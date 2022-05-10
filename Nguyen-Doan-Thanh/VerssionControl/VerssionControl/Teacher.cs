@@ -6,21 +6,19 @@ using System.Threading.Tasks;
 
 namespace VerssionControl
 {
-    public class Student
+    public class Teacher
     {
         private string _Name;
-        private string _Email;
+        private string _Description;
         private int _Age;
-        public Student(string name, string email, int age)
+        public Teacher(string name, int age)
         {
             _Name = name;
-            _Email = email; 
             _Age = age;
         }
         public void ShowInfor()
         {
-            Console.WriteLine($"name : {_Name}, age: {_Age}");
+            Console.WriteLine(_Description);
         }
-
     }
 }
