@@ -11,5 +11,4 @@ training repo
       Trainees/Nguyen-Van-A_Merging-code
       
       ...
-  
-  
+4. Đồng thời khi tạo ra branch mới, mỗi thành viên sẽ tạo ra 1 Pull Request có tên tương tự. Tất cả code và comment sẽ được trao đổi trên pull requesst đó.
