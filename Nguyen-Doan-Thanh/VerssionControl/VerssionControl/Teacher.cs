@@ -19,6 +19,7 @@ namespace VerssionControl
         public void ShowInfor()
         {
             Console.WriteLine(_Description);
+            // comment for conflict resolving 
         }
     }
 }
