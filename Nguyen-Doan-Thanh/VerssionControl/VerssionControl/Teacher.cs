@@ -20,6 +20,7 @@ namespace VerssionControl
         {
             Console.WriteLine(_Description);
             // comment for conflict resolving 
+            Console.WriteLine(_Name);
         }
     }
 }
