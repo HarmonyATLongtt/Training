@@ -1,0 +1,8 @@
+E:\Maunv\RevitAPI\RevitTools\RevitTools\bin\x64\Debug\RevitTools.dll
+E:\Maunv\RevitAPI\RevitTools\RevitTools\bin\x64\Debug\RevitTools.pdb
+E:\Maunv\RevitAPI\RevitTools\RevitTools\obj\x64\Debug\RevitTools.Views.FormWatch.resources
+E:\Maunv\RevitAPI\RevitTools\RevitTools\obj\x64\Debug\RevitTools.csproj.GenerateResource.cache
+E:\Maunv\RevitAPI\RevitTools\RevitTools\obj\x64\Debug\RevitTools.csproj.CoreCompileInputs.cache
+E:\Maunv\RevitAPI\RevitTools\RevitTools\obj\x64\Debug\RevitTools.dll
+E:\Maunv\RevitAPI\RevitTools\RevitTools\obj\x64\Debug\RevitTools.pdb
+E:\Maunv\RevitAPI\RevitTools\RevitTools\obj\x64\Debug\RevitTools.csprojAssemblyReference.cache
