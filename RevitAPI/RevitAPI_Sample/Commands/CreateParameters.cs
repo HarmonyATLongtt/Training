@@ -1,6 +1,7 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using RevitAPI_Sample.DataClasses;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,28 +21,28 @@ namespace RevitAPI_Sample.Commands
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
 
-            ExternalDefinitionCreationOptions infoOpt = new ExternalDefinitionCreationOptions("Info", ParameterType.Text)
+            ExternalDefinitionCreationOptions infoOpt = new ExternalDefinitionCreationOptions(Define.PARA_INFO, ParameterType.Text)
             {
                 Visible = true,
                 Description = "Description for",
                 //HideWhenNoValue = true,
                 UserModifiable = true,
             };
-            ExternalDefinitionCreationOptions indexOpt = new ExternalDefinitionCreationOptions("Index", ParameterType.Integer)
+            ExternalDefinitionCreationOptions indexOpt = new ExternalDefinitionCreationOptions(Define.PARA_INDEX, ParameterType.Integer)
             {
                 Visible = true,
                 Description = "Description for",
                 //HideWhenNoValue = true,
                 UserModifiable = true,
             };
-            ExternalDefinitionCreationOptions materialOpt = new ExternalDefinitionCreationOptions("Material", ParameterType.Material)
+            ExternalDefinitionCreationOptions materialOpt = new ExternalDefinitionCreationOptions(Define.PARA_MATERIAL, ParameterType.Integer)
             {
                 Visible = true,
                 Description = "Description for",
                 //HideWhenNoValue = true,
                 UserModifiable = true,
             };
-            ExternalDefinitionCreationOptions heightOpt = new ExternalDefinitionCreationOptions("Height", ParameterType.Number)
+            ExternalDefinitionCreationOptions heightOpt = new ExternalDefinitionCreationOptions(Define.PARA_HEIGHT, ParameterType.Number)
             {
                 Visible = true,
                 Description = "Description for",
@@ -52,7 +53,7 @@ namespace RevitAPI_Sample.Commands
             {
                 tr.Start("Create Share");
                 CreateProjectShareParameter(doc, "Group1", infoOpt, new[] { BuiltInCategory.OST_StructuralFraming }, BuiltInParameterGroup.INVALID, true, true);
-                CreateProjectShareParameter(doc, "Group1", indexOpt, new[] { BuiltInCategory.OST_StructuralFraming }, BuiltInParameterGroup.PG_IFC, isParaInstance: true);
+                CreateProjectShareParameter(doc, "Group1", indexOpt, new[] { BuiltInCategory.OST_StructuralFraming }, BuiltInParameterGroup.INVALID, isParaInstance: true);
                 CreateProjectShareParameter(doc, "Group2", materialOpt, new[] { BuiltInCategory.OST_StructuralFraming }, BuiltInParameterGroup.INVALID);
                 CreateProjectShareParameter(doc, "Group2", heightOpt, new[] { BuiltInCategory.OST_StructuralFraming, BuiltInCategory.OST_Walls }, BuiltInParameterGroup.INVALID);
 
@@ -135,6 +136,11 @@ namespace RevitAPI_Sample.Commands
             catch { }
             return result;
         }
+
+        /// <summary>
+        /// Not run
+        /// </summary>
+        /// <param name="doc"></param>
         private void CreateProjectParameter(Document doc)
         {
             using (Transaction tr = new Transaction(doc))
@@ -150,10 +156,6 @@ namespace RevitAPI_Sample.Commands
                 CategorySet catSet1 = doc.Application.Create.NewCategorySet();
                 tr.Commit();
             }
-
-
-
         }
-
     }
 }

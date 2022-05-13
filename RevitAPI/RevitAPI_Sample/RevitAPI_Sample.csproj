@@ -99,7 +99,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\ExtensibleStorage.cs" />
     <Compile Include="Commands\CreateParameters.cs" />
+    <Compile Include="DataClasses\Define.cs" />
     <Compile Include="Utils\SolidUtils.cs" />
     <Compile Include="Utils\Unit.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -108,7 +110,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Utils\Utils.cs" />
+    <Compile Include="Utils\Common.cs" />
     <Compile Include="Views\Watch.cs">
       <SubType>Form</SubType>
     </Compile>
