@@ -31,12 +31,6 @@ namespace RevitAPI_Sample.Commands
             UIDocument uidoc = uiapp.ActiveUIDocument;
             _doc = uidoc.Document;
 
-            //Category cate = Category.GetCategory(_doc, BuiltInCategory.OST_StructuralFraming);
-            //if (!IsAllParameterExist(cate, Define.GetAllParaNames))
-            //{
-            //    System.Windows.Forms.MessageBox.Show("Parameter not enough or have not created yet");
-            //    return Result.Cancelled;
-            //}
             IList<Element> frammingElems = Utils.Common.PickElements(uidoc, new FrammingElementFilter(), "Select structural Frammings");
             if (frammingElems.Count == 0)
             {
@@ -124,11 +118,6 @@ namespace RevitAPI_Sample.Commands
             builderHeight.SetDocumentation("for infor framing height");
             // register the Schema object
             Schema schema = schemaBuilder.Finish();
-
-            // create an entity (object) for this schema (class)
-
-            // get the field from the schema
-
             entity = new Entity(schema);
             elem.SetEntity(entity);// store the entity in the element
 
