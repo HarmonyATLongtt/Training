@@ -1,0 +1,107 @@
+E:\Bai4\Bai4\bin\Debug\Bai4.dll
+E:\Bai4\Bai4\bin\Debug\Bai4.pdb
+E:\Bai4\Bai4\bin\Debug\RevitAPI.dll
+E:\Bai4\Bai4\bin\Debug\RevitAPIUI.dll
+E:\Bai4\Bai4\bin\Debug\AdpSDKCSharpWrapper.dll
+E:\Bai4\Bai4\bin\Debug\RevitAPIFoundation.dll
+E:\Bai4\Bai4\bin\Debug\RevitDBAPI.dll
+E:\Bai4\Bai4\bin\Debug\PersistenceDBAPI.dll
+E:\Bai4\Bai4\bin\Debug\UtilityAPI.dll
+E:\Bai4\Bai4\bin\Debug\APIDBAPI.dll
+E:\Bai4\Bai4\bin\Debug\GraphicsAPI.dll
+E:\Bai4\Bai4\bin\Debug\ElementGroupDBAPI.dll
+E:\Bai4\Bai4\bin\Debug\EssentialsDBAPI.dll
+E:\Bai4\Bai4\bin\Debug\GeomUtilAPI.dll
+E:\Bai4\Bai4\bin\Debug\FamilyDBAPI.dll
+E:\Bai4\Bai4\bin\Debug\DetailDBAPI.dll
+E:\Bai4\Bai4\bin\Debug\CurtainGridFamilyDBAPI.dll
+E:\Bai4\Bai4\bin\Debug\ArrayElemsDBAPI.dll
+E:\Bai4\Bai4\bin\Debug\EnergyAnalysisDBAPI.dll
+E:\Bai4\Bai4\bin\Debug\BuildingSystemsDBAPI.dll
+E:\Bai4\Bai4\bin\Debug\HostObjDBAPI.dll
+E:\Bai4\Bai4\bin\Debug\RoomAreaPlanDBAPI.dll
+E:\Bai4\Bai4\bin\Debug\SiteDBAPI.dll
+E:\Bai4\Bai4\bin\Debug\SculptingDBAPI.dll
+E:\Bai4\Bai4\bin\Debug\StructuralDBAPI.dll
+E:\Bai4\Bai4\bin\Debug\InterfaceAPI.dll
+E:\Bai4\Bai4\bin\Debug\InterfaceUtilAPI.dll
+E:\Bai4\Bai4\bin\Debug\RebarDBAPI.dll
+E:\Bai4\Bai4\bin\Debug\StructuralAnalysisDBAPI.dll
+E:\Bai4\Bai4\bin\Debug\MassingDBAPI.dll
+E:\Bai4\Bai4\bin\Debug\AssemblyDBAPI.dll
+E:\Bai4\Bai4\bin\Debug\DPartDBAPI.dll
+E:\Bai4\Bai4\bin\Debug\NumberingDBAPI.dll
+E:\Bai4\Bai4\bin\Debug\PointCloudAccessAPI.dll
+E:\Bai4\Bai4\bin\Debug\StairRampDBAPI.dll
+E:\Bai4\Bai4\bin\Debug\AnalysisAppsDBAPI.dll
+E:\Bai4\Bai4\bin\Debug\MaterialDBAPI.dll
+E:\Bai4\Bai4\bin\Debug\DBManagedServices.dll
+E:\Bai4\Bai4\bin\Debug\AdWindows.dll
+E:\Bai4\Bai4\bin\Debug\RevitAddInUtility.dll
+E:\Bai4\Bai4\bin\Debug\APIInterop.dll
+E:\Bai4\Bai4\bin\Debug\UIFramework.dll
+E:\Bai4\Bai4\bin\Debug\AddInManager.dll
+E:\Bai4\Bai4\bin\Debug\RevitUIAPI.dll
+E:\Bai4\Bai4\bin\Debug\BuildingSystemsUIAPI.dll
+E:\Bai4\Bai4\bin\Debug\DesktopMFCAPI.dll
+E:\Bai4\Bai4\bin\Debug\APIUIAPI.dll
+E:\Bai4\Bai4\bin\Debug\RevitMFCAPI.dll
+E:\Bai4\Bai4\bin\Debug\EssentialsUIAPI.dll
+E:\Bai4\Bai4\bin\Debug\EnergyAnalysisUtilitiesAPI.dll
+E:\Bai4\Bai4\bin\Debug\DetailUIAPI.dll
+E:\Bai4\Bai4\bin\Debug\UIFrameworkServices.dll
+E:\Bai4\Bai4\bin\Debug\ManagedMC3.dll
+E:\Bai4\Bai4\bin\Debug\Autodesk.UI.Themes.dll
+E:\Bai4\Bai4\bin\Debug\Xceed.Wpf.AvalonDock.dll
+E:\Bai4\Bai4\bin\Debug\Autodesk.UI.Windows.dll
+E:\Bai4\Bai4\bin\Debug\RevitAPI.xml
+E:\Bai4\Bai4\bin\Debug\RevitAPIUI.xml
+E:\Bai4\Bai4\bin\Debug\RevitAddInUtility.xml
+E:\Bai4\Bai4\bin\Debug\cs-CZ\AdWindows.resources.dll
+E:\Bai4\Bai4\bin\Debug\de-DE\AdWindows.resources.dll
+E:\Bai4\Bai4\bin\Debug\en-GB\AdWindows.resources.dll
+E:\Bai4\Bai4\bin\Debug\en-US\AdWindows.resources.dll
+E:\Bai4\Bai4\bin\Debug\es-ES\AdWindows.resources.dll
+E:\Bai4\Bai4\bin\Debug\fr-FR\AdWindows.resources.dll
+E:\Bai4\Bai4\bin\Debug\it-IT\AdWindows.resources.dll
+E:\Bai4\Bai4\bin\Debug\ja-JP\AdWindows.resources.dll
+E:\Bai4\Bai4\bin\Debug\ko-KR\AdWindows.resources.dll
+E:\Bai4\Bai4\bin\Debug\pl-PL\AdWindows.resources.dll
+E:\Bai4\Bai4\bin\Debug\pt-BR\AdWindows.resources.dll
+E:\Bai4\Bai4\bin\Debug\ru-RU\AdWindows.resources.dll
+E:\Bai4\Bai4\bin\Debug\zh-CN\AdWindows.resources.dll
+E:\Bai4\Bai4\bin\Debug\zh-TW\AdWindows.resources.dll
+E:\Bai4\Bai4\obj\Debug\Bai4.csproj.AssemblyReference.cache
+E:\Bai4\Bai4\obj\Debug\View\CreateGeometryView.g.cs
+E:\Bai4\Bai4\obj\Debug\Bai4_MarkupCompile.cache
+E:\Bai4\Bai4\obj\Debug\Bai4_MarkupCompile.lref
+E:\Bai4\Bai4\obj\Debug\View\CreateGeometryView.baml
+E:\Bai4\Bai4\obj\Debug\Bai4.g.resources
+E:\Bai4\Bai4\obj\Debug\Bai4.csproj.CoreCompileInputs.cache
+E:\Bai4\Bai4\obj\Debug\Bai4.csproj.CopyComplete
+E:\Bai4\Bai4\obj\Debug\Bai4.dll
+E:\Bai4\Bai4\obj\Debug\Bai4.pdb
+C:\ProgramData\Autodesk\Revit\Addins\2020\ExportViewSelectorAddin\Bai4.dll
+C:\ProgramData\Autodesk\Revit\Addins\2020\ExportViewSelectorAddin\Bai4.pdb
+C:\Users\hotru\OneDrive\Desktop\Bai Tap\New folder (2)\Bai4\Bai4\obj\Debug\Bai4.csproj.AssemblyReference.cache
+C:\Users\hotru\OneDrive\Desktop\Bai Tap\New folder (2)\Bai4\Bai4\obj\Debug\View\CreateGeometryView.g.cs
+C:\Users\hotru\OneDrive\Desktop\Bai Tap\New folder (2)\Bai4\Bai4\obj\Debug\Bai4_MarkupCompile.cache
+C:\Users\hotru\OneDrive\Desktop\Bai Tap\New folder (2)\Bai4\Bai4\obj\Debug\Bai4_MarkupCompile.lref
+C:\Users\hotru\OneDrive\Desktop\Bai Tap\New folder (2)\Bai4\Bai4\obj\Debug\View\CreateGeometryView.baml
+C:\Users\hotru\OneDrive\Desktop\Bai Tap\New folder (2)\Bai4\Bai4\obj\Debug\Bai4.g.resources
+C:\Users\hotru\OneDrive\Desktop\Bai Tap\New folder (2)\Bai4\Bai4\obj\Debug\Bai4.csproj.CoreCompileInputs.cache
+C:\Users\hotru\OneDrive\Desktop\Bai Tap\New folder (2)\Bai4\Bai4\obj\Debug\Bai4.csproj.CopyComplete
+C:\Users\hotru\OneDrive\Desktop\Bai Tap\New folder (2)\Bai4\Bai4\obj\Debug\Bai4.dll
+C:\Users\hotru\OneDrive\Desktop\Bai Tap\New folder (2)\Bai4\Bai4\obj\Debug\Bai4.pdb
+C:\ProgramData\Autodesk\Revit\Addins\2022\ExportViewSelectorAddin\Bai4.dll
+C:\ProgramData\Autodesk\Revit\Addins\2022\ExportViewSelectorAddin\Bai4.pdb
+C:\Users\hotru\OneDrive\Desktop\New folder (2)\Bai4\Bai4\obj\Debug\Bai4.csproj.AssemblyReference.cache
+C:\Users\hotru\OneDrive\Desktop\New folder (2)\Bai4\Bai4\obj\Debug\View\CreateGeometryView.g.cs
+C:\Users\hotru\OneDrive\Desktop\New folder (2)\Bai4\Bai4\obj\Debug\Bai4_MarkupCompile.cache
+C:\Users\hotru\OneDrive\Desktop\New folder (2)\Bai4\Bai4\obj\Debug\Bai4_MarkupCompile.lref
+C:\Users\hotru\OneDrive\Desktop\New folder (2)\Bai4\Bai4\obj\Debug\Bai4.dll
+C:\Users\hotru\OneDrive\Desktop\New folder (2)\Bai4\Bai4\obj\Debug\Bai4.pdb
+C:\Users\hotru\OneDrive\Desktop\New folder (2)\Bai4\Bai4\obj\Debug\View\CreateGeometryView.baml
+C:\Users\hotru\OneDrive\Desktop\New folder (2)\Bai4\Bai4\obj\Debug\Bai4.g.resources
+C:\Users\hotru\OneDrive\Desktop\New folder (2)\Bai4\Bai4\obj\Debug\Bai4.csproj.CoreCompileInputs.cache
+C:\Users\hotru\OneDrive\Desktop\New folder (2)\Bai4\Bai4\obj\Debug\Bai4.csproj.CopyComplete
