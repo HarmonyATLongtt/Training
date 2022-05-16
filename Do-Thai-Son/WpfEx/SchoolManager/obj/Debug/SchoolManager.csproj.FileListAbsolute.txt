@@ -1,0 +1,16 @@
+F:\wpf\WpfEx\SchoolManager\bin\Debug\SchoolManager.exe.config
+F:\wpf\WpfEx\SchoolManager\bin\Debug\SchoolManager.exe
+F:\wpf\WpfEx\SchoolManager\bin\Debug\SchoolManager.pdb
+F:\wpf\WpfEx\SchoolManager\obj\Debug\SchoolManager.csproj.AssemblyReference.cache
+F:\wpf\WpfEx\SchoolManager\obj\Debug\SchoolManager.csproj.SuggestedBindingRedirects.cache
+F:\wpf\WpfEx\SchoolManager\obj\Debug\MainWindow.g.cs
+F:\wpf\WpfEx\SchoolManager\obj\Debug\App.g.cs
+F:\wpf\WpfEx\SchoolManager\obj\Debug\SchoolManager_MarkupCompile.cache
+F:\wpf\WpfEx\SchoolManager\obj\Debug\SchoolManager_MarkupCompile.lref
+F:\wpf\WpfEx\SchoolManager\obj\Debug\MainWindow.baml
+F:\wpf\WpfEx\SchoolManager\obj\Debug\SchoolManager.g.resources
+F:\wpf\WpfEx\SchoolManager\obj\Debug\SchoolManager.Properties.Resources.resources
+F:\wpf\WpfEx\SchoolManager\obj\Debug\SchoolManager.csproj.GenerateResource.cache
+F:\wpf\WpfEx\SchoolManager\obj\Debug\SchoolManager.csproj.CoreCompileInputs.cache
+F:\wpf\WpfEx\SchoolManager\obj\Debug\SchoolManager.exe
+F:\wpf\WpfEx\SchoolManager\obj\Debug\SchoolManager.pdb
