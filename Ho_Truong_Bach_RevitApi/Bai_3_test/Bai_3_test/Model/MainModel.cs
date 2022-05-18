@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Bai_3.ViewModel;
+using Bai_3_test.ViewModel;
 
 namespace Bai_3.Model
 {
@@ -17,8 +17,7 @@ namespace Bai_3.Model
         public IList<FamilySymbol> FamilyTypeList { get; set; }
         public FamilySymbol SelectedType { get; set; }
         public IList<Level> LevelList { get; set; }
-        public Level SelectedLevel { get; set; }
-        
+        public Level SelectedLevel { get; set; }       
         public Family _Family { get; set; }
         public MainModel(Document doc)
         {
@@ -30,9 +29,11 @@ namespace Bai_3.Model
             else
             {
                 FamilyTypeList = GetFamilyType(_Family);
+                SelectedType = FamilyTypeList.FirstOrDefault();
+
                 LevelList = GetLevels(doc);
-            }           
-            
+                SelectedLevel = LevelList.FirstOrDefault();
+            }              
         }  
         /// <summary>
         /// load family
@@ -52,7 +53,7 @@ namespace Bai_3.Model
                     if (File.Exists(openFileDialog.FileName))
                     {
                         doc.LoadFamily(openFileDialog.FileName, out family);
-                    } 
+                    }
                 }
                 tran.Commit();
             }
@@ -94,6 +95,7 @@ namespace Bai_3.Model
                                                      .OfCategory(BuiltInCategory.OST_Grids)
                                                      .OfClass(typeof(Grid))
                                                      .Cast<Grid>()
+                                                     .Where(x => x.IsCurved == false)
                                                      .Where(x => !IsBelongToMultisegmentGrid(x))
                                                      .Select(x => x.Curve)
                                                      .Cast<Line>()
@@ -169,32 +171,8 @@ namespace Bai_3.Model
                 {
                     MessageBox.Show("level null");
                 }
-            }
-            else
-            {
-                MessageBox.Show("intersection grid null");
-            }
-        }
-        /// <summary>
-        /// compare two object in certain conditions
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <returns></returns>
-        public class FilterIntersection : IEqualityComparer<XYZ>
-        {
-            public bool Equals(XYZ x, XYZ y)
-            {
-                if (Object.ReferenceEquals(x, y)) return true;
-                if (Object.ReferenceEquals(x, null) || Object.ReferenceEquals(y, null))
-                    return false;
-                return x.IsAlmostEqualTo(y);
-            }
-            public int GetHashCode(XYZ obj)
-            {
-                return 1;
-            }
-        }
+            }   
+        }        
         /// <summary>
         /// Filter multi segment grid
         /// </summary>

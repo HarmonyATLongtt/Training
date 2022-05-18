@@ -21,7 +21,7 @@ namespace Bai_3.ViewModel
 {
     public class MainViewModel : BaseViewModel
     {
-        private MainModel _mainModel;       
+        public MainModel _mainModel;       
         public IList<Level> ListLevel
         {
             get { return _mainModel.LevelList; }
@@ -52,9 +52,9 @@ namespace Bai_3.ViewModel
         }
         private void Cancel(object obj)
         {
-            if (obj is Window window)
+            if(obj is Window window)
             {
-                window.DialogResult = false;
+
                 window.Close();
             }
         }
@@ -66,5 +66,6 @@ namespace Bai_3.ViewModel
                 window.Close();
             }
         }
+        
     }       
 }

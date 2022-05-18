@@ -46,11 +46,11 @@ namespace Bai4.ViewModel
         {
             _mainModel = model;
             OkCommand = new RelayCommand(Ok);
-            CancelCommand = new RelayCommand(Cancel);
+            CancelCommand = new RelayCommand(Cancel);            
         }
         private void Ok(object obj)
         {
-            if (obj is Window window)
+            if (obj is Window window && Validate())
             {
                 window.DialogResult = true;
                 window.Close();
@@ -63,8 +63,19 @@ namespace Bai4.ViewModel
                 window.DialogResult = false;
                 window.Close();
             }
-        }       
-       
+        }
+        public bool Validate()
+        {
+            if (CubeSelect)
+            {
+                return CubeLength.GetType().Equals(typeof(double)) && CubeLength > 0;
+            }
+            else
+            {
+                return SphereRadius.GetType().Equals(typeof(double)) && SphereRadius > 0;
+            }
+        }
+
     }
 }
 

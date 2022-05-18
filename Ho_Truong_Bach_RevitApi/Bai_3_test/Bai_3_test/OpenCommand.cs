@@ -23,12 +23,10 @@ namespace Bai_3.ViewModel
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
             Document doc = uidoc.Document;
 
-            try
-            { 
-                MainModel mainModel = new MainModel(doc);
-                MainViewModel mainViewModel = new MainViewModel(mainModel);
+            MainModel mainModel = new MainModel(doc);
+            MainViewModel mainViewModel = new MainViewModel(mainModel);
 
-                if(mainModel._Family != null)
+                if (mainModel._Family != null)
                 {
                     LoadFamilyView mainView = new LoadFamilyView();
                     mainView.DataContext = mainViewModel;
@@ -40,13 +38,7 @@ namespace Bai_3.ViewModel
                             mainModel.LoadedFamilyInstance(mainViewModel.SelectedSymbol, doc);
                         }
                     }
-                }    
-            }
-            catch (Exception ex)
-            {
-                message = ex.Message;
-                return Result.Failed;
-            }
+                }
             return Result.Succeeded;
         }
     }

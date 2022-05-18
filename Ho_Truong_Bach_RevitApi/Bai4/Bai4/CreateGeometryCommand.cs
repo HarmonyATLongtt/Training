@@ -41,11 +41,11 @@ namespace Bai4
                         {
                             MessageBox.Show("Chưa chọn tạo hình lập phương hoặc hình cầu", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
-                        if (mainViewModel.CubeSelect && mainViewModel.CubeLength > 0)
+                        if (mainViewModel.CubeSelect == true)
                         {
                             CreatCube(doc, mainModel.CubeLength, ListIntersection);
                         }
-                        if (mainViewModel.SphereSelect && mainViewModel.SphereRadius > 0)
+                        if (mainViewModel.SphereSelect == true)
                         {
                             CreateSphere(doc, mainModel.SphereRadius, ListIntersection);
                         }
@@ -192,26 +192,6 @@ namespace Bai4
             else
             {
                 return new List<XYZ>();
-            }
-        }
-        /// <summary>
-        /// compare two object in certain conditions
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <returns></returns>
-        public class FilterIntersection : IEqualityComparer<XYZ>
-        {
-            public bool Equals(XYZ x, XYZ y)
-            {
-                if (Object.ReferenceEquals(x, y)) return true;
-                if (Object.ReferenceEquals(x, null) || Object.ReferenceEquals(y, null))
-                    return false;
-                return x.IsAlmostEqualTo(y);
-            }
-            public int GetHashCode(XYZ obj)
-            {
-                return 1;
             }
         }
         /// <summary>
