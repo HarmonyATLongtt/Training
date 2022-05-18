@@ -1,0 +1,188 @@
+﻿<Window x:Class="WPF_Sample.Views.ClassView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+          xmlns:diag="clr-namespace:System.Diagnostics;assembly=WindowsBase"
+        xmlns:local="clr-namespace:WPF_Sample.Views"
+         xmlns:converter="clr-namespace:WPF_Sample.Converters"
+         xmlns:enums="clr-namespace:WPF_Sample.Enums"
+         xmlns:vm="clr-namespace:WPF_Sample.ViewModels"
+          d:DataContext="{d:DesignInstance Type=vm:ClassViewModel}"
+         xmlns:Behaviors="http://schemas.microsoft.com/xaml/behaviors"
+        x:Name="WndClassView"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterOwner"
+        Title="{Binding ClassName}"
+        Height="450" Width="800"
+  Icon="{Binding MainIcon}"
+        ResizeMode="CanMinimize">
+    <Behaviors:Interaction.Triggers>
+        <Behaviors:EventTrigger EventName = "Closed" >
+            <Behaviors:InvokeCommandAction Command="{Binding CloseWndCmd}" CommandParameter="{Binding ElementName=WndClassView}" />
+        </Behaviors:EventTrigger>
+    </Behaviors:Interaction.Triggers>
+   
+    <Window.Resources>
+
+        <converter:BooleanToReverseConverter x:Key="booleanToReverseConverter"></converter:BooleanToReverseConverter>
+        <converter:StringToUpperCaseConverter x:Key="stringToUpperCaseConverter"></converter:StringToUpperCaseConverter>
+        <converter:EnumToStringConverter x:Key="enumToStringConverter"></converter:EnumToStringConverter>
+        <converter:DebugConverter x:Key="debugConverter" />
+
+        <Thickness x:Key="Margin-Top" Left="2" Top="10" Right="0" Bottom="2" />
+        <ObjectDataProvider x:Key="enumDataSource"
+                        ObjectType="{x:Type sys:Enum}"
+                        MethodName="GetValues">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="enums:Gender" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <Grid  Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="85" />
+            </Grid.ColumnDefinitions>
+            <Grid Margin="{StaticResource Margin-All-2}">
+                <TextBox Text="{Binding TextSearch, UpdateSourceTrigger=PropertyChanged}"
+                           x:Name="SearchTermTextBox" />
+                <TextBlock IsHitTestVisible="False" Text="Enter Search Term Here"
+                           VerticalAlignment="Center"
+                           Foreground="DarkGray">
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Text, ElementName=SearchTermTextBox}" Value="">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
+        </Grid>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="85" />
+            </Grid.ColumnDefinitions>
+            <ListView x:Name="lsvStudents"
+                  ItemsSource="{Binding StudentViewModels}"
+                   HorizontalAlignment="Stretch"
+                  HorizontalContentAlignment="Stretch"
+                       Margin="{StaticResource Margin-All-2}">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn>
+                            <GridViewColumnHeader>
+                                <CheckBox Content="Edit"
+                                          IsChecked ="{Binding AllowEditableAll, UpdateSourceTrigger=PropertyChanged}"
+                                       />
+                            </GridViewColumnHeader>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox IsChecked="{Binding AllowEditable , UpdateSourceTrigger=PropertyChanged}" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Tên" Width="230">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                                          IsReadOnly="{Binding AllowEditable,Converter={StaticResource booleanToReverseConverter}}" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Ngày sinh" Width="100">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <DatePicker SelectedDate="{Binding Birthday}"
+                                             IsHitTestVisible="{Binding AllowEditable}" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Tuổi" Width="100">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock
+                                     Text="{Binding Age }">
+                                    </TextBlock>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+
+                        <GridViewColumn Header="Giới Tính" Width="100">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <ComboBox ItemsSource="{Binding  Source={StaticResource enumDataSource}}"
+                                              SelectedItem="{Binding Gender}"
+
+                                        IsHitTestVisible="{Binding AllowEditable}">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Converter={StaticResource enumToStringConverter }}" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+            <StackPanel Grid.Column="1" Style="{StaticResource StackPanel-Top}">
+                <Button
+                        Content="Add"
+                    Command="{Binding AddStudentCmd}"
+                          CommandParameter= "{Binding ElementName= lsvStudents}"
+                        Style="{StaticResource Btn-Outline-Primary}"
+                       Margin="{StaticResource Margin-Top}" />
+                <Button
+                        Content="Delete"
+                        Command="{Binding DeleteStudentCmd}"
+                          CommandParameter= "{Binding ElementName= lsvStudents}"
+                   Style="{StaticResource Btn-Outline-Warning}"
+                    Margin="{StaticResource Margin-Top}">
+                </Button>
+                <Button
+                     Content="Export Excel"
+                     Command="{Binding ExportExcelCmd}"
+                       CommandParameter= "{Binding ElementName= lsvStudents}"
+                       Style="{StaticResource Btn-Outline-Primary}"
+                       Margin="{StaticResource Margin-Top}" />
+                <Button
+                     Content="Apply-Close"
+                    Command="{Binding ApplyChangeCmd}"
+                    CommandParameter= "{Binding ElementName=WndClassView}"
+                    IsCancel="True"
+                    Style="{StaticResource Btn-Outline-Success}"
+                    Margin="{StaticResource Margin-Top}" />
+
+                <Button
+                     Content="Close"
+                    Command="{Binding CloseWndCmd}"
+                    CommandParameter= "{Binding ElementName=WndClassView}"
+                    IsCancel="True"
+                    Style="{StaticResource Btn-Outline-Danger}"
+                    Margin="{StaticResource Margin-Top}" />
+                <Expander ExpandDirection="Right">
+                    <TextBlock>ddddddddddddddd</TextBlock>
+                </Expander>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>
