@@ -72,9 +72,11 @@
             <StackPanel Grid.ColumnSpan="2"
                     Orientation="Horizontal" FlowDirection="RightToLeft">
                 <Button Content="Cancel" 
+                        IsCancel="True"
                     Command="{Binding CancelCommand}"
                     CommandParameter="{Binding ElementName=MainView}"/>
                 <Button Content="OK" 
+                        IsDefault="True"
                     Command="{Binding OkCommand}"
                     CommandParameter="{Binding ElementName=MainView}"/>
             </StackPanel>

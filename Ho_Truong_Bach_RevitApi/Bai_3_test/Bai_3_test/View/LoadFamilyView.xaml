@@ -50,18 +50,14 @@
 
         <Label Grid.Row="0" Grid.Column="0" Content="Chọn một Type" />
         <ComboBox Grid.Row="0" Grid.Column="1"
-                  IsEditable="True" IsReadOnly="True" Text="Please Select"
                   ItemsSource="{Binding ListSymbol}" 
                   SelectedItem="{Binding SelectedSymbol, UpdateSourceTrigger=PropertyChanged}"
                   DisplayMemberPath="Name"
                   IsSynchronizedWithCurrentItem="True"
                   SelectedIndex="0">
-            
         </ComboBox>
-
         <Label Grid.Row="1" Grid.Column="0" Content="Chọn Level đặt Family" />
         <ComboBox Grid.Row="1"  Grid.Column="1" 
-                  IsEditable="True" IsReadOnly="True" Text="Please Select"
                   ItemsSource="{Binding ListLevel}"
                   SelectedItem="{Binding SelectedLevel}"
                   DisplayMemberPath="Name" />

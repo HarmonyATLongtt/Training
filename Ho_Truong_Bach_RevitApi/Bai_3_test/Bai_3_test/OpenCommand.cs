@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Autodesk.Revit.Attributes;
+﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Bai_3.Model;
-using Bai_3.ViewModel;
 using Bai_3_test.View;
-using System.Windows;
+using System;
+using System.Windows.Forms;
 
 namespace Bai_3.ViewModel
 {
@@ -23,32 +16,40 @@ namespace Bai_3.ViewModel
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
             Document doc = uidoc.Document;
 
-            try
-            { 
-                MainModel mainModel = new MainModel(doc);
-                MainViewModel mainViewModel = new MainViewModel(mainModel);
-
-                if(mainModel._Family != null)
+            using (TransactionGroup group = new TransactionGroup(doc, "Load family"))
+            {
+                try
                 {
-                    LoadFamilyView mainView = new LoadFamilyView();
-                    mainView.DataContext = mainViewModel;
+                    group.Start();
+                    MainModel mainModel = new MainModel(doc);
+                    MainViewModel mainViewModel = new MainViewModel(mainModel);
 
-                    if (mainView.ShowDialog() == true)
+                    if (mainModel._Family != null)
                     {
-                        if (mainViewModel.SelectedSymbol != null && mainViewModel.SelectedLevel != null)
+                        LoadFamilyView mainView = new LoadFamilyView();
+                        mainView.DataContext = mainViewModel;
+
+                        if (mainView.ShowDialog() == true)
                         {
-                            mainModel.LoadedFamilyInstance(mainViewModel.SelectedSymbol, doc);
+                            if (mainViewModel.SelectedSymbol != null && mainViewModel.SelectedLevel != null)
+                            {
+                                mainModel.LoadedFamilyInstance(mainViewModel.SelectedSymbol, doc);
+                                group.Assimilate();
+                            }
                         }
                     }
-                }    
-            }
-            catch (Exception ex)
-            {
-                message = ex.Message;
-                return Result.Failed;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message + "\n" + ex.StackTrace.ToString());
+                }
+                finally
+                {
+                    if (group.HasStarted() && group.GetStatus() != TransactionStatus.Committed)
+                        group.RollBack();
+                }
             }
             return Result.Succeeded;
         }
     }
 }
-
