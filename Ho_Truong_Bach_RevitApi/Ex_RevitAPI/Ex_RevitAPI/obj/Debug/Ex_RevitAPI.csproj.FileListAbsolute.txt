@@ -1,0 +1,13 @@
+E:\Hello_C#\Ex_RevitAPI\Ex_RevitAPI\bin\Debug\Ex_RevitAPI.dll
+E:\Hello_C#\Ex_RevitAPI\Ex_RevitAPI\bin\Debug\Ex_RevitAPI.pdb
+E:\Hello_C#\Ex_RevitAPI\Ex_RevitAPI\obj\Debug\Ex_RevitAPI.csproj.AssemblyReference.cache
+E:\Hello_C#\Ex_RevitAPI\Ex_RevitAPI\obj\Debug\Ex_RevitAPI.csproj.CoreCompileInputs.cache
+E:\Hello_C#\Ex_RevitAPI\Ex_RevitAPI\obj\Debug\Ex_RevitAPI.dll
+E:\Hello_C#\Ex_RevitAPI\Ex_RevitAPI\obj\Debug\Ex_RevitAPI.pdb
+E:\Hello_C#\Ex_RevitAPI\Ex_RevitAPI\obj\Debug\Ex_RevitAPI_MarkupCompile.cache
+E:\Hello_C#\Ex_RevitAPI\Ex_RevitAPI\obj\Debug\Ex_RevitAPI_MarkupCompile.lref
+E:\Hello_C#\Ex_RevitAPI\Ex_RevitAPI\obj\Debug\Ex_RevitAPI.g.resources
+E:\Hello_C#\Ex_RevitAPI\Ex_RevitAPI\obj\Debug\Bai 1\View\InstanceFilterView.g.cs
+E:\Hello_C#\Ex_RevitAPI\Ex_RevitAPI\obj\Debug\Bai 1\View\InstanceFilterView.baml
+C:\ProgramData\Autodesk\Revit\Addins\2020\ExportViewSelectorAddin\Ex_RevitAPI.dll
+C:\ProgramData\Autodesk\Revit\Addins\2020\ExportViewSelectorAddin\Ex_RevitAPI.pdb
