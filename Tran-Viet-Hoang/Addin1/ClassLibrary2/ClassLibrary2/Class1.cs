@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.Attributes;
-
+using ClassLibrary2.UI.Views;
+using ClassLibrary2.UI.ViewModel;
 
 namespace ClassLibrary2
 {
@@ -15,29 +16,11 @@ namespace ClassLibrary2
     {
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            //get uidoc
-            //UIDocument uidoc = commandData.Application.ActiveUIDocument;
+            MainView view = new MainView();
+            //view.DataContext = new MainViewModel();
+            view.Show();
 
-            //getelement
-            //Reference r = uidoc.Selection.PickObject(Autodesk.Revit.UI.Selection.ObjectType.Element);
-            TaskDialog.Show("Chào ngày cũ", "Chào ngày siêu mới");
             return Result.Succeeded;
-            //try
-            //{
-            //    Reference r = uidoc.Selection.PickObject(Autodesk.Revit.UI.Selection.ObjectType.Element);
-            //    if (r != null)
-            //    {                 
-            //        TaskDialog.Show("Element Id", r.ElementId.ToString());                  
-            //    }
-            //    return Result.Succeeded;
-            //}
-            //catch (Exception ex)
-            //{
-            //    message = ex.Message;
-            //    return Result.Failed;
-            //}
-
-
         }
     }
 }
