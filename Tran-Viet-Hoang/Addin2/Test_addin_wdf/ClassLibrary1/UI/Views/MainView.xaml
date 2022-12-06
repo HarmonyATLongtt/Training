@@ -1,0 +1,15 @@
+﻿<Window x:Class="ClassLibrary1.UI.Views.MainView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ClassLibrary1.UI.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Label Content="Etabs file" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="112,57,0,0"></Label>
+        <Button x:Name="btnopen" Content="Load" VerticalAlignment="Top" Width="100" Margin="278,60,422,0"></Button>
+        <DataGrid x:Name="grid1" ItemsSource="{Binding datagrid}"  Margin="0,135,0,127"/>
+    </Grid>
+    
+</Window>
