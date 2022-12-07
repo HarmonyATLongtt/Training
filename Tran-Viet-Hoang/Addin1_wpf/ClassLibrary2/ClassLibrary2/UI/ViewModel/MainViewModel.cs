@@ -1,6 +1,4 @@
-﻿using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,7 +8,6 @@ using System.Data.OleDb;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using Application = Autodesk.Revit.ApplicationServices.Application;
 
 namespace ClassLibrary2.UI.ViewModel
 {
@@ -93,13 +90,15 @@ namespace ClassLibrary2.UI.ViewModel
             }
         }
 
-        public ICommand updateCommand { get; set; }
         public ICommand LoadCommand { get; set; }
+        public ICommand CancelCommand { get; set; }
+        public ICommand CreateCommand { get; set; }
 
         public MainViewModel()
         {
-            updateCommand = new RelayCommand(UpdateName);
             LoadCommand = new RelayCommand(LoadCommandInvoke);
+            CancelCommand = new RelayCommand(CancelCommandInvoke);
+            CreateCommand = new RelayCommand(CreateCommandInvoke);
         }
 
         private void LoadCommandInvoke()
@@ -119,32 +118,12 @@ namespace ClassLibrary2.UI.ViewModel
             }
         }
 
-        private void UpdateName()
+        private void CancelCommandInvoke()
         {
-            MyName = "Honag";
         }
 
-        //tao du lieu cho item source cua listbox
-        private IEnumerable<DataTable> InitTables()
+        private void CreateCommandInvoke()
         {
-            List<DataTable> tables = new List<DataTable>();
-            for (int i = 1; i <= 10; i++)
-            {
-                DataTable table = new DataTable()
-                {
-                    TableName = "table_" + i.ToString(),
-                };
-
-                if (i == 2)
-                {
-                    table.Columns.Add("Ten");
-                    table.Columns.Add("Lop");
-                    table.Rows.Add("Hoang", "Huy");
-                    table.Rows.Add("63TH1", "K3");
-                }
-                tables.Add(table);
-            }
-            return tables;
         }
 
         #region Load .mdb file
@@ -154,55 +133,31 @@ namespace ClassLibrary2.UI.ViewModel
             List<DataTable> tables = new List<DataTable>();
             if (!string.IsNullOrEmpty(filePath))
             {
-                //string connectionString = "Provider=Microsoft.JET.OLEDB.4.0;"
                 string connectionString = "Provider=Microsoft.ACE.OLEDB.12.0;"
                                         + "data source="
                                         + filePath + ";";
-                
-                //+ ";Password=";
+
                 using (var connection = new OleDbConnection(connectionString))
                 {
                     connection.Open();
-
-                    List<string> names = GetTableNames(connection);
-                    if (names?.Count > 0)
+                    List<string> tableNames = GetTableNames(connection);
+                    if (tableNames?.Count > 0)
                     {
-                        foreach (string name in names)
+                        foreach (string tableName in tableNames)
                         {
-                            var query = "SELECT * FROM `" + name + "`";
-                            DataTable table = new DataTable(name);
-
-                            using (var command = new OleDbCommand(query, connection))
-                            {
-                                using (var reader = command.ExecuteReader())
-                                {
-                                    // add columns
-                                    for (int i = 0; i < reader.FieldCount; i++)
-                                        table.Columns.Add(reader.GetName(i));
-
-                                    //add rows
-                                    while (reader.Read())
-                                    {
-                                        var row = table.NewRow();
-                                        for (int i = 0; i < reader.FieldCount; i++)
-                                            row[i] = reader[i].ToString();
-                                        table.Rows.Add(row);
-                                    }
-                                }
-                            }
+                            var table = ReadTable(connection, tableName);
                             tables.Add(table);
                         }
-                        //tables.Add(ReadTable(connection, name));
                     }
                 }
             }
             return tables;
         }
 
-        private DataTable ReadTable(OleDbConnection connection, string name)
+        private DataTable ReadTable(OleDbConnection connection, string tableName)
         {
-            var query = "Select * From " + name;
-            DataTable table = new DataTable();
+            var query = "Select * From `" + tableName + "`";
+            DataTable table = new DataTable(tableName);
 
             using (var command = new OleDbCommand(query, connection))
             {
@@ -210,14 +165,14 @@ namespace ClassLibrary2.UI.ViewModel
                 {
                     // add columns
                     for (int i = 0; i < reader.FieldCount; i++)
-                        table.Columns.Add();
+                        table.Columns.Add(reader.GetName(i));
 
                     //add rows
                     while (reader.Read())
                     {
                         var row = table.NewRow();
                         for (int i = 0; i < reader.FieldCount; i++)
-                            row.ItemArray[i] = reader[i];
+                            row[i] = reader[i].ToString();
                         table.Rows.Add(row);
                     }
                 }
@@ -249,42 +204,5 @@ namespace ClassLibrary2.UI.ViewModel
         }
 
         #endregion Load .mdb file
-    }
-
-    public class RelayCommand : ICommand
-    {
-        public event EventHandler CanExecuteChanged;
-
-        private Action _a;
-
-        public RelayCommand(Action a)
-        {
-            _a = a;
-        }
-
-        public bool CanExecute(object parameter)
-        {
-            return true;
-        }
-
-        public void Execute(object parameter)
-        {
-            if (_a != null)
-                _a.Invoke();
-        }
-    }
-
-    public class Doc : IExternalCommand
-    {
-        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
-        {
-            UIApplication uiapp = commandData.Application;
-            UIDocument uidoc = uiapp.ActiveUIDocument;
-            Application app = uiapp.Application;
-            Document doc = uidoc.Document;
-
-            var collector = new FilteredElementCollector(doc).GetElementCount();
-            return Result.Succeeded;
-        }
     }
 }
