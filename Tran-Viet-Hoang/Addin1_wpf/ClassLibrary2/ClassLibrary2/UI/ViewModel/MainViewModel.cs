@@ -158,6 +158,7 @@ namespace ClassLibrary2.UI.ViewModel
                 string connectionString = "Provider=Microsoft.ACE.OLEDB.12.0;"
                                         + "data source="
                                         + filePath + ";";
+                
                 //+ ";Password=";
                 using (var connection = new OleDbConnection(connectionString))
                 {
@@ -177,7 +178,7 @@ namespace ClassLibrary2.UI.ViewModel
                                 {
                                     // add columns
                                     for (int i = 0; i < reader.FieldCount; i++)
-                                        table.Columns.Add();
+                                        table.Columns.Add(reader.GetName(i));
 
                                     //add rows
                                     while (reader.Read())
