@@ -1,13 +1,12 @@
-﻿using System;
+﻿using Autodesk.Revit.Attributes;
+using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Autodesk.Revit.UI;
-using Autodesk.Revit.DB;
-using Autodesk.Revit.Attributes;
-using Application = Autodesk.Revit.ApplicationServices.Application;
 using System.Windows;
+using Application = Autodesk.Revit.ApplicationServices.Application;
+
 
 
 namespace GetSetComments
@@ -41,8 +40,8 @@ namespace GetSetComments
 
             using (var transaction = new Transaction(doc, "Set Mark"))
             {
-                transaction.Start();
-                getcmt.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS).Set(num);
+                transaction.Start();             
+                getcmt.LookupParameter("Comments").Set(num.ToString());              
                 MessageBox.Show("Then it is: " + num);
                 transaction.Commit();
             }

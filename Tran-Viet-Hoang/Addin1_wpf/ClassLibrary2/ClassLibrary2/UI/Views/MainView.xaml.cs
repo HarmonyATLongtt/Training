@@ -11,26 +11,12 @@ namespace ClassLibrary2.UI.Views
     public partial class MainView : Window
     {
         
-
         public MainView()
         {
             InitializeComponent();
 
         }
 
-
-       
-
-        //void CloseApp(object target, ExecutedRoutedEventArgs e)
-        //{
-        //    /*** Code to check for State before Closing ***/
-        //    this.Close();
-        //}
-
-        //void CloseAppCanExecute(object sender, CanExecuteRoutedEventArgs e)
-        //{
-        //    /*** Logic to Determine if it is safe to Close the Window ***/
-        //    e.CanExecute = true;
-        //}
+    
     }
 }

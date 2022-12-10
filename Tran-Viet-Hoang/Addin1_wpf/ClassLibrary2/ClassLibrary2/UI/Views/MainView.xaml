@@ -8,9 +8,6 @@
         mc:Ignorable="d"
         x:Name="window"
         Height="508" Width="1300" d:DesignWidth="1300" d:DesignHeight="508">
-    <Window.DataContext>
-        <local:ViewClose/>
-    </Window.DataContext>
     <Window.Resources>
         <Style TargetType="Button">
             <Setter Property="Margin" Value="5,5,5,5" />

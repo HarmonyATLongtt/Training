@@ -18,11 +18,46 @@ namespace ClassLibrary2.UI.ViewModel
         public MainViewModel()
         {
             LoadCommand = new RelayCommand(LoadCommandInvoke);
-            //CreateCommand = new RelayCommand(CreateCommandInvoke);
 
+            CloseCommand = new HelperCommand(UserClose, CanClose);
         }
 
+        #region close window
+        private void UserClose(object parameter)
+        {
+            Window wnd = parameter as Window;
+            MessageBox.Show("Have a great day!!");
+            wnd?.Close();
+        }
+        private bool CanClose(object parameter) => true;
+       
+        public class HelperCommand : ICommand
+        {
+            private readonly Action<object> _execute;
+            private readonly Predicate<object> _canExecute;
+            //public HelperCommand(Action<object> execute) : this(execute, canExecute: null) { }
+            public HelperCommand(Action<object> execute, Predicate<object> canExecute)
+            {
+                if (execute == null) throw new ArgumentNullException("execute");
+                this._execute = execute;
+                this._canExecute = canExecute;
+            }
+            public event EventHandler CanExecuteChanged;
+            public bool CanExecute(object parameter) => this._canExecute == null ? true : this._canExecute(parameter);
+            public void Execute(object parameter) => this._execute(parameter);
+            public void RaiseCanExecuteChanged() => this.CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+        }
+        #endregion close window
 
+
+        public ICommand CloseCommand { get; set; }
+
+        public ICommand LoadCommand { get; set; }
+
+        public ICommand CreateCommand { get; set; }
+      
+
+        // bắt sự kiện thay đổi properties của control
         public event PropertyChangedEventHandler PropertyChanged = delegate { };
 
         public void RaisePropertyChange(string propName)
@@ -37,30 +72,7 @@ namespace ClassLibrary2.UI.ViewModel
         {
             if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs(name));
         }
-
-        private string _myName;
-
-        public string MyName
-        {
-            get { return _myName; }
-            set
-            {
-                _myName = value;
-                RaisePropertyChange(nameof(MyName));
-            }
-        }
-
-        private int _myAge;
-
-        public int MyAge
-        {
-            get { return _myAge; }
-            set
-            {
-                _myAge = value;
-                RaisePropertyChange(nameof(MyAge));
-            }
-        }
+    
 
         //tao itemsource de bind vao listbox
         private ObservableCollection<DataTable> _tables;
@@ -75,17 +87,6 @@ namespace ClassLibrary2.UI.ViewModel
             }
         }
 
-        private string _filePath;
-
-        public string FilePath
-        {
-            get => _filePath;
-            set
-            {
-                _filePath = value;
-                RaisePropertyChange(nameof(FilePath));
-            }
-        }
 
         // gán giá trị và bổ sung bắt sự kiện thay đổi của giá trị bingding của itemselected (listbox) và itemsource (datagrid)
         private DataTable _TableSelected;
@@ -101,10 +102,16 @@ namespace ClassLibrary2.UI.ViewModel
         }
 
 
-        public ICommand LoadCommand { get; set; }
-      
-        public ICommand CreateCommand { get; set; }
-      
+        private string _filePath;
+        public string FilePath
+        {
+            get => _filePath;
+            set
+            {
+                _filePath = value;
+                RaisePropertyChange(nameof(FilePath));
+            }
+        }
 
         private void LoadCommandInvoke()
         {
@@ -123,14 +130,6 @@ namespace ClassLibrary2.UI.ViewModel
             }
         }
 
-        //private void CancelCommandInvoke()
-        //{
-        //    RaisePropertyChange(nameof(CancelCommand));
-        //}
-
-        //private void CreateCommandInvoke()
-        //{
-        //}
 
         #region Load .mdb file
 

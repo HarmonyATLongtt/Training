@@ -49,7 +49,6 @@ namespace GetSetColumnWidth
             }
             else
                 MessageBox.Show("Người dùng hủy thao tác");
-
             return Result.Succeeded;
         }
 

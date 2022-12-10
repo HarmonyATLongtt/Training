@@ -1,16 +1,10 @@
 ﻿using Autodesk.Revit.DB;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ClassLibrary2
 {
     internal class GetValueByNameMethod
-    {
-       
-            public dynamic GetParameterValue(Parameter parameter, bool getDisplayText)
+    {      
+        public dynamic GetParameterValue(Parameter parameter, bool getDisplayText)
             {
                 if (parameter != null && parameter.HasValue)
                 {
@@ -35,7 +29,7 @@ namespace ClassLibrary2
                 return null;
             }
 
-            public dynamic GetParameterValueByName(Element elem, string paramName, bool getDisplayText = false)
+        public dynamic GetParameterValueByName(Element elem, string paramName, bool getDisplayText = false)
             {
                 if (elem != null)
                 {

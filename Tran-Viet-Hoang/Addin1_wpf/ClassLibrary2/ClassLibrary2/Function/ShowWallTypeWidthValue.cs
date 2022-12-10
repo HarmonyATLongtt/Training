@@ -3,7 +3,6 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using ClassLibrary2;
 using System.Collections.Generic;
-using Application = Autodesk.Revit.ApplicationServices.Application;
 
 namespace ShowWallTypeWidthValue
 {
