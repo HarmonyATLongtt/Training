@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using ClassLibrary2.UI.Views;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,6 +14,15 @@ namespace ClassLibrary2.UI.ViewModel
 {
     public class MainViewModel : INotifyPropertyChanged
     {
+
+        public MainViewModel()
+        {
+            LoadCommand = new RelayCommand(LoadCommandInvoke);
+            //CreateCommand = new RelayCommand(CreateCommandInvoke);
+
+        }
+
+
         public event PropertyChangedEventHandler PropertyChanged = delegate { };
 
         public void RaisePropertyChange(string propName)
@@ -90,16 +100,11 @@ namespace ClassLibrary2.UI.ViewModel
             }
         }
 
-        public ICommand LoadCommand { get; set; }
-        public ICommand CancelCommand { get; set; }
-        public ICommand CreateCommand { get; set; }
 
-        public MainViewModel()
-        {
-            LoadCommand = new RelayCommand(LoadCommandInvoke);
-            CancelCommand = new RelayCommand(CancelCommandInvoke);
-            CreateCommand = new RelayCommand(CreateCommandInvoke);
-        }
+        public ICommand LoadCommand { get; set; }
+      
+        public ICommand CreateCommand { get; set; }
+      
 
         private void LoadCommandInvoke()
         {
@@ -118,13 +123,14 @@ namespace ClassLibrary2.UI.ViewModel
             }
         }
 
-        private void CancelCommandInvoke()
-        {
-        }
+        //private void CancelCommandInvoke()
+        //{
+        //    RaisePropertyChange(nameof(CancelCommand));
+        //}
 
-        private void CreateCommandInvoke()
-        {
-        }
+        //private void CreateCommandInvoke()
+        //{
+        //}
 
         #region Load .mdb file
 

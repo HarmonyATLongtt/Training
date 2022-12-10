@@ -1,6 +1,7 @@
 ﻿using Autodesk.Revit.DB;
 using System.Collections.Generic;
 using System.Windows;
+using System.Windows.Input;
 
 namespace ClassLibrary2.UI.Views
 {
@@ -9,12 +10,27 @@ namespace ClassLibrary2.UI.Views
     /// </summary>
     public partial class MainView : Window
     {
-        public object ConfigurationManager { get; private set; }
+        
 
         public MainView()
         {
-            List<BeamSystem> GetBeamSystems_Class = new List<BeamSystem>();
             InitializeComponent();
+
         }
+
+
+       
+
+        //void CloseApp(object target, ExecutedRoutedEventArgs e)
+        //{
+        //    /*** Code to check for State before Closing ***/
+        //    this.Close();
+        //}
+
+        //void CloseAppCanExecute(object sender, CanExecuteRoutedEventArgs e)
+        //{
+        //    /*** Logic to Determine if it is safe to Close the Window ***/
+        //    e.CanExecute = true;
+        //}
     }
 }
