@@ -20,35 +20,7 @@ namespace ClassLibrary2.UI.ViewModel
             LoadCommand = new RelayCommand(LoadCommandInvoke);
 
             CloseCommand = new HelperCommand(UserClose, CanClose);
-        }
-
-        #region close window
-        private void UserClose(object parameter)
-        {
-            Window wnd = parameter as Window;
-            MessageBox.Show("Have a great day!!");
-            wnd?.Close();
-        }
-        private bool CanClose(object parameter) => true;
-       
-        public class HelperCommand : ICommand
-        {
-            private readonly Action<object> _execute;
-            private readonly Predicate<object> _canExecute;
-            //public HelperCommand(Action<object> execute) : this(execute, canExecute: null) { }
-            public HelperCommand(Action<object> execute, Predicate<object> canExecute)
-            {
-                if (execute == null) throw new ArgumentNullException("execute");
-                this._execute = execute;
-                this._canExecute = canExecute;
-            }
-            public event EventHandler CanExecuteChanged;
-            public bool CanExecute(object parameter) => this._canExecute == null ? true : this._canExecute(parameter);
-            public void Execute(object parameter) => this._execute(parameter);
-            public void RaiseCanExecuteChanged() => this.CanExecuteChanged?.Invoke(this, EventArgs.Empty);
-        }
-        #endregion close window
-
+        }   
 
         public ICommand CloseCommand { get; set; }
 
@@ -209,5 +181,32 @@ namespace ClassLibrary2.UI.ViewModel
         }
 
         #endregion Load .mdb file
+
+        #region WindowClosed
+        private void UserClose(object parameter)
+        {
+            Window wnd = parameter as Window;
+            MessageBox.Show("Have a great day!!");
+            wnd?.Close();
+        }
+        private bool CanClose(object parameter) => true;
+
+        public class HelperCommand : ICommand
+        {
+            private readonly Action<object> _execute;
+            private readonly Predicate<object> _canExecute;
+            //public HelperCommand(Action<object> execute) : this(execute, canExecute: null) { }
+            public HelperCommand(Action<object> execute, Predicate<object> canExecute)
+            {
+                if (execute == null) throw new ArgumentNullException("execute");
+                this._execute = execute;
+                this._canExecute = canExecute;
+            }
+            public event EventHandler CanExecuteChanged;
+            public bool CanExecute(object parameter) => this._canExecute == null ? true : this._canExecute(parameter);
+            public void Execute(object parameter) => this._execute(parameter);
+            public void RaiseCanExecuteChanged() => this.CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+        }
+        #endregion WindowClosed
     }
 }

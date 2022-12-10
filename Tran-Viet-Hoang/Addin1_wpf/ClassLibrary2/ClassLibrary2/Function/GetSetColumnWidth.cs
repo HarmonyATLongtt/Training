@@ -21,27 +21,27 @@ namespace GetSetColumnWidth
             Application app = uiapp.Application;
             Document doc = uidoc.Document;
 
-            var element = PickConcreteColumn(uidoc);
+            var strcolumn = PickConcreteColumn(uidoc);
 
             Random rnd = new Random();
             int num = rnd.Next(300, 900);
-            if (element != null)
+            if (strcolumn != null)
             {
                 using (var transaction = new Transaction(doc, "Get Set Column Width"))
                 {
                     transaction.Start();
-                    if (element is FamilyInstance inst)
+                    if (strcolumn is FamilyInstance inst)
                     {
-                        var beamType = doc.GetElement(inst.GetTypeId()) as FamilySymbol;
-                        Parameter para = beamType.LookupParameter("b");
+                        var columnType = doc.GetElement(inst.GetTypeId()) as FamilySymbol;
+                        Parameter para = columnType.LookupParameter("b");
                         if (para != null
                             && !para.IsReadOnly
                             && para.StorageType == StorageType.Double)
                         {
                             string val = (para.AsDouble() * 304.8).ToString();
-                            MessageBox.Show("Giá trị b hiện tại của cột " + beamType.Name.ToString() + " là: " + val + " mm");
+                            MessageBox.Show("Giá trị b hiện tại của cột " + columnType.Name.ToString() + " là: " + val + " mm");
                             para.Set(num / 304.8);
-                            MessageBox.Show("Giá trị b của cột " + beamType.Name.ToString() + " trở thành là: " + num + " mm");
+                            MessageBox.Show("Giá trị b của cột " + columnType.Name.ToString() + " trở thành là: " + num + " mm");
                         }
                     }
                     transaction.Commit();

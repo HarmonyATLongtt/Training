@@ -16,26 +16,26 @@ namespace ShowWallTypeWidthValue
             UIDocument uidoc = uiapp.ActiveUIDocument;         
             Document doc = uidoc.Document;
    
-            ElementCategoryFilter filterW = new ElementCategoryFilter(BuiltInCategory.OST_Walls);
-            IList<Element> filterlogic = new FilteredElementCollector(doc).WherePasses(filterW).ToElements();
-            string mess = "";
-            foreach (Element eachwall in filterlogic)
+            ElementCategoryFilter filterWall = new ElementCategoryFilter(BuiltInCategory.OST_Walls);
+            IList<Element> wallelems = new FilteredElementCollector(doc).WherePasses(filterWall).ToElements();
+            string walldialog = "";
+            foreach (Element specificwall in wallelems)
             {
-                if (null == eachwall.GetTypeId())
+                if (null == specificwall.GetTypeId())
                 {
                     TaskDialog.Show("Revit", "Not found");
                 }
                 else
                 {
-                    Parameter parameter = eachwall.LookupParameter("Width");
+                    Parameter parameter = specificwall.LookupParameter("Width");
                     if (parameter != null)
                     {
-                        double? value = new GetValueByNameMethod().GetParameterValueByName(eachwall, "Width");
-                        mess += eachwall.Name + " has widthvalue is: " + value * 304.8 + " mm" + "\n";
+                        double? value = new GetValueByNameMethod().GetParameterValueByName(specificwall, "Width");
+                        walldialog += specificwall.Name + " has widthvalue is: " + value * 304.8 + " mm" + "\n";
                     }
                 }
             }
-            TaskDialog.Show("Revit", mess);
+            TaskDialog.Show("Revit", walldialog);
             return Result.Succeeded;
         }
     }

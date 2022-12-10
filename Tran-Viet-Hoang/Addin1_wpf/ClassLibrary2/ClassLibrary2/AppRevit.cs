@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using Autodesk.Revit.Attributes;
-using ClassLibrary2.UI.Views;
 using ClassLibrary2.UI.ViewModel;
-using System.Windows;
+using ClassLibrary2.UI.Views;
 using Application = Autodesk.Revit.ApplicationServices.Application;
 
 namespace ClassLibrary2

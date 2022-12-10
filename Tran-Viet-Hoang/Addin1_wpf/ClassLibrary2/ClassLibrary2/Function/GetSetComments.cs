@@ -26,11 +26,11 @@ namespace GetSetComments
             Random rnd = new Random();
             int num = rnd.Next(100);
 
-            var getcmt = uidoc.Selection.GetElementIds().Select(x => doc.GetElement(x)).First();
-            var cmtvalue = getcmt.LookupParameter("Comments").AsString();
-            if (cmtvalue != null && cmtvalue != "")
+            var selectelem = uidoc.Selection.GetElementIds().Select(x => doc.GetElement(x)).First();
+            var elemcmtvalue = selectelem.LookupParameter("Comments").AsString();
+            if (elemcmtvalue != null && elemcmtvalue != "")
             {
-                MessageBox.Show("This element comment now is: " + cmtvalue);
+                MessageBox.Show("This element comment now is: " + elemcmtvalue);
             }
             else
             {
@@ -41,7 +41,7 @@ namespace GetSetComments
             using (var transaction = new Transaction(doc, "Set Mark"))
             {
                 transaction.Start();             
-                getcmt.LookupParameter("Comments").Set(num.ToString());              
+                selectelem.LookupParameter("Comments").Set(num.ToString());              
                 MessageBox.Show("Then it is: " + num);
                 transaction.Commit();
             }
