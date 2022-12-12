@@ -84,4 +84,3 @@ G:\01Thuctap\Training\Tran-Viet-Hoang\Addin1_wpf\ClassLibrary2\ClassLibrary2\obj
 G:\01Thuctap\Training\Tran-Viet-Hoang\Addin1_wpf\ClassLibrary2\ClassLibrary2\obj\Debug\ClassLibrary2.dll
 G:\01Thuctap\Training\Tran-Viet-Hoang\Addin1_wpf\ClassLibrary2\ClassLibrary2\obj\Debug\ClassLibrary2.pdb
 G:\01Thuctap\Training\Tran-Viet-Hoang\Addin1_wpf\ClassLibrary2\ClassLibrary2\obj\Debug\GeneratedInternalTypeHelper.g.cs
-G:\01Thuctap\Training\Tran-Viet-Hoang\Addin1_wpf\ClassLibrary2\ClassLibrary2\obj\Debug\ClassLibrary2_MarkupCompile.lref

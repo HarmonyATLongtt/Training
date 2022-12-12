@@ -8,6 +8,7 @@ using System.Data;
 using System.Data.OleDb;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace ClassLibrary2.UI.ViewModel
@@ -20,6 +21,7 @@ namespace ClassLibrary2.UI.ViewModel
             LoadCommand = new RelayCommand(LoadCommandInvoke);
 
             CloseCommand = new HelperCommand(UserClose, CanClose);
+            //CreateCommand = new HelperCommand(ListboxTables, CanClose);
         }   
 
         public ICommand CloseCommand { get; set; }
@@ -95,13 +97,27 @@ namespace ClassLibrary2.UI.ViewModel
                     var tables = LoadMdbFile(FilePath);
                     Tables = new ObservableCollection<DataTable>(tables);
                 }
+
+              
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message + "\n" + ex.StackTrace.ToString());
             }
+
         }
 
+        //private void ListboxTables(object parameter)
+        //{
+        //    ListBox listdata = parameter as ListBox;
+        //    DataTable modelimport = new DataTable();
+        //    string tablenameslist = "";
+        //    foreach( var lists in listdata.Items )
+        //    {
+        //        tablenameslist += lists.GetType().Name.ToString() +"\n";
+        //    }
+          
+        //}
 
         #region Load .mdb file
 
@@ -185,8 +201,8 @@ namespace ClassLibrary2.UI.ViewModel
         #region WindowClosed
         private void UserClose(object parameter)
         {
-            Window wnd = parameter as Window;
-            MessageBox.Show("Have a great day!!");
+            Window wnd = parameter as Window;     
+            MessageBox.Show("Have a great day!!" );
             wnd?.Close();
         }
         private bool CanClose(object parameter) => true;

@@ -2,7 +2,6 @@
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using Application = Autodesk.Revit.ApplicationServices.Application;

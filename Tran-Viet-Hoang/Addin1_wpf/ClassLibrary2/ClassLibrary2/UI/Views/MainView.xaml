@@ -45,6 +45,7 @@
         <Label Grid.Row="1" Grid.Column="2" Content="Sheet data" />
         
         <ListBox Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Margin="5"
+                 x:Name="TablesList"
                  ItemsSource="{Binding Tables}"
                  SelectedItem="{Binding TableSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                  DisplayMemberPath="TableName" />
@@ -54,9 +55,10 @@
         
         <StackPanel Grid.Row="3" Grid.Column="3" Grid.ColumnSpan="4" 
                     Orientation="Horizontal" FlowDirection="RightToLeft">
-            <Button Content="Cancel"  Command="{Binding CloseCommand}" 
+            <Button Content="Cancel"   Command="{Binding CloseCommand}" 
                     CommandParameter="{Binding ElementName=window, Mode=OneWay}"  />
-            <Button Content="Create" IsDefault="True" Command="{Binding CreateCommand}"  />
+            <Button Content="Create" IsDefault="True" Command="{Binding CreateCommand}"
+                    CommandParameter="{Binding ElementName=TablesList, Mode=OneWay}"  />
         </StackPanel>
     </Grid>
 </Window>
