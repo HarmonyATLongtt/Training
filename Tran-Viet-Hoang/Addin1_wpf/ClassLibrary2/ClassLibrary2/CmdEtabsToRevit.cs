@@ -1,9 +1,11 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using ClassLibrary2.Data;
 using ClassLibrary2.UI.ViewModel;
 using ClassLibrary2.UI.Views;
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using Application = Autodesk.Revit.ApplicationServices.Application;
 
@@ -26,7 +28,17 @@ namespace ClassLibrary2
                 view.ShowDialog();
 
                 MainViewModel vm = view.DataContext as MainViewModel;
-                //vm.LevelDatas;
+                List<LevelData> LevelModelData = vm.LevelDatas;
+
+                //foreach (LevelData levelData in LevelModelData)
+                //{
+                //    MessageBox.Show(levelData.Name + " " + levelData.Elevation);
+                //}
+
+                foreach (LevelData levelData in LevelModelData)
+                {
+                    LevelModel(commandData, levelData.Name, levelData.Elevation);
+                }
             }
             catch (Exception ex)
             {
@@ -40,34 +52,34 @@ namespace ClassLibrary2
         {
             UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
-            Application app = uiapp.Application;
             Document doc = uidoc.Document;
             var elems = new FilteredElementCollector(doc)
                         .WhereElementIsNotElementType()
                         .OfCategory(BuiltInCategory.OST_Levels);
-            foreach (var name in elems)
+            string Levelexisted = "false";
+
+            using (var transaction = new Transaction(doc, "Set Elevation"))
             {
-                Parameter para = name.LookupParameter("Name");
-                Parameter cote = name.LookupParameter("Elevation");
-                if (para.AsString() == uniquename)
+                foreach (var singlelevel in elems)
                 {
-                    using (var transaction = new Transaction(doc, "Set Elevation"))
+                    Parameter para = singlelevel.LookupParameter("Name");
+                    Parameter cote = singlelevel.LookupParameter("Elevation");
+                    if (para.AsString() == uniquename)
                     {
                         transaction.Start();
+                        Levelexisted = "true";
                         cote.Set(elevation / 304.8);
                         transaction.Commit();
                     }
                 }
-                else
+
+                if (Levelexisted == "false")
                 {
-                    using (var transaction = new Transaction(doc, "Create Level"))
-                    {
-                        transaction.Start();
-                        Level newlevel = Level.Create(doc, elevation);
-                        Parameter paranew = newlevel.LookupParameter("Name");
-                        paranew.Set(uniquename);
-                        transaction.Commit();
-                    }
+                    transaction.Start();
+                    Level newlevel = Level.Create(doc, elevation);
+                    Parameter paranew = newlevel.LookupParameter("Name");
+                    paranew.Set(uniquename);
+                    transaction.Commit();
                 }
             }
         }
