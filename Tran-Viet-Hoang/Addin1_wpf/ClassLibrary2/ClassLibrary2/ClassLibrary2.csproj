@@ -76,9 +76,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Function\AllowColumn.cs" />
-    <Compile Include="AppRevit.cs" />
+    <Compile Include="CmdEtabsToRevit.cs" />
     <Compile Include="Data\BeamData.cs" />
     <Compile Include="Data\LevelData.cs" />
+    <Compile Include="Function\CreateLevel.cs" />
     <Compile Include="Function\GetSetColumnWidth.cs" />
     <Compile Include="Function\GetSetComments.cs" />
     <Compile Include="Function\GetValueByNameMethod.cs" />

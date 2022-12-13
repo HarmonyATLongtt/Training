@@ -3,40 +3,40 @@
 namespace ClassLibrary2
 {
     internal class GetValueByNameMethod
-    {      
+    {
         public dynamic GetParameterValue(Parameter parameter, bool getDisplayText)
+        {
+            if (parameter != null && parameter.HasValue)
             {
-                if (parameter != null && parameter.HasValue)
+                if (getDisplayText)
+                    return parameter.AsValueString();
+
+                switch (parameter.StorageType)
                 {
-                    if (getDisplayText)
-                        return parameter.AsValueString();
+                    case StorageType.Double:
+                        return parameter.AsDouble();
 
-                    switch (parameter.StorageType)
-                    {
-                        case StorageType.Double:
-                            return parameter.AsDouble();
+                    case StorageType.ElementId:
+                        return parameter.AsElementId();
 
-                        case StorageType.ElementId:
-                            return parameter.AsElementId();
+                    case StorageType.Integer:
+                        return parameter.AsInteger();
 
-                        case StorageType.Integer:
-                            return parameter.AsInteger();
-
-                        case StorageType.String:
-                            return parameter.AsString();
-                    }
+                    case StorageType.String:
+                        return parameter.AsString();
                 }
-                return null;
             }
+            return null;
+        }
 
         public dynamic GetParameterValueByName(Element elem, string paramName, bool getDisplayText = false)
+        {
+            if (elem != null)
             {
-                if (elem != null)
-                {
-                    Parameter parameter = elem.LookupParameter(paramName);
-                    return GetParameterValue(parameter, getDisplayText);
-                }
-                return null;
+                Parameter parameter = elem.LookupParameter(paramName);
+                return GetParameterValue(parameter, getDisplayText);
             }
-     }
+            return null;
+        }
+    }
 }

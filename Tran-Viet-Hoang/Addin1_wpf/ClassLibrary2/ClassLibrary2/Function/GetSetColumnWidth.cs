@@ -8,12 +8,10 @@ using Application = Autodesk.Revit.ApplicationServices.Application;
 
 namespace GetSetColumnWidth
 {
-
     [TransactionAttribute(TransactionMode.Manual)]
     [Regeneration(RegenerationOption.Manual)]
     public class AppRevit : IExternalCommand
     {
-
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UIApplication uiapp = commandData.Application;

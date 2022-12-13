@@ -6,15 +6,12 @@ using System.Linq;
 using System.Windows;
 using Application = Autodesk.Revit.ApplicationServices.Application;
 
-
-
 namespace GetSetComments
 {
     [TransactionAttribute(TransactionMode.Manual)]
     [Regeneration(RegenerationOption.Manual)]
     public class AppRevit : IExternalCommand
     {
-
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UIApplication uiapp = commandData.Application;
@@ -36,16 +33,14 @@ namespace GetSetComments
                 MessageBox.Show("No comments found");
             }
 
-
             using (var transaction = new Transaction(doc, "Set Mark"))
             {
-                transaction.Start();             
-                selectelem.LookupParameter("Comments").Set(num.ToString());              
+                transaction.Start();
+                selectelem.LookupParameter("Comments").Set(num.ToString());
                 MessageBox.Show("Then it is: " + num);
                 transaction.Commit();
             }
             return Result.Succeeded;
         }
-
     }
 }

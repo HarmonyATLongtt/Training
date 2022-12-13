@@ -1,7 +1,4 @@
-﻿using Autodesk.Revit.DB;
-using System.Collections.Generic;
-using System.Windows;
-using System.Windows.Input;
+﻿using System.Windows;
 
 namespace ClassLibrary2.UI.Views
 {
@@ -9,12 +6,10 @@ namespace ClassLibrary2.UI.Views
     /// Interaction logic for MainView.xaml
     /// </summary>
     public partial class MainView : Window
-    {      
+    {
         public MainView()
         {
             InitializeComponent();
-
         }
-  
     }
 }

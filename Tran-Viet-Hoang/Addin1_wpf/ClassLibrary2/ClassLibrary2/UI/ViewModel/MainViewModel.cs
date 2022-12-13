@@ -1,5 +1,4 @@
 ﻿using ClassLibrary2.Data;
-using ClassLibrary2.UI.Views;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -8,15 +7,14 @@ using System.ComponentModel;
 using System.Data;
 using System.Data.OleDb;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace ClassLibrary2.UI.ViewModel
 {
     public class MainViewModel : INotifyPropertyChanged
     {
+        public List<LevelData> LevelDatas { get; set; }
 
         public MainViewModel()
         {
@@ -24,14 +22,13 @@ namespace ClassLibrary2.UI.ViewModel
             CreateCommand = new RelayCommand(CreateCommandInvoke);
             CloseCommand = new HelperCommand(UserClose, CanClose);
             //CreateCommand = new HelperCommand(ListboxTables, CanClose);
-        }   
+        }
 
         public ICommand CloseCommand { get; set; }
 
         public ICommand LoadCommand { get; set; }
 
         public ICommand CreateCommand { get; set; }
-      
 
         // bắt sự kiện thay đổi properties của control
         public event PropertyChangedEventHandler PropertyChanged = delegate { };
@@ -48,7 +45,6 @@ namespace ClassLibrary2.UI.ViewModel
         {
             if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs(name));
         }
-    
 
         //tao itemsource de bind vao listbox
         private ObservableCollection<DataTable> _tables;
@@ -63,7 +59,6 @@ namespace ClassLibrary2.UI.ViewModel
             }
         }
 
-
         // gán giá trị và bổ sung bắt sự kiện thay đổi của giá trị bingding của itemselected (listbox) và itemsource (datagrid)
         private DataTable _TableSelected;
 
@@ -77,8 +72,8 @@ namespace ClassLibrary2.UI.ViewModel
             }
         }
 
-
         private string _filePath;
+
         public string FilePath
         {
             get => _filePath;
@@ -99,126 +94,106 @@ namespace ClassLibrary2.UI.ViewModel
                     var tables = LoadMdbFile(FilePath);
                     Tables = new ObservableCollection<DataTable>(tables);
                 }
-
-              
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message + "\n" + ex.StackTrace.ToString());
             }
-
         }
-
-
 
         private void CreateCommandInvoke()
         {
             try
             {
-              string tab = "";
-              string Levelinfo = "";
-              double[] Levelelevalue = new double[100];
-              string test1 = "";
-              //double testele = -1;
-              foreach(DataTable ta in Tables)
+                foreach (DataTable ta in Tables)
                 {
-                    tab = ta.TableName;
-                    switch (tab)
+                    switch (ta.TableName)
                     {
+                        //case "Beam Object Connectivity":
+                        //    MessageBox.Show(tab);
+                        //    break;
+                        //case "Column Object Connectivity":
+                        //    MessageBox.Show(tab);
+                        //    break;
+                        //case "Concrete Beam Flexure Envelope - TCVN 5574-2012":
+                        //    MessageBox.Show(tab);
+                        //    break;
+                        //case "Concrete Beam Shear Envelope - TCVN 5574-2012":
+                        //    MessageBox.Show(tab);
+                        //    break;
+                        //case "Frame Assignments - Insertion Point":
+                        //    MessageBox.Show(tab);
+                        //    break;
+                        //case "Frame Assignments - Section Properties":
+                        //    MessageBox.Show(tab);
+                        //    break;
+                        //case "Frame Section Property Definitions - Concrete Beam Reinforcing":
+                        //    MessageBox.Show(tab);
+                        //    break;
+                        //case "Frame Section Property Definitions - Concrete Rectangular":
+                        //    MessageBox.Show(tab);
+                        //    break;
+                        case "Point Object Connectivity":                         
+                            break;
 
-                        case "Beam Object Connectivity":
-                            MessageBox.Show(tab);
-                            break;
-                        case "Column Object Connectivity":
-                            MessageBox.Show(tab);
-                            break;
-                        case "Concrete Beam Flexure Envelope - TCVN 5574-2012":
-                            MessageBox.Show(tab);
-                            break;
-                        case "Concrete Beam Shear Envelope - TCVN 5574-2012":
-                            MessageBox.Show(tab);
-                            break;
-                        case "Frame Assignments - Insertion Point":
-                            MessageBox.Show(tab);
-                            break;
-                        case "Frame Assignments - Section Properties":
-                            MessageBox.Show(tab);
-                            break;
-                        case "Frame Section Property Definitions - Concrete Beam Reinforcing":
-                            MessageBox.Show(tab);
-                            break;
-                        case "Frame Section Property Definitions - Concrete Rectangular":
-                            MessageBox.Show(tab);
-                            break;
-                        case "Point Object Connectivity":
-                            MessageBox.Show(tab);
-                            break;
                         case "Story Definitions":
-                            LevelData[] Level = new LevelData[10];
-                                                     
-                            // lấy ra height và tính cao độ cho từng tầng
-                            for (int i = 0; i < ta.Columns.Count; i++)
-                                {                                
-                                    if (ta.Columns[i].ColumnName == "Height")
-                                    {
-                                        for(int j = ta.Rows.Count-1; j >= 0 ; j--)
-                                        {                                         
-                                                int stt = ta.Rows.Count - j;
-                                                int lowerstt =  stt -1;
-                                                Double.TryParse(ta.Rows[j][ta.Columns[i]].ToString(), out double elevalue);
-                                                Levelelevalue[0] = 0;
-                                                Levelelevalue[stt] = elevalue + Levelelevalue[lowerstt];
-                                                test1 += "Level "+(stt+1).ToString()+" có giá trị Elevation là: "+ Levelelevalue[stt].ToString() + "\n";
-                                        }
-                                    }
-                                }                           
-                                MessageBox.Show("Level 1 có giá trị Elevation là: " +Levelelevalue[0].ToString() + "\n" + test1);
-                            
-                            // lấy ra name và gắn cao độ (lấy được ở trên) của từng tầng cho name của tầng đó
-                            for (int i = 0; i < ta.Rows.Count; i++)
-                            {
-                                for (int j = 0; j < ta.Columns.Count; j++)
-                                {
-                                    if (ta.Columns[j].ColumnName == "Name")
-                                    {
-                                        Level[i] = new LevelData();
-                                        Level[i].Elevation = Levelelevalue[ta.Rows.Count - i];
-                                        Level[i].Name = ta.Rows[i][ta.Columns[j]].ToString();                                     
-                                        Levelinfo += Level[i].Name + "   " + Level[i].Elevation + "\n" ;
-                                    }                                 
-                                }
-                            }
-                            MessageBox.Show(tab);                          
-                            MessageBox.Show(Levelinfo);
+
+                            //string Hoangcode = string.Empty;
+                            //List<LevelData> LevelList = LevelReadData( ta);
+                            //foreach (var singlestory in LevelList)
+                            //{
+                            //    Hoangcode += singlestory.Name + " có cote là " + singlestory.Elevation + "\n";
+                            //}
+                            //MessageBox.Show("Hoang" + "\n" + Hoangcode);
+
+                            LevelDatas = LevelReadData(ta);
+
                             break;
+
                         default:
-                        break;
-
+                            break;
                     }
-                    //tab += ta.TableName + "\n";
-              }
-              //MessageBox.Show(tab);
-
-
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message + "\n" + ex.StackTrace.ToString());
             }
-
         }
 
-        //private void ListboxTables(object parameter)
-        //{
-        //    ListBox listdata = parameter as ListBox;
-        //    DataTable modelimport = new DataTable();
-        //    string tablenameslist = "";
-        //    foreach( var lists in listdata.Items )
-        //    {
-        //        tablenameslist += lists.GetType().Name.ToString() +"\n";
-        //    }
+        #region Level ReadData
 
-        //}
+        private List<LevelData> LevelReadData(DataTable table)
+        {
+            double elev = 0;
+            var levelclass = new List<LevelData>();
+
+            LevelData baseLevel = new LevelData();
+            baseLevel.Elevation = elev;
+            baseLevel.Name = "Base";
+            levelclass.Add(baseLevel);
+
+            var accendingRows = table.Rows
+                                .Cast<DataRow>()
+                                .OrderBy(r => r["Name"].ToString());
+            foreach (DataRow row in accendingRows)
+            {
+                string height = row["Height"].ToString();
+                if (double.TryParse(height, out double val))
+                {
+                    elev += val;
+
+                    LevelData levelData = new LevelData();
+                    levelData.Elevation = elev;
+                    levelData.Name = row["Name"].ToString();
+
+                    levelclass.Add(levelData);
+                };
+            }
+            return levelclass;
+        }
+
+        #endregion Level ReadData
 
         #region Load .mdb file
 
@@ -227,7 +202,6 @@ namespace ClassLibrary2.UI.ViewModel
             List<DataTable> tables = new List<DataTable>();
             try
             {
-
                 if (!string.IsNullOrEmpty(filePath))
                 {
                     string connectionString = "Provider=Microsoft.ACE.OLEDB.12.0;"
@@ -249,7 +223,7 @@ namespace ClassLibrary2.UI.ViewModel
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.StackTrace.ToString());
             }
@@ -308,18 +282,21 @@ namespace ClassLibrary2.UI.ViewModel
         #endregion Load .mdb file
 
         #region WindowClosed
+
         private void UserClose(object parameter)
         {
-            Window wnd = parameter as Window;     
-            MessageBox.Show("Have a great day!!" );
+            Window wnd = parameter as Window;
+            MessageBox.Show("Have a great day!!");
             wnd?.Close();
         }
+
         private bool CanClose(object parameter) => true;
 
         public class HelperCommand : ICommand
         {
             private readonly Action<object> _execute;
             private readonly Predicate<object> _canExecute;
+
             //public HelperCommand(Action<object> execute) : this(execute, canExecute: null) { }
             public HelperCommand(Action<object> execute, Predicate<object> canExecute)
             {
@@ -327,11 +304,16 @@ namespace ClassLibrary2.UI.ViewModel
                 this._execute = execute;
                 this._canExecute = canExecute;
             }
+
             public event EventHandler CanExecuteChanged;
+
             public bool CanExecute(object parameter) => this._canExecute == null ? true : this._canExecute(parameter);
+
             public void Execute(object parameter) => this._execute(parameter);
+
             public void RaiseCanExecuteChanged() => this.CanExecuteChanged?.Invoke(this, EventArgs.Empty);
         }
+
         #endregion WindowClosed
     }
 }

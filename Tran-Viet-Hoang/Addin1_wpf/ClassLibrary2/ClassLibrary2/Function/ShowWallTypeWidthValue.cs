@@ -9,13 +9,12 @@ namespace ShowWallTypeWidthValue
     [TransactionAttribute(TransactionMode.Manual)]
     public class AppRevit : IExternalCommand
     {
-
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UIApplication uiapp = commandData.Application;
-            UIDocument uidoc = uiapp.ActiveUIDocument;         
+            UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
-   
+
             ElementCategoryFilter filterWall = new ElementCategoryFilter(BuiltInCategory.OST_Walls);
             IList<Element> wallelems = new FilteredElementCollector(doc).WherePasses(filterWall).ToElements();
             string walldialog = "";
