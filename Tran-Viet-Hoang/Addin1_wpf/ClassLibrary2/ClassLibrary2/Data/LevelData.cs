@@ -9,6 +9,12 @@ namespace ClassLibrary2.Data
     class LevelData
     {
         public double Elevation { get; set; }
+
         public string Name { get; set; }
+        //public string Name 
+        //{
+        //    get { return _name; }
+        //    set { _name = value; }
+        //}
     }
 }

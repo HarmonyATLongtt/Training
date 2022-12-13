@@ -1,4 +1,5 @@
-﻿using ClassLibrary2.UI.Views;
+﻿using ClassLibrary2.Data;
+using ClassLibrary2.UI.Views;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -7,6 +8,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Data.OleDb;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -19,7 +21,7 @@ namespace ClassLibrary2.UI.ViewModel
         public MainViewModel()
         {
             LoadCommand = new RelayCommand(LoadCommandInvoke);
-
+            CreateCommand = new RelayCommand(CreateCommandInvoke);
             CloseCommand = new HelperCommand(UserClose, CanClose);
             //CreateCommand = new HelperCommand(ListboxTables, CanClose);
         }   
@@ -107,6 +109,105 @@ namespace ClassLibrary2.UI.ViewModel
 
         }
 
+
+
+        private void CreateCommandInvoke()
+        {
+            try
+            {
+              string tab = "";
+              string Levelinfo = "";
+              double[] Levelelevalue = new double[100];
+              string test1 = "";
+              //double testele = -1;
+              foreach(DataTable ta in Tables)
+                {
+                    tab = ta.TableName;
+                    switch (tab)
+                    {
+
+                        case "Beam Object Connectivity":
+                            MessageBox.Show(tab);
+                            break;
+                        case "Column Object Connectivity":
+                            MessageBox.Show(tab);
+                            break;
+                        case "Concrete Beam Flexure Envelope - TCVN 5574-2012":
+                            MessageBox.Show(tab);
+                            break;
+                        case "Concrete Beam Shear Envelope - TCVN 5574-2012":
+                            MessageBox.Show(tab);
+                            break;
+                        case "Frame Assignments - Insertion Point":
+                            MessageBox.Show(tab);
+                            break;
+                        case "Frame Assignments - Section Properties":
+                            MessageBox.Show(tab);
+                            break;
+                        case "Frame Section Property Definitions - Concrete Beam Reinforcing":
+                            MessageBox.Show(tab);
+                            break;
+                        case "Frame Section Property Definitions - Concrete Rectangular":
+                            MessageBox.Show(tab);
+                            break;
+                        case "Point Object Connectivity":
+                            MessageBox.Show(tab);
+                            break;
+                        case "Story Definitions":
+                            LevelData[] Level = new LevelData[10];
+                                                     
+                            // lấy ra height và tính cao độ cho từng tầng
+                            for (int i = 0; i < ta.Columns.Count; i++)
+                                {                                
+                                    if (ta.Columns[i].ColumnName == "Height")
+                                    {
+                                        for(int j = ta.Rows.Count-1; j >= 0 ; j--)
+                                        {                                         
+                                                int stt = ta.Rows.Count - j;
+                                                int lowerstt =  stt -1;
+                                                Double.TryParse(ta.Rows[j][ta.Columns[i]].ToString(), out double elevalue);
+                                                Levelelevalue[0] = 0;
+                                                Levelelevalue[stt] = elevalue + Levelelevalue[lowerstt];
+                                                test1 += "Level "+(stt+1).ToString()+" có giá trị Elevation là: "+ Levelelevalue[stt].ToString() + "\n";
+                                        }
+                                    }
+                                }                           
+                                MessageBox.Show("Level 1 có giá trị Elevation là: " +Levelelevalue[0].ToString() + "\n" + test1);
+                            
+                            // lấy ra name và gắn cao độ (lấy được ở trên) của từng tầng cho name của tầng đó
+                            for (int i = 0; i < ta.Rows.Count; i++)
+                            {
+                                for (int j = 0; j < ta.Columns.Count; j++)
+                                {
+                                    if (ta.Columns[j].ColumnName == "Name")
+                                    {
+                                        Level[i] = new LevelData();
+                                        Level[i].Elevation = Levelelevalue[ta.Rows.Count - i];
+                                        Level[i].Name = ta.Rows[i][ta.Columns[j]].ToString();                                     
+                                        Levelinfo += Level[i].Name + "   " + Level[i].Elevation + "\n" ;
+                                    }                                 
+                                }
+                            }
+                            MessageBox.Show(tab);                          
+                            MessageBox.Show(Levelinfo);
+                            break;
+                        default:
+                        break;
+
+                    }
+                    //tab += ta.TableName + "\n";
+              }
+              //MessageBox.Show(tab);
+
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message + "\n" + ex.StackTrace.ToString());
+            }
+
+        }
+
         //private void ListboxTables(object parameter)
         //{
         //    ListBox listdata = parameter as ListBox;
@@ -116,7 +217,7 @@ namespace ClassLibrary2.UI.ViewModel
         //    {
         //        tablenameslist += lists.GetType().Name.ToString() +"\n";
         //    }
-          
+
         //}
 
         #region Load .mdb file
@@ -124,25 +225,33 @@ namespace ClassLibrary2.UI.ViewModel
         private List<DataTable> LoadMdbFile(string filePath)
         {
             List<DataTable> tables = new List<DataTable>();
-            if (!string.IsNullOrEmpty(filePath))
+            try
             {
-                string connectionString = "Provider=Microsoft.ACE.OLEDB.12.0;"
-                                        + "data source="
-                                        + filePath + ";";
 
-                using (var connection = new OleDbConnection(connectionString))
+                if (!string.IsNullOrEmpty(filePath))
                 {
-                    connection.Open();
-                    List<string> tableNames = GetTableNames(connection);
-                    if (tableNames?.Count > 0)
+                    string connectionString = "Provider=Microsoft.ACE.OLEDB.12.0;"
+                                            + "data source="
+                                            + filePath + ";";
+
+                    using (var connection = new OleDbConnection(connectionString))
                     {
-                        foreach (string tableName in tableNames)
+                        connection.Open();
+                        List<string> tableNames = GetTableNames(connection);
+                        if (tableNames?.Count > 0)
                         {
-                            var table = ReadTable(connection, tableName);
-                            tables.Add(table);
+                            foreach (string tableName in tableNames)
+                            {
+                                var table = ReadTable(connection, tableName);
+                                tables.Add(table);
+                            }
                         }
                     }
                 }
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.StackTrace.ToString());
             }
             return tables;
         }
