@@ -1,4 +1,5 @@
-﻿using ClassLibrary2.Data;
+﻿using Autodesk.Revit.DB;
+using ClassLibrary2.Data;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,8 @@ namespace ClassLibrary2.UI.ViewModel
     public class MainViewModel : INotifyPropertyChanged
     {
         public List<LevelData> LevelDatas { get; set; }
+
+        public List<BeamData> BeamDatas { get; set; }
 
         public MainViewModel()
         {
@@ -48,7 +51,6 @@ namespace ClassLibrary2.UI.ViewModel
 
         //tao itemsource de bind vao listbox
         private ObservableCollection<DataTable> _tables;
-
         public ObservableCollection<DataTable> Tables
         {
             get => _tables;
@@ -59,9 +61,9 @@ namespace ClassLibrary2.UI.ViewModel
             }
         }
 
+
         // gán giá trị và bổ sung bắt sự kiện thay đổi của giá trị bingding của itemselected (listbox) và itemsource (datagrid)
         private DataTable _TableSelected;
-
         public DataTable TableSelected
         {
             get => _TableSelected;
@@ -72,8 +74,8 @@ namespace ClassLibrary2.UI.ViewModel
             }
         }
 
-        private string _filePath;
 
+        private string _filePath;
         public string FilePath
         {
             get => _filePath;
@@ -83,6 +85,7 @@ namespace ClassLibrary2.UI.ViewModel
                 RaisePropertyChange(nameof(FilePath));
             }
         }
+
 
         private void LoadCommandInvoke()
         {
@@ -100,66 +103,149 @@ namespace ClassLibrary2.UI.ViewModel
                 MessageBox.Show(ex.Message + "\n" + ex.StackTrace.ToString());
             }
         }
-
         private void CreateCommandInvoke()
         {
             try
             {
-                foreach (DataTable ta in Tables)
-                {
-                    switch (ta.TableName)
-                    {
-                        //case "Beam Object Connectivity":
-                        //    MessageBox.Show(tab);
-                        //    break;
-                        //case "Column Object Connectivity":
-                        //    MessageBox.Show(tab);
-                        //    break;
-                        //case "Concrete Beam Flexure Envelope - TCVN 5574-2012":
-                        //    MessageBox.Show(tab);
-                        //    break;
-                        //case "Concrete Beam Shear Envelope - TCVN 5574-2012":
-                        //    MessageBox.Show(tab);
-                        //    break;
-                        //case "Frame Assignments - Insertion Point":
-                        //    MessageBox.Show(tab);
-                        //    break;
-                        //case "Frame Assignments - Section Properties":
-                        //    MessageBox.Show(tab);
-                        //    break;
-                        //case "Frame Section Property Definitions - Concrete Beam Reinforcing":
-                        //    MessageBox.Show(tab);
-                        //    break;
-                        //case "Frame Section Property Definitions - Concrete Rectangular":
-                        //    MessageBox.Show(tab);
-                        //    break;
-                        case "Point Object Connectivity":                         
-                            break;
+                
+                var tablebeamobject = _tables.FirstOrDefault(x => x.TableName.Equals("Beam Object Connectivity"));
+                DataTable tablebeamob = tablebeamobject;
+                var tablebeamlevel = _tables.FirstOrDefault(x => x.TableName.Equals("Story Definitions"));
+                LevelDatas = LevelReadData(tablebeamlevel); // đưa dữ liệu đọc được (Read) từ file mdb vào list LevelDatas
+                BeamDatas = ReadBeamAll(); // đưa dữ liệu đọc đọc được (Read) từ file mdb vào list BeamDatas
 
-                        case "Story Definitions":
-
-                            //string Hoangcode = string.Empty;
-                            //List<LevelData> LevelList = LevelReadData( ta);
-                            //foreach (var singlestory in LevelList)
-                            //{
-                            //    Hoangcode += singlestory.Name + " có cote là " + singlestory.Elevation + "\n";
-                            //}
-                            //MessageBox.Show("Hoang" + "\n" + Hoangcode);
-
-                            LevelDatas = LevelReadData(ta);
-
-                            break;
-
-                        default:
-                            break;
-                    }
-                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message + "\n" + ex.StackTrace.ToString());
             }
         }
+
+        #region Beam ReadData 
+
+        private List<BeamData> ReadBeamAll()
+        {
+            List<BeamData> beamall = new List<BeamData>();
+            var tablebeamobject = _tables.FirstOrDefault(x => x.TableName.Equals("Beam Object Connectivity"));
+
+            foreach (DataRow row in tablebeamobject.Rows)
+            {
+                BeamData beam = new BeamData();
+                ReadBeamObject(ref beam, row); //nhập vô beam name, level, start, end
+                ReadFlexureDesign(ref beam);  // nhập vô As
+                ReadSectionName(ref beam); // nhập vô section name
+                ReadPointocation(ref beam); // nhập vô tọa độ start, end
+                ReadDimenson(ref beam); //nhập vào kích thước tiết diện
+                ReadCover(ref beam); //nhập vào lớp bê tông bảo vệ
+
+                beamall.Add(beam);
+            }
+            return beamall;
+        }
+
+        private BeamData ReadPointocation(ref BeamData beam)
+        {
+            var tablepoint = _tables.FirstOrDefault(x => x.TableName.Equals("Point Object Connectivity"));
+
+            foreach (DataRow row in tablepoint.Rows)
+            {
+                if (beam.Point_I_ID == row["UniqueName"].ToString())
+                {
+                    beam.Point_I = ConvertPoint(row);
+                }
+                else if (beam.Point_J_ID == row["UniqueName"].ToString())
+                {
+                    beam.Point_J = ConvertPoint(row);
+                }
+            }
+
+            return beam;
+        }
+
+        public XYZ ConvertPoint (DataRow row)
+        {
+            // sử dụng hàm chuyển đổi đơn  vị version cũ nên hiện thông báo, nhưng vẫn chạy được!
+            double x = UnitUtils.ConvertToInternalUnits(Convert.ToDouble(row["X"]), DisplayUnitType.DUT_MILLIMETERS);
+            double y = UnitUtils.ConvertToInternalUnits(Convert.ToDouble(row["Y"]), DisplayUnitType.DUT_MILLIMETERS);
+            double z = UnitUtils.ConvertToInternalUnits(Convert.ToDouble(row["Z"]), DisplayUnitType.DUT_MILLIMETERS);
+            return new XYZ(x, y, z);
+        }
+
+        private BeamData ReadSectionName(ref BeamData beam) //đọc section name mục đích ban đầu là set family instance cho cấu kiện vừa được vẽ, nhưng thời gian không nhiều nên tạo sẵn family trong project và section name hiện tại chỉ dùng để tham chiếu kích thước tiết diện
+        {
+            var tablesection = _tables.FirstOrDefault(x => x.TableName.Equals("Frame Assignments - Section Properties"));
+            var tablecover = _tables.FirstOrDefault(x => x.TableName.Equals("Frame Section Property Definitions - Concrete Beam Reinforcing"));
+
+            foreach (DataRow row in tablesection.Rows)
+            {
+                if (beam.Name == row["UniqueName"].ToString())
+                {
+                    beam.SectionName = row["Section Property"].ToString();
+                }
+            }
+            return beam;
+        }
+
+        private BeamData ReadFlexureDesign(ref BeamData beam)
+        {
+            var tablesection = _tables.FirstOrDefault(x => x.TableName.Equals("Concrete Beam Flexure Envelope - TCVN 5574-2012"));
+
+            foreach (DataRow row in tablesection.Rows)
+            {
+                if (beam.Name == row["UniqueName"].ToString())
+                {
+                    beam.AsTopLongitudinal = Convert.ToDouble(row["As Top"]);
+                    beam.AsBottomLongitudinal = Convert.ToDouble(row["As Bot"]);
+                }
+            }
+            return beam;
+        }
+
+        private BeamData ReadCover(ref BeamData beam)
+        {
+            var tablecover = _tables.FirstOrDefault(x => x.TableName.Equals("Frame Section Property Definitions - Concrete Beam Reinforcing"));
+
+            foreach (DataRow row in tablecover.Rows)
+            {
+                if (beam.SectionName == row["Name"].ToString())
+                {
+                    beam.TopCover = UnitUtils.ConvertToInternalUnits(Convert.ToDouble(row["Top Cover"]), DisplayUnitType.DUT_MILLIMETERS);
+                    beam.BottomCover = UnitUtils.ConvertToInternalUnits(Convert.ToDouble(row["Bottom Cover"]), DisplayUnitType.DUT_MILLIMETERS);
+
+                }
+            }
+            return beam;
+        }
+
+        private BeamData ReadDimenson(ref BeamData beam)
+        {
+            var tabledim = _tables.FirstOrDefault(x => x.TableName.Equals("Frame Section Property Definitions - Concrete Rectangular"));
+
+            foreach (DataRow row in tabledim.Rows)
+            {
+                if (beam.SectionName == row["Name"].ToString())
+                {
+                    beam.h = UnitUtils.ConvertToInternalUnits(Convert.ToDouble(row["Depth"]), DisplayUnitType.DUT_MILLIMETERS) ;
+
+                    beam.b = UnitUtils.ConvertToInternalUnits(Convert.ToDouble(row["Width"]), DisplayUnitType.DUT_MILLIMETERS);
+                }
+            }
+
+            return beam;
+        }
+
+        private BeamData ReadBeamObject(ref BeamData beam, DataRow row)
+        {
+            beam.Name = row["Unique Name"].ToString();
+            beam.Level = row["Story"].ToString();
+            beam.Point_I_ID = row["UniquePtI"].ToString();
+            beam.Point_J_ID = row["UniquePtJ"].ToString();
+            return beam;
+        }
+
+
+        #endregion Beam ReadData 
+     
 
         #region Level ReadData
 
@@ -184,7 +270,7 @@ namespace ClassLibrary2.UI.ViewModel
                     elev += val;
 
                     LevelData levelData = new LevelData();
-                    levelData.Elevation = elev;
+                    levelData.Elevation = UnitUtils.ConvertToInternalUnits(elev, DisplayUnitType.DUT_MILLIMETERS);
                     levelData.Name = row["Name"].ToString();
 
                     levelclass.Add(levelData);
