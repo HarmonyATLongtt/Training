@@ -19,6 +19,8 @@ namespace ClassLibrary2.UI.ViewModel
 
         public List<BeamData> BeamDatas { get; set; }
 
+        public List<ColumnData> ColDatas { get; set; }
+
         public MainViewModel()
         {
             LoadCommand = new RelayCommand(LoadCommandInvoke);
@@ -113,7 +115,7 @@ namespace ClassLibrary2.UI.ViewModel
                 var tablebeamlevel = _tables.FirstOrDefault(x => x.TableName.Equals("Story Definitions"));
                 LevelDatas = LevelReadData(tablebeamlevel); // đưa dữ liệu đọc được (Read) từ file mdb vào list LevelDatas
                 BeamDatas = ReadBeamAll(); // đưa dữ liệu đọc đọc được (Read) từ file mdb vào list BeamDatas
-
+                ColDatas = ReadColAll();
             }
             catch (Exception ex)
             {
@@ -174,7 +176,6 @@ namespace ClassLibrary2.UI.ViewModel
         private BeamData ReadSectionName(ref BeamData beam) //đọc section name mục đích ban đầu là set family instance cho cấu kiện vừa được vẽ, nhưng thời gian không nhiều nên tạo sẵn family trong project và section name hiện tại chỉ dùng để tham chiếu kích thước tiết diện
         {
             var tablesection = _tables.FirstOrDefault(x => x.TableName.Equals("Frame Assignments - Section Properties"));
-            var tablecover = _tables.FirstOrDefault(x => x.TableName.Equals("Frame Section Property Definitions - Concrete Beam Reinforcing"));
 
             foreach (DataRow row in tablesection.Rows)
             {
@@ -245,7 +246,69 @@ namespace ClassLibrary2.UI.ViewModel
 
 
         #endregion Beam ReadData 
-     
+
+
+        #region Column Data
+        private List<ColumnData> ReadColAll()
+        {
+            List<ColumnData> colall = new List<ColumnData>();
+            var tablebeamobject = _tables.FirstOrDefault(x => x.TableName.Equals("Column Object Connectivity"));
+
+            foreach (DataRow row in tablebeamobject.Rows)
+            {
+                ColumnData col = new ColumnData();
+                ReadColumnObject(ref col, row); //nhập vô beam name, level, start, end
+                ReadColumnSectionName(ref col); // nhập vô section name
+                ReadColumnPointLocation(ref col); // nhập vô tọa độ start, end
+                colall.Add(col);
+            }
+            return colall;
+        }
+
+        private ColumnData ReadColumnObject(ref ColumnData col, DataRow row)
+        {
+            col.Name = row["Unique Name"].ToString();
+            col.Level = row["Story"].ToString();
+            col.Point_I_ID = row["UniquePtI"].ToString();
+            return col;
+        }
+
+
+        private ColumnData ReadColumnSectionName(ref ColumnData col) //đọc section name mục đích ban đầu là set family instance cho cấu kiện vừa được vẽ, nhưng thời gian không nhiều nên tạo sẵn family trong project và section name hiện tại chỉ dùng để tham chiếu kích thước tiết diện
+        {
+            var tablesection = _tables.FirstOrDefault(x => x.TableName.Equals("Frame Assignments - Section Properties"));
+
+            foreach (DataRow row in tablesection.Rows)
+            {
+                if (col.Name == row["UniqueName"].ToString())
+                {
+                    col.SectionName = row["Section Property"].ToString();
+                }
+            }
+            return col;
+        }
+
+
+        private ColumnData ReadColumnPointLocation(ref ColumnData col)
+        {
+            var tablepoint = _tables.FirstOrDefault(x => x.TableName.Equals("Point Object Connectivity"));
+
+            foreach (DataRow row in tablepoint.Rows)
+            {
+                if (col.Point_I_ID == row["UniqueName"].ToString())
+                {
+                    col.Point_I = ConvertPoint(row);
+                }
+                else if (col.Point_J_ID == row["UniqueName"].ToString())
+                {
+                    col.Point_J = ConvertPoint(row);
+                }
+            }
+
+            return col;
+        }
+        
+        #endregion Column Data
 
         #region Level ReadData
 
