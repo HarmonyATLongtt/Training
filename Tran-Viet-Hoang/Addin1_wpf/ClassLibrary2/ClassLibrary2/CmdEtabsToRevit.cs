@@ -30,7 +30,7 @@ namespace ClassLibrary2
                 view.ShowDialog();
 
                 MainViewModel vm = view.DataContext as MainViewModel;
-
+                var tablebeamobject = vm.Tables;
                 List<LevelData> LevelModelData = vm.LevelDatas;
                 List<BeamData> BeamModelData = vm.BeamDatas;
                 List<ColumnData> ColumnModelData = vm.ColDatas;
@@ -44,6 +44,9 @@ namespace ClassLibrary2
                 //vẽ dầm kèm set rebarcover
                 CreateBeams(doc, BeamModelData);
                 CreateCols(doc, ColumnModelData, LevelModelData);
+
+                //TaskDialog.Show("ColumnEtabsId", listcolid(doc, ColumnModelData));
+                drawcolstirrup(doc, ColumnModelData);
             }
             catch (Exception ex)
             {
@@ -141,7 +144,6 @@ namespace ClassLibrary2
                 FamilyInstance beamnew = doc.Create.NewFamilyInstance(beamLine, beamtype, beamlevel, Autodesk.Revit.DB.Structure.StructuralType.Beam);
                 //mỗi khi 1 beam mới đc tạo ra thì gán ngay rebar cover của etabs mình tạo cho beam đó
                 SetRebarCover(doc, beamnew, beamData);
-               
             }
         }
 
@@ -195,8 +197,8 @@ namespace ClassLibrary2
 
                 Parameter colbasepara = col.LookupParameter("Base Level");
                 Parameter colbaseoffsetpara = col.LookupParameter("Base Offset");
-
-                
+                Parameter colcmt = col.LookupParameter("Comments");
+                colcmt.Set("Etabs" + colData.Name);
 
                 string storybase = null;
                 string ok = "No";
@@ -216,54 +218,6 @@ namespace ClassLibrary2
                 colbaseoffsetpara.Set(0); // set bằng 0 vì đôi khi vẽ cột ra thì 1 giá trị top hay base offset của cột tự động gán 1 giá trị không mong muốn
                 coltoppara.Set(coltoplevel.Id);
                 coltopoffsetpara.Set(0);
-
-
-
-                ////lấy những param cần cho vẽ thép
-                //Parameter elemlength = col.LookupParameter("Length");
-                //Parameter col_b = col.Symbol.LookupParameter("b");
-                //Parameter col_h = col.Symbol.LookupParameter("h");
-                ////khai báo giá trị other cover, để xác định chính xác length của thép
-                //double cover = 50 / 304.8;
-
-                //BoundingBoxXYZ boundingbox = columnn.get_BoundingBox(null);
-                //XYZ min = boundingbox.Transform.OfPoint(boundingbox.Min);
-                //XYZ max = boundingbox.Transform.OfPoint(boundingbox.Max);
-
-                //XYZ origin = new XYZ(boundingbox.Min.X + cover, boundingbox.Min.Y + cover, boundingbox.Min.Z + cover);
-
-                //XYZ yVec = new XYZ(0, 1, 0);
-                //XYZ xVec = new XYZ(1, 0, 0);
-                //if (Convert.ToDouble(boundingbox.Max.X - boundingbox.Min.X) > Convert.ToDouble(boundingbox.Max.Y - boundingbox.Min.Y))
-                //{
-                //    origin = new XYZ(boundingbox.Min.X + cover, boundingbox.Min.Y + cover, boundingbox.Max.Z - cover);
-                //    xVec = new XYZ(0, 1, 0);
-                //    yVec = new XYZ(1, 0, 0);
-                //}
-                //Rebar rebar = Rebar.CreateFromRebarShape(doc, shape, type, columnn, origin, xVec, yVec);
-
-                //Parameter tie_B = rebar.LookupParameter("B");
-                //Parameter tie_C = rebar.LookupParameter("C");
-                //Parameter tie_D = rebar.LookupParameter("D");
-                //Parameter tie_E = rebar.LookupParameter("E");
-                //MessageBox.Show(xVec + "\n" + yVec);
-
-                //double B_D = col_b.AsDouble() - 2 * cover;
-                //tie_B.Set(B_D);
-                //tie_D.Set(B_D);
-
-                //double C_E = col_h.AsDouble() - 2 * cover;
-                //tie_C.Set(C_E);
-                //tie_E.Set(C_E);
-
-                
-                //BoundingBoxXYZ boundingboxnew = rebar.get_BoundingBox(null);
-                //XYZ origin1 = boundingboxnew.Transform.OfPoint(boundingboxnew.Min);
-                //XYZ vect = origin - origin1;
-
-                //ElementTransformUtils.MoveElement(doc, rebar.Id, vect);
-
-                //rebar.GetShapeDrivenAccessor().SetLayoutAsMaximumSpacing(250 / 304.8, elemlength.AsDouble(), true, true, false);
             }
         }
 
@@ -319,6 +273,107 @@ namespace ClassLibrary2
 
         #endregion SetBeamRebarCover
 
+        #region GetColumnID
+
+        public void drawcolstirrup(Document doc, List<ColumnData> cols)
+        {
+            List<FamilyInstance> coletabselems = ColumnIDs(doc, cols);
+            RebarShape shape = new FilteredElementCollector(doc)
+                .OfClass(typeof(RebarShape))
+                .Cast<RebarShape>()
+                .First(x => x.Name == "M_T1");
+
+            RebarBarType type = new FilteredElementCollector(doc)
+                .OfClass(typeof(RebarBarType))
+                .Cast<RebarBarType>()
+                .First(x => x.Name == "8M");
+
+            using (Transaction trans = new Transaction(doc, "create col"))
+            {
+                trans.Start();
+                foreach (var coletabs in coletabselems)
+                {
+                    //lấy những param cần cho vẽ thép
+                    Parameter elemlength = coletabs.LookupParameter("Length");
+                    Parameter col_b = coletabs.Symbol.LookupParameter("b");
+                    Parameter col_h = coletabs.Symbol.LookupParameter("h");
+                    //khai báo giá trị other cover, để xác định chính xác length của thép
+                    double cover = 50 / 304.8;
+
+                    BoundingBoxXYZ boundingbox = coletabs.get_BoundingBox(null);
+                    XYZ min = boundingbox.Transform.OfPoint(boundingbox.Min);
+                    XYZ max = boundingbox.Transform.OfPoint(boundingbox.Max);
+
+                    XYZ origin = new XYZ(boundingbox.Min.X + cover, boundingbox.Min.Y + cover, boundingbox.Min.Z + cover);
+
+                    XYZ yVec = new XYZ(0, 1, 0);
+                    XYZ xVec = new XYZ(1, 0, 0);
+                    if (Convert.ToDouble(boundingbox.Max.X - boundingbox.Min.X) > Convert.ToDouble(boundingbox.Max.Y - boundingbox.Min.Y))
+                    {
+                        origin = new XYZ(boundingbox.Min.X + cover, boundingbox.Min.Y + cover, boundingbox.Max.Z - cover);
+                        xVec = new XYZ(0, 1, 0);
+                        yVec = new XYZ(1, 0, 0);
+                    }
+                    Rebar rebar = Rebar.CreateFromRebarShape(doc, shape, type, coletabs, origin, xVec, yVec);
+
+                    Parameter tie_B = rebar.LookupParameter("B");
+                    Parameter tie_C = rebar.LookupParameter("C");
+                    Parameter tie_D = rebar.LookupParameter("D");
+                    Parameter tie_E = rebar.LookupParameter("E");
+
+                    double B_D = col_b.AsDouble() - 2 * cover;
+                    tie_B.Set(B_D);
+                    tie_D.Set(B_D);
+
+                    double C_E = col_h.AsDouble() - 2 * cover;
+                    tie_C.Set(C_E);
+                    tie_E.Set(C_E);
+
+                    BoundingBoxXYZ boundingboxnew = rebar.get_BoundingBox(null);
+                    XYZ origin1 = boundingboxnew.Transform.OfPoint(boundingboxnew.Min);
+                    XYZ vect = origin - origin1;
+
+                    ElementTransformUtils.MoveElement(doc, rebar.Id, vect);
+
+                    rebar.GetShapeDrivenAccessor().SetLayoutAsMaximumSpacing(250 / 304.8, elemlength.AsDouble(), true, true, false);
+                }
+                trans.Commit();
+            }
+        }
+
+        //public string listcolid(Document doc, List<ColumnData> cols)
+        //{
+        //    List<ElementId> colelemids = ColumnIDs(doc, cols);
+        //    string listshow = "";
+        //    foreach (var list in colelemids)
+        //    {
+        //        ElementId ts = list;
+        //        listshow += ts.ToString() + "\n";
+        //    }
+        //    return listshow;
+        //}
+
+        public List<FamilyInstance> ColumnIDs(Document doc, List<ColumnData> cols)
+        {
+            List<FamilyInstance> colelemid = new List<FamilyInstance>();
+            foreach (var colname in cols)
+            {
+                string cmt = "Etabs" + colname.Name;
+                var colType = new FilteredElementCollector(doc)
+                  .WhereElementIsNotElementType()
+                  .OfCategory(BuiltInCategory.OST_StructuralColumns)
+                  .Cast<FamilyInstance>()
+                  .First(x => x.LookupParameter("Comments").AsString() == cmt);
+                if (colType != null)
+                {
+                    colelemid.Add(colType);
+                }
+            }
+            return colelemid;
+        }
+
+        #endregion GetColumnID
+
         #region CreateBeamRebar
 
         private void CreateBeamRebar(Document doc, BeamData beam, FamilyInstance beamnew)
@@ -358,20 +413,13 @@ namespace ClassLibrary2
             if (Math.Abs(xVec.X) > Math.Abs(xVec.Y))
             {
                 origin1 = new XYZ(boundingbox.Min.X + cover + stirrup, boundingbox.Max.Y - cover - stirrup, boundingbox.Min.Z + cover + stirrup);
-
             }
             else if (Math.Abs(xVec.X) < Math.Abs(xVec.Y))
             {
                 origin1 = new XYZ(boundingbox.Min.X + cover + stirrup, boundingbox.Min.Y + cover + stirrup, boundingbox.Min.Z + cover + stirrup);
-
             }
             XYZ min = boundingbox.Transform.OfPoint(boundingbox.Min);
             XYZ max = boundingbox.Transform.OfPoint(boundingbox.Max);
-
-
-
-
-
 
             MessageBox.Show("vec = " + xVec.Y);
             try
@@ -389,10 +437,8 @@ namespace ClassLibrary2
                     }
                     Rebar rebar = Rebar.CreateFromRebarShape(doc, shape, type, beamnew, origin1, xVec, yVec);
 
-
                     Parameter rebarlength = rebar.LookupParameter("B");
                     double oldlength = rebarlength.AsDouble(); //giữ lại giá trị length ban đầu để sau thực hiện rotate
-
 
                     XYZ vect = new XYZ(cover + stirrup, cover + stirrup, cover + stirrup);
                     XYZ point1 = XYZ.Zero;
@@ -417,18 +463,14 @@ namespace ClassLibrary2
 
                     rebar.GetShapeDrivenAccessor().SetLayoutAsNumberWithSpacing(3, 75 / 304.8, false, true, true);
 
-
                     transaction.Commit();
                 }
             }
-
             catch (Exception ex)
             {
-                
                 string message = ex.Message;
             }
-        }   
-    
+        }
 
         #endregion CreateBeamRebar
     }

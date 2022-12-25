@@ -6,7 +6,7 @@ namespace ClassLibrary2.Data
     {
 
         //bảng beam object connectivity
-        public string Level  { get; set; }
+        public string Level { get; set; }
         public string Name { get; set; }
         public string Point_I_ID { get; set; }
         public string Point_J_ID { get; set; }

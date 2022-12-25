@@ -75,6 +75,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\BeamID.cs" />
     <Compile Include="Data\ColumnData.cs" />
     <Compile Include="Data\RebarSetData.cs" />
     <Compile Include="Function\AllowColumn.cs" />

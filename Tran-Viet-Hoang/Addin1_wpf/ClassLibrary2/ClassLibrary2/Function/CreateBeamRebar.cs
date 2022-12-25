@@ -44,7 +44,7 @@ namespace CreateBeamRebar
                 "As tối thiểu là (0.05%): " + Asmin + " mm2" + "\n" +
                 "As bố trí : " + Math.Round(designrebar.RebarCrossSectionArea, 3) + "mm2" + "\n" +
                 "Với phướng án thép lớp dưới là: " + designrebar.Number + "D" + designrebar.Type + "\n" +
-                "Các thanh thép cách nhau là: " + designrebar.Spacing*304.8)
+                "Các thanh thép cách nhau là: " + designrebar.Spacing)
                    ;
             string rebartype = designrebar.Type.ToString() + "M";
           
@@ -57,7 +57,7 @@ namespace CreateBeamRebar
                 .OfClass(typeof(RebarBarType))
                 .Cast<RebarBarType>()
                 .First(x => x.Name == rebartype);
-
+           
             //Lấy hướng vẽ của cấu kiện để biết là sẽ vẽ thép cho cấu kiện theo phương X hay pương Y
             Location loc = elem.Location;
             LocationCurve locCur = loc as LocationCurve;
@@ -79,8 +79,6 @@ namespace CreateBeamRebar
             {
                 origin1 = new XYZ(boundingbox.Min.X + cover + stirrup, boundingbox.Min.Y + cover + stirrup, boundingbox.Min.Z + cover + stirrup);
             }
-            //XYZ min = boundingbox.Transform.OfPoint(boundingbox.Min);
-            //XYZ max = boundingbox.Transform.OfPoint(boundingbox.Max);
 
             try
             {
@@ -120,7 +118,7 @@ namespace CreateBeamRebar
 
                     ElementTransformUtils.RotateElement(doc, rebar.Id, axis, Math.PI);
 
-                    //rebar.GetShapeDrivenAccessor().SetLayoutAsNumberWithSpacing(designrebar.Number, designrebar.Spacing, false, true, true);
+                    rebar.GetShapeDrivenAccessor().SetLayoutAsNumberWithSpacing(designrebar.Number, designrebar.Spacing/304.8, false, true, true);
 
                     transaction.Commit();
                 }
@@ -136,16 +134,15 @@ namespace CreateBeamRebar
         public RebarSetData RebarBeamCaculation(FamilyInstance beam, double cover, double stirrup, double Astinhtoan)
         {
             double kc = 25; //khoảng cách thông thủy tối thiểu giữa các thanh thép lớp dưới
-            int[] duongkinhcautao = { 16, 18, 20, 22 };
+            int[] duongkinhcautao = {22,20,18,16};
             int[] sothanh = new int[4];
-
 
             Parameter elemb = beam.Symbol.LookupParameter("b");
             Parameter elemh = beam.Symbol.LookupParameter("h");
             double Asmin = elemb.AsDouble() * 304.8 * elemh.AsDouble() * 304.8 * 0.05 / 100; // diện tích cốt thép tối thiểu là 0,05%
             if(Asmin < Astinhtoan) { Asmin = Astinhtoan;} // chọn ra giá trị mà As thiết kế bắt buộc sẽ phải lớn hơn
-            RebarSetData rebarsets = new RebarSetData();
             
+            RebarSetData rebarsets = new RebarSetData();
             for (int i = 0; i < duongkinhcautao.Count(); i++)
             {
                 //số thanh phải nhỏ hơn hoặc bằng, nên dùng hàm Floor để lấy giá trị nguyên lớn nhất và gần kết quả nhất
@@ -160,7 +157,7 @@ namespace CreateBeamRebar
                     rebarset.Type = duongkinhcautao[i];
                     rebarset.RebarCrossSectionArea = Math.Pow(duongkinhcautao[i], 2) * Math.PI / 4 * sothanh[i];
                     rebarset.CrossSectionWidth = elemb.AsDouble();
-                    rebarset.Spacing = (rebarset.CrossSectionWidth - 2*cover - 2*stirrup - rebarset.Type/304.8) / (rebarset.Number - 1);
+                    rebarset.Spacing = ((rebarset.CrossSectionWidth - 2*(cover + stirrup))*304.8 - rebarset.Type) / (rebarset.Number - 1);
                     rebarsets = rebarset;
                     break;
                 }

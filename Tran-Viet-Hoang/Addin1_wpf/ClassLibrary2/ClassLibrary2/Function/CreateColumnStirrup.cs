@@ -89,6 +89,17 @@ namespace CreateColumnStirrup
 
                     rebar.GetShapeDrivenAccessor().SetLayoutAsMaximumSpacing(250 / 304.8, elemlength.AsDouble(), true, true, false);
 
+
+
+                    ElementId idcol = columnn.Id;
+                    var colTypes = new FilteredElementCollector(doc)
+                       .WhereElementIsNotElementType()
+                       .OfCategory(BuiltInCategory.OST_StructuralColumns)
+                       .Cast<FamilyInstance>()
+                       .First(x=>x.Id==idcol);
+                    Parameter cmt = colTypes.LookupParameter("Comments");
+                    TaskDialog.Show("ID nè", "Cmt of this col is: " + cmt.AsString());
+
                     transaction.Commit();
                 }
                 return Result.Succeeded;

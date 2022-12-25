@@ -110,8 +110,8 @@ namespace ClassLibrary2.UI.ViewModel
             try
             {
                 
-                var tablebeamobject = _tables.FirstOrDefault(x => x.TableName.Equals("Beam Object Connectivity"));
-                DataTable tablebeamob = tablebeamobject;
+                //var tablebeamobject = _tables.FirstOrDefault(x => x.TableName.Equals("Beam Object Connectivity"));
+                //DataTable tablebeamob = tablebeamobject;
                 var tablebeamlevel = _tables.FirstOrDefault(x => x.TableName.Equals("Story Definitions"));
                 LevelDatas = LevelReadData(tablebeamlevel); // đưa dữ liệu đọc được (Read) từ file mdb vào list LevelDatas
                 BeamDatas = ReadBeamAll(); // đưa dữ liệu đọc đọc được (Read) từ file mdb vào list BeamDatas
