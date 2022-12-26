@@ -99,8 +99,7 @@ namespace CreateBeamStirrup
                     //MessageBox.Show("Hoang " + shape1.Id);
                     //end hướng dẫn Hiền
 
-                    double B = tie_B.AsDouble() * 304.8;
-                    double C = tie_C.AsDouble() * 304.8;
+                    
                     double B_D = beam_b.AsDouble() - 2 * cover;
                     tie_B.Set(B_D);
                     tie_D.Set(B_D);

@@ -44,5 +44,7 @@ namespace ClassLibrary2.Data
         public double YJ { get; set; }
         public double ZJ { get; set; }
 
+        
+
     }
 }

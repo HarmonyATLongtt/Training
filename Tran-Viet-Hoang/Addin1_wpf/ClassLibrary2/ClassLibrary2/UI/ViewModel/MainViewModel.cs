@@ -136,7 +136,7 @@ namespace ClassLibrary2.UI.ViewModel
                 ReadBeamObject(ref beam, row); //nhập vô beam name, level, start, end
                 ReadFlexureDesign(ref beam);  // nhập vô As
                 ReadSectionName(ref beam); // nhập vô section name
-                ReadPointocation(ref beam); // nhập vô tọa độ start, end
+                ReadPointLocation(ref beam); // nhập vô tọa độ start, end
                 ReadDimenson(ref beam); //nhập vào kích thước tiết diện
                 ReadCover(ref beam); //nhập vào lớp bê tông bảo vệ
 
@@ -145,7 +145,7 @@ namespace ClassLibrary2.UI.ViewModel
             return beamall;
         }
 
-        private BeamData ReadPointocation(ref BeamData beam)
+        private BeamData ReadPointLocation(ref BeamData beam)
         {
             var tablepoint = _tables.FirstOrDefault(x => x.TableName.Equals("Point Object Connectivity"));
 
@@ -314,9 +314,8 @@ namespace ClassLibrary2.UI.ViewModel
 
         private List<LevelData> LevelReadData(DataTable table)
         {
-            double elev = 0;
             var levelclass = new List<LevelData>();
-
+            double elev = 0;
             LevelData baseLevel = new LevelData();
             baseLevel.Elevation = elev;
             baseLevel.Name = "Base";
@@ -328,6 +327,7 @@ namespace ClassLibrary2.UI.ViewModel
             foreach (DataRow row in accendingRows)
             {
                 string height = row["Height"].ToString();
+                //double height2 = Convert.ToDouble( row["Height"]);
                 if (double.TryParse(height, out double val))
                 {
                     elev += val;
