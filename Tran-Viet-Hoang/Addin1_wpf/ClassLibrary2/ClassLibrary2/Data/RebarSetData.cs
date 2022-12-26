@@ -15,6 +15,7 @@ namespace ClassLibrary2.Data
         public Rebar ColumnStirrup { get; set; }
         public Rebar BeamStirrup { get; set; }
         public XYZ BeamStirrupOrigin { get; set; }
+        public XYZ BeamStandardOrigin { get; set; } //điểm origin cho thép dọc
         public double HostLength { get; set; }
         public double Host_b { get; set; }
         public double Host_h { get; set; }

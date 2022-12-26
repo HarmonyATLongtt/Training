@@ -52,6 +52,8 @@ namespace ClassLibrary2
 
                 //sau khi set giá trị mới cho stirrup thì move stirrup về nằm gọn trong cấu kiện
                 MoveStirrup(doc, ColumnModelData, BeamModelData);
+
+                SetAllBeamStandard(doc, BeamModelData);
             }
             catch (Exception ex)
             {
@@ -157,6 +159,7 @@ namespace ClassLibrary2
         #endregion DrawBeam
 
         #region SetBeamStirrup
+
         // hàm tạo list trả về các giá trị kiểu Rebar, giá trị length, b, h và boundingbox của host beam
         public List<RebarSetData> BeamStirrup(Document doc, List<FamilyInstance> beams)
         {
@@ -176,7 +179,7 @@ namespace ClassLibrary2
                     rebar.HostLength = beam.LookupParameter("Length").AsDouble();
                     rebar.Host_h = beam.Symbol.LookupParameter("h").AsDouble();
                     rebar.Host_b = beam.Symbol.LookupParameter("b").AsDouble();
-                    rebar.BeamStirrupOrigin = BeamStirrupOrigin(beam,50/304.8);
+                    rebar.BeamStirrupOrigin = BeamStirrupOrigin(beam, 50 / 304.8);
                     rebars.Add(rebar);
                 }
             }
@@ -297,144 +300,156 @@ namespace ClassLibrary2
             }
             return origin;
         }
+
         #endregion SetBeamStirrup
 
-        //#region SetBeamStandardBar
-        ////hàm trả về điểm origin để vẽ thép dọc cho dầm
-        //public void SetBeamStandard(Document doc, FamilyInstance elem,BeamData beam) 
-        //{
-        //    double stirrup = 8 / 304.8;
-        //    double cover = 50 / 304.8;
-        //    Parameter elemlength = elem.LookupParameter("Length");
-        //    Parameter elemb = elem.Symbol.LookupParameter("b");
-        //    Parameter elemh = elem.Symbol.LookupParameter("h");
-        //    RebarSetData designrebar = RebarBeamCaculation(elem, cover, stirrup, beam.AsBottomLongitudinal);
-        //    string rebartype = designrebar.Type.ToString() + "M";
+        #region SetBeamStandardBar
 
-        //    RebarShape shape = new FilteredElementCollector(doc)
-        //        .OfClass(typeof(RebarShape))
-        //        .Cast<RebarShape>()
-        //        .First(x => x.Name == "M_00");
+        //hàm trả về điểm origin để vẽ thép dọc cho dầm
+        public void SetAllBeamStandard(Document doc, List<BeamData> beams) 
+        {
+            using (var transaction = new Transaction(doc, "Create rebar "))
+            {
+                transaction.Start();
+                foreach(var beam in beams)
+                {
+                    string cmt = "Etabs" + beam.Name;
+                    var beamtype = new FilteredElementCollector(doc)
+                      .WhereElementIsNotElementType()
+                      .OfCategory(BuiltInCategory.OST_StructuralFraming)
+                      .Cast<FamilyInstance>()
+                      .First(x => x.LookupParameter("Comments").AsString() == cmt);
+                    SetBeamStandard(doc, beamtype,beam);
+                }
+                MessageBox.Show("Done");
+                transaction.Commit();
+            }
+            
+        }
+        public void SetBeamStandard(Document doc, FamilyInstance elem, BeamData beam)
+        {
+            double stirrup = 8 / 304.8;
+            double cover = 50 / 304.8;
+            Parameter elemlength = elem.LookupParameter("Length");
+            Parameter elemb = elem.Symbol.LookupParameter("b");
+            Parameter elemh = elem.Symbol.LookupParameter("h");
+            RebarSetData designrebar = RebarBeamCaculation(elem, cover, stirrup, beam.AsBottomLongitudinal);
+            string rebartype = designrebar.Type.ToString() + "M";
 
-        //    RebarBarType type = new FilteredElementCollector(doc)
-        //        .OfClass(typeof(RebarBarType))
-        //        .Cast<RebarBarType>()
-        //        .First(x => x.Name == rebartype);
-        //    try
-        //    {
-        //        using (var transaction = new Transaction(doc, "Create rebar "))
-        //        {
-        //            transaction.Start();
+            RebarShape shape = new FilteredElementCollector(doc)
+                .OfClass(typeof(RebarShape))
+                .Cast<RebarShape>()
+                .First(x => x.Name == "M_00");
 
-        //            //nếu Bounding box ngược chiều với hướng vẽ element thì thép sẽ bị bay ra ngoài, vậy nên kiểm tra nếu ngược chiều thì gán chiều vẽ thép bằng ngược chiều của chiều vẽ dầm
-        //            if (Math.Round(xVec.X, 4) < 0 || Math.Round(xVec.Y, 4) < 0)
-        //            {
-        //                //dù giá trị vector có thể là (1.0000; 0,00000; 0,00000) nhưng riêng giá trị Y có thể là giá trị : -3.0723465E-15 - giá trị rất gần với 0 nhưng vẫn là < 0)
-        //                // nên phải làm tròn số thập phân của X hoặc Y của vector để lệnh if kiểm tra được như ý muốn
-        //                xVec = -locline.Direction;
-        //            }
-        //            Rebar rebar = Rebar.CreateFromRebarShape(doc, shape, type, elem, origin1, xVec, yVec);
+            RebarBarType type = new FilteredElementCollector(doc)
+                .OfClass(typeof(RebarBarType))
+                .Cast<RebarBarType>()
+                .First(x => x.Name == rebartype);
 
-        //            Parameter rebarlength = rebar.LookupParameter("B");
-        //            double oldlength = rebarlength.AsDouble(); //giữ lại giá trị length ban đầu để sau thực hiện rotate
+            XYZ xVec = xVecBeam(elem);
+            XYZ origin1 = BeamStandardOrigin(elem, cover, stirrup);
+            XYZ yVec = new XYZ(0, 0, 1);
+            //nếu Bounding box ngược chiều với hướng vẽ element thì thép sẽ bị bay ra ngoài, vậy nên kiểm tra nếu ngược chiều thì gán chiều vẽ thép bằng ngược chiều của chiều vẽ dầm
+            if (Math.Round(xVec.X, 4) < 0 || Math.Round(xVec.Y, 4) < 0)
+            {
+                //dù giá trị vector có thể là (1.0000; 0,00000; 0,00000) nhưng riêng giá trị Y có thể là giá trị : -3.0723465E-15 - giá trị rất gần với 0 nhưng vẫn là < 0)
+                // nên phải làm tròn số thập phân của X hoặc Y của vector để lệnh if kiểm tra được như ý muốn
+                xVec = -xVec;
+            }
+            Rebar rebar = Rebar.CreateFromRebarShape(doc, shape, type, elem, origin1, xVec, yVec);
 
-        //            XYZ point1 = XYZ.Zero;
+            Parameter rebarlength = rebar.LookupParameter("B");
+            double oldlength = rebarlength.AsDouble(); //giữ lại giá trị length ban đầu để sau thực hiện rotate
 
-        //            //kiểm tra xem cấu kiện được vẽ theo phương nào để có thể lấy được trục để rotate
-        //            if (Math.Abs(xVec.X) > Math.Abs(xVec.Y))
-        //            {
-        //                point1 = origin1 + XYZ.BasisX * oldlength / 2; ;
-        //            }
-        //            else if (Math.Abs(xVec.X) < Math.Abs(xVec.Y))
-        //            {
-        //                point1 = origin1 + XYZ.BasisY * oldlength / 2; ;
-        //            }
+            XYZ point1 = XYZ.Zero;
 
-        //            XYZ point2 = point1 + XYZ.BasisZ * 100;
-        //            Line axis = Line.CreateBound(point1, point2);
+            //kiểm tra xem cấu kiện được vẽ theo phương nào để có thể lấy được trục để rotate
+            if (Math.Abs(xVec.X) > Math.Abs(xVec.Y))
+            {
+                point1 = origin1 + XYZ.BasisX * oldlength / 2; ;
+            }
+            else if (Math.Abs(xVec.X) < Math.Abs(xVec.Y))
+            {
+                point1 = origin1 + XYZ.BasisY * oldlength / 2; ;
+            }
 
-        //            // set giá trị mới cho length cuả rebar
-        //            rebarlength.Set(Convert.ToDouble(elemlengthvalue) / 304.8 - 2 * cover);
+            XYZ point2 = point1 + XYZ.BasisZ * 100;
+            Line axis = Line.CreateBound(point1, point2);
 
-        //            ElementTransformUtils.RotateElement(doc, rebar.Id, axis, Math.PI);
+            // set giá trị mới cho length cuả rebar
+            rebarlength.Set(elemlength.AsDouble() - 2 * cover);
 
-        //            rebar.GetShapeDrivenAccessor().SetLayoutAsNumberWithSpacing(designrebar.Number, designrebar.Spacing / 304.8, false, true, true);
+            ElementTransformUtils.RotateElement(doc, rebar.Id, axis, Math.PI);
 
-        //            transaction.Commit();
-        //        }
-        //        return Result.Succeeded;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        message = ex.Message;
-        //        return Result.Failed;
-        //    }
-        //}
-        //public XYZ xVecBeam(FamilyInstance elem)
-        //{
-        //    //Lấy hướng vẽ của cấu kiện để biết là sẽ vẽ thép cho cấu kiện theo phương X hay pương Y
-        //    Location loc = elem.Location;
-        //    LocationCurve locCur = loc as LocationCurve;
-        //    Curve curve = locCur.Curve;
-        //    Line locline = curve as Line;
+            rebar.GetShapeDrivenAccessor().SetLayoutAsNumberWithSpacing(designrebar.Number, designrebar.Spacing / 304.8, false, true, true);
+        }
 
-        //    //gán vector phương X trong definition của shape thép với vector vẽ cấu kiện
-        //    XYZ xVec = locline.Direction;
-        //}
-        //public XYZ BeamStandardOrigin(FamilyInstance elem, double cover, double stirrup)
-        //{
-           
+        public XYZ xVecBeam(FamilyInstance elem)
+        {
+            //Lấy hướng vẽ của cấu kiện để biết là sẽ vẽ thép cho cấu kiện theo phương X hay pương Y
+            Location loc = elem.Location;
+            LocationCurve locCur = loc as LocationCurve;
+            Curve curve = locCur.Curve;
+            Line locline = curve as Line;
 
-        //    BoundingBoxXYZ boundingbox = elem.get_BoundingBox(null);
-        //    XYZ origin1 = XYZ.Zero;
+            //gán vector phương X trong definition của shape thép với vector vẽ cấu kiện
+            XYZ xVec = locline.Direction;
+            return xVec;
+        }
 
-        //    if (Math.Abs(xVec.X) > Math.Abs(xVec.Y))
-        //    {
-        //        origin1 = new XYZ(boundingbox.Min.X + cover + stirrup, boundingbox.Max.Y - cover - stirrup, boundingbox.Min.Z + cover + stirrup);
-        //    }
-        //    else if (Math.Abs(xVec.X) < Math.Abs(xVec.Y))
-        //    {
-        //        origin1 = new XYZ(boundingbox.Min.X + cover + stirrup, boundingbox.Min.Y + cover + stirrup, boundingbox.Min.Z + cover + stirrup);
-        //    }
+        public XYZ BeamStandardOrigin(FamilyInstance elem, double cover, double stirrup)
+        {
+            BoundingBoxXYZ boundingbox = elem.get_BoundingBox(null);
+            XYZ origin1 = XYZ.Zero;
+            XYZ xVec = xVecBeam(elem);
+            if (Math.Abs(xVec.X) > Math.Abs(xVec.Y))
+            {
+                origin1 = new XYZ(boundingbox.Min.X + cover + stirrup, boundingbox.Max.Y - cover - stirrup, boundingbox.Min.Z + cover + stirrup);
+            }
+            else if (Math.Abs(xVec.X) < Math.Abs(xVec.Y))
+            {
+                origin1 = new XYZ(boundingbox.Min.X + cover + stirrup, boundingbox.Min.Y + cover + stirrup, boundingbox.Min.Z + cover + stirrup);
+            }
 
-        //    return origin1;
-        //}
-        ////hàm tính lượng thép cần bố trí
-        //public RebarSetData RebarBeamCaculation(FamilyInstance beam, double cover, double stirrup, double Astinhtoan)
-        //{
-        //    double kc = 25; //khoảng cách thông thủy tối thiểu giữa các thanh thép lớp dưới
-        //    int[] duongkinhcautao = { 22, 20, 18, 16 };
-        //    int[] sothanh = new int[4];
+            return origin1;
+        }
 
-        //    Parameter elemb = beam.Symbol.LookupParameter("b");
-        //    Parameter elemh = beam.Symbol.LookupParameter("h");
-        //    double Asmin = elemb.AsDouble() * 304.8 * elemh.AsDouble() * 304.8 * 0.05 / 100; // diện tích cốt thép tối thiểu là 0,05%
-        //    if (Asmin < Astinhtoan) { Asmin = Astinhtoan; } // chọn ra giá trị mà As thiết kế bắt buộc sẽ phải lớn hơn
+        //hàm tính lượng thép cần bố trí
+        public RebarSetData RebarBeamCaculation(FamilyInstance beam, double cover, double stirrup, double Astinhtoan)
+        {
+            double kc = 25; //khoảng cách thông thủy tối thiểu giữa các thanh thép lớp dưới
+            int[] duongkinhcautao = { 22, 20, 18, 16 };
+            int[] sothanh = new int[4];
 
-        //    RebarSetData rebarsets = new RebarSetData();
-        //    for (int i = 0; i < duongkinhcautao.Count(); i++)
-        //    {
-        //        //số thanh phải nhỏ hơn hoặc bằng, nên dùng hàm Floor để lấy giá trị nguyên lớn nhất và gần kết quả nhất
-        //        sothanh[i] = Convert.ToInt32(Math.Floor((elemb.AsDouble() * 304.8 + kc - 2 * (cover + stirrup) * 304.8) / (duongkinhcautao[i] + kc)));
-        //    }
-        //    for (int i = 0; i < sothanh.Count(); i++)
-        //    {
-        //        if (Math.Pow(duongkinhcautao[i], 2) * Math.PI / 4 * sothanh[i] >= Asmin)
-        //        {
-        //            RebarSetData rebarset = new RebarSetData();
-        //            rebarset.Number = sothanh[i];
-        //            rebarset.Type = duongkinhcautao[i];
-        //            rebarset.RebarCrossSectionArea = Math.Pow(duongkinhcautao[i], 2) * Math.PI / 4 * sothanh[i];
-        //            rebarset.CrossSectionWidth = elemb.AsDouble();
-        //            rebarset.Spacing = ((rebarset.CrossSectionWidth - 2 * (cover + stirrup)) * 304.8 - rebarset.Type) / (rebarset.Number - 1);
-        //            rebarsets = rebarset;
-        //            break;
-        //        }
+            Parameter elemb = beam.Symbol.LookupParameter("b");
+            Parameter elemh = beam.Symbol.LookupParameter("h");
+            double Asmin = elemb.AsDouble() * 304.8 * elemh.AsDouble() * 304.8 * 0.05 / 100; // diện tích cốt thép tối thiểu là 0,05%
+            if (Asmin < Astinhtoan) { Asmin = Astinhtoan; } // chọn ra giá trị mà As thiết kế bắt buộc sẽ phải lớn hơn
 
-        //    }
-        //    return rebarsets;
-        //}
-        //#endregion SetBeamStandardBar
+            RebarSetData rebarsets = new RebarSetData();
+            for (int i = 0; i < duongkinhcautao.Count(); i++)
+            {
+                //số thanh phải nhỏ hơn hoặc bằng, nên dùng hàm Floor để lấy giá trị nguyên lớn nhất và gần kết quả nhất
+                sothanh[i] = Convert.ToInt32(Math.Floor((elemb.AsDouble() * 304.8 + kc - 2 * (cover + stirrup) * 304.8) / (duongkinhcautao[i] + kc)));
+            }
+            for (int i = 0; i < sothanh.Count(); i++)
+            {
+                if (Math.Pow(duongkinhcautao[i], 2) * Math.PI / 4 * sothanh[i] >= Asmin)
+                {
+                    RebarSetData rebarset = new RebarSetData();
+                    rebarset.Number = sothanh[i];
+                    rebarset.Type = duongkinhcautao[i];
+                    rebarset.RebarCrossSectionArea = Math.Pow(duongkinhcautao[i], 2) * Math.PI / 4 * sothanh[i];
+                    rebarset.CrossSectionWidth = elemb.AsDouble();
+                    rebarset.Spacing = ((rebarset.CrossSectionWidth - 2 * (cover + stirrup)) * 304.8 - rebarset.Type) / (rebarset.Number - 1);
+                    rebarsets = rebarset;
+                    break;
+                }
+            }
+            return rebarsets;
+        }
+
+        #endregion SetBeamStandardBar
 
         #region SetBeamRebarCover
 
@@ -600,8 +615,6 @@ namespace ClassLibrary2
             }
         }
 
-       
-
         //Hàm tạo 1 stirrup ban đầu cho 1 cột
         public Rebar rebarcolumnbefore(FamilyInstance coletabs, Document doc, RebarShape shape, RebarBarType type)
         {
@@ -672,6 +685,7 @@ namespace ClassLibrary2
         #endregion SetColumnStirrup
 
         #region Move Stirrup
+
         //hàm di chuyển các stirrup vừa set lại giá trị, về đúng vị trí nằm trong cột đồng thời rải stirrup đi hết cấu kiện
         public void MoveStirrup(Document doc, List<ColumnData> columns, List<BeamData> beams)
         {
@@ -714,8 +728,7 @@ namespace ClassLibrary2
                 trans.Commit();
             }
         }
-        #endregion Move Stirrup
 
-       
+        #endregion Move Stirrup
     }
 }
