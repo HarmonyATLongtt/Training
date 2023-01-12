@@ -11,5 +11,7 @@ namespace ClassLibrary2.UI.Views
         {
             InitializeComponent();
         }
+
+       
     }
 }

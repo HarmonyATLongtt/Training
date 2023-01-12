@@ -191,14 +191,18 @@ namespace ClassLibrary2.UI.ViewModel
         {
             var tablesection = _tables.FirstOrDefault(x => x.TableName.Equals("Concrete Beam Flexure Envelope - TCVN 5574-2012"));
 
+            List<double> allAstop = new List<double>();
+            List<double> allAsbot = new List<double>();
             foreach (DataRow row in tablesection.Rows)
             {
                 if (beam.Name == row["UniqueName"].ToString())
                 {
-                    beam.AsTopLongitudinal = Convert.ToDouble(row["As Top"]);
-                    beam.AsBottomLongitudinal = Convert.ToDouble(row["As Bot"]);
+                    allAstop.Add(Convert.ToDouble(row["As Top"]));
+                    allAsbot.Add(Convert.ToDouble(row["As Bot"]));
                 }
             }
+            beam.AsBottomLongitudinal = allAsbot.Max();
+            beam.AsTopLongitudinal = allAstop.Max();
             return beam;
         }
 

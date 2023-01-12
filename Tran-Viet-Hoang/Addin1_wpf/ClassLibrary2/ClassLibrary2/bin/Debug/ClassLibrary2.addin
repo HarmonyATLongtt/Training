@@ -2,7 +2,7 @@
 <RevitAddIns>
 	<AddIn Type="Command">
 		<Name>ClassLibrary2</Name>
-		<FullClassName>ClassLibrary2.AppRevit</FullClassName>
+		<FullClassName>ClassLibrary2.CmdEtabsToRevit</FullClassName>
 		<Assembly>ClassLibrary2.dll</Assembly>
 		<AddInId>175EFBFC-F328-44E7-9C09-F90CD0274850</AddInId>
 		<Text>Remodel</Text>

@@ -24,7 +24,6 @@ namespace ClassLibrary2.Data
 
         //bảng section properties
         public string SectionName { get; set; }
-        public string ShapeFamily { get; set; }
 
 
         //bảng concrete beam reinforcing 

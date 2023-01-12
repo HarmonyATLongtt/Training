@@ -114,11 +114,11 @@ namespace CreateBeamRebar
                     Line axis = Line.CreateBound(point1, point2);
 
                     // set giá trị mới cho length cuả rebar
-                    rebarlength.Set(Convert.ToDouble(elemlengthvalue) / 304.8 - 2 * cover);
+                    //rebarlength.Set(Convert.ToDouble(elemlengthvalue) / 304.8 - 2 * cover);
 
-                    ElementTransformUtils.RotateElement(doc, rebar.Id, axis, Math.PI);
+                    //ElementTransformUtils.RotateElement(doc, rebar.Id, axis, Math.PI);
 
-                    rebar.GetShapeDrivenAccessor().SetLayoutAsNumberWithSpacing(designrebar.Number, designrebar.Spacing/304.8, false, true, true);
+                    //rebar.GetShapeDrivenAccessor().SetLayoutAsNumberWithSpacing(designrebar.Number, designrebar.Spacing / 304.8, false, true, true);
 
                     transaction.Commit();
                 }

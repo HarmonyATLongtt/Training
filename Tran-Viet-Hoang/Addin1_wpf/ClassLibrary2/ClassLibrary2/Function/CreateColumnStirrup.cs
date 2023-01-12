@@ -49,12 +49,12 @@ namespace CreateColumnStirrup
 
             XYZ yVec = new XYZ(0, 1, 0);
             XYZ xVec = new XYZ(1, 0, 0);
-            if (Convert.ToDouble(boundingbox.Max.X - boundingbox.Min.X) > Convert.ToDouble(boundingbox.Max.Y - boundingbox.Min.Y))
-            {
-                origin = new XYZ(boundingbox.Min.X + cover, boundingbox.Min.Y + cover, boundingbox.Max.Z - cover);
-                xVec = new XYZ(0, 1, 0);
-                yVec = new XYZ(1, 0, 0);
-            }
+            //if (Convert.ToDouble(boundingbox.Max.X - boundingbox.Min.X) > Convert.ToDouble(boundingbox.Max.Y - boundingbox.Min.Y))
+            //{
+            //    origin = new XYZ(boundingbox.Min.X + cover, boundingbox.Min.Y + cover, boundingbox.Max.Z - cover);
+            //    xVec = new XYZ(0, 1, 0);
+            //    yVec = new XYZ(1, 0, 0);
+            //}
 
             try
             {
