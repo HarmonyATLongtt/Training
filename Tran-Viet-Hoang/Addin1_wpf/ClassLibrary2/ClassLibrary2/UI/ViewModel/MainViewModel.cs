@@ -53,6 +53,7 @@ namespace ClassLibrary2.UI.ViewModel
 
         //tao itemsource de bind vao listbox
         private ObservableCollection<DataTable> _tables;
+
         public ObservableCollection<DataTable> Tables
         {
             get => _tables;
@@ -63,9 +64,9 @@ namespace ClassLibrary2.UI.ViewModel
             }
         }
 
-
         // gán giá trị và bổ sung bắt sự kiện thay đổi của giá trị bingding của itemselected (listbox) và itemsource (datagrid)
         private DataTable _TableSelected;
+
         public DataTable TableSelected
         {
             get => _TableSelected;
@@ -76,8 +77,8 @@ namespace ClassLibrary2.UI.ViewModel
             }
         }
 
-
         private string _filePath;
+
         public string FilePath
         {
             get => _filePath;
@@ -87,7 +88,6 @@ namespace ClassLibrary2.UI.ViewModel
                 RaisePropertyChange(nameof(FilePath));
             }
         }
-
 
         private void LoadCommandInvoke()
         {
@@ -105,11 +105,11 @@ namespace ClassLibrary2.UI.ViewModel
                 MessageBox.Show(ex.Message + "\n" + ex.StackTrace.ToString());
             }
         }
+
         private void CreateCommandInvoke()
         {
             try
             {
-                
                 //var tablebeamobject = _tables.FirstOrDefault(x => x.TableName.Equals("Beam Object Connectivity"));
                 //DataTable tablebeamob = tablebeamobject;
                 var tablebeamlevel = _tables.FirstOrDefault(x => x.TableName.Equals("Story Definitions"));
@@ -123,7 +123,7 @@ namespace ClassLibrary2.UI.ViewModel
             }
         }
 
-        #region Beam ReadData 
+        #region Beam ReadData
 
         private List<ConcreteBeamData> ReadBeamAll()
         {
@@ -164,7 +164,7 @@ namespace ClassLibrary2.UI.ViewModel
             return beam;
         }
 
-        public XYZ ConvertPoint (DataRow row)
+        public XYZ ConvertPoint(DataRow row)
         {
             // sử dụng hàm chuyển đổi đơn  vị version cũ nên hiện thông báo, nhưng vẫn chạy được!
             double x = UnitUtils.ConvertToInternalUnits(Convert.ToDouble(row["X"]), DisplayUnitType.DUT_MILLIMETERS);
@@ -216,7 +216,6 @@ namespace ClassLibrary2.UI.ViewModel
                 {
                     beam.TopCover = UnitUtils.ConvertToInternalUnits(Convert.ToDouble(row["Top Cover"]), DisplayUnitType.DUT_MILLIMETERS);
                     beam.BottomCover = UnitUtils.ConvertToInternalUnits(Convert.ToDouble(row["Bottom Cover"]), DisplayUnitType.DUT_MILLIMETERS);
-
                 }
             }
             return beam;
@@ -230,7 +229,7 @@ namespace ClassLibrary2.UI.ViewModel
             {
                 if (beam.SectionName == row["Name"].ToString())
                 {
-                    beam.h = UnitUtils.ConvertToInternalUnits(Convert.ToDouble(row["Depth"]), DisplayUnitType.DUT_MILLIMETERS) ;
+                    beam.h = UnitUtils.ConvertToInternalUnits(Convert.ToDouble(row["Depth"]), DisplayUnitType.DUT_MILLIMETERS);
 
                     beam.b = UnitUtils.ConvertToInternalUnits(Convert.ToDouble(row["Width"]), DisplayUnitType.DUT_MILLIMETERS);
                 }
@@ -248,11 +247,10 @@ namespace ClassLibrary2.UI.ViewModel
             return beam;
         }
 
-
-        #endregion Beam ReadData 
-
+        #endregion Beam ReadData
 
         #region Column Data
+
         private List<ConcreteColumnData> ReadColAll()
         {
             List<ConcreteColumnData> colall = new List<ConcreteColumnData>();
@@ -261,8 +259,13 @@ namespace ClassLibrary2.UI.ViewModel
             foreach (DataRow row in tablebeamobject.Rows)
             {
                 ConcreteColumnData col = new ConcreteColumnData();
+                // 
                 ReadColumnObject(ref col, row); //nhập vô beam name, level, start, end
+
+                // 
                 ReadColumnSectionName(ref col); // nhập vô section name
+
+                //
                 ReadColumnPointLocation(ref col); // nhập vô tọa độ start, end
                 colall.Add(col);
             }
@@ -277,7 +280,6 @@ namespace ClassLibrary2.UI.ViewModel
             return col;
         }
 
-
         private ConcreteColumnData ReadColumnSectionName(ref ConcreteColumnData col) //đọc section name mục đích ban đầu là set family instance cho cấu kiện vừa được vẽ, nhưng thời gian không nhiều nên tạo sẵn family trong project và section name hiện tại chỉ dùng để tham chiếu kích thước tiết diện
         {
             var tablesection = _tables.FirstOrDefault(x => x.TableName.Equals("Frame Assignments - Section Properties"));
@@ -291,7 +293,6 @@ namespace ClassLibrary2.UI.ViewModel
             }
             return col;
         }
-
 
         private ConcreteColumnData ReadColumnPointLocation(ref ConcreteColumnData col)
         {
@@ -311,7 +312,7 @@ namespace ClassLibrary2.UI.ViewModel
 
             return col;
         }
-        
+
         #endregion Column Data
 
         #region Level ReadData
@@ -409,6 +410,11 @@ namespace ClassLibrary2.UI.ViewModel
             return table;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         private List<string> GetTableNames(OleDbConnection connection)
         {
             object[] restrictions = new[] { null, null, null, "TABLE" };

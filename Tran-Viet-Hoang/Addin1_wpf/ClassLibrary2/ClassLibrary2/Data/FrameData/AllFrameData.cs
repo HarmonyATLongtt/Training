@@ -1,4 +1,7 @@
 ﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Structure;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ClassLibrary2.Data.FrameData
 {
@@ -29,13 +32,14 @@ namespace ClassLibrary2.Data.FrameData
 
         public double h { get; set; }  //height
 
-        //bảng point object connectivity
-        public double XI { get; set; }
+        private List<RebarSetData> RebarSet { get; set; }
 
-        public double YI { get; set; }
-        public double ZI { get; set; }
-        public double XJ { get; set; }
-        public double YJ { get; set; }
-        public double ZJ { get; set; }
+        private void foo(List<AllFrameData> elemDatas)
+        {
+            var rebars = elemDatas.SelectMany(x => x.RebarSet).Where( x=> x.VNStyle == RebarVNStyle.thep_chu).ToList();
+
+        }
+
+        
     }
 }

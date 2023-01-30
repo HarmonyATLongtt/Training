@@ -22,6 +22,18 @@ namespace ClassLibrary2.Data
 
         public BoundingBoxXYZ Host_boundingbox_1 { get; set; }
         public BoundingBoxXYZ Host_boundingbox_2 { get; set; }
+        public RebarStyle Style { get; set; }
+        public RebarVNStyle VNStyle { get; set; }
+        Rebar Rebar { get; set; }
+    }
+    public enum RebarVNStyle
+    {
+        thep_chu,
+        thep_dai_dau,
+        thep_dai_giua,
+        thep_dai_cuoi,
+        thep_chong_phinh,
+        thep_dia,
 
     }
 }
