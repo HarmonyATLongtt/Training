@@ -75,19 +75,25 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Data\BeamID.cs" />
-    <Compile Include="Data\ColumnData.cs" />
-    <Compile Include="Data\RebarSetData.cs" />
-    <Compile Include="Function\AllowColumn.cs" />
+    <Compile Include="Data\FrameData\ConcreteColumnData.cs" />
+    <Compile Include="Data\FrameData\AllFrameData.cs" />
+    <Compile Include="Data\RebarSetData\RebarSetData.cs" />
     <Compile Include="CmdEtabsToRevit.cs" />
-    <Compile Include="Data\BeamData.cs" />
-    <Compile Include="Data\LevelData.cs" />
-    <Compile Include="Function\CreateBeamRebar.cs" />
-    <Compile Include="Function\CreateBeamStirrup.cs" />
-    <Compile Include="Function\CreateColumnRebar.cs" />
-    <Compile Include="Function\CreateColumnStirrup.cs" />
-    <Compile Include="Function\CreateLevel.cs" />
-    <Compile Include="Function\GetValueByNameMethod.cs" />
+    <Compile Include="Data\FrameData\ConcreteBeamData.cs" />
+    <Compile Include="Data\LevelData\LevelData.cs" />
+    <Compile Include="Function\Remodel_CreateColumn.cs" />
+    <Compile Include="Function\Remodel_SetBeamStirrup.cs" />
+    <Compile Include="Function\Remodel_SetColumnStirrup.cs" />
+    <Compile Include="Function\Remodel_GetStirrup.cs" />
+    <Compile Include="Function\Remodel_GetFrame.cs" />
+    <Compile Include="Function\Remodel_MoveStirrup.cs" />
+    <Compile Include="Function\Remodel_SetBeamStandard.cs" />
+    <Compile Include="Function\Remodel_CaculateRebar.cs" />
+    <Compile Include="Function\Remodel_GetBeamStandardOrigin.cs" />
+    <Compile Include="Function\Remodel_MarkEtabsElement.cs" />
+    <Compile Include="Function\Remodel_SetRebarCover.cs" />
+    <Compile Include="Function\Remodel_CreateBeam.cs" />
+    <Compile Include="Function\Remodel_CreateLevel.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>

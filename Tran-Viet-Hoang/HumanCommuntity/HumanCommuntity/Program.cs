@@ -10,16 +10,28 @@ namespace HumanCommuntity
     {
         private static void Main(string[] args)
         {
+            HumanBeing human = new HumanBeing { Name = "cháu Bo tiêu hoc", Age = 10, Sex = "Nam" };
             HumanBeing hocsinh = new Student { Name = "cháu Bo tiêu hoc", Age = 10, Sex = "Nam" };
             Student hocsinh1 = new Student { Name = "cháu Bo tiêu hoc", Age = 10, Sex = "Nam" };
+
+            Student hocsinh_undergraduate = new Undergraduate { Name = "cháu Bo tiêu hoc", Age = 10, Sex = "Nam" };
+            Undergraduate hocsinh_undergraduate1 = new Undergraduate { Name = "cháu Bo tiêu hoc", Age = 10, Sex = "Nam" };
+
+
+
             HumanBeing bacsi = new Doctor { Name = "bác sĩ Đông", Age = 38, Sex = "Nam" };
             HumanBeing giaovien = new Teacher { Name = "cô giáo Kim", Age = 32, Sex = "Nư" };
 
-            Console.WriteLine(hocsinh.Name + " " + hocsinh.Age + " tuôi, giơi tính: " + hocsinh.Sex);
-            hocsinh.Communicate(); //not override: Talk
+            Console.WriteLine(human.Name + " " + human.Age + " tuôi, giơi tính: " + human.Sex);
+            human.Communicate(); //not override: Talk
+            Console.Write("\n");
+            hocsinh.Communicate(); // hiding....: Students are so noisy
             hocsinh1.Communicate(); // hiding....: Students are so noisy
+            Console.Write("\n");
+            hocsinh_undergraduate.Communicate(); // hiding....: Talk
+            hocsinh_undergraduate1.Communicate(); // hiding....: Talk
 
-            hocsinh.Job();         //not override
+            human.Job();         //not override
             Console.Write("\n");
 
             Console.WriteLine(bacsi.Name + " " + bacsi.Age + " tuôi, giơi tính: " + bacsi.Sex);

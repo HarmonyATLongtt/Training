@@ -17,9 +17,9 @@ namespace ClassLibrary2.UI.ViewModel
     {
         public List<LevelData> LevelDatas { get; set; }
 
-        public List<BeamData> BeamDatas { get; set; }
+        public List<ConcreteBeamData> BeamDatas { get; set; }
 
-        public List<ColumnData> ColDatas { get; set; }
+        public List<ConcreteColumnData> ColDatas { get; set; }
 
         public MainViewModel()
         {
@@ -125,14 +125,14 @@ namespace ClassLibrary2.UI.ViewModel
 
         #region Beam ReadData 
 
-        private List<BeamData> ReadBeamAll()
+        private List<ConcreteBeamData> ReadBeamAll()
         {
-            List<BeamData> beamall = new List<BeamData>();
+            List<ConcreteBeamData> beamall = new List<ConcreteBeamData>();
             var tablebeamobject = _tables.FirstOrDefault(x => x.TableName.Equals("Beam Object Connectivity"));
 
             foreach (DataRow row in tablebeamobject.Rows)
             {
-                BeamData beam = new BeamData();
+                ConcreteBeamData beam = new ConcreteBeamData();
                 ReadBeamObject(ref beam, row); //nhập vô beam name, level, start, end
                 ReadFlexureDesign(ref beam);  // nhập vô As
                 ReadSectionName(ref beam); // nhập vô section name
@@ -145,7 +145,7 @@ namespace ClassLibrary2.UI.ViewModel
             return beamall;
         }
 
-        private BeamData ReadPointLocation(ref BeamData beam)
+        private ConcreteBeamData ReadPointLocation(ref ConcreteBeamData beam)
         {
             var tablepoint = _tables.FirstOrDefault(x => x.TableName.Equals("Point Object Connectivity"));
 
@@ -173,7 +173,7 @@ namespace ClassLibrary2.UI.ViewModel
             return new XYZ(x, y, z);
         }
 
-        private BeamData ReadSectionName(ref BeamData beam) //đọc section name mục đích ban đầu là set family instance cho cấu kiện vừa được vẽ, nhưng thời gian không nhiều nên tạo sẵn family trong project và section name hiện tại chỉ dùng để tham chiếu kích thước tiết diện
+        private ConcreteBeamData ReadSectionName(ref ConcreteBeamData beam) //đọc section name mục đích ban đầu là set family instance cho cấu kiện vừa được vẽ, nhưng thời gian không nhiều nên tạo sẵn family trong project và section name hiện tại chỉ dùng để tham chiếu kích thước tiết diện
         {
             var tablesection = _tables.FirstOrDefault(x => x.TableName.Equals("Frame Assignments - Section Properties"));
 
@@ -187,7 +187,7 @@ namespace ClassLibrary2.UI.ViewModel
             return beam;
         }
 
-        private BeamData ReadFlexureDesign(ref BeamData beam)
+        private ConcreteBeamData ReadFlexureDesign(ref ConcreteBeamData beam)
         {
             var tablesection = _tables.FirstOrDefault(x => x.TableName.Equals("Concrete Beam Flexure Envelope - TCVN 5574-2012"));
 
@@ -206,7 +206,7 @@ namespace ClassLibrary2.UI.ViewModel
             return beam;
         }
 
-        private BeamData ReadCover(ref BeamData beam)
+        private ConcreteBeamData ReadCover(ref ConcreteBeamData beam)
         {
             var tablecover = _tables.FirstOrDefault(x => x.TableName.Equals("Frame Section Property Definitions - Concrete Beam Reinforcing"));
 
@@ -222,7 +222,7 @@ namespace ClassLibrary2.UI.ViewModel
             return beam;
         }
 
-        private BeamData ReadDimenson(ref BeamData beam)
+        private ConcreteBeamData ReadDimenson(ref ConcreteBeamData beam)
         {
             var tabledim = _tables.FirstOrDefault(x => x.TableName.Equals("Frame Section Property Definitions - Concrete Rectangular"));
 
@@ -239,7 +239,7 @@ namespace ClassLibrary2.UI.ViewModel
             return beam;
         }
 
-        private BeamData ReadBeamObject(ref BeamData beam, DataRow row)
+        private ConcreteBeamData ReadBeamObject(ref ConcreteBeamData beam, DataRow row)
         {
             beam.Name = row["Unique Name"].ToString();
             beam.Level = row["Story"].ToString();
@@ -253,14 +253,14 @@ namespace ClassLibrary2.UI.ViewModel
 
 
         #region Column Data
-        private List<ColumnData> ReadColAll()
+        private List<ConcreteColumnData> ReadColAll()
         {
-            List<ColumnData> colall = new List<ColumnData>();
+            List<ConcreteColumnData> colall = new List<ConcreteColumnData>();
             var tablebeamobject = _tables.FirstOrDefault(x => x.TableName.Equals("Column Object Connectivity"));
 
             foreach (DataRow row in tablebeamobject.Rows)
             {
-                ColumnData col = new ColumnData();
+                ConcreteColumnData col = new ConcreteColumnData();
                 ReadColumnObject(ref col, row); //nhập vô beam name, level, start, end
                 ReadColumnSectionName(ref col); // nhập vô section name
                 ReadColumnPointLocation(ref col); // nhập vô tọa độ start, end
@@ -269,7 +269,7 @@ namespace ClassLibrary2.UI.ViewModel
             return colall;
         }
 
-        private ColumnData ReadColumnObject(ref ColumnData col, DataRow row)
+        private ConcreteColumnData ReadColumnObject(ref ConcreteColumnData col, DataRow row)
         {
             col.Name = row["Unique Name"].ToString();
             col.Level = row["Story"].ToString();
@@ -278,7 +278,7 @@ namespace ClassLibrary2.UI.ViewModel
         }
 
 
-        private ColumnData ReadColumnSectionName(ref ColumnData col) //đọc section name mục đích ban đầu là set family instance cho cấu kiện vừa được vẽ, nhưng thời gian không nhiều nên tạo sẵn family trong project và section name hiện tại chỉ dùng để tham chiếu kích thước tiết diện
+        private ConcreteColumnData ReadColumnSectionName(ref ConcreteColumnData col) //đọc section name mục đích ban đầu là set family instance cho cấu kiện vừa được vẽ, nhưng thời gian không nhiều nên tạo sẵn family trong project và section name hiện tại chỉ dùng để tham chiếu kích thước tiết diện
         {
             var tablesection = _tables.FirstOrDefault(x => x.TableName.Equals("Frame Assignments - Section Properties"));
 
@@ -293,7 +293,7 @@ namespace ClassLibrary2.UI.ViewModel
         }
 
 
-        private ColumnData ReadColumnPointLocation(ref ColumnData col)
+        private ConcreteColumnData ReadColumnPointLocation(ref ConcreteColumnData col)
         {
             var tablepoint = _tables.FirstOrDefault(x => x.TableName.Equals("Point Object Connectivity"));
 
