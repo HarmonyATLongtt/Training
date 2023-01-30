@@ -8,7 +8,6 @@ using ClassLibrary2.UI.Views;
 using System;
 using System.Collections.Generic;
 using System.Windows;
-using Application = Autodesk.Revit.ApplicationServices.Application;
 
 namespace ClassLibrary2
 {
@@ -19,7 +18,6 @@ namespace ClassLibrary2
         {
             UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
-            Application app = uiapp.Application;
             Document doc = uidoc.Document;
 
             try
