@@ -32,11 +32,11 @@ namespace ClassLibrary2.Function
 
         public void SetTopnBotBeamStandard(Document doc, ConcreteBeamData beam)
         {
-            Rebar stirrupdiameter = new Remodel_GetElem().GetStirrupTie(doc, beam.HostRebar.Host);
+            Rebar stirrupdiameter = new Remodel_GetElem().GetStirrupTie(doc, beam.HostRebar.HostData.Host);
 
             double stirrup = stirrupdiameter.LookupParameter("Bar Diameter").AsDouble();
             double cover = beam.Covers.Side;
-            FamilyInstance elem = beam.HostRebar.Host;
+            FamilyInstance elem = beam.HostRebar.HostData.Host;
            
 
             XYZ origintop = new Remodel_GetBeamStandardOrigin().TopBeamStandardOrigin(elem, cover, stirrup);
@@ -49,15 +49,15 @@ namespace ClassLibrary2.Function
         public void SetSingleBeamStandard(Document doc, ConcreteBeamData beam, XYZ origin, double As)
         {
             double elemlength = beam.Length;
-            double stirrup = beam.Stirrup_Tie.Type;
+            double stirrup = beam.Stirrup_Tie.DiameterData.Type;
             double cover = beam.Covers.Side;
             RebarSetData rebardesign = new Remodel_CaculateRebar().BeamStandard(beam, cover, stirrup, As);
-            string rebartype = rebardesign.Type.ToString() + "M";
+            string rebartype = rebardesign.DiameterData.Type.ToString() + "M";
 
             RebarShape shape = new Remodel_GetElem().GetRebarShape(doc, "M_00");
             RebarBarType type = new Remodel_GetElem().GetRebarBarType(doc, rebartype);
 
-            XYZ xVec = xVecBeam(beam.HostRebar.Host);
+            XYZ xVec = xVecBeam(beam.HostRebar.HostData.Host);
             XYZ yVec = new XYZ(0, 0, 1);
             //nếu Bounding box ngược chiều với hướng vẽ element thì thép sẽ bị bay ra ngoài, vậy nên kiểm tra nếu ngược chiều thì gán chiều vẽ thép bằng ngược chiều của chiều vẽ dầm
             if (Math.Round(xVec.X, 4) < 0 || Math.Round(xVec.Y, 4) < 0)
@@ -66,7 +66,7 @@ namespace ClassLibrary2.Function
                 // nên phải làm tròn số thập phân của X hoặc Y của vector để lệnh if kiểm tra được như ý muốn
                 xVec = -xVec;
             }
-            Rebar rebarnew = Rebar.CreateFromRebarShape(doc, shape, type, beam.HostRebar.Host, origin, xVec, yVec);
+            Rebar rebarnew = Rebar.CreateFromRebarShape(doc, shape, type, beam.HostRebar.HostData.Host, origin, xVec, yVec);
 
             Parameter rebarlength = rebarnew.LookupParameter("B");
             double oldlength = rebarlength.AsDouble(); //giữ lại giá trị length ban đầu để sau thực hiện rotate
@@ -89,7 +89,7 @@ namespace ClassLibrary2.Function
             rebarlength.Set(elemlength - 2 * beam.Covers.Side);
 
             ElementTransformUtils.RotateElement(doc, rebarnew.Id, axis, Math.PI);
-            rebarnew.GetShapeDrivenAccessor().SetLayoutAsNumberWithSpacing(rebardesign.Number, rebardesign.Spacing / 304.8, false, true, true);
+            rebarnew.GetShapeDrivenAccessor().SetLayoutAsNumberWithSpacing(rebardesign.LayoutData.Number, rebardesign.LayoutData.Spacing / 304.8, false, true, true);
         }
 
         public XYZ xVecBeam(FamilyInstance elem)

@@ -61,7 +61,7 @@ namespace ClassLibrary2.Function
                 xVec = new XYZ(1, 0, 0);
             }
             XYZ origin = new Remodel_GetStirrup().FrameStirrupOrigin(beametabs, cover);
-            Rebar rebar = Rebar.CreateFromRebarShape(doc, shape, type, beametabs.HostRebar.Host, origin, xVec, yVec);
+            Rebar rebar = Rebar.CreateFromRebarShape(doc, shape, type, beametabs.HostRebar.HostData.Host, origin, xVec, yVec);
             return rebar;
         }
     }

@@ -2,11 +2,14 @@
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using ClassLibrary2.Data;
+using ClassLibrary2.Factory.EtabDataExtractor;
 using ClassLibrary2.Function;
 using ClassLibrary2.UI.ViewModel;
 using ClassLibrary2.UI.Views;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Linq;
 using System.Windows;
 using Application = Autodesk.Revit.ApplicationServices.Application;
 
@@ -30,10 +33,11 @@ namespace ClassLibrary2
                 {
 
                     MainViewModel vm = view.DataContext as MainViewModel;
-                    var tablebeamobject = vm.Tables;
-                    List<LevelData> LevelModelData = vm.LevelDatas;
-                    List<ConcreteBeamData> BeamModelData = vm.BeamDatas;
-                    List<ConcreteColumnData> ColumnModelData = vm.ColDatas;
+                    var tablelist = vm.Tables.ToList();
+                    EtabExtractor etabdatagetting = new EtabExtractor(tablelist);
+                    List<LevelData> LevelModelData = etabdatagetting.LevelReadData();
+                    List<ConcreteBeamData> BeamModelData = etabdatagetting.ExtractBeam();
+                    List<ConcreteColumnData> ColumnModelData = etabdatagetting.ExtractCol();
 
                     //tạo hệ thống level
                     foreach (LevelData levelData in LevelModelData)
@@ -54,6 +58,7 @@ namespace ClassLibrary2
                     //new Remodel_MoveStirrup().MoveStirrup(doc, ColumnModelData, BeamModelData);
 
                     //new Remodel_SetBeamStandard().SetAllBeamStandard(doc, BeamModelData);
+                    MessageBox.Show("Have a greate day");
                 }
             }
             catch (Exception ex)

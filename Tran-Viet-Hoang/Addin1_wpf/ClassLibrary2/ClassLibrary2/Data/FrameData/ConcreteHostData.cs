@@ -1,6 +1,4 @@
 ﻿using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.Structure;
-using ClassLibrary2.Factory.RebarSet;
 using System.Collections.Generic;
 
 namespace ClassLibrary2.Data.FrameData
@@ -36,13 +34,13 @@ namespace ClassLibrary2.Data.FrameData
 
         //public double length { get; set; }
 
-
         public XYZ drawdirection { get; set; }
         public RebarSetData HostRebar { get; set; }
 
         #endregion old
 
         #region new
+
         public string Level { get; set; }
 
         public string Name { get; set; }
@@ -72,7 +70,6 @@ namespace ClassLibrary2.Data.FrameData
             Reinforcing = new elemReinforcing();
             Standards = new List<RebarSetData>();
             Stirrup_Tie = new RebarSetData();
-
         }
     }
 }

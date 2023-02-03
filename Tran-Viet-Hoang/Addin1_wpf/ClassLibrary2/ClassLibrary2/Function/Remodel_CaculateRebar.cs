@@ -10,8 +10,8 @@ namespace ClassLibrary2.Function
         public RebarSetData BeamStandard(ConcreteBeamData beam, double coverside, double stirrup, double Astinhtoan)
         {
             //khoảng cách thông thủy tối thiểu giữa các thanh thép lớp dưới
-            double kc = beam.HostRebar.MinSpacing;
-            int[] duongkinhcautao = beam.HostRebar.RebarDiameter;
+            double kc = beam.HostRebar.LayoutData.MinSpacing;
+            int[] duongkinhcautao = beam.HostRebar.DiameterData.RebarDiameterS;
             int[] sothanh = new int[duongkinhcautao.Count()];
 
             double elemb = beam.Dimensions.b;
@@ -30,11 +30,11 @@ namespace ClassLibrary2.Function
                 if (Math.Pow(duongkinhcautao[i], 2) * Math.PI / 4 * sothanh[i] >= Asmin)
                 {
                     RebarSetData rebarset = new RebarSetData();
-                    rebarset.Number = sothanh[i];
-                    rebarset.Type = duongkinhcautao[i];
-                    rebarset.RebarCrossSectionArea = Math.Pow(duongkinhcautao[i], 2) * Math.PI / 4 * sothanh[i];
-                    rebarset.CrossSectionWidth = elemb;
-                    rebarset.Spacing = ((rebarset.CrossSectionWidth - 2 * (coverside + stirrup)) * 304.8 - rebarset.Type) / (rebarset.Number - 1);
+                    rebarset.LayoutData.Number = sothanh[i];
+                    rebarset.DiameterData.Type = duongkinhcautao[i];
+                    rebarset.LayoutData.RebarCrossSectionArea = Math.Pow(duongkinhcautao[i], 2) * Math.PI / 4 * sothanh[i];
+                    rebarset.LayoutData.CrossSectionWidth = elemb;
+                    rebarset.LayoutData.Spacing = ((rebarset.LayoutData.CrossSectionWidth - 2 * (coverside + stirrup)) * 304.8 - rebarset.DiameterData.Type) / (rebarset.LayoutData.Number - 1);
                     rebarsets = rebarset;
                     break;
                 }

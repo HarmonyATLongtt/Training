@@ -1,29 +1,25 @@
 ﻿using ClassLibrary2.Data;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ClassLibrary2.Factory.RebarSet
 {
     public class RebarSet
     {
-
-        public RebarSetData TopBeamStandards (ConcreteBeamData beam) 
+        public RebarSetData TopBeamStandards(ConcreteBeamData beam)
         {
-            RebarSetData allstandard =  BeamStandard(beam, beam.Reinforcing.AsTop);
-           
+            RebarSetData allstandard = BeamStandard(beam, beam.Reinforcing.AsTop);
 
             return allstandard;
         }
-        public RebarSetData BeamStandard (ConcreteBeamData beam, double Astinhtoan) 
+
+        public RebarSetData BeamStandard(ConcreteBeamData beam, double Astinhtoan)
         {
             //khoảng cách thông thủy tối thiểu giữa các thanh thép lớp dưới
-            double kc = beam.HostRebar.MinSpacing;
+            double kc = beam.HostRebar.LayoutData.MinSpacing;
             double coverside = beam.Covers.Side;
-            double stirrup = beam.Stirrup_Tie.Type;
-            int[] duongkinhcautao = beam.HostRebar.RebarDiameter;
+            double stirrup = beam.Stirrup_Tie.DiameterData.Type;
+            int[] duongkinhcautao = beam.HostRebar.DiameterData.RebarDiameterS;
             int[] sothanh = new int[duongkinhcautao.Count()];
 
             double elemb = beam.Dimensions.b;
@@ -42,11 +38,11 @@ namespace ClassLibrary2.Factory.RebarSet
                 if (Math.Pow(duongkinhcautao[i], 2) * Math.PI / 4 * sothanh[i] >= Asmin)
                 {
                     RebarSetData rebarset = new RebarSetData();
-                    rebarset.Number = sothanh[i];
-                    rebarset.Type = duongkinhcautao[i];
-                    rebarset.RebarCrossSectionArea = Math.Pow(duongkinhcautao[i], 2) * Math.PI / 4 * sothanh[i];
-                    rebarset.CrossSectionWidth = elemb;
-                    rebarset.Spacing = ((rebarset.CrossSectionWidth - 2 * (coverside + stirrup)) * 304.8 - rebarset.Type) / (rebarset.Number - 1);
+                    rebarset.LayoutData.Number = sothanh[i];
+                    rebarset.DiameterData.Type = duongkinhcautao[i];
+                    rebarset.LayoutData.RebarCrossSectionArea = Math.Pow(duongkinhcautao[i], 2) * Math.PI / 4 * sothanh[i];
+                    rebarset.LayoutData.CrossSectionWidth = elemb;
+                    rebarset.LayoutData.Spacing = ((rebarset.LayoutData.CrossSectionWidth - 2 * (coverside + stirrup)) * 304.8 - rebarset.DiameterData.Type) / (rebarset.LayoutData.Number - 1);
                     rebarsets = rebarset;
                     break;
                 }
@@ -54,7 +50,7 @@ namespace ClassLibrary2.Factory.RebarSet
             return rebarsets;
         }
 
-        public RebarSetData BeamStirrup_Tie() 
+        public RebarSetData BeamStirrup_Tie()
         {
             RebarSetData stirrup = new RebarSetData();
             return stirrup;

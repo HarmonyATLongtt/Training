@@ -81,6 +81,12 @@
     <Compile Include="Data\FrameData\elemDimensionData.cs" />
     <Compile Include="Data\FrameData\elemReinforcing.cs" />
     <Compile Include="Data\FrameData\PointData.cs" />
+    <Compile Include="Data\RebarSetData\RebarLocationData.cs" />
+    <Compile Include="Data\RebarSetData\RebarHostData.cs" />
+    <Compile Include="Data\RebarSetData\RebarDiameterData.cs" />
+    <Compile Include="Data\RebarSetData\RebarLayoutData.cs" />
+    <Compile Include="Data\RebarSetData\RebarStyleData.cs" />
+    <Compile Include="Data\RebarSetData\RebarShapeData.cs" />
     <Compile Include="Data\RebarSetData\RebarSetData.cs" />
     <Compile Include="CmdEtabsToRevit.cs" />
     <Compile Include="Data\FrameData\ConcreteBeamData.cs" />

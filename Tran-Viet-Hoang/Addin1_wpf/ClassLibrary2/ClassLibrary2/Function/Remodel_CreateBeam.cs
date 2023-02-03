@@ -51,7 +51,7 @@ namespace ClassLibrary2.Function
 
                 beamData.Length = elemlength.AsDouble();
                 beamData.HostRebar = new RebarSetData();
-                beamData.HostRebar.Host = beamnew;
+                beamData.HostRebar.HostData.Host = beamnew;
 
                 Location loc = beamnew.Location;
                 LocationCurve locCur = loc as LocationCurve;

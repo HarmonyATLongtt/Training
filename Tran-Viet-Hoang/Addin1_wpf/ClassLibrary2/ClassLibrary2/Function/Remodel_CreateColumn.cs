@@ -52,7 +52,7 @@ namespace ClassLibrary2.Function
                 colData.HostRebar = new RebarSetData();
                 colData.Dimensions.b = col.Symbol.LookupParameter("b").AsDouble();
                 colData.Dimensions.h = col.Symbol.LookupParameter("h").AsDouble();
-                colData.HostRebar.Host = col;
+                colData.HostRebar.HostData.Host = col;
                 colData.Length = elemlength.AsDouble();
 
                 Parameter coltoppara = col.LookupParameter("Top Level");

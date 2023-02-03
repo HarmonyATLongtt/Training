@@ -13,16 +13,16 @@ namespace ClassLibrary2.Function
             List<RebarSetData> rebars = new List<RebarSetData>();
             foreach (var col in cols)
             {
-                var stirrup = new Remodel_GetElem().GetStirrupTie(doc, col.HostRebar.Host);
+                var stirrup = new Remodel_GetElem().GetStirrupTie(doc, col.HostRebar.HostData.Host);
 
                 if (stirrup != null)
                 {
                     RebarSetData rebar = new RebarSetData();
                     rebar.ColumnStirrup = stirrup;
-                    rebar.HostLength = col.Length;
-                    rebar.Host_h = col.Dimensions.h;
-                    rebar.Host_b = col.Dimensions.b;
-                    rebar.Host_boundingbox = col.HostRebar.Host.get_BoundingBox(null);
+                    rebar.HostData.HostLength = col.Length;
+                    rebar.HostData.Host_h = col.Dimensions.h;
+                    rebar.HostData.Host_b = col.Dimensions.b;
+                    rebar.LocationData.BoundingBox = col.HostRebar.HostData.Host.get_BoundingBox(null);
                     rebars.Add(rebar);
                 }
             }
@@ -35,16 +35,16 @@ namespace ClassLibrary2.Function
             List<RebarSetData> rebars = new List<RebarSetData>();
             foreach (var beam in beams)
             {
-                var stirrup = new Remodel_GetElem().GetStirrupTie(doc, beam.HostRebar.Host);
+                var stirrup = new Remodel_GetElem().GetStirrupTie(doc, beam.HostRebar.HostData.Host);
 
                 if (stirrup != null)
                 {
                     RebarSetData rebar = new RebarSetData();
                     rebar.BeamStirrup = stirrup;
-                    rebar.HostLength = beam.Length;
-                    rebar.Host_h = beam.Dimensions.h;
-                    rebar.Host_b = beam.Dimensions.b;
-                    rebar.BeamStirrupOrigin = FrameStirrupOrigin(beam, beam.Covers.Side);
+                    rebar.HostData.HostLength = beam.Length;
+                    rebar.HostData.Host_h = beam.Dimensions.h;
+                    rebar.HostData.Host_b = beam.Dimensions.b;
+                    rebar.LocationData.RebarOrigin = FrameStirrupOrigin(beam, beam.Covers.Side);
                     rebars.Add(rebar);
                 }
             }
@@ -58,7 +58,7 @@ namespace ClassLibrary2.Function
 
             XYZ xVec = beametabs.drawdirection; // để lấy được chiều vẽ của dầm
 
-            BoundingBoxXYZ boundingbox = beametabs.HostRebar.Host.get_BoundingBox(null);
+            BoundingBoxXYZ boundingbox = beametabs.HostRebar.HostData.Host.get_BoundingBox(null);
 
             XYZ origin = XYZ.Zero;
 

@@ -185,8 +185,10 @@ namespace ClassLibrary2.Factory.EtabDataExtractor
 
         #region Level ReadData
 
-        public List<LevelData> LevelReadData(DataTable table)
+        public List<LevelData> LevelReadData()
         {
+            var table = _tables.FirstOrDefault(x => x.TableName.Equals("Story Definitions"));
+
             double elev = 0;
             var levelclass = new List<LevelData>()
             {

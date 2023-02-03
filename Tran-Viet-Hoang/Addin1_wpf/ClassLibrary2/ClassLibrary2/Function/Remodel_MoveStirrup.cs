@@ -22,7 +22,7 @@ namespace ClassLibrary2.Function
 
                 foreach (var stirrup in colstirrups)
                 {   //lấy vị trí điểm gốc cũ
-                    BoundingBoxXYZ boundingbox = stirrup.Host_boundingbox;
+                    BoundingBoxXYZ boundingbox = stirrup.LocationData.BoundingBox;
                     XYZ min = boundingbox.Transform.OfPoint(boundingbox.Min);
                     XYZ origin = min + XYZ.BasisX * cover + XYZ.BasisY * cover + XYZ.BasisZ * cover;
 
@@ -37,19 +37,19 @@ namespace ClassLibrary2.Function
                     ElementTransformUtils.MoveElement(doc, stirrup.ColumnStirrup.Id, vect);
 
                     // set spacing cho thép đai sau khi thép đai trở về đúng vị trí
-                    stirrup.ColumnStirrup.GetShapeDrivenAccessor().SetLayoutAsMaximumSpacing(250 / 304.8, stirrup.HostLength, true, true, false);
+                    stirrup.ColumnStirrup.GetShapeDrivenAccessor().SetLayoutAsMaximumSpacing(250 / 304.8, stirrup.HostData.HostLength, true, true, false);
                 }
                 //dầm
                 foreach (var stirrup in beamstirrups)
                 {
-                    XYZ origin1st = stirrup.BeamStirrupOrigin;
+                    XYZ origin1st = stirrup.LocationData.RebarOrigin;
 
                     BoundingBoxXYZ boundingboxnew = stirrup.BeamStirrup.get_BoundingBox(null);
                     XYZ origin2nd = boundingboxnew.Transform.OfPoint(boundingboxnew.Min);
                     XYZ vect = origin1st - origin2nd;
 
                     ElementTransformUtils.MoveElement(doc, stirrup.BeamStirrup.Id, vect);
-                    stirrup.BeamStirrup.GetShapeDrivenAccessor().SetLayoutAsMaximumSpacing(250 / 304.8, stirrup.HostLength, true, true, false);
+                    stirrup.BeamStirrup.GetShapeDrivenAccessor().SetLayoutAsMaximumSpacing(250 / 304.8, stirrup.HostData.HostLength, true, true, false);
                 }
                 trans.Commit();
             }
