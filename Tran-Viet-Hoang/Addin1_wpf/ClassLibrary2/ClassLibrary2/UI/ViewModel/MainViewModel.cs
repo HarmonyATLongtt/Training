@@ -183,6 +183,11 @@ namespace ClassLibrary2.UI.ViewModel
             return table;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         private List<string> GetTableNames(OleDbConnection connection)
         {
             object[] restrictions = new[] { null, null, null, "TABLE" };
