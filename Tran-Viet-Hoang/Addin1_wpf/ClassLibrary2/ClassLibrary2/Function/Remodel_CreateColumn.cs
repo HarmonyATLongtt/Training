@@ -7,23 +7,21 @@ namespace ClassLibrary2.Function
 {
     public class Remodel_CreateColumn
     {
+       
+
         public void CreateCols(Document doc, List<ConcreteColumnData> ColDatas, List<LevelData> LLevels)
         {
-            var collevels = new FilteredElementCollector(doc)
-                       .WhereElementIsNotElementType()
-                       .OfCategory(BuiltInCategory.OST_Levels)
-                       .Cast<Level>()
-                       .ToList();
+            var utils = new Remodel_GetElem();
+            var collevels = utils.GetListLevels(doc);
 
-            var colTypes = new FilteredElementCollector(doc)
-                       .WhereElementIsElementType()
-                       .OfCategory(BuiltInCategory.OST_StructuralColumns)
-                       .Cast<FamilySymbol>()
-                       .ToList();
+            var cols = new List<BuiltInCategory>() { BuiltInCategory.OST_StructuralColumns };
+            var colTypes = utils.GetListFamilySymbols(doc, cols);
+
+         
 
             if (collevels.Count > 0 && colTypes.Count > 0)
             {
-                using (Transaction trans = new Transaction(doc, "create col"))
+                using (Transaction trans = new Transaction(doc, "create cols"))
                 {
                     trans.Start();
                     foreach (ConcreteColumnData colData in ColDatas)
@@ -37,7 +35,7 @@ namespace ClassLibrary2.Function
 
         public void CreateCol(Document doc, ConcreteColumnData colData, List<LevelData> LLevels, List<Level> levels, List<FamilySymbol> colTypes)
         {
-            var coltype = colTypes.FirstOrDefault(x => x.Name.Equals(colData.SectionName));
+            var coltype = colTypes.FirstOrDefault(x => x.Name.Equals(colData.Dimensions.SectionName));
             var coltoplevel = levels.FirstOrDefault(x => x.Name.Equals(colData.Level));
 
             if (coltype != null && coltoplevel != null)
@@ -47,7 +45,16 @@ namespace ClassLibrary2.Function
                     coltype.Activate();
                 }
                 //doc.Create.NewFamilyInstance(colData.Point_I, coltype, collevel, Autodesk.Revit.DB.Structure.StructuralType.Column);
-                var col = doc.Create.NewFamilyInstance(colData.Point_I, coltype, coltoplevel, Autodesk.Revit.DB.Structure.StructuralType.Column);
+                var col = doc.Create.NewFamilyInstance(colData.StartPoint.Point, coltype, coltoplevel, Autodesk.Revit.DB.Structure.StructuralType.Column);
+
+                Parameter elemlength = col.LookupParameter("Length");
+
+                colData.HostRebar = new RebarSetData();
+                colData.Dimensions.b = col.Symbol.LookupParameter("b").AsDouble();
+                colData.Dimensions.h = col.Symbol.LookupParameter("h").AsDouble();
+                colData.HostRebar.Host = col;
+                colData.Length = elemlength.AsDouble();
+
                 Parameter coltoppara = col.LookupParameter("Top Level");
                 Parameter coltopoffsetpara = col.LookupParameter("Top Offset");
 

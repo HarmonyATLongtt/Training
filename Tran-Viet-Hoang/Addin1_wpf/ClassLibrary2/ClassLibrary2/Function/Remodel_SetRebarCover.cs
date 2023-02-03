@@ -24,24 +24,24 @@ namespace ClassLibrary2.Function
             if (rebarcover.FirstOrDefault(x => x.Name.Equals(newnametop)) != null)
             {
                 Parameter existlength = rebarcover.FirstOrDefault(x => x.Name.Equals(newnametop)).LookupParameter("Length");
-                existlength.Set(beam.TopCover);
+                existlength.Set(beam.Covers.Top);
                 Topcover.Set(rebarcover.FirstOrDefault(x => x.Name.Equals(newnametop)).Id);
             }
             else
             {
-                RebarCoverType topp = CreateRebarCover(doc, newnametop, beam.TopCover);
+                RebarCoverType topp = CreateRebarCover(doc, newnametop, beam.Covers.Top);
                 Topcover.Set(topp.Id);
             }
 
             if (rebarcover.FirstOrDefault(x => x.Name.Equals(newnamebot)) != null)
             {
                 Parameter existlength = rebarcover.FirstOrDefault(x => x.Name.Equals(newnamebot)).LookupParameter("Length");
-                existlength.Set(beam.BottomCover);
+                existlength.Set(beam.Covers.Bottom);
                 Bottomcover.Set(rebarcover.FirstOrDefault(x => x.Name.Equals(newnamebot)).Id);
             }
             else
             {
-                RebarCoverType bott = CreateRebarCover(doc, newnamebot, beam.BottomCover);
+                RebarCoverType bott = CreateRebarCover(doc, newnamebot, beam.Covers.Bottom);
                 Bottomcover.Set(bott.Id);
                 //othercover.Set(fifty.Id);
             }

@@ -1,8 +1,5 @@
 ﻿using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.Structure;
-using ClassLibrary2.Data;
 using System;
-using System.Linq;
 
 namespace ClassLibrary2.Function
 {
@@ -12,7 +9,7 @@ namespace ClassLibrary2.Function
         {
             BoundingBoxXYZ boundingbox = elem.get_BoundingBox(null);
             XYZ origin = XYZ.Zero;
-            XYZ xVec = xVecBeam(elem);
+            XYZ xVec = new Remodel_SetBeamStandard().xVecBeam(elem);
             if (Math.Abs(xVec.X) > Math.Abs(xVec.Y))
             {
                 origin = new XYZ(boundingbox.Min.X + cover + stirrup, boundingbox.Max.Y - cover - stirrup, boundingbox.Min.Z + cover + stirrup);
@@ -24,14 +21,18 @@ namespace ClassLibrary2.Function
 
             return origin;
         }
+
         public XYZ TopBeamStandardOrigin(FamilyInstance elem, double cover, double stirrup)
         {
             BoundingBoxXYZ boundingbox = elem.get_BoundingBox(null);
             XYZ origin = XYZ.Zero;
-            XYZ xVec = xVecBeam(elem);
+            // lấy về phương của thép dọc nằm trong elem
+            XYZ xVec = new Remodel_SetBeamStandard().xVecBeam(elem);
+
+            // điều kiện kiểm tra nếu thép đặt theo phương X
             if (Math.Abs(xVec.X) > Math.Abs(xVec.Y))
             {
-                origin = new XYZ(boundingbox.Min.X + cover + stirrup, boundingbox.Max.Y - cover - stirrup, boundingbox.Max.Z - cover - stirrup);
+                origin = new XYZ(boundingbox.Min.X + cover + stirrup, boundingbox.Max.Y - cover - stirrup, boundingbox.Max.Z  - cover - stirrup);
             }
             else if (Math.Abs(xVec.X) < Math.Abs(xVec.Y))
             {
@@ -41,17 +42,5 @@ namespace ClassLibrary2.Function
             return origin;
         }
 
-        public XYZ xVecBeam(FamilyInstance elem)
-        {
-            //Lấy hướng vẽ của cấu kiện để biết là sẽ vẽ thép cho cấu kiện theo phương X hay pương Y
-            Location loc = elem.Location;
-            LocationCurve locCur = loc as LocationCurve;
-            Curve curve = locCur.Curve;
-            Line locline = curve as Line;
-
-            //gán vector phương X trong definition của shape thép với vector vẽ cấu kiện
-            XYZ xVec = locline.Direction;
-            return xVec;
-        }
     }
 }

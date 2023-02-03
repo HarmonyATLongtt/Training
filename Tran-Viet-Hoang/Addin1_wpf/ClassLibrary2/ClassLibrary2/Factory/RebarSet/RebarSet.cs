@@ -1,16 +1,28 @@
 ﻿using ClassLibrary2.Data;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace ClassLibrary2.Function
+namespace ClassLibrary2.Factory.RebarSet
 {
-    public class Remodel_CaculateRebar
+    public class RebarSet
     {
-        //hàm tính lượng thép cần bố trí
-        public RebarSetData BeamStandard(ConcreteBeamData beam, double coverside, double stirrup, double Astinhtoan)
+
+        public RebarSetData TopBeamStandards (ConcreteBeamData beam) 
+        {
+            RebarSetData allstandard =  BeamStandard(beam, beam.Reinforcing.AsTop);
+           
+
+            return allstandard;
+        }
+        public RebarSetData BeamStandard (ConcreteBeamData beam, double Astinhtoan) 
         {
             //khoảng cách thông thủy tối thiểu giữa các thanh thép lớp dưới
             double kc = beam.HostRebar.MinSpacing;
+            double coverside = beam.Covers.Side;
+            double stirrup = beam.Stirrup_Tie.Type;
             int[] duongkinhcautao = beam.HostRebar.RebarDiameter;
             int[] sothanh = new int[duongkinhcautao.Count()];
 
@@ -40,6 +52,12 @@ namespace ClassLibrary2.Function
                 }
             }
             return rebarsets;
+        }
+
+        public RebarSetData BeamStirrup_Tie() 
+        {
+            RebarSetData stirrup = new RebarSetData();
+            return stirrup;
         }
     }
 }

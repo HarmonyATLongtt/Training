@@ -2,7 +2,7 @@
 
 namespace ClassLibrary2.Data
 {
-    public class ConcreteColumnData : AllFrameData
+    public class ConcreteColumnData : ConcreteHostData
     {
     }
 }

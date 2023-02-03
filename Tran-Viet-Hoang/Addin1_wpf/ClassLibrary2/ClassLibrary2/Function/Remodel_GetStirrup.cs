@@ -1,34 +1,28 @@
 ﻿using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.Structure;
 using ClassLibrary2.Data;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace ClassLibrary2.Function
 {
     public class Remodel_GetStirrup
     {
         // hàm tạo list trả về các giá trị kiểu Rebar, giá trị length, b, h và boundingbox của host column
-        public List<RebarSetData> ColumnStirrup(Document doc, List<FamilyInstance> cols)
+        public List<RebarSetData> ColumnStirrup(Document doc, List<ConcreteColumnData> cols)
         {
             List<RebarSetData> rebars = new List<RebarSetData>();
-            string style = "Stirrup / Tie";
             foreach (var col in cols)
             {
-                var stirrup = new FilteredElementCollector(doc)
-                  .WhereElementIsNotElementType()
-                  .OfCategory(BuiltInCategory.OST_Rebar)
-                  .Cast<Rebar>()
-                  .First(x => x.LookupParameter("Style").AsValueString() == style && x.GetHostId() == col.Id);
+                var stirrup = new Remodel_GetElem().GetStirrupTie(doc, col.HostRebar.Host);
+
                 if (stirrup != null)
                 {
                     RebarSetData rebar = new RebarSetData();
                     rebar.ColumnStirrup = stirrup;
-                    rebar.HostLength = col.LookupParameter("Length").AsDouble();
-                    rebar.Host_h = col.Symbol.LookupParameter("h").AsDouble();
-                    rebar.Host_b = col.Symbol.LookupParameter("b").AsDouble();
-                    rebar.Host_boundingbox_1 = col.get_BoundingBox(null);
+                    rebar.HostLength = col.Length;
+                    rebar.Host_h = col.Dimensions.h;
+                    rebar.Host_b = col.Dimensions.b;
+                    rebar.Host_boundingbox = col.HostRebar.Host.get_BoundingBox(null);
                     rebars.Add(rebar);
                 }
             }
@@ -36,25 +30,21 @@ namespace ClassLibrary2.Function
         }
 
         // hàm tạo list trả về các giá trị kiểu Rebar, giá trị length, b, h và boundingbox của host beam
-        public List<RebarSetData> BeamStirrup(Document doc, List<FamilyInstance> beams)
+        public List<RebarSetData> BeamStirrup(Document doc, List<ConcreteBeamData> beams)
         {
             List<RebarSetData> rebars = new List<RebarSetData>();
-            string style = "Stirrup / Tie";
             foreach (var beam in beams)
             {
-                var stirrup = new FilteredElementCollector(doc)
-                  .WhereElementIsNotElementType()
-                  .OfCategory(BuiltInCategory.OST_Rebar)
-                  .Cast<Rebar>()
-                  .First(x => x.LookupParameter("Style").AsValueString() == style && x.GetHostId() == beam.Id);
+                var stirrup = new Remodel_GetElem().GetStirrupTie(doc, beam.HostRebar.Host);
+
                 if (stirrup != null)
                 {
                     RebarSetData rebar = new RebarSetData();
                     rebar.BeamStirrup = stirrup;
-                    rebar.HostLength = beam.LookupParameter("Length").AsDouble();
-                    rebar.Host_h = beam.Symbol.LookupParameter("h").AsDouble();
-                    rebar.Host_b = beam.Symbol.LookupParameter("b").AsDouble();
-                    rebar.BeamStirrupOrigin = FrameStirrupOrigin(beam, 50 / 304.8);
+                    rebar.HostLength = beam.Length;
+                    rebar.Host_h = beam.Dimensions.h;
+                    rebar.Host_b = beam.Dimensions.b;
+                    rebar.BeamStirrupOrigin = FrameStirrupOrigin(beam, beam.Covers.Side);
                     rebars.Add(rebar);
                 }
             }
@@ -62,16 +52,13 @@ namespace ClassLibrary2.Function
         }
 
         // Hàm lấy origin ban đầu về cho stirrup của dầm
-        public XYZ FrameStirrupOrigin(FamilyInstance beam, double cover)
+        public XYZ FrameStirrupOrigin(ConcreteBeamData beametabs, double cover)
         {
             //Lấy hướng vẽ của cấu kiện để biết là sẽ vẽ thép cho cấu kiện theo phương X hay pương Y
-            Location loc = beam.Location;
-            LocationCurve locCur = loc as LocationCurve;
-            Curve curve = locCur.Curve;
-            Line locline = curve as Line;
-            XYZ xVec = locline.Direction; // để lấy được chiều vẽ của dầm
 
-            BoundingBoxXYZ boundingbox = beam.get_BoundingBox(null);
+            XYZ xVec = beametabs.drawdirection; // để lấy được chiều vẽ của dầm
+
+            BoundingBoxXYZ boundingbox = beametabs.HostRebar.Host.get_BoundingBox(null);
 
             XYZ origin = XYZ.Zero;
 

@@ -10,9 +10,9 @@ namespace ClassLibrary2.Function
             UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
-            var elems = new FilteredElementCollector(doc)
-                        .WhereElementIsNotElementType()
-                        .OfCategory(BuiltInCategory.OST_Levels);
+
+            var elems = new Remodel_GetElem().GetListLevels(doc);
+
             string Levelexisted = "false";
 
             using (var transaction = new Transaction(doc, "Set Elevation"))

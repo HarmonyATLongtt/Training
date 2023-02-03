@@ -9,17 +9,9 @@ namespace ClassLibrary2.Function
     {
         public void CreateBeams(Document doc, List<ConcreteBeamData> beamDatas)
         {
-            var levels = new FilteredElementCollector(doc)
-                       .WhereElementIsNotElementType()
-                       .OfCategory(BuiltInCategory.OST_Levels)
-                       .Cast<Level>()
-                       .ToList();
-
-            var beamTypes = new FilteredElementCollector(doc)
-                       .WhereElementIsElementType()
-                       .OfCategory(BuiltInCategory.OST_StructuralFraming)
-                       .Cast<FamilySymbol>()
-                       .ToList();
+            var levels = new Remodel_GetElem().GetListLevels(doc);
+            var beams = new List<BuiltInCategory>() { BuiltInCategory.OST_StructuralFraming };
+            var beamTypes = new Remodel_GetElem().GetListFamilySymbols(doc, beams);
 
             if (levels.Count > 0 && beamTypes.Count > 0)
             {
@@ -37,7 +29,7 @@ namespace ClassLibrary2.Function
 
         public void CreateBeam(Document doc, ConcreteBeamData beamData, List<Level> levels, List<FamilySymbol> beamTypes)
         {
-            var beamtype = beamTypes.FirstOrDefault(x => x.Name.Equals(beamData.SectionName));
+            var beamtype = beamTypes.FirstOrDefault(x => x.Name.Equals(beamData.Dimensions.SectionName));
             var beamlevel = levels.FirstOrDefault(x => x.Name.Equals(beamData.Level));
 
             if (beamtype != null && beamlevel != null)
@@ -46,12 +38,23 @@ namespace ClassLibrary2.Function
                 {
                     beamtype.Activate();
                 }
-                Curve beamLine = Line.CreateBound(beamData.Point_I, beamData.Point_J);
+                Curve beamLine = Line.CreateBound(beamData.StartPoint.Point, beamData.EndPoint.Point);
                 FamilyInstance beamnew = doc.Create.NewFamilyInstance(beamLine, beamtype, beamlevel, Autodesk.Revit.DB.Structure.StructuralType.Beam);
                 //mỗi khi 1 beam mới đc tạo ra thì gán ngay rebar cover của etabs mình tạo cho beam đó
-                new Remodel_SetRebarCover().SetRebarCover(doc,beamnew,beamData);
-                new Remodel_MarkEtabsElement().SetComment(beamnew,beamData.Name);
-                
+                new Remodel_SetRebarCover().SetRebarCover(doc, beamnew, beamData);
+                new Remodel_MarkEtabsElement().SetComment(beamnew, beamData.Name);
+
+                Parameter elemlength = beamnew.LookupParameter("Length");
+
+                beamData.Length = elemlength.AsDouble();
+                beamData.HostRebar = new RebarSetData();
+                beamData.HostRebar.Host = beamnew;
+
+                Location loc = beamnew.Location;
+                LocationCurve locCur = loc as LocationCurve;
+                Curve curve = locCur.Curve;
+                Line locline = curve as Line;
+                beamData.drawdirection = locline.Direction; // để lấy được chiều vẽ của dầm
             }
         }
     }

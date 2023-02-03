@@ -1,5 +1,5 @@
-﻿using Autodesk.Revit.DB;
-using ClassLibrary2.Data;
+﻿using ClassLibrary2.Data;
+using ClassLibrary2.Factory.EtabDataExtractor;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -53,6 +53,7 @@ namespace ClassLibrary2.UI.ViewModel
 
         //tao itemsource de bind vao listbox
         private ObservableCollection<DataTable> _tables;
+
         public ObservableCollection<DataTable> Tables
         {
             get => _tables;
@@ -63,9 +64,9 @@ namespace ClassLibrary2.UI.ViewModel
             }
         }
 
-
         // gán giá trị và bổ sung bắt sự kiện thay đổi của giá trị bingding của itemselected (listbox) và itemsource (datagrid)
         private DataTable _TableSelected;
+
         public DataTable TableSelected
         {
             get => _TableSelected;
@@ -76,8 +77,8 @@ namespace ClassLibrary2.UI.ViewModel
             }
         }
 
-
         private string _filePath;
+
         public string FilePath
         {
             get => _filePath;
@@ -87,7 +88,6 @@ namespace ClassLibrary2.UI.ViewModel
                 RaisePropertyChange(nameof(FilePath));
             }
         }
-
 
         private void LoadCommandInvoke()
         {
@@ -105,248 +105,22 @@ namespace ClassLibrary2.UI.ViewModel
                 MessageBox.Show(ex.Message + "\n" + ex.StackTrace.ToString());
             }
         }
+
         private void CreateCommandInvoke()
         {
             try
             {
-                
-                //var tablebeamobject = _tables.FirstOrDefault(x => x.TableName.Equals("Beam Object Connectivity"));
-                //DataTable tablebeamob = tablebeamobject;
                 var tablebeamlevel = _tables.FirstOrDefault(x => x.TableName.Equals("Story Definitions"));
-                LevelDatas = LevelReadData(tablebeamlevel); // đưa dữ liệu đọc được (Read) từ file mdb vào list LevelDatas
-                BeamDatas = ReadBeamAll(); // đưa dữ liệu đọc đọc được (Read) từ file mdb vào list BeamDatas
-                ColDatas = ReadColAll();
+                EtabExtractor ex = new EtabExtractor(Tables.ToList());
+                LevelDatas = ex.LevelReadData(tablebeamlevel); // đưa dữ liệu đọc được (Read) từ file mdb vào list LevelDatas
+                ColDatas = ex.ExtractCol();
+                BeamDatas = ex.ExtractBeam();
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message + "\n" + ex.StackTrace.ToString());
             }
         }
-
-        #region Beam ReadData 
-
-        private List<ConcreteBeamData> ReadBeamAll()
-        {
-            List<ConcreteBeamData> beamall = new List<ConcreteBeamData>();
-            var tablebeamobject = _tables.FirstOrDefault(x => x.TableName.Equals("Beam Object Connectivity"));
-
-            foreach (DataRow row in tablebeamobject.Rows)
-            {
-                ConcreteBeamData beam = new ConcreteBeamData();
-                ReadBeamObject(ref beam, row); //nhập vô beam name, level, start, end
-                ReadFlexureDesign(ref beam);  // nhập vô As
-                ReadSectionName(ref beam); // nhập vô section name
-                ReadPointLocation(ref beam); // nhập vô tọa độ start, end
-                ReadDimenson(ref beam); //nhập vào kích thước tiết diện
-                ReadCover(ref beam); //nhập vào lớp bê tông bảo vệ
-
-                beamall.Add(beam);
-            }
-            return beamall;
-        }
-
-        private ConcreteBeamData ReadPointLocation(ref ConcreteBeamData beam)
-        {
-            var tablepoint = _tables.FirstOrDefault(x => x.TableName.Equals("Point Object Connectivity"));
-
-            foreach (DataRow row in tablepoint.Rows)
-            {
-                if (beam.Point_I_ID == row["UniqueName"].ToString())
-                {
-                    beam.Point_I = ConvertPoint(row);
-                }
-                else if (beam.Point_J_ID == row["UniqueName"].ToString())
-                {
-                    beam.Point_J = ConvertPoint(row);
-                }
-            }
-
-            return beam;
-        }
-
-        public XYZ ConvertPoint (DataRow row)
-        {
-            // sử dụng hàm chuyển đổi đơn  vị version cũ nên hiện thông báo, nhưng vẫn chạy được!
-            double x = UnitUtils.ConvertToInternalUnits(Convert.ToDouble(row["X"]), DisplayUnitType.DUT_MILLIMETERS);
-            double y = UnitUtils.ConvertToInternalUnits(Convert.ToDouble(row["Y"]), DisplayUnitType.DUT_MILLIMETERS);
-            double z = UnitUtils.ConvertToInternalUnits(Convert.ToDouble(row["Z"]), DisplayUnitType.DUT_MILLIMETERS);
-            return new XYZ(x, y, z);
-        }
-
-        private ConcreteBeamData ReadSectionName(ref ConcreteBeamData beam) //đọc section name mục đích ban đầu là set family instance cho cấu kiện vừa được vẽ, nhưng thời gian không nhiều nên tạo sẵn family trong project và section name hiện tại chỉ dùng để tham chiếu kích thước tiết diện
-        {
-            var tablesection = _tables.FirstOrDefault(x => x.TableName.Equals("Frame Assignments - Section Properties"));
-
-            foreach (DataRow row in tablesection.Rows)
-            {
-                if (beam.Name == row["UniqueName"].ToString())
-                {
-                    beam.SectionName = row["Section Property"].ToString();
-                }
-            }
-            return beam;
-        }
-
-        private ConcreteBeamData ReadFlexureDesign(ref ConcreteBeamData beam)
-        {
-            var tablesection = _tables.FirstOrDefault(x => x.TableName.Equals("Concrete Beam Flexure Envelope - TCVN 5574-2012"));
-
-            List<double> allAstop = new List<double>();
-            List<double> allAsbot = new List<double>();
-            foreach (DataRow row in tablesection.Rows)
-            {
-                if (beam.Name == row["UniqueName"].ToString())
-                {
-                    allAstop.Add(Convert.ToDouble(row["As Top"]));
-                    allAsbot.Add(Convert.ToDouble(row["As Bot"]));
-                }
-            }
-            beam.AsBottomLongitudinal = allAsbot.Max();
-            beam.AsTopLongitudinal = allAstop.Max();
-            return beam;
-        }
-
-        private ConcreteBeamData ReadCover(ref ConcreteBeamData beam)
-        {
-            var tablecover = _tables.FirstOrDefault(x => x.TableName.Equals("Frame Section Property Definitions - Concrete Beam Reinforcing"));
-
-            foreach (DataRow row in tablecover.Rows)
-            {
-                if (beam.SectionName == row["Name"].ToString())
-                {
-                    beam.TopCover = UnitUtils.ConvertToInternalUnits(Convert.ToDouble(row["Top Cover"]), DisplayUnitType.DUT_MILLIMETERS);
-                    beam.BottomCover = UnitUtils.ConvertToInternalUnits(Convert.ToDouble(row["Bottom Cover"]), DisplayUnitType.DUT_MILLIMETERS);
-
-                }
-            }
-            return beam;
-        }
-
-        private ConcreteBeamData ReadDimenson(ref ConcreteBeamData beam)
-        {
-            var tabledim = _tables.FirstOrDefault(x => x.TableName.Equals("Frame Section Property Definitions - Concrete Rectangular"));
-
-            foreach (DataRow row in tabledim.Rows)
-            {
-                if (beam.SectionName == row["Name"].ToString())
-                {
-                    beam.h = UnitUtils.ConvertToInternalUnits(Convert.ToDouble(row["Depth"]), DisplayUnitType.DUT_MILLIMETERS) ;
-
-                    beam.b = UnitUtils.ConvertToInternalUnits(Convert.ToDouble(row["Width"]), DisplayUnitType.DUT_MILLIMETERS);
-                }
-            }
-
-            return beam;
-        }
-
-        private ConcreteBeamData ReadBeamObject(ref ConcreteBeamData beam, DataRow row)
-        {
-            beam.Name = row["Unique Name"].ToString();
-            beam.Level = row["Story"].ToString();
-            beam.Point_I_ID = row["UniquePtI"].ToString();
-            beam.Point_J_ID = row["UniquePtJ"].ToString();
-            return beam;
-        }
-
-
-        #endregion Beam ReadData 
-
-
-        #region Column Data
-        private List<ConcreteColumnData> ReadColAll()
-        {
-            List<ConcreteColumnData> colall = new List<ConcreteColumnData>();
-            var tablebeamobject = _tables.FirstOrDefault(x => x.TableName.Equals("Column Object Connectivity"));
-
-            foreach (DataRow row in tablebeamobject.Rows)
-            {
-                ConcreteColumnData col = new ConcreteColumnData();
-                ReadColumnObject(ref col, row); //nhập vô beam name, level, start, end
-                ReadColumnSectionName(ref col); // nhập vô section name
-                ReadColumnPointLocation(ref col); // nhập vô tọa độ start, end
-                colall.Add(col);
-            }
-            return colall;
-        }
-
-        private ConcreteColumnData ReadColumnObject(ref ConcreteColumnData col, DataRow row)
-        {
-            col.Name = row["Unique Name"].ToString();
-            col.Level = row["Story"].ToString();
-            col.Point_I_ID = row["UniquePtI"].ToString();
-            return col;
-        }
-
-
-        private ConcreteColumnData ReadColumnSectionName(ref ConcreteColumnData col) //đọc section name mục đích ban đầu là set family instance cho cấu kiện vừa được vẽ, nhưng thời gian không nhiều nên tạo sẵn family trong project và section name hiện tại chỉ dùng để tham chiếu kích thước tiết diện
-        {
-            var tablesection = _tables.FirstOrDefault(x => x.TableName.Equals("Frame Assignments - Section Properties"));
-
-            foreach (DataRow row in tablesection.Rows)
-            {
-                if (col.Name == row["UniqueName"].ToString())
-                {
-                    col.SectionName = row["Section Property"].ToString();
-                }
-            }
-            return col;
-        }
-
-
-        private ConcreteColumnData ReadColumnPointLocation(ref ConcreteColumnData col)
-        {
-            var tablepoint = _tables.FirstOrDefault(x => x.TableName.Equals("Point Object Connectivity"));
-
-            foreach (DataRow row in tablepoint.Rows)
-            {
-                if (col.Point_I_ID == row["UniqueName"].ToString())
-                {
-                    col.Point_I = ConvertPoint(row);
-                }
-                else if (col.Point_J_ID == row["UniqueName"].ToString())
-                {
-                    col.Point_J = ConvertPoint(row);
-                }
-            }
-
-            return col;
-        }
-        
-        #endregion Column Data
-
-        #region Level ReadData
-
-        private List<LevelData> LevelReadData(DataTable table)
-        {
-            var levelclass = new List<LevelData>();
-            double elev = 0;
-            LevelData baseLevel = new LevelData();
-            baseLevel.Elevation = elev;
-            baseLevel.Name = "Base";
-            levelclass.Add(baseLevel);
-
-            var accendingRows = table.Rows
-                                .Cast<DataRow>()
-                                .OrderBy(r => r["Name"].ToString());
-            foreach (DataRow row in accendingRows)
-            {
-                string height = row["Height"].ToString();
-                //double height2 = Convert.ToDouble( row["Height"]);
-                if (double.TryParse(height, out double val))
-                {
-                    elev += val;
-
-                    LevelData levelData = new LevelData();
-                    levelData.Elevation = UnitUtils.ConvertToInternalUnits(elev, DisplayUnitType.DUT_MILLIMETERS);
-                    levelData.Name = row["Name"].ToString();
-
-                    levelclass.Add(levelData);
-                };
-            }
-            return levelclass;
-        }
-
-        #endregion Level ReadData
 
         #region Load .mdb file
 

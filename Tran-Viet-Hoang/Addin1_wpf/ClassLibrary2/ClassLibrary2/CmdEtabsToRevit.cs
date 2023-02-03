@@ -8,6 +8,7 @@ using ClassLibrary2.UI.Views;
 using System;
 using System.Collections.Generic;
 using System.Windows;
+using Application = Autodesk.Revit.ApplicationServices.Application;
 
 namespace ClassLibrary2
 {
@@ -18,6 +19,7 @@ namespace ClassLibrary2
         {
             UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
+            Application app = uiapp.Application;
             Document doc = uidoc.Document;
 
             try
@@ -37,19 +39,20 @@ namespace ClassLibrary2
                 {
                     new Remodel_CreateLevel().CreateLevel(commandData, levelData.Name, levelData.Elevation);
                 }
-
+               
                 //vẽ dầm kèm set rebarcover
                 new Remodel_CreateBeam().CreateBeams(doc, BeamModelData);
+
                 new Remodel_CreateColumn().CreateCols(doc, ColumnModelData, LevelModelData);
 
-                //vẽ 1 stirrup ban đầu cho cột và dầm đồng thời set lại giá trị cho stirrup đó để phù hợp với kích thước cấu kiện
-                new Remodel_SetColumnStirrup().drawcolstirrup(doc, ColumnModelData);
-                new Remodel_SetBeamStirrup().drawbeamstirrup(doc, BeamModelData);
+                ////vẽ 1 stirrup ban đầu cho cột và dầm đồng thời set lại giá trị cho stirrup đó để phù hợp với kích thước cấu kiện
+                //new Remodel_SetColumnStirrup().drawcolstirrup(doc, ColumnModelData);
+                //new Remodel_SetBeamStirrup().drawbeamstirrup(doc, BeamModelData);
 
-                //sau khi set giá trị mới cho stirrup thì move stirrup về nằm gọn trong cấu kiện
-                new Remodel_MoveStirrup().MoveStirrup(doc, ColumnModelData, BeamModelData);
+                ////sau khi set giá trị mới cho stirrup thì move stirrup về nằm gọn trong cấu kiện
+                //new Remodel_MoveStirrup().MoveStirrup(doc, ColumnModelData, BeamModelData);
 
-                new Remodel_SetBeamStandard().SetAllBeamStandard(doc, BeamModelData);
+                //new Remodel_SetBeamStandard().SetAllBeamStandard(doc, BeamModelData);
             }
             catch (Exception ex)
             {

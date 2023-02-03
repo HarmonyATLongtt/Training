@@ -76,16 +76,22 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\FrameData\ConcreteColumnData.cs" />
-    <Compile Include="Data\FrameData\AllFrameData.cs" />
+    <Compile Include="Data\FrameData\ConcreteHostData.cs" />
+    <Compile Include="Data\FrameData\CoverData.cs" />
+    <Compile Include="Data\FrameData\elemDimensionData.cs" />
+    <Compile Include="Data\FrameData\elemReinforcing.cs" />
+    <Compile Include="Data\FrameData\PointData.cs" />
     <Compile Include="Data\RebarSetData\RebarSetData.cs" />
     <Compile Include="CmdEtabsToRevit.cs" />
     <Compile Include="Data\FrameData\ConcreteBeamData.cs" />
     <Compile Include="Data\LevelData\LevelData.cs" />
+    <Compile Include="Factory\EtabDataExtractor\EtabExtractor.cs" />
+    <Compile Include="Factory\RebarSet\RebarSet.cs" />
+    <Compile Include="Function\Remodel_GetElem.cs" />
     <Compile Include="Function\Remodel_CreateColumn.cs" />
     <Compile Include="Function\Remodel_SetBeamStirrup.cs" />
     <Compile Include="Function\Remodel_SetColumnStirrup.cs" />
     <Compile Include="Function\Remodel_GetStirrup.cs" />
-    <Compile Include="Function\Remodel_GetFrame.cs" />
     <Compile Include="Function\Remodel_MoveStirrup.cs" />
     <Compile Include="Function\Remodel_SetBeamStandard.cs" />
     <Compile Include="Function\Remodel_CaculateRebar.cs" />
