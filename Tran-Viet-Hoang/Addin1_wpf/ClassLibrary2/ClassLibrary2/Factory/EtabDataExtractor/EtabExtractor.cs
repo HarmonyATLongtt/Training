@@ -1,7 +1,6 @@
 ﻿using Autodesk.Revit.DB;
 using ClassLibrary2.Data;
 using ClassLibrary2.Data.FrameData;
-using ClassLibrary2.UI.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -12,35 +11,15 @@ namespace ClassLibrary2.Factory.EtabDataExtractor
     public class EtabExtractor
     {
         private List<DataTable> _tables;
-     
+
         public EtabExtractor(List<DataTable> tables)
         {
             _tables = tables;
         }
 
-        public List<ConcreteColumnData> ExtractCol()
-        {
-            var elemDatas = new List<ConcreteColumnData>();
-
-            var cols = ReadColAll();
-            elemDatas.AddRange(cols);
-
-            return elemDatas;
-        }
-
-        public List<ConcreteBeamData> ExtractBeam()
-        {
-            var elemDatas = new List<ConcreteBeamData>();
-
-            var beams = ReadBeamAll();
-            elemDatas.AddRange(beams);
-
-            return elemDatas;
-        }
-
         #region Beam ReadData
 
-        private List<ConcreteBeamData> ReadBeamAll()
+        public List<ConcreteBeamData> ExtractBeam()
         {
             List<ConcreteBeamData> beamall = new List<ConcreteBeamData>();
             var tablebeamobject = _tables.FirstOrDefault(x => x.TableName.Equals("Beam Object Connectivity"));
@@ -57,9 +36,9 @@ namespace ClassLibrary2.Factory.EtabDataExtractor
                 // nhập vô tọa độ start, end
                 ReadBeamPointLocation(ref beam);
                 //nhập vào kích thước tiết diện
-                ReadBeamDimenson(ref beam); 
+                ReadBeamDimenson(ref beam);
                 //nhập vào lớp bê tông bảo vệ
-                ReadBeamCover(ref beam); 
+                ReadBeamCover(ref beam);
 
                 beamall.Add(beam);
             }
@@ -76,15 +55,6 @@ namespace ClassLibrary2.Factory.EtabDataExtractor
                 beam.StartPoint.Point = ConvertPoint(rowI);
                 beam.EndPoint.Point = ConvertPoint(rowJ);
             }
-        }
-
-        public XYZ ConvertPoint(DataRow row)
-        {
-            // sử dụng hàm chuyển đổi đơn  vị version cũ nên hiện thông báo, nhưng vẫn chạy được!
-            double x = UnitUtils.ConvertToInternalUnits(Convert.ToDouble(row["X"]), DisplayUnitType.DUT_MILLIMETERS);
-            double y = UnitUtils.ConvertToInternalUnits(Convert.ToDouble(row["Y"]), DisplayUnitType.DUT_MILLIMETERS);
-            double z = UnitUtils.ConvertToInternalUnits(Convert.ToDouble(row["Z"]), DisplayUnitType.DUT_MILLIMETERS);
-            return new XYZ(x, y, z);
         }
 
         private void ReadBeamSectionName(ref ConcreteBeamData beam) //đọc section name mục đích ban đầu là set family instance cho cấu kiện vừa được vẽ, nhưng thời gian không nhiều nên tạo sẵn family trong project và section name hiện tại chỉ dùng để tham chiếu kích thước tiết diện
@@ -125,7 +95,7 @@ namespace ClassLibrary2.Factory.EtabDataExtractor
                 beam.Covers.Bottom = UnitUtils.ConvertToInternalUnits(Convert.ToDouble(row["Bottom Cover"]), DisplayUnitType.DUT_MILLIMETERS);
             }
         }
-        
+
         private void ReadBeamDimenson(ref ConcreteBeamData beam)
         {
             var row = FindRow("Frame Section Property Definitions - Concrete Rectangular", "Name", beam.Dimensions.SectionName);
@@ -143,14 +113,14 @@ namespace ClassLibrary2.Factory.EtabDataExtractor
             beam.Level = row["Story"].ToString();
             beam.StartPoint.Id = row["UniquePtI"].ToString();
             beam.EndPoint.Id = row["UniquePtJ"].ToString();
-            beam.Length = Convert.ToDouble(row["Length"])/304.8;
+            beam.Length = Convert.ToDouble(row["Length"]) / 304.8;
         }
 
         #endregion Beam ReadData
 
         #region Column Data
 
-        private List<ConcreteColumnData> ReadColAll()
+        public List<ConcreteColumnData> ExtractCol()
         {
             List<ConcreteColumnData> colall = new List<ConcreteColumnData>();
             var tablebeamobject = _tables.FirstOrDefault(x => x.TableName.Equals("Column Object Connectivity"));
@@ -164,14 +134,12 @@ namespace ClassLibrary2.Factory.EtabDataExtractor
                 ReadColumnSectionName(ref col);
                 // nhập vô tọa độ start, end
                 ReadColumnPointLocation(ref col);
-                // nhập vô kích thước tiết diện 
+                // nhập vô kích thước tiết diện
                 ReadColumnDimenson(ref col);
                 colall.Add(col);
             }
             return colall;
         }
-
-
 
         private void ReadColumnDimenson(ref ConcreteColumnData col)
         {
@@ -194,7 +162,6 @@ namespace ClassLibrary2.Factory.EtabDataExtractor
             col.EndPoint = null;
             col.StartPoint.Id = row["UniquePtI"].ToString();
             col.Length = Convert.ToDouble(row["Length"]) / 304.8;
-
         }
 
         private void ReadColumnSectionName(ref ConcreteColumnData col) //đọc section name mục đích ban đầu là set family instance cho cấu kiện vừa được vẽ, nhưng thời gian không nhiều nên tạo sẵn family trong project và section name hiện tại chỉ dùng để tham chiếu kích thước tiết diện
@@ -220,12 +187,11 @@ namespace ClassLibrary2.Factory.EtabDataExtractor
 
         public List<LevelData> LevelReadData(DataTable table)
         {
-            var levelclass = new List<LevelData>();
             double elev = 0;
-            LevelData baseLevel = new LevelData();
-            baseLevel.Elevation = elev;
-            baseLevel.Name = "Base";
-            levelclass.Add(baseLevel);
+            var levelclass = new List<LevelData>()
+            {
+                new LevelData("Base", elev),
+            };
 
             var accendingRows = table.Rows
                                 .Cast<DataRow>()
@@ -237,18 +203,17 @@ namespace ClassLibrary2.Factory.EtabDataExtractor
                 if (double.TryParse(height, out double val))
                 {
                     elev += val;
-
-                    LevelData levelData = new LevelData();
-                    levelData.Elevation = UnitUtils.ConvertToInternalUnits(elev, DisplayUnitType.DUT_MILLIMETERS);
-                    levelData.Name = row["Name"].ToString();
-
-                    levelclass.Add(levelData);
+                    var levelElev = UnitUtils.ConvertToInternalUnits(elev, DisplayUnitType.DUT_MILLIMETERS);
+                    var name = row["Name"].ToString();
+                    levelclass.Add(new LevelData(name,levelElev));
                 };
             }
             return levelclass;
         }
 
         #endregion Level ReadData
+
+        #region utils
 
         private DataRow FindRow(string tableName, string rowName, string queryName)
         {
@@ -263,25 +228,16 @@ namespace ClassLibrary2.Factory.EtabDataExtractor
             }
             return null;
         }
-    }
 
-    public class Vd
-    {
-        public void foo()
+        public XYZ ConvertPoint(DataRow row)
         {
-            // doc etab
-            MainViewModel model = new MainViewModel();
-            EtabExtractor ex = new EtabExtractor(model.Tables.ToList());
-            List<ConcreteColumnData> colDatas = ex.ExtractCol();
-            List<ConcreteBeamData> beamDatas = ex.ExtractBeam();
-
-            // tinh thep
-
-            // ve
-
-            // ve host
-
-            // ve thep
+            // sử dụng hàm chuyển đổi đơn  vị version cũ nên hiện thông báo, nhưng vẫn chạy được!
+            double x = UnitUtils.ConvertToInternalUnits(Convert.ToDouble(row["X"]), DisplayUnitType.DUT_MILLIMETERS);
+            double y = UnitUtils.ConvertToInternalUnits(Convert.ToDouble(row["Y"]), DisplayUnitType.DUT_MILLIMETERS);
+            double z = UnitUtils.ConvertToInternalUnits(Convert.ToDouble(row["Z"]), DisplayUnitType.DUT_MILLIMETERS);
+            return new XYZ(x, y, z);
         }
+
+        #endregion utils
     }
 }

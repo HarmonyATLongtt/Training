@@ -26,33 +26,35 @@ namespace ClassLibrary2
             {
                 MainView view = new MainView();
                 view.DataContext = new MainViewModel();
-                view.ShowDialog();
-
-                MainViewModel vm = view.DataContext as MainViewModel;
-                var tablebeamobject = vm.Tables;
-                List<LevelData> LevelModelData = vm.LevelDatas;
-                List<ConcreteBeamData> BeamModelData = vm.BeamDatas;
-                List<ConcreteColumnData> ColumnModelData = vm.ColDatas;
-
-                //tạo hệ thống level
-                foreach (LevelData levelData in LevelModelData)
+                if (view.ShowDialog() == true)
                 {
-                    new Remodel_CreateLevel().CreateLevel(commandData, levelData.Name, levelData.Elevation);
+
+                    MainViewModel vm = view.DataContext as MainViewModel;
+                    var tablebeamobject = vm.Tables;
+                    List<LevelData> LevelModelData = vm.LevelDatas;
+                    List<ConcreteBeamData> BeamModelData = vm.BeamDatas;
+                    List<ConcreteColumnData> ColumnModelData = vm.ColDatas;
+
+                    //tạo hệ thống level
+                    foreach (LevelData levelData in LevelModelData)
+                    {
+                        new Remodel_CreateLevel().CreateLevel(commandData, levelData.Name, levelData.Elevation);
+                    }
+
+                    //vẽ dầm kèm set rebarcover
+                    new Remodel_CreateBeam().CreateBeams(doc, BeamModelData);
+
+                    new Remodel_CreateColumn().CreateCols(doc, ColumnModelData, LevelModelData);
+
+                    ////vẽ 1 stirrup ban đầu cho cột và dầm đồng thời set lại giá trị cho stirrup đó để phù hợp với kích thước cấu kiện
+                    //new Remodel_SetColumnStirrup().drawcolstirrup(doc, ColumnModelData);
+                    //new Remodel_SetBeamStirrup().drawbeamstirrup(doc, BeamModelData);
+
+                    ////sau khi set giá trị mới cho stirrup thì move stirrup về nằm gọn trong cấu kiện
+                    //new Remodel_MoveStirrup().MoveStirrup(doc, ColumnModelData, BeamModelData);
+
+                    //new Remodel_SetBeamStandard().SetAllBeamStandard(doc, BeamModelData);
                 }
-               
-                //vẽ dầm kèm set rebarcover
-                new Remodel_CreateBeam().CreateBeams(doc, BeamModelData);
-
-                new Remodel_CreateColumn().CreateCols(doc, ColumnModelData, LevelModelData);
-
-                ////vẽ 1 stirrup ban đầu cho cột và dầm đồng thời set lại giá trị cho stirrup đó để phù hợp với kích thước cấu kiện
-                //new Remodel_SetColumnStirrup().drawcolstirrup(doc, ColumnModelData);
-                //new Remodel_SetBeamStirrup().drawbeamstirrup(doc, BeamModelData);
-
-                ////sau khi set giá trị mới cho stirrup thì move stirrup về nằm gọn trong cấu kiện
-                //new Remodel_MoveStirrup().MoveStirrup(doc, ColumnModelData, BeamModelData);
-
-                //new Remodel_SetBeamStandard().SetAllBeamStandard(doc, BeamModelData);
             }
             catch (Exception ex)
             {

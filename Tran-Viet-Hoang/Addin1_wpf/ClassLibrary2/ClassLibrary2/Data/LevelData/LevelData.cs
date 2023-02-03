@@ -4,5 +4,11 @@
     {
         public double Elevation { get; set; }
         public string Name { get; set; }
+
+        public LevelData(string name, double elev)
+        {
+            Name = name;
+            Elevation = elev;
+        }
     }
 }

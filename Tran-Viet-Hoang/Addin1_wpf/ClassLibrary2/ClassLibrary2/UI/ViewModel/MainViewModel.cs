@@ -24,7 +24,7 @@ namespace ClassLibrary2.UI.ViewModel
         public MainViewModel()
         {
             LoadCommand = new RelayCommand(LoadCommandInvoke);
-            CreateCommand = new RelayCommand(CreateCommandInvoke);
+            CreateCommand = new RelayCommand<object>(CreateCommandInvoke);
             CloseCommand = new HelperCommand(UserClose, CanClose);
             //CreateCommand = new HelperCommand(ListboxTables, CanClose);
         }
@@ -106,20 +106,25 @@ namespace ClassLibrary2.UI.ViewModel
             }
         }
 
-        private void CreateCommandInvoke()
+        private void CreateCommandInvoke(object parameter)
         {
-            try
+            if (parameter is Window window)
             {
-                var tablebeamlevel = _tables.FirstOrDefault(x => x.TableName.Equals("Story Definitions"));
-                EtabExtractor ex = new EtabExtractor(Tables.ToList());
-                LevelDatas = ex.LevelReadData(tablebeamlevel); // đưa dữ liệu đọc được (Read) từ file mdb vào list LevelDatas
-                ColDatas = ex.ExtractCol();
-                BeamDatas = ex.ExtractBeam();
+                window.DialogResult = true;
+                window.Close();
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message + "\n" + ex.StackTrace.ToString());
-            }
+            //try
+            //{
+            //    var tablebeamlevel = _tables.FirstOrDefault(x => x.TableName.Equals("Story Definitions"));
+            //    EtabExtractor ex = new EtabExtractor(Tables.ToList());
+            //    LevelDatas = ex.LevelReadData(tablebeamlevel); // đưa dữ liệu đọc được (Read) từ file mdb vào list LevelDatas
+            //    ColDatas = ex.ExtractCol();
+            //    BeamDatas = ex.ExtractBeam();
+            //}
+            //catch (Exception ex)
+            //{
+            //    MessageBox.Show(ex.Message + "\n" + ex.StackTrace.ToString());
+            //}
         }
 
         #region Load .mdb file

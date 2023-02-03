@@ -58,7 +58,7 @@
             <Button Content="Cancel"   Command="{Binding CloseCommand}"
                     CommandParameter="{Binding ElementName=window, Mode=OneWay}" />
             <Button Content="Create" IsDefault="True" Command="{Binding CreateCommand}"
-                    CommandParameter="{Binding ElementName=TablesList, Mode=OneWay}" />
+                    CommandParameter="{Binding ElementName=window, Mode=OneWay}" />
         </StackPanel>
     </Grid>
 </Window>

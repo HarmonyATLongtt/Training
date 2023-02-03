@@ -27,7 +27,10 @@ namespace ClassLibrary2.Function
             }
         }
 
-        public void CreateBeam(Document doc, ConcreteBeamData beamData, List<Level> levels, List<FamilySymbol> beamTypes)
+        public void CreateBeam(Document doc,
+                               ConcreteBeamData beamData,
+                               List<Level> levels,
+                               List<FamilySymbol> beamTypes)
         {
             var beamtype = beamTypes.FirstOrDefault(x => x.Name.Equals(beamData.Dimensions.SectionName));
             var beamlevel = levels.FirstOrDefault(x => x.Name.Equals(beamData.Level));
