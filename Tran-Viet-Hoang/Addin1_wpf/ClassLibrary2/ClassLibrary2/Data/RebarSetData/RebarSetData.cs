@@ -14,11 +14,11 @@ namespace ClassLibrary2.Data
         public Rebar ColumnStirrup { get; set; }
         public Rebar BeamStirrup { get; set; }
 
-        public RebarStyle standard { get; set; }
+        public RebarStyle steelstyle { get; set; }
 
         public RebarSetData()
         {
-            standard = RebarStyle.Standard;
+            steelstyle = RebarStyle.Standard;
         }
     }
 }

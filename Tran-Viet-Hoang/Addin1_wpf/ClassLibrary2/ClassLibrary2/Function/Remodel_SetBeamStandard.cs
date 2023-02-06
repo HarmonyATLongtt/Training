@@ -36,8 +36,8 @@ namespace ClassLibrary2.Function
 
             double stirrup = stirrupdiameter.LookupParameter("Bar Diameter").AsDouble();
             double cover = beam.Covers.Side;
+
             FamilyInstance elem = beam.HostRebar.HostData.Host;
-           
 
             XYZ origintop = new Remodel_GetBeamStandardOrigin().TopBeamStandardOrigin(elem, cover, stirrup);
             XYZ originbot = new Remodel_GetBeamStandardOrigin().BotBeamStandardOrigin(elem, cover, stirrup);

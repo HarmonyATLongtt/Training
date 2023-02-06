@@ -48,10 +48,10 @@ namespace ClassLibrary2.Function
                 new Remodel_MarkEtabsElement().SetComment(beamnew, beamData.Name);
 
                 Parameter elemlength = beamnew.LookupParameter("Length");
-
                 beamData.Length = elemlength.AsDouble();
-                beamData.HostRebar = new RebarSetData();
-                beamData.HostRebar.HostData.Host = beamnew;
+
+                beamData.Host = beamnew;
+
 
                 Location loc = beamnew.Location;
                 LocationCurve locCur = loc as LocationCurve;

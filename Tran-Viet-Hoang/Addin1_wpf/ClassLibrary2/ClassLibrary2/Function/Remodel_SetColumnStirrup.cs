@@ -25,7 +25,7 @@ namespace ClassLibrary2.Function
                 trans.Start();
                 foreach (var coletabs in cols)
                 {
-                    Rebar barnew = stirrupcolumnbefore(coletabs.HostRebar.HostData.Host, doc, shape, type, cover);
+                    Rebar barnew = stirrupcolumnbefore(coletabs.Host as FamilyInstance, doc, shape, type, cover);
                     Parameter tie_B = barnew.LookupParameter("B");
                     Parameter tie_C = barnew.LookupParameter("C");
                     Parameter tie_D = barnew.LookupParameter("D");

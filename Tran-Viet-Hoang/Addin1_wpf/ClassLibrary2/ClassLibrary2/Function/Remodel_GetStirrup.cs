@@ -44,7 +44,7 @@ namespace ClassLibrary2.Function
                     rebar.HostData.HostLength = beam.Length;
                     rebar.HostData.Host_h = beam.Dimensions.h;
                     rebar.HostData.Host_b = beam.Dimensions.b;
-                    rebar.LocationData.RebarOrigin = FrameStirrupOrigin(beam, beam.Covers.Side);
+                    rebar.LocationData.RebarOrigin = FrameStirrupOrigin(beam);
                     rebars.Add(rebar);
                 }
             }
@@ -52,25 +52,30 @@ namespace ClassLibrary2.Function
         }
 
         // Hàm lấy origin ban đầu về cho stirrup của dầm
-        public XYZ FrameStirrupOrigin(ConcreteBeamData beametabs, double cover)
+        public XYZ FrameStirrupOrigin(ConcreteBeamData beametabs)
         {
+            beametabs.HostRebar = new RebarSetData();
+            beametabs.HostRebar.HostData = new RebarHostData();
+            double coverbot = beametabs.Covers.Top;
+            double coverside = beametabs.Covers.Side;
             //Lấy hướng vẽ của cấu kiện để biết là sẽ vẽ thép cho cấu kiện theo phương X hay pương Y
 
             XYZ xVec = beametabs.drawdirection; // để lấy được chiều vẽ của dầm
-
-            BoundingBoxXYZ boundingbox = beametabs.HostRebar.HostData.Host.get_BoundingBox(null);
+            FamilyInstance ins = beametabs.Host as FamilyInstance;
+            BoundingBoxXYZ boundingbox = ins.get_BoundingBox(null);
+          
 
             XYZ origin = XYZ.Zero;
 
             if (Math.Abs(xVec.X) > Math.Abs(xVec.Y))
             {
                 //Nếu dầm được vẽ theo phương X, thì phương X của family thép đai sẽ map vào phương Y
-                origin = new XYZ(boundingbox.Min.X + cover, boundingbox.Min.Y + cover, boundingbox.Min.Z + cover);
+                origin = new XYZ(boundingbox.Min.X + coverside, boundingbox.Min.Y + coverside, boundingbox.Min.Z + coverbot);
             }
             else if (Math.Abs(xVec.X) < Math.Abs(xVec.Y))
             {
                 //Nếu dầm được vẽ theo phương Y, thì phương X của family thép đai sẽ map vào phương X
-                origin = new XYZ(boundingbox.Min.X + cover, boundingbox.Max.Y - cover, boundingbox.Min.Z + cover);
+                origin = new XYZ(boundingbox.Min.X + coverside, boundingbox.Max.Y - coverside, boundingbox.Min.Z + coverbot);
             }
             return origin;
         }

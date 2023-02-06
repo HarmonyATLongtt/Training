@@ -7,8 +7,6 @@ namespace ClassLibrary2.Function
 {
     public class Remodel_CreateColumn
     {
-       
-
         public void CreateCols(Document doc, List<ConcreteColumnData> ColDatas, List<LevelData> LLevels)
         {
             var utils = new Remodel_GetElem();
@@ -16,8 +14,6 @@ namespace ClassLibrary2.Function
 
             var cols = new List<BuiltInCategory>() { BuiltInCategory.OST_StructuralColumns };
             var colTypes = utils.GetListFamilySymbols(doc, cols);
-
-         
 
             if (collevels.Count > 0 && colTypes.Count > 0)
             {
@@ -49,11 +45,11 @@ namespace ClassLibrary2.Function
 
                 Parameter elemlength = col.LookupParameter("Length");
 
-                colData.HostRebar = new RebarSetData();
                 colData.Dimensions.b = col.Symbol.LookupParameter("b").AsDouble();
                 colData.Dimensions.h = col.Symbol.LookupParameter("h").AsDouble();
-                colData.HostRebar.HostData.Host = col;
                 colData.Length = elemlength.AsDouble();
+
+                colData.Host= col;
 
                 Parameter coltoppara = col.LookupParameter("Top Level");
                 Parameter coltopoffsetpara = col.LookupParameter("Top Offset");

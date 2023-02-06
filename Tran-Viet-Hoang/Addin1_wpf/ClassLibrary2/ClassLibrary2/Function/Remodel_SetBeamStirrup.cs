@@ -13,18 +13,14 @@ namespace ClassLibrary2.Function
         public void drawbeamstirrup(Document doc, List<ConcreteBeamData> beams)
         {
             double cover = new ConcreteHostData().Covers.Side;
-            string rebartype = "8M";
-            string rebarshape = "M_T1";
-
-            RebarShape shape = new Remodel_GetElem().GetRebarShape(doc, rebarshape);
-            RebarBarType type = new Remodel_GetElem().GetRebarBarType(doc, rebartype);
+          
 
             using (Transaction trans = new Transaction(doc, "create beam stirrup"))
             {
                 trans.Start();
                 foreach (var beametabs in beams)
                 {
-                    Rebar barnew = stirrupbeambefore(beametabs, doc, shape, type, cover);
+                    Rebar barnew = stirrupbeambefore(beametabs, doc);
                     Parameter tie_B = barnew.LookupParameter("B");
                     Parameter tie_C = barnew.LookupParameter("C");
                     Parameter tie_D = barnew.LookupParameter("D");
@@ -43,8 +39,15 @@ namespace ClassLibrary2.Function
         }
 
         //Hàm tạo 1 stirrup ban đầu cho 1 dầm
-        public Rebar stirrupbeambefore(ConcreteBeamData beametabs, Document doc, RebarShape shape, RebarBarType type, double cover)
+        public Rebar stirrupbeambefore(ConcreteBeamData beametabs, Document doc )
         {
+
+            string rebartype = "8M";
+            string rebarshape = "M_T1";
+
+            RebarShape shape = new Remodel_GetElem().GetRebarShape(doc, rebarshape);
+            RebarBarType type = new Remodel_GetElem().GetRebarBarType(doc, rebartype);
+
             //Lấy hướng vẽ của cấu kiện để biết là sẽ vẽ thép cho cấu kiện theo phương X hay pương Y
             XYZ xVec = beametabs.drawdirection; // để lấy được chiều vẽ của dầm
             //khai báo giá trị other cover, để xác định chính xác length của thép
@@ -60,8 +63,12 @@ namespace ClassLibrary2.Function
                 //Nếu dầm được vẽ theo phương Y, thì phương X của family thép đai sẽ map vào phương X
                 xVec = new XYZ(1, 0, 0);
             }
-            XYZ origin = new Remodel_GetStirrup().FrameStirrupOrigin(beametabs, cover);
-            Rebar rebar = Rebar.CreateFromRebarShape(doc, shape, type, beametabs.HostRebar.HostData.Host, origin, xVec, yVec);
+            XYZ origin = new Remodel_GetStirrup().FrameStirrupOrigin(beametabs);
+            Rebar rebar = Rebar.CreateFromRebarShape(doc, 
+                beametabs.Stirrup_Tie.ShapeData.Shape,
+                beametabs.Stirrup_Tie.DiameterData.Rebartype, 
+                beametabs.Host,
+                origin, xVec, yVec);
             return rebar;
         }
     }
