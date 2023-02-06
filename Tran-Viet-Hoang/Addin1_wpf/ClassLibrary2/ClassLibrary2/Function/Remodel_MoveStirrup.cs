@@ -27,17 +27,17 @@ namespace ClassLibrary2.Function
                     XYZ origin = min + XYZ.BasisX * cover + XYZ.BasisY * cover + XYZ.BasisZ * cover;
 
                     // lấy vị trí điểm gốc mới
-                    BoundingBoxXYZ boundingboxnew = stirrup.ColumnStirrup.get_BoundingBox(null);
+                    BoundingBoxXYZ boundingboxnew = stirrup.Rebar.get_BoundingBox(null);
                     XYZ origin1 = boundingboxnew.Transform.OfPoint(boundingboxnew.Min);
 
                     // tạo vect di chuyển từ vị trí mới về vị trí cũ
                     XYZ vect = origin - origin1;
 
                     // di chuyển thép đai theo vector vừa tạo
-                    ElementTransformUtils.MoveElement(doc, stirrup.ColumnStirrup.Id, vect);
+                    ElementTransformUtils.MoveElement(doc, stirrup.Rebar.Id, vect);
 
                     // set spacing cho thép đai sau khi thép đai trở về đúng vị trí
-                    stirrup.ColumnStirrup.GetShapeDrivenAccessor().SetLayoutAsMaximumSpacing(250 / 304.8, stirrup.HostData.HostLength, true, true, false);
+                    stirrup.Rebar.GetShapeDrivenAccessor().SetLayoutAsMaximumSpacing(250 / 304.8, stirrup.HostData.HostLength, true, true, false);
                 }
                 //dầm
                 foreach (var stirrup in beamstirrups)

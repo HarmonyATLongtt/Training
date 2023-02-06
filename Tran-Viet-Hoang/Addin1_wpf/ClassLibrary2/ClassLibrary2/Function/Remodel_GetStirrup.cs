@@ -18,7 +18,7 @@ namespace ClassLibrary2.Function
                 if (stirrup != null)
                 {
                     RebarSetData rebar = new RebarSetData();
-                    rebar.ColumnStirrup = stirrup;
+                    rebar.Rebar = stirrup;
                     rebar.HostData.HostLength = col.Length;
                     rebar.HostData.Host_h = col.Dimensions.h;
                     rebar.HostData.Host_b = col.Dimensions.b;

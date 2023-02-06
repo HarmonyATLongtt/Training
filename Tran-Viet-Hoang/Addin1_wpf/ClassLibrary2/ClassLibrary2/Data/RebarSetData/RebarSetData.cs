@@ -4,21 +4,17 @@ namespace ClassLibrary2.Data
 {
     public class RebarSetData
     {
-        public RebarDiameterData DiameterData { get; set; }
-        public RebarHostData HostData { get; set; }
+        public RebarBarType Rebartype { get; set; }
         public RebarLayoutData LayoutData { get; set; }
         public RebarShapeData ShapeData { get; set; }
-        public RebarStyleData StyleData { get; set; }
 
         public RebarLocationData LocationData { get; set; }
-        public Rebar ColumnStirrup { get; set; }
-        public Rebar BeamStirrup { get; set; }
+        public Rebar Rebar { get; set; }
 
-        public RebarStyle steelstyle { get; set; }
+        public RebarStyle Style { get; set; }
 
         public RebarSetData()
         {
-            steelstyle = RebarStyle.Standard;
         }
     }
 }

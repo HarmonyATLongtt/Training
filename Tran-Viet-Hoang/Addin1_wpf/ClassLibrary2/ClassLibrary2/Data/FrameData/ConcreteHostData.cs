@@ -5,13 +5,8 @@ namespace ClassLibrary2.Data.FrameData
 {
     public class ConcreteHostData
     {
-        #region old
-
-
         public XYZ drawdirection { get; set; }
         public RebarSetData HostRebar { get; set; }
-
-        #endregion old
 
         #region new
 

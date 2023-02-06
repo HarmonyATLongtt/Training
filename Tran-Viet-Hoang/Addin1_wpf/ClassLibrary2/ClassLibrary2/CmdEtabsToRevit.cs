@@ -3,6 +3,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using ClassLibrary2.Data;
 using ClassLibrary2.Factory.EtabDataExtractor;
+using ClassLibrary2.Factory.RebarSet;
 using ClassLibrary2.Function;
 using ClassLibrary2.UI.ViewModel;
 using ClassLibrary2.UI.Views;
@@ -46,6 +47,14 @@ namespace ClassLibrary2
                     //vẽ dầm kèm set rebarcover
                     new Remodel_CreateBeam().CreateBeams(doc, BeamModelData);
                     new Remodel_CreateColumn().CreateCols(doc, ColumnModelData, LevelModelData);
+
+                    // tinhh toan rebar
+                    RebarSet rebarFactory = new RebarSet(doc);
+                    foreach (var beam in BeamModelData)
+                        beam.Rebars = rebarFactory.CalculateBeamRebar(beam);
+
+                    foreach (var col in ColumnModelData)
+                        col.Rebars = rebarFactory.CalculateColumnRebar(col);
 
                     //vẽ 1 stirrup ban đầu cho cột và dầm đồng thời set lại giá trị cho stirrup đó để phù hợp với kích thước cấu kiện
                     new Remodel_SetColumnStirrup().drawcolstirrup(doc, ColumnModelData);

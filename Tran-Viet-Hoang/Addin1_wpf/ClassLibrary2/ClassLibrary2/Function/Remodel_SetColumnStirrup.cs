@@ -3,6 +3,7 @@ using Autodesk.Revit.DB.Structure;
 using ClassLibrary2.Data;
 using System.Collections.Generic;
 using ClassLibrary2.Data.FrameData;
+using System.Linq;
 
 namespace ClassLibrary2.Function
 {
@@ -26,18 +27,28 @@ namespace ClassLibrary2.Function
                 foreach (var coletabs in cols)
                 {
                     Rebar barnew = stirrupcolumnbefore(coletabs.Host as FamilyInstance, doc, shape, type, cover);
-                    Parameter tie_B = barnew.LookupParameter("B");
-                    Parameter tie_C = barnew.LookupParameter("C");
-                    Parameter tie_D = barnew.LookupParameter("D");
-                    Parameter tie_E = barnew.LookupParameter("E");
+                    var segments = coletabs.Rebars.Where(x => x.Style == RebarStyle.StirrupTie).First().ShapeData.Segments;
+                    foreach(var segData in segments)
+                    {
+                        Parameter para = barnew.LookupParameter(segData.Key);
+                        if (para != null && !para.IsReadOnly)
+                            para.Set(segData.Value);
+                    }
 
-                    double B_D = coletabs.Dimensions.b - 2 * cover;
-                    tie_B.Set(B_D);
-                    tie_D.Set(B_D);
 
-                    double C_E = coletabs.Dimensions.h - 2 * cover;
-                    tie_C.Set(C_E);
-                    tie_E.Set(C_E);
+
+                    //Parameter tie_B = barnew.LookupParameter("B");
+                    //Parameter tie_C = barnew.LookupParameter("C");
+                    //Parameter tie_D = barnew.LookupParameter("D");
+                    //Parameter tie_E = barnew.LookupParameter("E");
+
+                    //double B_D = coletabs.Dimensions.b - 2 * cover;
+                    //tie_B.Set(B_D);
+                    //tie_D.Set(B_D);
+
+                    //double C_E = coletabs.Dimensions.h - 2 * cover;
+                    //tie_C.Set(C_E);
+                    //tie_E.Set(C_E);
                 }
                 trans.Commit();
             }
