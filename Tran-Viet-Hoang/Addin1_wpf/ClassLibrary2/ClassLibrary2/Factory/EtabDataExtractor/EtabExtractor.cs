@@ -57,7 +57,8 @@ namespace ClassLibrary2.Factory.EtabDataExtractor
             }
         }
 
-        private void ReadBeamSectionName(ref ConcreteBeamData beam) //đọc section name mục đích ban đầu là set family instance cho cấu kiện vừa được vẽ, nhưng thời gian không nhiều nên tạo sẵn family trong project và section name hiện tại chỉ dùng để tham chiếu kích thước tiết diện
+        //đọc section name mục đích ban đầu là set family instance cho cấu kiện vừa được vẽ, nhưng thời gian không nhiều nên tạo sẵn family trong project và section name hiện tại chỉ dùng để tham chiếu kích thước tiết diện
+        private void ReadBeamSectionName(ref ConcreteBeamData beam)
         {
             var row = FindRow("Frame Assignments - Section Properties", "UniqueName", beam.Name);
 
@@ -82,8 +83,8 @@ namespace ClassLibrary2.Factory.EtabDataExtractor
                 }
             }
 
-            beam.Reinforcing.AsBot = allAsbot.Max();
-            beam.Reinforcing.AsTop = allAstop.Max();
+            beam.Reinforcing.AsBot = allAsbot.Max() * 0.00001076391;
+            beam.Reinforcing.AsTop = allAstop.Max() * 0.00001076391;
         }
 
         private void ReadBeamCover(ref ConcreteBeamData beam)
@@ -113,6 +114,7 @@ namespace ClassLibrary2.Factory.EtabDataExtractor
             beam.Level = row["Story"].ToString();
             beam.StartPoint.Id = row["UniquePtI"].ToString();
             beam.EndPoint.Id = row["UniquePtJ"].ToString();
+            beam.Dimensions.Length = Convert.ToDouble(row["Length"]) / 304.8;
             beam.Length = Convert.ToDouble(row["Length"]) / 304.8;
         }
 
@@ -207,7 +209,7 @@ namespace ClassLibrary2.Factory.EtabDataExtractor
                     elev += val;
                     var levelElev = UnitUtils.ConvertToInternalUnits(elev, DisplayUnitType.DUT_MILLIMETERS);
                     var name = row["Name"].ToString();
-                    levelclass.Add(new LevelData(name,levelElev));
+                    levelclass.Add(new LevelData(name, levelElev));
                 };
             }
             return levelclass;

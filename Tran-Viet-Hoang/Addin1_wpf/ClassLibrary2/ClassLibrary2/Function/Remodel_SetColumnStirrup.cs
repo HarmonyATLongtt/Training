@@ -1,8 +1,8 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Structure;
 using ClassLibrary2.Data;
-using System.Collections.Generic;
 using ClassLibrary2.Data.FrameData;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ClassLibrary2.Function
@@ -12,7 +12,6 @@ namespace ClassLibrary2.Function
         // hàm tạo 1 stirrup cho nhiều cột và set lại giá trị stirrup đó sao cho phù hợp với kích thước cột
         public void drawcolstirrup(Document doc, List<ConcreteColumnData> cols)
         {
-
             double cover = new ConcreteHostData().Covers.Side;
 
             string rebartype = "8M";
@@ -28,14 +27,12 @@ namespace ClassLibrary2.Function
                 {
                     Rebar barnew = stirrupcolumnbefore(coletabs.Host as FamilyInstance, doc, shape, type, cover);
                     var segments = coletabs.Rebars.Where(x => x.Style == RebarStyle.StirrupTie).First().ShapeData.Segments;
-                    foreach(var segData in segments)
+                    foreach (var segData in segments)
                     {
                         Parameter para = barnew.LookupParameter(segData.Key);
                         if (para != null && !para.IsReadOnly)
                             para.Set(segData.Value);
                     }
-
-
 
                     //Parameter tie_B = barnew.LookupParameter("B");
                     //Parameter tie_C = barnew.LookupParameter("C");
@@ -57,8 +54,6 @@ namespace ClassLibrary2.Function
         //Hàm tạo 1 stirrup ban đầu cho 1 cột
         public Rebar stirrupcolumnbefore(FamilyInstance coletabs, Document doc, RebarShape shape, RebarBarType type, double cover)
         {
-            
-
             BoundingBoxXYZ boundingbox = coletabs.get_BoundingBox(null);
 
             XYZ origin = new XYZ(boundingbox.Min.X + cover, boundingbox.Min.Y + cover, boundingbox.Min.Z + cover);

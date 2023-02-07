@@ -9,12 +9,14 @@ namespace ClassLibrary2.Data
         public RebarShapeData ShapeData { get; set; }
 
         public RebarLocationData LocationData { get; set; }
-        public Rebar Rebar { get; set; }
-
+        public Rebar Rebars { get; set; }
         public RebarStyle Style { get; set; }
 
         public RebarSetData()
         {
+            LocationData = new RebarLocationData();
+            LayoutData = new RebarLayoutData();
+            ShapeData = new RebarShapeData();
         }
     }
 }

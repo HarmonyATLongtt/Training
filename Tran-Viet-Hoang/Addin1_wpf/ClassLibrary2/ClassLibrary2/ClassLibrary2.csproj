@@ -81,11 +81,9 @@
     <Compile Include="Data\FrameData\elemDimensionData.cs" />
     <Compile Include="Data\FrameData\elemReinforcing.cs" />
     <Compile Include="Data\FrameData\PointData.cs" />
+    <Compile Include="Data\RebarSetData\ASData.cs" />
     <Compile Include="Data\RebarSetData\RebarLocationData.cs" />
-    <Compile Include="Data\RebarSetData\RebarHostData.cs" />
-    <Compile Include="Data\RebarSetData\RebarDiameterData.cs" />
     <Compile Include="Data\RebarSetData\RebarLayoutData.cs" />
-    <Compile Include="Data\RebarSetData\RebarStyleData.cs" />
     <Compile Include="Data\RebarSetData\RebarShapeData.cs" />
     <Compile Include="Data\RebarSetData\RebarSetData.cs" />
     <Compile Include="CmdEtabsToRevit.cs" />
@@ -97,11 +95,8 @@
     <Compile Include="Function\Remodel_CreateColumn.cs" />
     <Compile Include="Function\Remodel_SetBeamStirrup.cs" />
     <Compile Include="Function\Remodel_SetColumnStirrup.cs" />
-    <Compile Include="Function\Remodel_GetStirrup.cs" />
     <Compile Include="Function\Remodel_MoveStirrup.cs" />
     <Compile Include="Function\Remodel_SetBeamStandard.cs" />
-    <Compile Include="Function\Remodel_CaculateRebar.cs" />
-    <Compile Include="Function\Remodel_GetBeamStandardOrigin.cs" />
     <Compile Include="Function\Remodel_MarkEtabsElement.cs" />
     <Compile Include="Function\Remodel_SetRebarCover.cs" />
     <Compile Include="Function\Remodel_CreateBeam.cs" />
@@ -117,6 +112,7 @@
     <Compile Include="UI\Views\MainView.xaml.cs">
       <DependentUpon>MainView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Utils\Common.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

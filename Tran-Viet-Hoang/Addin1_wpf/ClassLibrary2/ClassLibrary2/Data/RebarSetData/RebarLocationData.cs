@@ -1,5 +1,4 @@
 ﻿using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.Structure;
 
 namespace ClassLibrary2.Data
 {
@@ -7,6 +6,7 @@ namespace ClassLibrary2.Data
     {
         public XYZ RebarOrigin { get; set; }
         public BoundingBoxXYZ BoundingBox { get; set; }
+
         public RebarLocationData()
         {
         }
