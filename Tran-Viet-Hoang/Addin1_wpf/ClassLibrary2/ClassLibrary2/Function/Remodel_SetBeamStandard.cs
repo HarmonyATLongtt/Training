@@ -5,6 +5,7 @@ using ClassLibrary2.Data;
 using ClassLibrary2.Factory.RebarSet;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 
 namespace ClassLibrary2.Function
@@ -24,6 +25,18 @@ namespace ClassLibrary2.Function
 
                     asall += "Dầm " + beam.Name + " có AsTop = " + beam.Reinforcing.AsTop / 0.00001076391 + " mm2, AsBot = " + beam.Reinforcing.AsBot / 0.00001076391 + " mm2" + "\n";
                 }
+
+
+                var find = beams.FirstOrDefault(x => x.Name == "48");
+                var thepdoc = find.Rebars.Where(x => x.Style == RebarStyle.Standard).ToList();
+                asall = "Dầm " + find.Name + "\n";
+                foreach (var thep in thepdoc)
+                {
+                    asall += "Thép phi: "+thep.Rebartype.BarDiameter * 304.8 + "\n" +
+                            "Min host boundingbox: "+(find.Host as FamilyInstance).get_BoundingBox(null).Min.ToString() + "\n" +
+                            "Rebar origin: " +thep.LocationData.RebarOrigin + "\n";
+                }
+                
                 MessageBox.Show("Done");
                 TaskDialog.Show("As", asall);
 
@@ -75,7 +88,9 @@ namespace ClassLibrary2.Function
                 point1 = origin + XYZ.BasisY * oldlength / 2; ;
             }
 
+            // point 2 chỉ khác point 1 ở chỉ số Z
             XYZ point2 = point1 + XYZ.BasisZ * 100;
+            // đường thẳng tạo từ point 1 và point 2 là đường thẳng song song với trục Z
             Line axis = Line.CreateBound(point1, point2);
 
             // set giá trị mới cho length cuả rebar

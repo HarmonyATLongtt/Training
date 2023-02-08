@@ -13,8 +13,6 @@ namespace ClassLibrary2.Function
         // hàm tạo 1 stirrup cho nhiều dầm và set lại giá trị stirrup đó sao cho phù hợp với kích thước dầm
         public void drawbeamstirrup(Document doc, List<ConcreteBeamData> beams)
         {
-            //double cover = new ConcreteHostData().Covers.Side;
-
             using (Transaction trans = new Transaction(doc, "create beam stirrup"))
             {
                 trans.Start();

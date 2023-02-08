@@ -1,6 +1,7 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Structure;
 using ClassLibrary2.Data;
+using ClassLibrary2.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -60,6 +61,8 @@ namespace ClassLibrary2.Factory.RebarSet
                     rebarSet.Rebartype = barType;
                     rebarSet.ShapeData = CalculateBeamStirrupShape(beam, shapes);
                     rebarSet.Style = RebarStyle.StirrupTie;
+
+
                     rebarSet.LocationData.RebarOrigin = BeamStirrupOrigin(beam);
                     return rebarSet;
                 }
@@ -99,12 +102,13 @@ namespace ClassLibrary2.Factory.RebarSet
 
             RebarSetData topData = CaculateBeamTopBotStandard(beam, beam.Reinforcing.AsTop, asDatas, shapes, stirrupSet);
             RebarSetData botData = CaculateBeamTopBotStandard(beam, beam.Reinforcing.AsBot, asDatas, shapes, stirrupSet);
+            // rebar origin phụ thuộc vào thép lớp trên hay là thép lớp dưới, nên khi có dữ liệu riêng của topdata và botdata thì mới add thêm origin data vào sau
             topData.LocationData.RebarOrigin = TopBeamStandardOrigin(beam.Host as FamilyInstance, beam, topData, stirrupDiameter);
             botData.LocationData.RebarOrigin = BotBeamStandardOrigin(beam.Host as FamilyInstance, beam, botData, stirrupDiameter);
             return new List<RebarSetData>()
             {
                 topData,
-                botData
+                botData,
             };
         }
 
@@ -122,7 +126,7 @@ namespace ClassLibrary2.Factory.RebarSet
                 double standardnumber = minAS.Quantity;
                 var layout = new RebarLayoutData()
                 {
-                    Spacing = (beam.Dimensions.b - 2 * (beam.Covers.Side + stirrup) - standard) / standardnumber + standard,
+                    Spacing = (beam.Dimensions.b - 2 * (beam.Covers.Side + stirrup) - standard * standardnumber) / (standardnumber-1) + standard ,
                     Number = minAS.Quantity,
                     MinSpacing = MIN_REBAR_SPACING,
                 };
@@ -164,11 +168,11 @@ namespace ClassLibrary2.Factory.RebarSet
             XYZ xVec = xVecBeam(elem);
             if (Math.Abs(xVec.X) > Math.Abs(xVec.Y))
             {
-                origin = new XYZ(boundingbox.Min.X + sidespacing, boundingbox.Max.Y - sidespacing, boundingbox.Min.Z + botspacing);
+                origin = new XYZ(boundingbox.Min.X + beam.Covers.Side, boundingbox.Max.Y - sidespacing, boundingbox.Min.Z + botspacing);
             }
             else if (Math.Abs(xVec.X) < Math.Abs(xVec.Y))
             {
-                origin = new XYZ(boundingbox.Min.X + sidespacing, boundingbox.Min.Y + sidespacing, boundingbox.Min.Z + botspacing);
+                origin = new XYZ(boundingbox.Min.X + sidespacing, boundingbox.Min.Y + beam.Covers.Side, boundingbox.Min.Z + botspacing);
             }
 
             return origin;
@@ -190,11 +194,11 @@ namespace ClassLibrary2.Factory.RebarSet
             // chỉ có khoảng cách thép với bề mặt cấu kiện theo phương Z mới theo cover top bot, thứ mà etabs đầu ra cung cấp
             if (Math.Abs(xVec.X) > Math.Abs(xVec.Y))
             {
-                origin = new XYZ(boundingbox.Min.X + sidespacing, boundingbox.Max.Y - sidespacing, boundingbox.Max.Z - topspacing);
+                origin = new XYZ(boundingbox.Min.X + beam.Covers.Side, boundingbox.Max.Y - sidespacing, boundingbox.Max.Z - topspacing);
             }
             else if (Math.Abs(xVec.X) < Math.Abs(xVec.Y))
             {
-                origin = new XYZ(boundingbox.Min.X + sidespacing, boundingbox.Min.Y + sidespacing, boundingbox.Max.Z - topspacing);
+                origin = new XYZ(boundingbox.Min.X + sidespacing, boundingbox.Min.Y + beam.Covers.Side, boundingbox.Max.Z - topspacing);
             }
 
             return origin;
@@ -224,7 +228,8 @@ namespace ClassLibrary2.Factory.RebarSet
                 if (barType != null)
                 {
                     BoundingBoxXYZ boundingbox = (col.Host as FamilyInstance).get_BoundingBox(null);
-                    double cover = col.Covers.Side;
+                   
+
                     double length = col.Length - col.Covers.Side * 2 - barType.BarDiameter;
                     int quantity = (int)(Math.Floor(length / STIRRUP_SPACING));
                     double spacing = length / quantity;
@@ -239,7 +244,10 @@ namespace ClassLibrary2.Factory.RebarSet
                     rebarSet.Rebartype = barType;
                     rebarSet.ShapeData = CalculateColumnStirrupShape(col, shapes);
                     rebarSet.Style = RebarStyle.StirrupTie;
-                    rebarSet.LocationData.RebarOrigin = new XYZ(boundingbox.Min.X + cover, boundingbox.Min.Y + cover, boundingbox.Min.Z + cover); ;
+
+                    double coverside = col.Covers.Side;
+                    double covertopbot = Common.Max(col.Covers.Top, col.Covers.Bottom) ;
+                    rebarSet.LocationData.RebarOrigin = new XYZ(boundingbox.Min.X + coverside, boundingbox.Min.Y + coverside, boundingbox.Min.Z + covertopbot); ;
                     return rebarSet;
                 }
             }
@@ -268,7 +276,7 @@ namespace ClassLibrary2.Factory.RebarSet
 
         public XYZ BeamStirrupOrigin(ConcreteBeamData beametabs)
         {
-            double coverbot = beametabs.Covers.Top;
+            double covertopbot =Common.Max( beametabs.Covers.Top, beametabs.Covers.Bottom);
             double coverside = beametabs.Covers.Side;
             //Lấy hướng vẽ của cấu kiện để biết là sẽ vẽ thép cho cấu kiện theo phương X hay pương Y
 
@@ -281,12 +289,12 @@ namespace ClassLibrary2.Factory.RebarSet
             if (Math.Abs(xVec.X) > Math.Abs(xVec.Y))
             {
                 //Nếu dầm được vẽ theo phương X, thì phương X của family thép đai sẽ map vào phương Y
-                origin = new XYZ(boundingbox.Min.X + coverside, boundingbox.Min.Y + coverside, boundingbox.Min.Z + coverbot);
+                origin = new XYZ(boundingbox.Min.X + coverside, boundingbox.Min.Y + coverside, boundingbox.Min.Z + covertopbot);
             }
             else if (Math.Abs(xVec.X) < Math.Abs(xVec.Y))
             {
                 //Nếu dầm được vẽ theo phương Y, thì phương X của family thép đai sẽ map vào phương X
-                origin = new XYZ(boundingbox.Min.X + coverside, boundingbox.Max.Y - coverside, boundingbox.Min.Z + coverbot);
+                origin = new XYZ(boundingbox.Min.X + coverside, boundingbox.Max.Y - coverside, boundingbox.Min.Z + covertopbot);
             }
             return origin;
         }

@@ -26,7 +26,6 @@ namespace ClassLibrary2.UI.ViewModel
             LoadCommand = new RelayCommand(LoadCommandInvoke);
             CreateCommand = new RelayCommand<object>(CreateCommandInvoke);
             CloseCommand = new HelperCommand(UserClose, CanClose);
-            //CreateCommand = new HelperCommand(ListboxTables, CanClose);
         }
 
         public ICommand CloseCommand { get; set; }
@@ -113,18 +112,7 @@ namespace ClassLibrary2.UI.ViewModel
                 window.DialogResult = true;
                 window.Close();
             }
-            //try
-            //{
-            //    var tablebeamlevel = _tables.FirstOrDefault(x => x.TableName.Equals("Story Definitions"));
-            //    EtabExtractor ex = new EtabExtractor(Tables.ToList());
-            //    LevelDatas = ex.LevelReadData(tablebeamlevel); // đưa dữ liệu đọc được (Read) từ file mdb vào list LevelDatas
-            //    ColDatas = ex.ExtractCol();
-            //    BeamDatas = ex.ExtractBeam();
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show(ex.Message + "\n" + ex.StackTrace.ToString());
-            //}
+           
         }
 
         #region Load .mdb file
