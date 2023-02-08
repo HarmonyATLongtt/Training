@@ -1,6 +1,6 @@
 ﻿namespace ClassLibrary2.Data.FrameData
 {
-    public class elemDimensionData
+    public class ElemDimensionData
     {
         public string SectionName { get; set; }
         public double b { get; set; }

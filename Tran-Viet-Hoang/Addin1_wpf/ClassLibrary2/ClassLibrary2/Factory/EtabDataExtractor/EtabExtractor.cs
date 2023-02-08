@@ -165,7 +165,7 @@ namespace ClassLibrary2.Factory.EtabDataExtractor
             var dataRow = FindRow("Frame Assignments - Section Properties", "UniqueName", col.Name);
             if (dataRow != null)
             {
-                col.Dimensions = new elemDimensionData();
+                col.Dimensions = new ElemDimensionData();
                 col.Dimensions.SectionName = dataRow["Section Property"].ToString();
             }
         }

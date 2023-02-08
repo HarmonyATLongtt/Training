@@ -78,8 +78,8 @@
     <Compile Include="Data\FrameData\ConcreteColumnData.cs" />
     <Compile Include="Data\FrameData\ConcreteHostData.cs" />
     <Compile Include="Data\FrameData\CoverData.cs" />
-    <Compile Include="Data\FrameData\elemDimensionData.cs" />
-    <Compile Include="Data\FrameData\elemReinforcing.cs" />
+    <Compile Include="Data\FrameData\ElemDimensionData.cs" />
+    <Compile Include="Data\FrameData\ElemReinforcing.cs" />
     <Compile Include="Data\FrameData\PointData.cs" />
     <Compile Include="Data\RebarSetData\ASData.cs" />
     <Compile Include="Data\RebarSetData\RebarLocationData.cs" />

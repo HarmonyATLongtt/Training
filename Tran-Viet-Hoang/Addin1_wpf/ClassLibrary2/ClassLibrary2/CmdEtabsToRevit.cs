@@ -64,7 +64,6 @@ namespace ClassLibrary2
                     //new Remodel_MoveStirrup().MoveStirrup(doc, ColumnModelData, BeamModelData);
 
                     new Remodel_SetBeamStandard().SetAllBeamStandard(doc, BeamModelData);
-                    MessageBox.Show("Have a greate day");
                 }
             }
             catch (Exception ex)

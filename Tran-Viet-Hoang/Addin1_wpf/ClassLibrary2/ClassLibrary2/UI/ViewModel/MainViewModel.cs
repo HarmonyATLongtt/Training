@@ -1,6 +1,4 @@
-﻿using ClassLibrary2.Data;
-using ClassLibrary2.Factory.EtabDataExtractor;
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,41 +13,6 @@ namespace ClassLibrary2.UI.ViewModel
 {
     public class MainViewModel : INotifyPropertyChanged
     {
-        public List<LevelData> LevelDatas { get; set; }
-
-        public List<ConcreteBeamData> BeamDatas { get; set; }
-
-        public List<ConcreteColumnData> ColDatas { get; set; }
-
-        public MainViewModel()
-        {
-            LoadCommand = new RelayCommand(LoadCommandInvoke);
-            CreateCommand = new RelayCommand<object>(CreateCommandInvoke);
-            CloseCommand = new HelperCommand(UserClose, CanClose);
-        }
-
-        public ICommand CloseCommand { get; set; }
-
-        public ICommand LoadCommand { get; set; }
-
-        public ICommand CreateCommand { get; set; }
-
-        // bắt sự kiện thay đổi properties của control
-        public event PropertyChangedEventHandler PropertyChanged = delegate { };
-
-        public void RaisePropertyChange(string propName)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propName));
-            }
-        }
-
-        public virtual void OnPropertyChanged(string name)
-        {
-            if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs(name));
-        }
-
         //tao itemsource de bind vao listbox
         private ObservableCollection<DataTable> _tables;
 
@@ -88,6 +51,39 @@ namespace ClassLibrary2.UI.ViewModel
             }
         }
 
+        public ICommand CloseCommand { get; set; }
+
+        public ICommand LoadCommand { get; set; }
+
+        public ICommand CreateCommand { get; set; }
+
+        public MainViewModel()
+        {
+            LoadCommand = new RelayCommand(LoadCommandInvoke);
+            CreateCommand = new RelayCommand<object>(CreateCommandInvoke);
+            CloseCommand = new RelayCommand<object>(CancelCommandInvoke);
+        }
+
+        #region override
+
+        // bắt sự kiện thay đổi properties của control
+        public event PropertyChangedEventHandler PropertyChanged = delegate { };
+
+        public void RaisePropertyChange(string propName)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propName));
+            }
+        }
+
+        public virtual void OnPropertyChanged(string name)
+        {
+            if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs(name));
+        }
+
+        #endregion override
+
         private void LoadCommandInvoke()
         {
             try
@@ -107,12 +103,20 @@ namespace ClassLibrary2.UI.ViewModel
 
         private void CreateCommandInvoke(object parameter)
         {
-            if (parameter is Window window)
+            if (parameter is System.Windows.Window window)
             {
                 window.DialogResult = true;
                 window.Close();
             }
-           
+        }
+
+        private void CancelCommandInvoke(object parameter)
+        {
+            if (parameter is System.Windows.Window wnd)
+            {
+                wnd.DialogResult = false;
+                wnd.Close();
+            }
         }
 
         #region Load .mdb file
@@ -177,7 +181,7 @@ namespace ClassLibrary2.UI.ViewModel
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="connection"></param>
         /// <returns></returns>
@@ -205,40 +209,5 @@ namespace ClassLibrary2.UI.ViewModel
         }
 
         #endregion Load .mdb file
-
-        #region WindowClosed
-
-        private void UserClose(object parameter)
-        {
-            Window wnd = parameter as Window;
-            MessageBox.Show("Have a great day!!");
-            wnd?.Close();
-        }
-
-        private bool CanClose(object parameter) => true;
-
-        public class HelperCommand : ICommand
-        {
-            private readonly Action<object> _execute;
-            private readonly Predicate<object> _canExecute;
-
-            //public HelperCommand(Action<object> execute) : this(execute, canExecute: null) { }
-            public HelperCommand(Action<object> execute, Predicate<object> canExecute)
-            {
-                if (execute == null) throw new ArgumentNullException("execute");
-                this._execute = execute;
-                this._canExecute = canExecute;
-            }
-
-            public event EventHandler CanExecuteChanged;
-
-            public bool CanExecute(object parameter) => this._canExecute == null ? true : this._canExecute(parameter);
-
-            public void Execute(object parameter) => this._execute(parameter);
-
-            public void RaiseCanExecuteChanged() => this.CanExecuteChanged?.Invoke(this, EventArgs.Empty);
-        }
-
-        #endregion WindowClosed
     }
 }

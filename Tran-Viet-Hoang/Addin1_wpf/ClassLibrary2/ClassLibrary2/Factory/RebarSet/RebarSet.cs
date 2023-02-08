@@ -54,14 +54,12 @@ namespace ClassLibrary2.Factory.RebarSet
                     var rebarSet = new RebarSetData();
                     rebarSet.LayoutData = new RebarLayoutData()
                     {
-                        MinSpacing = MIN_REBAR_SPACING,
                         Spacing = spacing,
                         Number = quantity,
                     };
                     rebarSet.Rebartype = barType;
                     rebarSet.ShapeData = CalculateBeamStirrupShape(beam, shapes);
                     rebarSet.Style = RebarStyle.StirrupTie;
-
 
                     rebarSet.LocationData.RebarOrigin = BeamStirrupOrigin(beam);
                     return rebarSet;
@@ -100,11 +98,9 @@ namespace ClassLibrary2.Factory.RebarSet
             double beamsectionArea = beam.Dimensions.b * beam.Dimensions.h;
             var asDatas = barTypes.ConvertAll(x => new ASData(x, length, MIN_REBAR_SPACING));
 
-            RebarSetData topData = CaculateBeamTopBotStandard(beam, beam.Reinforcing.AsTop, asDatas, shapes, stirrupSet);
-            RebarSetData botData = CaculateBeamTopBotStandard(beam, beam.Reinforcing.AsBot, asDatas, shapes, stirrupSet);
+            RebarSetData topData = CaculateBeamTopBotStandard(beam, beam.Reinforcing.AsTop, asDatas, shapes, stirrupSet, true);
+            RebarSetData botData = CaculateBeamTopBotStandard(beam, beam.Reinforcing.AsBot, asDatas, shapes, stirrupSet, false);
             // rebar origin phụ thuộc vào thép lớp trên hay là thép lớp dưới, nên khi có dữ liệu riêng của topdata và botdata thì mới add thêm origin data vào sau
-            topData.LocationData.RebarOrigin = TopBeamStandardOrigin(beam.Host as FamilyInstance, beam, topData, stirrupDiameter);
-            botData.LocationData.RebarOrigin = BotBeamStandardOrigin(beam.Host as FamilyInstance, beam, botData, stirrupDiameter);
             return new List<RebarSetData>()
             {
                 topData,
@@ -113,12 +109,14 @@ namespace ClassLibrary2.Factory.RebarSet
         }
 
         private RebarSetData CaculateBeamTopBotStandard(ConcreteBeamData beam,
-                                                     double AS,
+                                                     double calculatedAS,
                                                      List<ASData> asDatas,
                                                      List<RebarShape> shapes,
-                                                     RebarSetData stirrupSet)
+                                                     RebarSetData stirrupSet,
+                                                     bool istopRebar)
         {
-            var minAS = asDatas.FirstOrDefault(x => x.AS >= AS && x.AS >= beam.Dimensions.b * beam.Dimensions.h * MIN_STEEL_AREA_RATIO);
+            var standardAS = beam.Dimensions.b * beam.Dimensions.h * MIN_STEEL_AREA_RATIO;
+            var minAS = asDatas.FirstOrDefault(x => x.AS >= calculatedAS && x.AS >= standardAS);
             if (minAS != null)
             {
                 double stirrup = stirrupSet.Rebartype.BarDiameter;
@@ -126,9 +124,8 @@ namespace ClassLibrary2.Factory.RebarSet
                 double standardnumber = minAS.Quantity;
                 var layout = new RebarLayoutData()
                 {
-                    Spacing = (beam.Dimensions.b - 2 * (beam.Covers.Side + stirrup) - standard * standardnumber) / (standardnumber-1) + standard ,
+                    Spacing = (beam.Dimensions.b - 2 * (beam.Covers.Side + stirrup) - standard * standardnumber) / (standardnumber - 1) + standard,
                     Number = minAS.Quantity,
-                    MinSpacing = MIN_REBAR_SPACING,
                 };
 
                 RebarSetData data = new RebarSetData();
@@ -136,6 +133,7 @@ namespace ClassLibrary2.Factory.RebarSet
                 data.Rebartype = minAS.BarType;
                 data.ShapeData = CalculateBeamStandardShape(beam, shapes);
                 data.Style = RebarStyle.Standard;
+                data.LocationData.RebarOrigin = BotBeamStandardOrigin(beam.Host as FamilyInstance, beam, data, stirrup, istopRebar);
 
                 return data;
             }
@@ -158,49 +156,54 @@ namespace ClassLibrary2.Factory.RebarSet
             return null;
         }
 
-        public XYZ BotBeamStandardOrigin(FamilyInstance elem, ConcreteBeamData beam, RebarSetData rebar, double stirrup)
+        public XYZ BotBeamStandardOrigin(FamilyInstance elem, ConcreteBeamData beam, RebarSetData rebar, double stirrup, bool isTopRebar)
         {
             double sidespacing = beam.Covers.Side + stirrup + rebar.Rebartype.BarDiameter / 2;
-            double topspacing = beam.Covers.Top + stirrup + rebar.Rebartype.BarDiameter / 2;
-            double botspacing = beam.Covers.Bottom + stirrup + rebar.Rebartype.BarDiameter / 2;
+            double verticalCocer = isTopRebar ? beam.Covers.Top : beam.Covers.Bottom;
+            double vertcalSpacing = verticalCocer + stirrup + rebar.Rebartype.BarDiameter / 2;
+
             BoundingBoxXYZ boundingbox = elem.get_BoundingBox(null);
             XYZ origin = XYZ.Zero;
             XYZ xVec = xVecBeam(elem);
+
+            double elev = isTopRebar
+                       ? boundingbox.Min.Z + vertcalSpacing
+                       : boundingbox.Max.Z - vertcalSpacing;
+
             if (Math.Abs(xVec.X) > Math.Abs(xVec.Y))
             {
-                origin = new XYZ(boundingbox.Min.X + beam.Covers.Side, boundingbox.Max.Y - sidespacing, boundingbox.Min.Z + botspacing);
+                origin = new XYZ(boundingbox.Min.X + beam.Covers.Side, boundingbox.Max.Y - sidespacing, elev);
             }
             else if (Math.Abs(xVec.X) < Math.Abs(xVec.Y))
             {
-                origin = new XYZ(boundingbox.Min.X + sidespacing, boundingbox.Min.Y + beam.Covers.Side, boundingbox.Min.Z + botspacing);
+                origin = new XYZ(boundingbox.Min.X + sidespacing, boundingbox.Min.Y + beam.Covers.Side, elev);
             }
 
             return origin;
         }
 
-        public XYZ TopBeamStandardOrigin(FamilyInstance elem, ConcreteBeamData beam, RebarSetData rebar, double stirrup)
+        public XYZ BeamStirrupOrigin(ConcreteBeamData beametabs)
         {
-            double sidespacing = beam.Covers.Side + stirrup + rebar.Rebartype.BarDiameter / 2;
-            double topspacing = beam.Covers.Top + stirrup + rebar.Rebartype.BarDiameter / 2;
-            double botspacing = beam.Covers.Bottom + stirrup + rebar.Rebartype.BarDiameter / 2;
+            double covertopbot = Common.Max(beametabs.Covers.Top, beametabs.Covers.Bottom);
+            double coverside = beametabs.Covers.Side;
+            //Lấy hướng vẽ của cấu kiện để biết là sẽ vẽ thép cho cấu kiện theo phương X hay pương Y
 
-            BoundingBoxXYZ boundingbox = elem.get_BoundingBox(null);
+            XYZ xVec = beametabs.drawdirection; // để lấy được chiều vẽ của dầm
+            FamilyInstance ins = beametabs.Host as FamilyInstance;
+            BoundingBoxXYZ boundingbox = ins.get_BoundingBox(null);
+
             XYZ origin = XYZ.Zero;
-            // lấy về phương của thép dọc nằm trong elem
-            XYZ xVec = xVecBeam(elem);
 
-            // điều kiện kiểm tra nếu thép đặt theo phương X
-            // khoảng cách của thép với bề mặt cấu kiện theo phương X hay Y luôn luôn là cách theo cover side
-            // chỉ có khoảng cách thép với bề mặt cấu kiện theo phương Z mới theo cover top bot, thứ mà etabs đầu ra cung cấp
             if (Math.Abs(xVec.X) > Math.Abs(xVec.Y))
             {
-                origin = new XYZ(boundingbox.Min.X + beam.Covers.Side, boundingbox.Max.Y - sidespacing, boundingbox.Max.Z - topspacing);
+                //Nếu dầm được vẽ theo phương X, thì phương X của family thép đai sẽ map vào phương Y
+                origin = new XYZ(boundingbox.Min.X + coverside, boundingbox.Min.Y + coverside, boundingbox.Min.Z + covertopbot);
             }
             else if (Math.Abs(xVec.X) < Math.Abs(xVec.Y))
             {
-                origin = new XYZ(boundingbox.Min.X + sidespacing, boundingbox.Min.Y + beam.Covers.Side, boundingbox.Max.Z - topspacing);
+                //Nếu dầm được vẽ theo phương Y, thì phương X của family thép đai sẽ map vào phương X
+                origin = new XYZ(boundingbox.Min.X + coverside, boundingbox.Max.Y - coverside, boundingbox.Min.Z + covertopbot);
             }
-
             return origin;
         }
 
@@ -220,7 +223,9 @@ namespace ClassLibrary2.Factory.RebarSet
             return rebarSets;
         }
 
-        private RebarSetData CalculateColumnStirrupsLayout(ConcreteColumnData col, List<RebarBarType> allBarTypes, List<RebarShape> shapes)
+        private RebarSetData CalculateColumnStirrupsLayout(ConcreteColumnData col,
+                                                           List<RebarBarType> allBarTypes,
+                                                           List<RebarShape> shapes)
         {
             if (col?.Host != null && allBarTypes?.Count > 0 && shapes?.Count > 0)
             {
@@ -228,7 +233,6 @@ namespace ClassLibrary2.Factory.RebarSet
                 if (barType != null)
                 {
                     BoundingBoxXYZ boundingbox = (col.Host as FamilyInstance).get_BoundingBox(null);
-                   
 
                     double length = col.Length - col.Covers.Side * 2 - barType.BarDiameter;
                     int quantity = (int)(Math.Floor(length / STIRRUP_SPACING));
@@ -237,7 +241,6 @@ namespace ClassLibrary2.Factory.RebarSet
                     var rebarSet = new RebarSetData();
                     rebarSet.LayoutData = new RebarLayoutData()
                     {
-                        MinSpacing = MIN_REBAR_SPACING,
                         Spacing = spacing,
                         Number = quantity,
                     };
@@ -246,7 +249,7 @@ namespace ClassLibrary2.Factory.RebarSet
                     rebarSet.Style = RebarStyle.StirrupTie;
 
                     double coverside = col.Covers.Side;
-                    double covertopbot = Common.Max(col.Covers.Top, col.Covers.Bottom) ;
+                    double covertopbot = Common.Max(col.Covers.Top, col.Covers.Bottom);
                     rebarSet.LocationData.RebarOrigin = new XYZ(boundingbox.Min.X + coverside, boundingbox.Min.Y + coverside, boundingbox.Min.Z + covertopbot); ;
                     return rebarSet;
                 }
@@ -274,31 +277,6 @@ namespace ClassLibrary2.Factory.RebarSet
             return null;
         }
 
-        public XYZ BeamStirrupOrigin(ConcreteBeamData beametabs)
-        {
-            double covertopbot =Common.Max( beametabs.Covers.Top, beametabs.Covers.Bottom);
-            double coverside = beametabs.Covers.Side;
-            //Lấy hướng vẽ của cấu kiện để biết là sẽ vẽ thép cho cấu kiện theo phương X hay pương Y
-
-            XYZ xVec = beametabs.drawdirection; // để lấy được chiều vẽ của dầm
-            FamilyInstance ins = beametabs.Host as FamilyInstance;
-            BoundingBoxXYZ boundingbox = ins.get_BoundingBox(null);
-
-            XYZ origin = XYZ.Zero;
-
-            if (Math.Abs(xVec.X) > Math.Abs(xVec.Y))
-            {
-                //Nếu dầm được vẽ theo phương X, thì phương X của family thép đai sẽ map vào phương Y
-                origin = new XYZ(boundingbox.Min.X + coverside, boundingbox.Min.Y + coverside, boundingbox.Min.Z + covertopbot);
-            }
-            else if (Math.Abs(xVec.X) < Math.Abs(xVec.Y))
-            {
-                //Nếu dầm được vẽ theo phương Y, thì phương X của family thép đai sẽ map vào phương X
-                origin = new XYZ(boundingbox.Min.X + coverside, boundingbox.Max.Y - coverside, boundingbox.Min.Z + covertopbot);
-            }
-            return origin;
-        }
-
         #endregion column
 
         // Get all type of rebar existing in revit
@@ -324,14 +302,13 @@ namespace ClassLibrary2.Factory.RebarSet
         public XYZ xVecBeam(FamilyInstance elem)
         {
             //Lấy hướng vẽ của cấu kiện để biết là sẽ vẽ thép cho cấu kiện theo phương X hay pương Y
-            Location loc = elem.Location;
-            LocationCurve locCur = loc as LocationCurve;
-            Curve curve = locCur.Curve;
-            Line locline = curve as Line;
+            LocationCurve locCur = elem.Location as LocationCurve;
+            Line locline = locCur.Curve as Line;
 
             //gán vector phương X trong definition của shape thép với vector vẽ cấu kiện
-            XYZ xVec = locline.Direction;
-            return xVec;
+            if (locline != null)
+                return locline.Direction;
+            return XYZ.Zero;
         }
     }
 }
