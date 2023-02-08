@@ -1,7 +1,6 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Structure;
 using ClassLibrary2.Data;
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,54 +29,16 @@ namespace ClassLibrary2.Factory.RebarSet
             List<RebarBarType> allBarTypes = GetRebarBarTypes();
             List<RebarShape> allBarShapes = GetRebarBarShapes();
 
-            var stirrupSet = CalculateStirrupsLayout(beam, allBarTypes, allBarShapes);
-            var standardSet = CalculateStandardLayout(beam, allBarTypes, allBarShapes, stirrupSet);
+            var stirrupSet = CalculateBeamStirrupsLayout(beam, allBarTypes, allBarShapes);
+            var standardSet = CalculateBeamStandardLayout(beam, allBarTypes, allBarShapes, stirrupSet);
 
             List<RebarSetData> rebarSets = new List<RebarSetData>();
             rebarSets.Add(stirrupSet);
             rebarSets.AddRange(standardSet);
             return rebarSets;
-
-            #region cmt
-
-            ////khoảng cách thông thủy tối thiểu giữa các thanh thép lớp dưới
-            //double kc = beam.HostRebar.LayoutData.MinSpacing;
-            //double coverside = beam.Covers.Side;
-            //double stirrup = beam.Stirrup_Tie.DiameterData.Type;
-            //int[] duongkinhcautao = beam.HostRebar.DiameterData.RebarDiameterS;
-            //int[] sothanh = new int[duongkinhcautao.Count()];
-
-            //double elemb = beam.Dimensions.b;
-            //double elemh = beam.Dimensions.h;
-            //double Asmin = elemb * 304.8 * elemh * 304.8 * 0.05 / 100; // diện tích cốt thép tối thiểu là 0,05%
-            //if (Asmin < requiredSteelArea / 1.1) { Asmin = requiredSteelArea / 1.1; } // chọn ra giá trị mà As thiết kế bắt buộc sẽ phải lớn hơn
-
-            //RebarSetData rebarsets = new RebarSetData();
-            //for (int i = 0; i < duongkinhcautao.Count(); i++)
-            //{
-            //    //số thanh phải nhỏ hơn hoặc bằng, nên dùng hàm Floor để lấy giá trị nguyên lớn nhất và gần kết quả nhất
-            //    sothanh[i] = Convert.ToInt32(Math.Floor((elemb * 304.8 + kc - 2 * (coverside + stirrup) * 304.8) / (duongkinhcautao[i] + kc)));
-            //}
-            //for (int i = 0; i < sothanh.Count(); i++)
-            //{
-            //    if (Math.Pow(duongkinhcautao[i], 2) * Math.PI / 4 * sothanh[i] >= Asmin)
-            //    {
-            //        RebarSetData rebarset = new RebarSetData();
-            //        rebarset.LayoutData.Number = sothanh[i];
-            //        rebarset.DiameterData.Type = duongkinhcautao[i];
-            //        rebarset.LayoutData.RebarCrossSectionArea = Math.Pow(duongkinhcautao[i], 2) * Math.PI / 4 * sothanh[i];
-            //        rebarset.LayoutData.CrossSectionWidth = elemb;
-            //        rebarset.LayoutData.Spacing = ((rebarset.LayoutData.CrossSectionWidth - 2 * (coverside + stirrup)) * 304.8 - rebarset.DiameterData.Type) / (rebarset.LayoutData.Number - 1);
-            //        rebarsets = rebarset;
-            //        break;
-            //    }
-            //}
-            //return rebarsets;
-
-            #endregion cmt
         }
 
-        private RebarSetData CalculateStirrupsLayout(ConcreteBeamData beam, List<RebarBarType> allBarTypes, List<RebarShape> shapes)
+        private RebarSetData CalculateBeamStirrupsLayout(ConcreteBeamData beam, List<RebarBarType> allBarTypes, List<RebarShape> shapes)
         {
             if (beam?.Host != null && allBarTypes?.Count > 0 && shapes?.Count > 0)
             {
@@ -97,16 +58,16 @@ namespace ClassLibrary2.Factory.RebarSet
                         Number = quantity,
                     };
                     rebarSet.Rebartype = barType;
-                    rebarSet.ShapeData = CalculateStirrupShape(beam, shapes);
+                    rebarSet.ShapeData = CalculateBeamStirrupShape(beam, shapes);
                     rebarSet.Style = RebarStyle.StirrupTie;
-                    rebarSet.LocationData.RebarOrigin = FrameStirrupOrigin(beam);
+                    rebarSet.LocationData.RebarOrigin = BeamStirrupOrigin(beam);
                     return rebarSet;
                 }
             }
             return null;
         }
 
-        private RebarShapeData CalculateStirrupShape(ConcreteBeamData beam, List<RebarShape> shapes)
+        private RebarShapeData CalculateBeamStirrupShape(ConcreteBeamData beam, List<RebarShape> shapes)
         {
             var shape = shapes.FirstOrDefault(x => x.Name == STIRRUP_SHAPE_NAME);
             if (shape != null)
@@ -126,7 +87,7 @@ namespace ClassLibrary2.Factory.RebarSet
             return null;
         }
 
-        private List<RebarSetData> CalculateStandardLayout(ConcreteBeamData beam,
+        private List<RebarSetData> CalculateBeamStandardLayout(ConcreteBeamData beam,
                                                           List<RebarBarType> barTypes,
                                                           List<RebarShape> shapes,
                                                           RebarSetData stirrupSet)
@@ -136,10 +97,10 @@ namespace ClassLibrary2.Factory.RebarSet
             double beamsectionArea = beam.Dimensions.b * beam.Dimensions.h;
             var asDatas = barTypes.ConvertAll(x => new ASData(x, length, MIN_REBAR_SPACING));
 
-            RebarSetData topData = CaculateTopBotStandard(beam, beam.Reinforcing.AsTop, asDatas, shapes, stirrupSet);
-            RebarSetData botData = CaculateTopBotStandard(beam, beam.Reinforcing.AsBot, asDatas, shapes, stirrupSet);
-            topData.LocationData.RebarOrigin = TopBeamStandardOrigin(beam.Host as FamilyInstance, beam.Covers.Side, stirrupDiameter);
-            botData.LocationData.RebarOrigin = BotBeamStandardOrigin(beam.Host as FamilyInstance, beam.Covers.Side, stirrupDiameter);
+            RebarSetData topData = CaculateBeamTopBotStandard(beam, beam.Reinforcing.AsTop, asDatas, shapes, stirrupSet);
+            RebarSetData botData = CaculateBeamTopBotStandard(beam, beam.Reinforcing.AsBot, asDatas, shapes, stirrupSet);
+            topData.LocationData.RebarOrigin = TopBeamStandardOrigin(beam.Host as FamilyInstance, beam, topData, stirrupDiameter);
+            botData.LocationData.RebarOrigin = BotBeamStandardOrigin(beam.Host as FamilyInstance, beam, botData, stirrupDiameter);
             return new List<RebarSetData>()
             {
                 topData,
@@ -147,7 +108,7 @@ namespace ClassLibrary2.Factory.RebarSet
             };
         }
 
-        private RebarSetData CaculateTopBotStandard(ConcreteBeamData beam,
+        private RebarSetData CaculateBeamTopBotStandard(ConcreteBeamData beam,
                                                      double AS,
                                                      List<ASData> asDatas,
                                                      List<RebarShape> shapes,
@@ -169,7 +130,7 @@ namespace ClassLibrary2.Factory.RebarSet
                 RebarSetData data = new RebarSetData();
                 data.LayoutData = layout;
                 data.Rebartype = minAS.BarType;
-                data.ShapeData = CalculateStandardShape(beam, shapes);
+                data.ShapeData = CalculateBeamStandardShape(beam, shapes);
                 data.Style = RebarStyle.Standard;
 
                 return data;
@@ -177,7 +138,7 @@ namespace ClassLibrary2.Factory.RebarSet
             return null;
         }
 
-        private RebarShapeData CalculateStandardShape(ConcreteBeamData beam, List<RebarShape> shapes)
+        private RebarShapeData CalculateBeamStandardShape(ConcreteBeamData beam, List<RebarShape> shapes)
         {
             var shape = shapes.FirstOrDefault(x => x.Name == STANDARD_SHAPE_NAME);
             if (shape != null)
@@ -193,75 +154,119 @@ namespace ClassLibrary2.Factory.RebarSet
             return null;
         }
 
-        #endregion beam
-
-        #region column
-
-        public List<RebarSetData> CalculateColumnRebar(ConcreteColumnData col)
+        public XYZ BotBeamStandardOrigin(FamilyInstance elem, ConcreteBeamData beam, RebarSetData rebar, double stirrup)
         {
-            return null;
-        }
-
-        #endregion column
-
-        // Get all type of rebar existing in revit
-        private List<RebarBarType> GetRebarBarTypes()
-        {
-            return new FilteredElementCollector(_doc)
-                        .WhereElementIsElementType()
-                        .OfClass(typeof(RebarBarType))
-                        .Cast<RebarBarType>()
-                        .ToList();
-        }
-
-        // Get all kind of shape existing in revit
-        private List<RebarShape> GetRebarBarShapes()
-        {
-            return new FilteredElementCollector(_doc)
-                        .WhereElementIsElementType()
-                        .OfClass(typeof(RebarShape))
-                        .Cast<RebarShape>()
-                        .ToList();
-        }
-
-        public XYZ BotBeamStandardOrigin(FamilyInstance elem, double cover, double stirrup)
-        {
+            double sidespacing = beam.Covers.Side + stirrup + rebar.Rebartype.BarDiameter / 2;
+            double topspacing = beam.Covers.Top + stirrup + rebar.Rebartype.BarDiameter / 2;
+            double botspacing = beam.Covers.Bottom + stirrup + rebar.Rebartype.BarDiameter / 2;
             BoundingBoxXYZ boundingbox = elem.get_BoundingBox(null);
             XYZ origin = XYZ.Zero;
             XYZ xVec = xVecBeam(elem);
             if (Math.Abs(xVec.X) > Math.Abs(xVec.Y))
             {
-                origin = new XYZ(boundingbox.Min.X + cover + stirrup, boundingbox.Max.Y - cover - stirrup, boundingbox.Min.Z + cover + stirrup);
+                origin = new XYZ(boundingbox.Min.X + sidespacing, boundingbox.Max.Y - sidespacing, boundingbox.Min.Z + botspacing);
             }
             else if (Math.Abs(xVec.X) < Math.Abs(xVec.Y))
             {
-                origin = new XYZ(boundingbox.Min.X + cover + stirrup, boundingbox.Min.Y + cover + stirrup, boundingbox.Min.Z + cover + stirrup);
+                origin = new XYZ(boundingbox.Min.X + sidespacing, boundingbox.Min.Y + sidespacing, boundingbox.Min.Z + botspacing);
             }
 
             return origin;
         }
 
-        public XYZ TopBeamStandardOrigin(FamilyInstance elem, double cover, double stirrup)
+        public XYZ TopBeamStandardOrigin(FamilyInstance elem, ConcreteBeamData beam, RebarSetData rebar, double stirrup)
         {
+            double sidespacing = beam.Covers.Side + stirrup + rebar.Rebartype.BarDiameter / 2;
+            double topspacing = beam.Covers.Top + stirrup + rebar.Rebartype.BarDiameter / 2;
+            double botspacing = beam.Covers.Bottom + stirrup + rebar.Rebartype.BarDiameter / 2;
+
             BoundingBoxXYZ boundingbox = elem.get_BoundingBox(null);
             XYZ origin = XYZ.Zero;
             // lấy về phương của thép dọc nằm trong elem
             XYZ xVec = xVecBeam(elem);
 
             // điều kiện kiểm tra nếu thép đặt theo phương X
+            // khoảng cách của thép với bề mặt cấu kiện theo phương X hay Y luôn luôn là cách theo cover side
+            // chỉ có khoảng cách thép với bề mặt cấu kiện theo phương Z mới theo cover top bot, thứ mà etabs đầu ra cung cấp
             if (Math.Abs(xVec.X) > Math.Abs(xVec.Y))
             {
-                origin = new XYZ(boundingbox.Min.X + cover + stirrup, boundingbox.Max.Y - cover - stirrup, boundingbox.Max.Z - cover - stirrup);
+                origin = new XYZ(boundingbox.Min.X + sidespacing, boundingbox.Max.Y - sidespacing, boundingbox.Max.Z - topspacing);
             }
             else if (Math.Abs(xVec.X) < Math.Abs(xVec.Y))
             {
-                origin = new XYZ(boundingbox.Min.X + cover + stirrup, boundingbox.Min.Y + cover + stirrup, boundingbox.Max.Z - cover - stirrup);
+                origin = new XYZ(boundingbox.Min.X + sidespacing, boundingbox.Min.Y + sidespacing, boundingbox.Max.Z - topspacing);
             }
 
             return origin;
         }
 
-        public XYZ FrameStirrupOrigin(ConcreteBeamData beametabs)
+        #endregion beam
+
+        #region column
+
+        public List<RebarSetData> CalculateColumnRebar(ConcreteColumnData col)
+        {
+            List<RebarBarType> allBarTypes = GetRebarBarTypes();
+            List<RebarShape> allBarShapes = GetRebarBarShapes();
+
+            var stirrupSet = CalculateColumnStirrupsLayout(col, allBarTypes, allBarShapes);
+
+            List<RebarSetData> rebarSets = new List<RebarSetData>();
+            rebarSets.Add(stirrupSet);
+            return rebarSets;
+        }
+
+        private RebarSetData CalculateColumnStirrupsLayout(ConcreteColumnData col, List<RebarBarType> allBarTypes, List<RebarShape> shapes)
+        {
+            if (col?.Host != null && allBarTypes?.Count > 0 && shapes?.Count > 0)
+            {
+                var barType = allBarTypes.FirstOrDefault(x => Math.Abs(x.BarDiameter - STIRRUP_DIAMETER) <= (0.05 / 304.8));
+                if (barType != null)
+                {
+                    BoundingBoxXYZ boundingbox = (col.Host as FamilyInstance).get_BoundingBox(null);
+                    double cover = col.Covers.Side;
+                    double length = col.Length - col.Covers.Side * 2 - barType.BarDiameter;
+                    int quantity = (int)(Math.Floor(length / STIRRUP_SPACING));
+                    double spacing = length / quantity;
+
+                    var rebarSet = new RebarSetData();
+                    rebarSet.LayoutData = new RebarLayoutData()
+                    {
+                        MinSpacing = MIN_REBAR_SPACING,
+                        Spacing = spacing,
+                        Number = quantity,
+                    };
+                    rebarSet.Rebartype = barType;
+                    rebarSet.ShapeData = CalculateColumnStirrupShape(col, shapes);
+                    rebarSet.Style = RebarStyle.StirrupTie;
+                    rebarSet.LocationData.RebarOrigin = new XYZ(boundingbox.Min.X + cover, boundingbox.Min.Y + cover, boundingbox.Min.Z + cover); ;
+                    return rebarSet;
+                }
+            }
+            return null;
+        }
+
+        private RebarShapeData CalculateColumnStirrupShape(ConcreteColumnData col, List<RebarShape> shapes)
+        {
+            var shape = shapes.FirstOrDefault(x => x.Name == STIRRUP_SHAPE_NAME);
+            if (shape != null)
+            {
+                Dictionary<string, double> segments = new Dictionary<string, double>();
+                // tinh toan segment
+                var b_d = col.Dimensions.b - 2 * col.Covers.Side;
+                var c_e = col.Dimensions.h - 2 * col.Covers.Side;
+                segments.Add("B", b_d);
+                segments.Add("C", c_e);
+                segments.Add("D", b_d);
+                segments.Add("E", c_e);
+
+                RebarShapeData shapeData = new RebarShapeData(shape, segments);
+                return shapeData;
+            }
+            return null;
+        }
+
+        public XYZ BeamStirrupOrigin(ConcreteBeamData beametabs)
         {
             double coverbot = beametabs.Covers.Top;
             double coverside = beametabs.Covers.Side;
@@ -284,6 +289,28 @@ namespace ClassLibrary2.Factory.RebarSet
                 origin = new XYZ(boundingbox.Min.X + coverside, boundingbox.Max.Y - coverside, boundingbox.Min.Z + coverbot);
             }
             return origin;
+        }
+
+        #endregion column
+
+        // Get all type of rebar existing in revit
+        private List<RebarBarType> GetRebarBarTypes()
+        {
+            return new FilteredElementCollector(_doc)
+                        .WhereElementIsElementType()
+                        .OfClass(typeof(RebarBarType))
+                        .Cast<RebarBarType>()
+                        .ToList();
+        }
+
+        // Get all kind of shape existing in revit
+        private List<RebarShape> GetRebarBarShapes()
+        {
+            return new FilteredElementCollector(_doc)
+                        .WhereElementIsElementType()
+                        .OfClass(typeof(RebarShape))
+                        .Cast<RebarShape>()
+                        .ToList();
         }
 
         public XYZ xVecBeam(FamilyInstance elem)

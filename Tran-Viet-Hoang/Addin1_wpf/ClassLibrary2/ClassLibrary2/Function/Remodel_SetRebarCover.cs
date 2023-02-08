@@ -19,8 +19,6 @@ namespace ClassLibrary2.Function
             Parameter Topcover = fam.LookupParameter("Rebar Cover - Top Face");
             string newnametop = "Etabs rebar topcover value";
 
-            //Parameter othercover = fam.LookupParameter("Rebar Cover - Other Faces");
-
             if (rebarcover.FirstOrDefault(x => x.Name.Equals(newnametop)) != null)
             {
                 Parameter existlength = rebarcover.FirstOrDefault(x => x.Name.Equals(newnametop)).LookupParameter("Length");
@@ -43,7 +41,6 @@ namespace ClassLibrary2.Function
             {
                 RebarCoverType bott = CreateRebarCover(doc, newnamebot, beam.Covers.Bottom);
                 Bottomcover.Set(bott.Id);
-                //othercover.Set(fifty.Id);
             }
         }
 

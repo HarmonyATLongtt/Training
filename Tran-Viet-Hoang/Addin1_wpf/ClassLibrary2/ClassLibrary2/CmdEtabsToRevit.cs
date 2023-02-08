@@ -53,15 +53,15 @@ namespace ClassLibrary2
                     foreach (var beam in BeamModelData)
                         beam.Rebars = rebarFactory.CalculateBeamRebar(beam);
 
-                    //foreach (var col in ColumnModelData)
-                    //    col.Rebars = rebarFactory.CalculateColumnRebar(col);
+                    foreach (var col in ColumnModelData)
+                        col.Rebars = rebarFactory.CalculateColumnRebar(col);
 
-                    ////vẽ 1 stirrup ban đầu cho cột và dầm đồng thời set lại giá trị cho stirrup đó để phù hợp với kích thước cấu kiện
-                    //new Remodel_SetColumnStirrup().drawcolstirrup(doc, ColumnModelData);
-                    //new Remodel_SetBeamStirrup().drawbeamstirrup(doc, BeamModelData);
+                    //vẽ 1 stirrup ban đầu cho cột và dầm đồng thời set lại giá trị cho stirrup đó để phù hợp với kích thước cấu kiện
+                    new Remodel_SetColumnStirrup().drawcolstirrup(doc, ColumnModelData);
+                    new Remodel_SetBeamStirrup().drawbeamstirrup(doc, BeamModelData);
 
-                    ////sau khi set giá trị mới cho stirrup thì move stirrup về nằm gọn trong cấu kiện
-                    //new Remodel_MoveStirrup().MoveStirrup(doc, ColumnModelData, BeamModelData);
+                    //sau khi set giá trị mới cho stirrup thì move stirrup về nằm gọn trong cấu kiện
+                    new Remodel_MoveStirrup().MoveStirrup(doc, ColumnModelData, BeamModelData);
 
                     new Remodel_SetBeamStandard().SetAllBeamStandard(doc, BeamModelData);
                     MessageBox.Show("Have a greate day");

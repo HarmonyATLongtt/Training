@@ -52,7 +52,6 @@ namespace ClassLibrary2.Function
 
                 beamData.Host = beamnew;
 
-
                 Location loc = beamnew.Location;
                 LocationCurve locCur = loc as LocationCurve;
                 Curve curve = locCur.Curve;

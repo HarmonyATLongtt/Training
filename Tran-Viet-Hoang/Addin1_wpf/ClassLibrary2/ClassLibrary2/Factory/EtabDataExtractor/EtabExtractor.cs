@@ -18,7 +18,6 @@ namespace ClassLibrary2.Factory.EtabDataExtractor
         }
 
         #region Beam ReadData
-
         public List<ConcreteBeamData> ExtractBeam()
         {
             List<ConcreteBeamData> beamall = new List<ConcreteBeamData>();
@@ -49,7 +48,6 @@ namespace ClassLibrary2.Factory.EtabDataExtractor
         {
             var rowI = FindRow("Point Object Connectivity", "UniqueName", beam.StartPoint.Id);
             var rowJ = FindRow("Point Object Connectivity", "UniqueName", beam.EndPoint.Id);
-
             if (rowI != null && rowJ != null)
             {
                 beam.StartPoint.Point = ConvertPoint(rowI);
@@ -61,7 +59,6 @@ namespace ClassLibrary2.Factory.EtabDataExtractor
         private void ReadBeamSectionName(ref ConcreteBeamData beam)
         {
             var row = FindRow("Frame Assignments - Section Properties", "UniqueName", beam.Name);
-
             if (row != null)
             {
                 beam.Dimensions.SectionName = row["Section Property"].ToString();
@@ -71,7 +68,6 @@ namespace ClassLibrary2.Factory.EtabDataExtractor
         private void ReadBeamFlexureDesign(ref ConcreteBeamData beam)
         {
             var tablesection = _tables.FirstOrDefault(x => x.TableName.Equals("Concrete Beam Flexure Envelope - TCVN 5574-2012"));
-
             List<double> allAstop = new List<double>();
             List<double> allAsbot = new List<double>();
             foreach (DataRow row in tablesection.Rows)
@@ -82,7 +78,6 @@ namespace ClassLibrary2.Factory.EtabDataExtractor
                     allAsbot.Add(Convert.ToDouble(row["As Bot"]));
                 }
             }
-
             beam.Reinforcing.AsBot = allAsbot.Max() * 0.00001076391;
             beam.Reinforcing.AsTop = allAstop.Max() * 0.00001076391;
         }
@@ -100,7 +95,6 @@ namespace ClassLibrary2.Factory.EtabDataExtractor
         private void ReadBeamDimenson(ref ConcreteBeamData beam)
         {
             var row = FindRow("Frame Section Property Definitions - Concrete Rectangular", "Name", beam.Dimensions.SectionName);
-
             if (row != null)
             {
                 beam.Dimensions.h = UnitUtils.ConvertToInternalUnits(Convert.ToDouble(row["Depth"]), DisplayUnitType.DUT_MILLIMETERS);
@@ -114,7 +108,7 @@ namespace ClassLibrary2.Factory.EtabDataExtractor
             beam.Level = row["Story"].ToString();
             beam.StartPoint.Id = row["UniquePtI"].ToString();
             beam.EndPoint.Id = row["UniquePtJ"].ToString();
-            beam.Dimensions.Length = Convert.ToDouble(row["Length"]) / 304.8;
+            beam.Length = Convert.ToDouble(row["Length"]) / 304.8;
             beam.Length = Convert.ToDouble(row["Length"]) / 304.8;
         }
 
