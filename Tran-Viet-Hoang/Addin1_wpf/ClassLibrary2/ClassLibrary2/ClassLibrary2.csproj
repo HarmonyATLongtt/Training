@@ -90,17 +90,12 @@
     <Compile Include="Data\FrameData\ConcreteBeamData.cs" />
     <Compile Include="Data\LevelData\LevelData.cs" />
     <Compile Include="Factory\EtabDataExtractor\EtabExtractor.cs" />
+    <Compile Include="Factory\LevelSet\CreatingLevel.cs" />
     <Compile Include="Factory\RebarSet\RebarSet.cs" />
-    <Compile Include="Function\Remodel_GetElem.cs" />
-    <Compile Include="Function\Remodel_CreateColumn.cs" />
-    <Compile Include="Function\Remodel_SetBeamStirrup.cs" />
-    <Compile Include="Function\Remodel_SetColumnStirrup.cs" />
-    <Compile Include="Function\Remodel_MoveStirrup.cs" />
-    <Compile Include="Function\Remodel_SetBeamStandard.cs" />
-    <Compile Include="Function\Remodel_MarkEtabsElement.cs" />
-    <Compile Include="Function\Remodel_SetRebarCover.cs" />
-    <Compile Include="Function\Remodel_CreateBeam.cs" />
-    <Compile Include="Function\Remodel_CreateLevel.cs" />
+    <Compile Include="Factory\ReinforcingBeamSet\CreatingBeamDesignRebar.cs" />
+    <Compile Include="Factory\ReinforcingBeamSet\CreatingConcreteBeamHost.cs" />
+    <Compile Include="Factory\ReinforcingColumnSet\CreatingColumnDesignRebar.cs" />
+    <Compile Include="Factory\ReinforcingColumnSet\CreatingConcreteColumnHost.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -131,6 +126,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Function\" />
     <Folder Include="RevitModification\" />
     <Folder Include="UI\Model\" />
   </ItemGroup>

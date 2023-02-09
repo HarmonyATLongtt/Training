@@ -159,6 +159,7 @@ namespace ClassLibrary2.Factory.RebarSet
         public XYZ BotBeamStandardOrigin(FamilyInstance elem, ConcreteBeamData beam, RebarSetData rebar, double stirrup, bool isTopRebar)
         {
             double sidespacing = beam.Covers.Side + stirrup + rebar.Rebartype.BarDiameter / 2;
+            // isTopRebar : true => return: beam.Covers.Top, false => Bottom
             double verticalCocer = isTopRebar ? beam.Covers.Top : beam.Covers.Bottom;
             double vertcalSpacing = verticalCocer + stirrup + rebar.Rebartype.BarDiameter / 2;
 
@@ -166,9 +167,11 @@ namespace ClassLibrary2.Factory.RebarSet
             XYZ origin = XYZ.Zero;
             XYZ xVec = xVecBeam(elem);
 
+
+            // isTopRebar: true => Max - spacing; false => Min + spacing
             double elev = isTopRebar
-                       ? boundingbox.Min.Z + vertcalSpacing
-                       : boundingbox.Max.Z - vertcalSpacing;
+                       ? boundingbox.Max.Z - vertcalSpacing
+                       : boundingbox.Min.Z + vertcalSpacing;
 
             if (Math.Abs(xVec.X) > Math.Abs(xVec.Y))
             {
