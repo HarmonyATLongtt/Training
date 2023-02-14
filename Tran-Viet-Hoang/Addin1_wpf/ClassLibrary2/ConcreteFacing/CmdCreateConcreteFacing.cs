@@ -47,7 +47,7 @@ namespace ConcreteFacing
                             .ToList();
                         if (Sol.Count() != 0)
                         {
-                            CreateDirectShape(doc, Sol, thickness);
+                            CreateDirectShape(doc, Sol, thickness, ins);
                         }
                         else
                         {
@@ -56,7 +56,7 @@ namespace ConcreteFacing
                             .SelectMany(x => x.GetInstanceGeometry().OfType<Solid>())
                             .ToList()
                             ;
-                            CreateDirectShape(doc, InsGeometry, thickness);
+                            CreateDirectShape(doc, InsGeometry, thickness, ins);
                         }
                     }
                     MessageBox.Show("Đã apply covers cho " + num + " cấu kiện");
@@ -115,34 +115,40 @@ namespace ConcreteFacing
             return null;
         }
 
-        public void CreateDirectShape(Document doc, List<Solid> solids, double thickness)
+        public void CreateDirectShape(Document doc, List<Solid> solids, double thickness, FamilyInstance ins)
         {
-            string facenumber = null;
-            string facenormal = null;
-            List<Face> facelist = new List<Face>();
             foreach (var solid in solids)
             {
                 var faces = solid.Faces.Size;
-                facenumber = faces.ToString();
                 if (solid.Volume != 0)
                 {
                     foreach (Face face in solid.Faces)
                     {
-                        facenormal += (face as PlanarFace).FaceNormal.ToString() + "\n";
-                        facelist.Add(face);
+                        PlanarFace planarFace = face as PlanarFace;
+                        XYZ vecX = planarFace.XVector.Negate();
+                        XYZ vecY = planarFace.YVector.Negate();
+                        XYZ otherfacenorm = planarFace.FaceNormal;
+                        // cross là theo quy tắc bàn tay phải
+                        XYZ topnorm = ins.HandOrientation.CrossProduct(ins.FacingOrientation);
+                        XYZ botnorm = topnorm.Negate();
 
-                        var eloop = face.GetEdgesAsCurveLoops();
-                        Solid cover = GeometryCreationUtilities.CreateExtrusionGeometry(eloop, (face as PlanarFace).FaceNormal, thickness);
-                        DirectShape ds = DirectShape.CreateElement(doc, new ElementId(BuiltInCategory.OST_GenericModel));
-                        ds.SetShape(new GeometryObject[] { cover });
+                        bool top = otherfacenorm.IsAlmostEqualTo(topnorm, 10E-5);
+                        bool bot = otherfacenorm.IsAlmostEqualTo(botnorm, 10E-5);
+                        bool right = otherfacenorm.IsAlmostEqualTo(ins.HandOrientation, 10E-5);
+                        bool left = otherfacenorm.IsAlmostEqualTo(ins.HandOrientation.Negate(), 10E-5);
+                        bool front = otherfacenorm.IsAlmostEqualTo(ins.FacingOrientation.Negate(), 10E-5);
+                        bool back = otherfacenorm.IsAlmostEqualTo(ins.FacingOrientation, 10E-5);
+
+                        if (left == true)
+                        {
+                            var eloop = face.GetEdgesAsCurveLoops();
+                            Solid cover = GeometryCreationUtilities.CreateExtrusionGeometry(eloop, otherfacenorm, thickness);
+                            DirectShape ds = DirectShape.CreateElement(doc, new ElementId(BuiltInCategory.OST_GenericModel));
+                            ds.SetShape(new GeometryObject[] { cover });
+                        }
                     }
                 }
             }
-
-            //int num = solids.Count();
-            //MessageBox.Show("Số solid mà ins có: " + num.ToString() + "\n" +
-            //    "Số face mà ins có: " + facelist.Count() + "\n" +
-            //    "Pháp tuyển của các face là: " + "\n" + facenormal);
         }
     }
 }
