@@ -22,23 +22,32 @@ namespace ConcreteFacing.UI.ViewModel
         }
 
         public ICommand CreateCommand { get; set; }
+        public ICommand CloseCommand { get; set; }
 
         public MainViewModel()
         {
-            CreateCommand = new RelayCommand(CreateCommandInvoke);
+            CreateCommand = new RelayCommand<object>(CreateCommandInvoke);
+            CloseCommand = new RelayCommand<object>(CancelCommandInvoke);
         }
 
-        private void CreateCommandInvoke()
+        private void CreateCommandInvoke(object parameter)
         {
-            DataTable Beam = new DataTable();
-            DataTable Column = new DataTable();
+            if (parameter is System.Windows.Window window)
+            {
+                DataTable Beam = new DataTable();
+                DataTable Column = new DataTable();
 
-            Beam.TableName = "Dầm";
-            Column.TableName = "Cột";
+                Beam.TableName = "Dầm";
+                Column.TableName = "Cột";
 
-            List<DataTable> list = new List<DataTable>() { Beam, Column };
+                List<DataTable> list = new List<DataTable>() { Beam, Column };
 
-            Tables = new ObservableCollection<DataTable>(list);
+                Tables = new ObservableCollection<DataTable>(list);
+
+                window.DialogResult = true;
+                window.Close();
+            }
+            
         }
         private void CancelCommandInvoke(object parameter)
         {

@@ -5,6 +5,7 @@ using ConcreteFacing.UI.ViewModel;
 using ConcreteFacing.UI.Views;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 
@@ -12,60 +13,56 @@ namespace ConcreteFacing
 {
     [TransactionAttribute(TransactionMode.Manual)]
     [Regeneration(RegenerationOption.Manual)]
-    public class CmdCreateConcreteFacing : IExternalCommand
+    public class CmdCreateConcreteFacing : IExternalCommand, INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
 
-            MainView view = new MainView();
-            view.DataContext = new MainViewModel();
-
             var elems = PickConcreteBeamOrColumn(uidoc);
-            //var elems = SelectedConcreteBeamOrColumn(uidoc);
-            int num = elems.Count();
-
-            if (elems != null && view.ShowDialog() == false)
+            if (elems != null)
             {
-                using (var transaction = new Transaction(doc, "Set Mark"))
+                MainView view = new MainView();
+                view.DataContext = new MainViewModel();
+                int num = elems.Count();
+                if (view.ShowDialog() == true)
                 {
-                    transaction.Start();
-                    foreach (var elem in elems)
+                    using (var transaction = new Transaction(doc, "Set Mark"))
                     {
-                        FamilyInstance ins = elem as FamilyInstance;
-                        BoundingBoxXYZ boundingbox = ins.get_BoundingBox(null);
-                        string info = "Cấu kiện " + ins.Name + " có:" + "\n" +
-                           "Vị trí Min BoundingBox là: " + boundingbox.Min.ToString() + "\n" +
-                           "Vị trí Max BoundingBox là: " + boundingbox.Max.ToString();
-
-                        double thickness = 20 / 304.8;
-
-                        var Sol = elem.get_Geometry(new Options())
-                            .OfType<Solid>()
-                            .ToList();
-                        if (Sol.Count() != 0)
+                        transaction.Start();
+                        foreach (var elem in elems)
                         {
-                            CreateDirectShape(doc, Sol, thickness, ins);
+                            FamilyInstance ins = elem as FamilyInstance;
+                            double thickness = 20 / 304.8;
+
+                            var Sol = elem.get_Geometry(new Options())
+                                .OfType<Solid>()
+                                .ToList();
+                            if (Sol.Count() != 0)
+                            {
+                                CreateDirectShape(doc, Sol, thickness, ins);
+                            }
+                            else
+                            {
+                                var InsGeometry = elem.get_Geometry(new Options())
+                                .OfType<GeometryInstance>()
+                                .SelectMany(x => x.GetInstanceGeometry().OfType<Solid>())
+                                .ToList()
+                                ;
+                                CreateDirectShape(doc, InsGeometry, thickness, ins);
+                            }
                         }
-                        else
-                        {
-                            var InsGeometry = elem.get_Geometry(new Options())
-                            .OfType<GeometryInstance>()
-                            .SelectMany(x => x.GetInstanceGeometry().OfType<Solid>())
-                            .ToList()
-                            ;
-                            CreateDirectShape(doc, InsGeometry, thickness, ins);
-                        }
+                        MessageBox.Show("Đã apply covers cho " + num + " cấu kiện");
+                        transaction.Commit();
                     }
-                    MessageBox.Show("Đã apply covers cho " + num + " cấu kiện");
-                    transaction.Commit();
                 }
+                else
+                    MessageBox.Show("Command is cancel");
             }
-            else
-                MessageBox.Show("nguoi dung huy thao tac");
-
             return Result.Succeeded;
         }
 
@@ -122,24 +119,39 @@ namespace ConcreteFacing
                 var faces = solid.Faces.Size;
                 if (solid.Volume != 0)
                 {
+                    int x = new Random().Next(1, 6);
+
                     foreach (Face face in solid.Faces)
                     {
                         PlanarFace planarFace = face as PlanarFace;
-                        XYZ vecX = planarFace.XVector.Negate();
-                        XYZ vecY = planarFace.YVector.Negate();
                         XYZ otherfacenorm = planarFace.FaceNormal;
                         // cross là theo quy tắc bàn tay phải
                         XYZ topnorm = ins.HandOrientation.CrossProduct(ins.FacingOrientation);
                         XYZ botnorm = topnorm.Negate();
 
-                        bool top = otherfacenorm.IsAlmostEqualTo(topnorm, 10E-5);
-                        bool bot = otherfacenorm.IsAlmostEqualTo(botnorm, 10E-5);
-                        bool right = otherfacenorm.IsAlmostEqualTo(ins.HandOrientation, 10E-5);
-                        bool left = otherfacenorm.IsAlmostEqualTo(ins.HandOrientation.Negate(), 10E-5);
-                        bool front = otherfacenorm.IsAlmostEqualTo(ins.FacingOrientation.Negate(), 10E-5);
-                        bool back = otherfacenorm.IsAlmostEqualTo(ins.FacingOrientation, 10E-5);
+                        #region cmt
+                        int faceorder = -1;
+                        //top
+                        if (otherfacenorm.IsAlmostEqualTo(topnorm, 10E-5)) { faceorder = 1; };
+                        //bot
+                        if (otherfacenorm.IsAlmostEqualTo(botnorm, 10E-5)) { faceorder = 2; };
+                        //right
+                        if (otherfacenorm.IsAlmostEqualTo(ins.HandOrientation, 10E-5)) { faceorder = 3; };
+                        //left
+                        if (otherfacenorm.IsAlmostEqualTo(ins.HandOrientation.Negate(), 10E-5)) { faceorder = 4; };
+                        //front
+                        if (otherfacenorm.IsAlmostEqualTo(ins.FacingOrientation.Negate(), 10E-5)) { faceorder = 5; };
+                        //back
+                        if (otherfacenorm.IsAlmostEqualTo(ins.FacingOrientation, 10E-5)) { faceorder = 6; };
+                        #endregion
+                        //bool top = otherfacenorm.IsAlmostEqualTo(topnorm, 10E-5);
+                        //bool bot = otherfacenorm.IsAlmostEqualTo(botnorm, 10E-5);
+                        //bool right = otherfacenorm.IsAlmostEqualTo(ins.HandOrientation, 10E-5);
+                        //bool left = otherfacenorm.IsAlmostEqualTo(ins.HandOrientation.Negate(), 10E-5);
+                        //bool front = otherfacenorm.IsAlmostEqualTo(ins.FacingOrientation.Negate(), 10E-5);
+                        //bool back = otherfacenorm.IsAlmostEqualTo(ins.FacingOrientation, 10E-5);
 
-                        if (left == true)
+                        if (faceorder == x)
                         {
                             var eloop = face.GetEdgesAsCurveLoops();
                             Solid cover = GeometryCreationUtilities.CreateExtrusionGeometry(eloop, otherfacenorm, thickness);

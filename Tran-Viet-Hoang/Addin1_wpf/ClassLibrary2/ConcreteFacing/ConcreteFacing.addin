@@ -8,7 +8,5 @@
 		<Text>Remodel</Text>
 		<VendorId>ADSK</VendorId>
 		<VendorDescription>Autodesk, www.autodesk.com</VendorDescription>
-		
-
 	</AddIn>
 </RevitAddIns>

@@ -4,8 +4,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         WindowStartupLocation="CenterScreen"
-        
         mc:Ignorable="d"
+        x:Name="window"
              d:DesignHeight="700" d:DesignWidth="1300" Height="700" Width="1300">
     <Window.Resources>
         <Style TargetType="Button">
