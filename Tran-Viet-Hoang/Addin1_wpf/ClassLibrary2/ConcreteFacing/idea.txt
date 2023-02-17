@@ -10,8 +10,9 @@ name (label : face name), name (textbox : thickness), content (label: face name)
 data về elem (face, face normal...) (nếu finish việc pick object mà không có elem nào được highlight
 thì thay vì hiện ui, sẽ hiện noti là bạn chưa chọn và kết thúc). Sau đó UI sẽ hiện lên, bên trái 
 giao diện được binding với dữ liệu list category ( "Content" của button binding với category name 
-trong list category).Bên phải là listview có "Visibility" binding với button, để lúc ui mới hiện 
-lên, khi người dùng chưa chọn bất kì category nào thì listview sẽ chỉ trống trơn 
+trong list category).Bên phải là listview binding với button ở bên treeview, để lúc ui mới hiện 
+lên, khi người dùng chưa chọn bất kì category nào thì listview sẽ chỉ trống trơn
+ 
 ( https://stackoverflow.com/questions/20908266/hide-list-view-until-button-is-pressed)
 . "Command" của button sẽ được binding với hàm ElemUI(), hàm này sẽ tạo một list dữ liệu để đưa vào
 source của DataTemplate trong ListView
