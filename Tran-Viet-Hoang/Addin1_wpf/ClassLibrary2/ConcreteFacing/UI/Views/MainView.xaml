@@ -34,20 +34,71 @@
             <ColumnDefinition Width="180" />
         </Grid.ColumnDefinitions>
 
-        <Label  Grid.Column="0"  Content="Element Covers Applying" 
+        <Label  Grid.Column="0"  Content="Element Covers Applying"
                 HorizontalContentAlignment="Left" Grid.ColumnSpan="2"
                 FontWeight="Bold" FontStyle="Italic" FontSize="15" />
-        
+
         <Label Grid.Row="1" Grid.Column="0" Content="Element Category List" />
         <Label Grid.Row="1" Grid.Column="2" Content="Cover Setting Data" />
 
-        <ListBox Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Margin="5"
+        <!--<ListBox Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Margin="5"
                  x:Name="TablesList"
                  ItemsSource="{Binding Tables}"
                  SelectedItem="{Binding TableSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                 DisplayMemberPath="TableName" />
+                 DisplayMemberPath="TableName">
+        </ListBox>-->
+
+        <TreeView Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Margin="5">
+            <!--<TreeView.ItemTemplate>
+                <DataTemplate>
+                    
+                </DataTemplate>
+            </TreeView.ItemTemplate>-->
+            <TreeViewItem Header="Category" IsExpanded="True">
+                <TreeViewItem>
+                    <TreeViewItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox IsChecked="True" VerticalAlignment="Center"></CheckBox>
+                            <Button Background="White" BorderThickness="0"
+                                    Content="Structural Framing" Width="auto"
+                                    Command="{Binding ViewBeamUICommand}"></Button>
+                        </StackPanel>
+                    </TreeViewItem.Header>
+                </TreeViewItem>
+                <TreeViewItem>
+                    <TreeViewItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox IsChecked="True" VerticalAlignment="Center"></CheckBox>
+                            <Button Background="White" BorderThickness="0" 
+                                    Content="Structural Column" Width="auto"
+                                    Command="{Binding ViewColumnUICommand}"></Button>
+                        </StackPanel>
+                    </TreeViewItem.Header>
+                </TreeViewItem>
+            </TreeViewItem>
+        </TreeView>
+
         <ListView Grid.Column="2" Grid.Row="2" Grid.ColumnSpan="2"  Margin="5"
-                  ItemsSource="{Binding TableSelected, UpdateSourceTrigger=PropertyChanged}" />
+                  Name ="lstVElemFace" 
+                  ItemsSource="{Binding TableSelected, UpdateSourceTrigger=PropertyChanged}">
+
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Rows="2" Columns="3"></UniformGrid>
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Grid.Row="{Binding x}" Grid.Column="{Binding y}">
+                        <Image Source="{Binding ImageFace}"  Stretch="Uniform"></Image>
+                        <CheckBox Content="{Binding cbxContent}"  ></CheckBox>
+                        <TextBox Text="{Binding txtText}"></TextBox>
+                    </StackPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+         
+        </ListView>
 
         <StackPanel Grid.Row="3" Grid.Column="3" Grid.ColumnSpan="4"
                     Orientation="Horizontal" FlowDirection="RightToLeft">

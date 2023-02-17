@@ -5,7 +5,6 @@ using ConcreteFacing.UI.ViewModel;
 using ConcreteFacing.UI.Views;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 
@@ -13,10 +12,8 @@ namespace ConcreteFacing
 {
     [TransactionAttribute(TransactionMode.Manual)]
     [Regeneration(RegenerationOption.Manual)]
-    public class CmdCreateConcreteFacing : IExternalCommand, INotifyPropertyChanged
+    public class CmdCreateConcreteFacing : IExternalCommand
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UIApplication uiapp = commandData.Application;
@@ -31,7 +28,7 @@ namespace ConcreteFacing
                 int num = elems.Count();
                 if (view.ShowDialog() == true)
                 {
-                    using (var transaction = new Transaction(doc, "Set Mark"))
+                    using (var transaction = new Transaction(doc, "Set Cover"))
                     {
                         transaction.Start();
                         foreach (var elem in elems)
@@ -130,6 +127,7 @@ namespace ConcreteFacing
                         XYZ botnorm = topnorm.Negate();
 
                         #region cmt
+
                         int faceorder = -1;
                         //top
                         if (otherfacenorm.IsAlmostEqualTo(topnorm, 10E-5)) { faceorder = 1; };
@@ -143,7 +141,9 @@ namespace ConcreteFacing
                         if (otherfacenorm.IsAlmostEqualTo(ins.FacingOrientation.Negate(), 10E-5)) { faceorder = 5; };
                         //back
                         if (otherfacenorm.IsAlmostEqualTo(ins.FacingOrientation, 10E-5)) { faceorder = 6; };
-                        #endregion
+
+                        #endregion cmt
+
                         //bool top = otherfacenorm.IsAlmostEqualTo(topnorm, 10E-5);
                         //bool bot = otherfacenorm.IsAlmostEqualTo(botnorm, 10E-5);
                         //bool right = otherfacenorm.IsAlmostEqualTo(ins.HandOrientation, 10E-5);
