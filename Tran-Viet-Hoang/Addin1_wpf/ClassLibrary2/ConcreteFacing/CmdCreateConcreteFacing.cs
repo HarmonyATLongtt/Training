@@ -21,10 +21,11 @@ namespace ConcreteFacing
             Document doc = uidoc.Document;
 
             var elems = PickConcreteBeamOrColumn(uidoc);
-            if (elems != null)
+            if (elems != null )
             {
+                //MainViewModel viewmodel = new MainViewModel();
                 MainView view = new MainView();
-                view.DataContext = new MainViewModel();
+                view.DataContext = new MainViewModel(elems);
                 int num = elems.Count();
                 if (view.ShowDialog() == true)
                 {

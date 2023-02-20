@@ -82,3 +82,4 @@ G:\01Thuctap\Training\Tran-Viet-Hoang\Addin1_wpf\ClassLibrary2\ConcreteFacing\bi
 G:\01Thuctap\Training\Tran-Viet-Hoang\Addin1_wpf\ClassLibrary2\ConcreteFacing\obj\Debug\UI\Views\MainView.baml
 G:\01Thuctap\Training\Tran-Viet-Hoang\Addin1_wpf\ClassLibrary2\ConcreteFacing\obj\Debug\UI\Views\MainView.g.cs
 G:\01Thuctap\Training\Tran-Viet-Hoang\Addin1_wpf\ClassLibrary2\ConcreteFacing\obj\Debug\ConcreteFacing.csproj.CopyComplete
+G:\01Thuctap\Training\Tran-Viet-Hoang\Addin1_wpf\ClassLibrary2\ConcreteFacing\bin\Debug\ConcreteFacing.addin
