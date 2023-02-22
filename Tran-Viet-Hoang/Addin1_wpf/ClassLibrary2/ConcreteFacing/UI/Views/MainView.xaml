@@ -20,37 +20,47 @@
             <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
 
-        <DataTemplate x:Key="lstCates">
-            <StackPanel Orientation="Horizontal">
-                <CheckBox IsChecked="{Binding cbxIsCheck, UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"
-                          VerticalAlignment="Center"></CheckBox>
-                <Button Background="White" BorderThickness="0"
-                                    Content="{Binding btnContent}" Width="auto"
-                                    Command="{Binding btnCmd}"></Button>
-            </StackPanel>
+        <DataTemplate x:Key="CateTemplate">
+            <CheckBox IsChecked="{Binding CateIsChecked, UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"
+                          Height="auto" Width="auto"
+                          VerticalAlignment="Center"
+                          HorizontalAlignment="Center"
+                          BorderThickness="1"
+                          BorderBrush="Black"
+                          Content="{Binding CateName}"
+                         ></CheckBox>
         </DataTemplate>
 
-        <DataTemplate x:Key="lstCoverFaceSetting">
-            <Grid Grid.Row="{Binding x}" Grid.Column="{Binding y}" ShowGridLines="true">
-                <Image Source="{Binding imgSource}"
-                       Height="{Binding imgheight}"
-                       Width="{Binding imgwidth}"
-                       VerticalAlignment="Top" HorizontalAlignment="Center" Stretch="Uniform"></Image>
-                <CheckBox Content="{Binding cbxContent}"
-                          IsChecked="{Binding cbxIsCheck, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                          VerticalAlignment="Bottom" HorizontalAlignment="Center" ></CheckBox>
+        <DataTemplate x:Key="CoverFaceTemplate">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="40" />
+                </Grid.RowDefinitions>
+
+                <Image Grid.Row="0" 
+                        Source="{Binding CoverFaceImgSource}"
+                       Stretch="Uniform"
+                       Height="200"
+                       Width="350"></Image>
+                <CheckBox Grid.Row="1"
+                          Content="{Binding CoverFaceContent}"
+                          IsChecked="{Binding CoverFaceIsCheck, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                          VerticalAlignment="Bottom" HorizontalAlignment="Center"></CheckBox>
             </Grid>
         </DataTemplate>
+        
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="40" />
             <RowDefinition Height="40" />
+            <RowDefinition Height="30" />
             <RowDefinition Height="*" />
             <RowDefinition Height="40" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="150" />
+            <ColumnDefinition Width="*" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="900" />
             <ColumnDefinition Width="180" />
@@ -63,40 +73,23 @@
         <Label Grid.Row="1" Grid.Column="0" Content="Element Category List" />
         <Label Grid.Row="1" Grid.Column="2" Content="Cover Setting Data" />
 
-        <!--<TreeView Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Margin="5">
-            <TreeViewItem Header="Category" IsExpanded="True">
-                <TreeViewItem>
-                    <TreeViewItem.Header>
-                        <StackPanel Orientation="Horizontal">
-                            <CheckBox IsChecked="True" VerticalAlignment="Center"></CheckBox>
-                            <Button Background="White" BorderThickness="0"
-                                    Content="Structural Framing" Width="auto"
-                                    Command="{Binding ViewBeamUICommand}"></Button>
-                        </StackPanel>
-                    </TreeViewItem.Header>
-                </TreeViewItem>
-                <TreeViewItem>
-                    <TreeViewItem.Header>
-                        <StackPanel Orientation="Horizontal">
-                            <CheckBox IsChecked="True" VerticalAlignment="Center"></CheckBox>
-                            <Button Background="White" BorderThickness="0"
-                                    Content="Structural Column" Width="auto"
-                                    Command="{Binding ViewColumnUICommand}"></Button>
-                        </StackPanel>
-                    </TreeViewItem.Header>
-                </TreeViewItem>
-            </TreeViewItem>
-        </TreeView>-->
-
-        <ListView Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Margin="5"
+        <ListView Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Grid.RowSpan="2" Margin="5"
                   ItemsSource="{Binding SourceCatelv}"
-                  ItemTemplate="{StaticResource lstCates}">
+                  ItemTemplate="{StaticResource CateTemplate}"
+                  SelectedItem="{Binding SelectedCate, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
         </ListView>
-
-        <ListView  Grid.Row="2"  Grid.Column="2" Grid.ColumnSpan="2"  Margin="5"
+        
+        <StackPanel Grid.Row="2" Grid.Column="2" FlowDirection="LeftToRight" Orientation="Horizontal" >
+            <Label Content="Thickness (mm): " Width="100" Height="auto" Margin="0"/>
+            <TextBox  Height="auto"  HorizontalAlignment="Center" Margin="5" MinWidth="30"
+                      Text="{Binding SelectedCate.Thickness, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                      ></TextBox>
+        </StackPanel>
+        
+        <ListView  Grid.Row="3"  Grid.Column="2" Grid.ColumnSpan="2"  Margin="5"
                   Name ="lstVElemFace"
-                  ItemsSource="{Binding SourceCoverFacelv, UpdateSourceTrigger=PropertyChanged}"
-                  ItemTemplate="{StaticResource lstCoverFaceSetting}">
+                  ItemsSource="{Binding SelectedCate.TemplateCoverFaceViewModels, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                  ItemTemplate="{StaticResource CoverFaceTemplate}" >
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>
                     <UniformGrid Rows="2" Columns="3"></UniformGrid>
@@ -104,18 +97,7 @@
             </ListView.ItemsPanel>
         </ListView>
 
-        <!--<ListView Grid.Column="2" Grid.Row="2" Grid.ColumnSpan="2"  Margin="5"
-                  Name ="lstVElemFace"
-                  ItemsSource="{Binding SourceCoverFacelv, UpdateSourceTrigger=PropertyChanged}"
-                  ItemTemplate="{StaticResource lstCoverFaceSetting}">
-            <ListView.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <UniformGrid Rows="2" Columns="3"></UniformGrid>
-                </ItemsPanelTemplate>
-            </ListView.ItemsPanel>
-        </ListView>-->
-
-        <StackPanel Grid.Row="3" Grid.Column="3" Grid.ColumnSpan="4"
+        <StackPanel Grid.Row="4" Grid.Column="3" Grid.ColumnSpan="4"
                     Orientation="Horizontal" FlowDirection="RightToLeft">
             <Button Content="Cancel"   Command="{Binding CloseCommand}"
                     CommandParameter="{Binding ElementName=window, Mode=OneWay}" />

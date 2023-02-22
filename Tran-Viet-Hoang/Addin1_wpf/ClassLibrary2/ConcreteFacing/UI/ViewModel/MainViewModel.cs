@@ -1,4 +1,5 @@
 ﻿using Autodesk.Revit.DB;
+using ConcreteFacing.DATA;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -28,50 +29,90 @@ namespace ConcreteFacing.UI.ViewModel
 
         public ICommand CreateCommand { get; set; }
         public ICommand CloseCommand { get; set; }
-        public ICommand ViewBeamUICommand { get; set; }
-        public ICommand ViewColumnUICommand { get; set; }
 
         public MainViewModel(List<Element> elems)
         {
-            ViewBeamUICommand = new RelayCommand(ViewBeamUICommandInvoke);
-            ViewColumnUICommand = new RelayCommand(ViewColumnUICommandInvoke);
-
-            ObservableCollection<TemplateCategoryViewModel> cates = new ObservableCollection<TemplateCategoryViewModel>();
-            //List<string> contents = new List<string>() { "Structural Framing", "Structural Column" };
-            List<ICommand> cmds = new List<ICommand>() { ViewBeamUICommand, ViewColumnUICommand };
-            BindingCategoryList(cates, cmds, elems);
+            ObservableCollection<CategoryViewModel> cates = new ObservableCollection<CategoryViewModel>();
+            BindingCategoryList(cates, elems);
 
             CreateCommand = new RelayCommand<object>(CreateCommandInvoke);
             CloseCommand = new RelayCommand<object>(CancelCommandInvoke);
         }
 
-        private void BindingCategoryList(ObservableCollection<TemplateCategoryViewModel> cates, List<ICommand> cmds,  List<Element> elems)
+        private void BindingCategoryList(ObservableCollection<CategoryViewModel> cates, List<Element> elems)
         {
             var catNames = elems.Select(x => x.Category.Name).Distinct().ToList();
 
-            foreach(var catName in catNames)
+            foreach (var catName in catNames)
             {
                 if (catName == "Structural Framing")
                 {
-                    cates.Add(new TemplateCategoryViewModel()
+                    ObservableCollection<OptionViewModel> elemfaces = new ObservableCollection<OptionViewModel>();
+                    List<string> strings = new List<string>() { "Top", "Left", "Front", "Bottom", "Right", "Back" };
+
+                    List<string> paths = new List<string>() {
+                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/beamtop.png",
+                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/beamleft.png",
+                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/beamfront.png",
+                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/beambottom.png",
+                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/beamright.png",
+                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/beamback.png",
+                    };
+
+                    string cate = "Beam";
+
+                    for (int i = 0; i < strings.Count; i++)
                     {
-                        btnContent = catName,
-                        btnCmd = cmds[0],
-                        elems = elems.Where(c => c.Category.Name == catName).ToList(),
+                        elemfaces.Add(new OptionViewModel()
+                        {
+                            CoverFaceContent = cate + strings[i],
+                            CoverFaceImgSource = new BitmapImage(new Uri(paths[i])),
+                            imgheight = 200,
+                            imgwidth = 350
+                        });
+                    }
+
+                    cates.Add(new CategoryViewModel()
+                    {
+                        CateElems = elems.Where(c => c.Category.Name == catName).ToList(),
+                        CateName = catName,
+                        TemplateCoverFaceViewModels = elemfaces,
                     });
                 }
                 if (catName == "Structural Columns")
                 {
-                    cates.Add(new TemplateCategoryViewModel()
-                    {
-                        btnContent = catName,
-                        btnCmd = cmds[1],
-                        elems = elems.Where(c => c.Category.Name == catName).ToList(),
+                    ObservableCollection<OptionViewModel> elemfaces = new ObservableCollection<OptionViewModel>();
+                    List<string> strings = new List<string>() { "Top", "Left", "Front", "Bottom", "Right", "Back" };
 
+                    List<string> paths = new List<string>() {
+                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/Coltop.png",
+                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/Colleft.png",
+                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/Colfront.png",
+                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/Colbottom.png",
+                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/Colright.png",
+                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/Colback.png",};
+
+                    string cate = "Column";
+                    for (int i = 0; i < strings.Count; i++)
+                    {
+                        elemfaces.Add(new OptionViewModel()
+                        {
+                            CoverFaceContent = cate + strings[i],
+                            CoverFaceImgSource = new BitmapImage(new Uri(paths[i])),
+                            imgheight = 350,
+                            imgwidth = 300
+                        });
+                    }
+
+                    cates.Add(new CategoryViewModel()
+                    {
+                        CateElems = elems.Where(c => c.Category.Name == catName).ToList(),
+                        CateName = catName,
+                        TemplateCoverFaceViewModels = elemfaces,
                     });
                 }
             }
-            SourceCatelv = new ObservableCollection<TemplateCategoryViewModel>(cates);
+            SourceCatelv = new ObservableCollection<CategoryViewModel>(cates);
         }
 
         private void CreateCommandInvoke(object parameter)
@@ -79,13 +120,12 @@ namespace ConcreteFacing.UI.ViewModel
             if (parameter is System.Windows.Window window)
             {
                 var cates = SourceCatelv;
-                string ms = "User Hii has check for: " + "\n" ;
-                foreach(var cate in cates)
+                string ms = "User Hii has check for: " + "\n";
+                //string ms = cates.cbxContent;
+                foreach (var cate in cates)
                 {
-                    if (cate.cbxIsCheck)
-                    {
-                        ms += cate.btnContent + "\n";
-                    }
+                    //cate.Thickness = Convert.ToDouble(CoverThickness);
+                    ms += cate.CateName + " được độ dày lớp cover là: " + cate.Thickness + "\n";
                 }
                 MessageBox.Show(ms);
                 window.DialogResult = true;
@@ -100,104 +140,6 @@ namespace ConcreteFacing.UI.ViewModel
                 wnd.DialogResult = false;
 
                 wnd.Close();
-            }
-        }
-
-        private void ViewBeamUICommandInvoke()
-        {
-            try
-            {
-                List<TemplateCoverFaceViewModel> elems = new List<TemplateCoverFaceViewModel>();
-                List<string> strings = new List<string>() { "Top", "Left", "Front", "Bottom", "Right", "Back" };
-                List<int> xindex = new List<int>() { 0, 0, 0, 1, 1, 1 };
-                List<int> yindex = new List<int>() { 0, 1, 2, 0, 1, 2 };
-                List<string> paths = new List<string>() {
-                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/beamtop.png",
-                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/beamleft.png",
-                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/beamfront.png",
-                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/beambottom.png",
-                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/beamright.png",
-                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/beamback.png",
-                    };
-
-                string cate = "Beam";
-
-                for (int i = 0; i < strings.Count; i++)
-                {
-                    elems.Add(new TemplateCoverFaceViewModel()
-                    {
-                        x = xindex[i],
-                        y = yindex[i],
-                        txtName = "txt" + cate + strings[i],
-                        cbxName = "cbx" + cate + strings[i],
-                        cbxContent = cate + strings[i],
-                        imgSource = new BitmapImage(new Uri(paths[i])),
-                        txtText = 5.ToString(),
-                        imgheight = 200,
-                        imgwidth = 350
-                    });
-                }
-                ////Top
-                //elems.Add(new Elem() { x = 0, y = 0, txtName = "txtBeamTop", cbxName = "cbxBeamTop", cbxContent = "BeamTop" });
-                ////Left
-                //elems.Add(new Elem() { x = 0, y = 1, txtName = "txtBeamLeft", cbxName = "cbxBeamLeft", cbxContent = "BeamLeft" });
-                ////Front
-                //elems.Add(new Elem() { x = 0, y = 2, txtName = "txtBeamFront", cbxName = "cbxBeamFront", cbxContent = "BeamFront" });
-                ////Bottom
-                //elems.Add(new Elem() { x = 1, y = 0, txtName = "txtBeamTop", cbxName = "cbxBeamTop", cbxContent = "BeamTop" });
-                ////Right
-                //elems.Add(new Elem() { x = 1, y = 1, txtName = "txtBeamTop", cbxName = "cbxBeamTop", cbxContent = "BeamTop" });
-                ////Back
-                //elems.Add(new Elem() { x = 1, y = 2, txtName = "txtBeamTop", cbxName = "cbxBeamTop", cbxContent = "BeamTop" });
-
-                SourceCoverFacelv = new List<TemplateCoverFaceViewModel>(elems);
-                MessageBox.Show("Pick Beam Cover Face!");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message + "\n" + ex.StackTrace.ToString());
-            }
-        }
-
-        private void ViewColumnUICommandInvoke()
-        {
-            try
-            {
-                List<TemplateCoverFaceViewModel> elems = new List<TemplateCoverFaceViewModel>();
-                List<string> strings = new List<string>() { "Top", "Left", "Front", "Bottom", "Right", "Back" };
-                List<int> xindex = new List<int>() { 0, 0, 0, 1, 1, 1 };
-                List<int> yindex = new List<int>() { 0, 1, 2, 0, 1, 2 };
-                List<string> paths = new List<string>() {
-                "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/Coltop.png",
-                "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/Colleft.png",
-                "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/Colfront.png",
-                "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/Colbottom.png",
-                "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/Colright.png",
-                "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/Colback.png",};
-
-                string cate = "Column";
-                for (int i = 0; i < strings.Count; i++)
-                {
-                    elems.Add(new TemplateCoverFaceViewModel()
-                    {
-                        x = xindex[i],
-                        y = yindex[i],
-                        txtName = "txt" + cate + strings[i],
-                        cbxName = "cbx" + cate + strings[i],
-                        cbxContent = cate + strings[i],
-                        imgSource = new BitmapImage(new Uri(paths[i])),
-                        txtText = 5.ToString(),
-                        imgheight = 350,
-                        imgwidth = 300
-                    });
-                }
-
-                SourceCoverFacelv = new List<TemplateCoverFaceViewModel>(elems);
-                MessageBox.Show("Pick Column Cover Face!");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message + "\n" + ex.StackTrace.ToString());
             }
         }
 
@@ -218,37 +160,15 @@ namespace ConcreteFacing.UI.ViewModel
 
         #region templateCoverSetting
 
-        private List<TemplateCoverFaceViewModel> _sourceCoverFacelv;
+        private List<OptionViewModel> _lstCateSelect;
 
-        public List<TemplateCoverFaceViewModel> SourceCoverFacelv
+        public List<OptionViewModel> LstCateSelect
         {
-            get => _sourceCoverFacelv;
+            get => _lstCateSelect;
             set
             {
-                _sourceCoverFacelv = value;
-                RaisePropertyChange(nameof(SourceCoverFacelv));
-            }
-        }
-
-        // data for binding in the ListView- data template
-        public class TemplateCoverFaceViewModel
-        {
-            public int x { get; set; }
-            public int y { get; set; }
-            public string face { get; set; }
-            public string cate { get; set; }
-            public string txtName { get; set; }
-            public string txtText { get; set; }
-            public string cbxName { get; set; }
-            public string cbxContent { get; set; }
-            public bool cbxIsCheck { get; set; }
-            public BitmapImage imgSource { get; set; }
-            public double imgheight { get; set; }
-            public double imgwidth { get; set; }
-
-            public TemplateCoverFaceViewModel()
-            {
-               
+                _lstCateSelect = value;
+                RaisePropertyChange(nameof(LstCateSelect));
             }
         }
 
@@ -256,17 +176,33 @@ namespace ConcreteFacing.UI.ViewModel
 
         #region templateCate
 
-        public ObservableCollection<TemplateCategoryViewModel> SourceCatelv { get; set; }
+        private ObservableCollection<CategoryViewModel> _sourceCatelv;
 
-        public class TemplateCategoryViewModel
+        public ObservableCollection<CategoryViewModel> SourceCatelv
         {
-            public string btnContent { get; set; }
-            public ICommand btnCmd { get; set; }
-            public bool cbxIsCheck { get; set; }
-            public List<Element> elems { get; set; }
-
-            public TemplateCategoryViewModel()
+            get => _sourceCatelv;
+            set
             {
+                if (_sourceCatelv != value)
+                {
+                    _sourceCatelv = value;
+                    OnPropertyChanged(nameof(SourceCatelv));
+                }
+            }
+        }
+
+        private CategoryViewModel _selectedCate;
+
+        public CategoryViewModel SelectedCate
+        {
+            get => _selectedCate;
+            set
+            {
+                if (_selectedCate != value)
+                {
+                    _selectedCate = value;
+                    OnPropertyChanged(nameof(SelectedCate));
+                }
             }
         }
 

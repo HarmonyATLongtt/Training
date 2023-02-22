@@ -21,7 +21,7 @@ namespace ConcreteFacing
             Document doc = uidoc.Document;
 
             var elems = PickConcreteBeamOrColumn(uidoc);
-            if (elems != null )
+            if (elems != null && elems.Count >0  )
             {
                 //MainViewModel viewmodel = new MainViewModel();
                 MainView view = new MainView();
@@ -35,7 +35,10 @@ namespace ConcreteFacing
                         foreach (var elem in elems)
                         {
                             FamilyInstance ins = elem as FamilyInstance;
-                            double thickness = 20 / 304.8;
+                            MainViewModel vm = view.DataContext as MainViewModel;
+
+                            //double thickness = vm.SourceCatelv.FirstOrDefault(x=> x.Thickness>0).Thickness / 304.8;
+                            double thickness = vm.SourceCatelv.First().Thickness / 304.8;
 
                             var Sol = elem.get_Geometry(new Options())
                                 .OfType<Solid>()
@@ -60,6 +63,10 @@ namespace ConcreteFacing
                 }
                 else
                     MessageBox.Show("Command is cancel");
+            }
+            else
+            {
+                MessageBox.Show("No element is selected!");
             }
             return Result.Succeeded;
         }
@@ -114,7 +121,6 @@ namespace ConcreteFacing
         {
             foreach (var solid in solids)
             {
-                var faces = solid.Faces.Size;
                 if (solid.Volume != 0)
                 {
                     int x = new Random().Next(1, 6);

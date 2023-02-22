@@ -126,7 +126,6 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Function\" />
     <Folder Include="RevitModification\" />
     <Folder Include="UI\Model\" />
   </ItemGroup>
