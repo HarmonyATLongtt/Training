@@ -115,12 +115,12 @@ namespace ConcreteFacing.Process.ObjectCoverSet
             }
            
             var sortedfaces = new UserOptions().Check(faces, vm, elem);
-            foreach (var sortedface in sortedfaces)
+            foreach (var sortedface in sortedfaces.FaceIsCheck)
             {
                 PlanarFace planarFace = sortedface as PlanarFace;
 
                 var eloop = sortedface.GetEdgesAsCurveLoops();
-                Solid cover = GeometryCreationUtilities.CreateExtrusionGeometry(eloop, planarFace.FaceNormal, 50/304.8);
+                Solid cover = GeometryCreationUtilities.CreateExtrusionGeometry(eloop, planarFace.FaceNormal, sortedfaces.Thickness / 304.8);
                 DirectShape ds = DirectShape.CreateElement(doc, new ElementId(BuiltInCategory.OST_GenericModel));
                 ds.SetShape(new GeometryObject[] { cover });
             }

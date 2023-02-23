@@ -2,22 +2,20 @@
 using ConcreteFacing.UI.ViewModel;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 
 namespace ConcreteFacing.DATA
 {
     public class UserOptions
     {
         public double Thickness { get; set; }
-        public bool CateIsCheck { get; set; }
-        public bool FaceIsCheck { get; set; }
+        public List<Face> FaceIsCheck { get; set; }
 
-       
-        public List<Face> Check(List<Face> faces, MainViewModel vm, Element elem)
+        public UserOptions Check(List<Face> faces, MainViewModel vm, Element elem)
         {
-            List<Face> result = new List<Face>();
+            UserOptions usersetting = new UserOptions();
 
-            FamilyInstance ins =  elem as FamilyInstance;
+            List<Face> result = new List<Face>();
+            FamilyInstance ins = elem as FamilyInstance;
             XYZ topnorm = ins.HandOrientation.CrossProduct(ins.FacingOrientation);
             XYZ botnorm = topnorm.Negate();
 
@@ -27,10 +25,11 @@ namespace ConcreteFacing.DATA
             {
                 if (cate.CateIsChecked && cate.CateName == "Structural Framing" && elem.Category.Name == "Structural Framing")
                 {
+                    usersetting.Thickness = cate.Thickness;
                     var allface = cate.TemplateCoverFaceViewModels.ToList();
-                    if (allface.Where( i => i.CoverFaceContent == "Top").First().CoverFaceIsCheck ) 
+                    if (allface.Where(i => i.CoverFaceContent == "Top").First().CoverFaceIsCheck)
                     {
-                        var plannarFace = faces.OfType<PlanarFace>().Where( m => m.FaceNormal.IsAlmostEqualTo(topnorm, 10E-5)).Cast<Face>().First();
+                        var plannarFace = faces.OfType<PlanarFace>().Where(m => m.FaceNormal.IsAlmostEqualTo(topnorm, 10E-5)).Cast<Face>().First();
                         result.Add(plannarFace);
                     }
                     if (allface.Where(i => i.CoverFaceContent == "Bottom").First().CoverFaceIsCheck)
@@ -48,12 +47,12 @@ namespace ConcreteFacing.DATA
                         var plannarFace = faces.OfType<PlanarFace>().Where(m => m.FaceNormal.IsAlmostEqualTo(ins.FacingOrientation, 10E-5)).Cast<Face>().First();
                         result.Add(plannarFace);
                     }
-
                 }
                 if (cate.CateIsChecked && cate.CateName == "Structural Columns" && elem.Category.Name == "Structural Columns")
                 {
+                    usersetting.Thickness = cate.Thickness;
                     var allface = cate.TemplateCoverFaceViewModels.ToList();
-                   
+
                     if (allface.Where(i => i.CoverFaceContent == "Right").First().CoverFaceIsCheck)
                     {
                         var plannarFace = faces.OfType<PlanarFace>().Where(m => m.FaceNormal.IsAlmostEqualTo(ins.HandOrientation, 10E-5)).Cast<Face>().First();
@@ -74,11 +73,10 @@ namespace ConcreteFacing.DATA
                         var plannarFace = faces.OfType<PlanarFace>().Where(m => m.FaceNormal.IsAlmostEqualTo(ins.FacingOrientation, 10E-5)).Cast<Face>().First();
                         result.Add(plannarFace);
                     }
-
                 }
             }
-
-            return result;
+            usersetting.FaceIsCheck = result;
+            return usersetting;
         }
     }
 }
