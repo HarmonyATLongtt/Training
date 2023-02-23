@@ -9,6 +9,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using static ConcreteFacing.DATA.OptionViewModel;
 
 namespace ConcreteFacing.UI.ViewModel
 {
@@ -45,74 +46,51 @@ namespace ConcreteFacing.UI.ViewModel
 
             foreach (var catName in catNames)
             {
+                ObservableCollection<OptionViewModel> elemfaces = new ObservableCollection<OptionViewModel>();
+                OptionsSetData optiondata = new OptionsSetData();
+
                 if (catName == "Structural Framing")
                 {
-                    ObservableCollection<OptionViewModel> elemfaces = new ObservableCollection<OptionViewModel>();
-                    List<string> strings = new List<string>() { "Top", "Left", "Front", "Bottom", "Right", "Back" };
+                    optiondata = new OptionsSetBeamData();
+                    List<string> paths = optiondata.imgpaths;
 
-                    List<string> paths = new List<string>() {
-                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/beamtop.png",
-                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/beamleft.png",
-                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/beamfront.png",
-                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/beambottom.png",
-                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/beamright.png",
-                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/beamback.png",
-                    };
-
-                    string cate = "Beam";
-
-                    for (int i = 0; i < strings.Count; i++)
+                    for (int i = 0; i < paths.Count; i++)
                     {
                         elemfaces.Add(new OptionViewModel()
                         {
-                            CoverFaceContent = cate + strings[i],
+                            CoverFaceContent = Enum.ToObject(typeof(BeamFaces), i).ToString(),
                             CoverFaceImgSource = new BitmapImage(new Uri(paths[i])),
-                            imgheight = 200,
-                            imgwidth = 350
+                            imgheight = optiondata.imgsize[0],
+                            imgwidth = optiondata.imgsize[1]
                         });
                     }
-
-                    cates.Add(new CategoryViewModel()
-                    {
-                        CateElems = elems.Where(c => c.Category.Name == catName).ToList(),
-                        CateName = catName,
-                        TemplateCoverFaceViewModels = elemfaces,
-                    });
                 }
-                if (catName == "Structural Columns")
+                else if (catName == "Structural Columns")
                 {
-                    ObservableCollection<OptionViewModel> elemfaces = new ObservableCollection<OptionViewModel>();
-                    List<string> strings = new List<string>() { "Top", "Left", "Front", "Bottom", "Right", "Back" };
+                    optiondata = new OptionsSetColumnData();
+                    List<string> paths = optiondata.imgpaths;
 
-                    List<string> paths = new List<string>() {
-                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/Coltop.png",
-                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/Colleft.png",
-                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/Colfront.png",
-                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/Colbottom.png",
-                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/Colright.png",
-                    "G:/01Thuctap/Training/Tran-Viet-Hoang/Addin1_wpf/ClassLibrary2/ConcreteFacing/Facelayout/Colback.png",};
-
-                    string cate = "Column";
-                    for (int i = 0; i < strings.Count; i++)
+                    for (int i = 0; i < paths.Count; i++)
                     {
                         elemfaces.Add(new OptionViewModel()
                         {
-                            CoverFaceContent = cate + strings[i],
+                            CoverFaceContent = Enum.ToObject(typeof(ColumnFaces), i).ToString(),
                             CoverFaceImgSource = new BitmapImage(new Uri(paths[i])),
-                            imgheight = 350,
-                            imgwidth = 300
+                            imgheight = optiondata.imgsize[0],
+                            imgwidth = optiondata.imgsize[1]
                         });
                     }
-
-                    cates.Add(new CategoryViewModel()
-                    {
-                        CateElems = elems.Where(c => c.Category.Name == catName).ToList(),
-                        CateName = catName,
-                        TemplateCoverFaceViewModels = elemfaces,
-                    });
                 }
+
+                cates.Add(new CategoryViewModel()
+                {
+                    CateElems = elems.Where(c => c.Category.Name == catName).ToList(),
+                    CateName = catName,
+                    TemplateCoverFaceViewModels = elemfaces,
+                });
             }
             SourceCatelv = new ObservableCollection<CategoryViewModel>(cates);
+            
         }
 
         private void CreateCommandInvoke(object parameter)

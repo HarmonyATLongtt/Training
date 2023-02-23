@@ -3,8 +3,6 @@ G:\01Thuctap\Training\Tran-Viet-Hoang\Addin1_wpf\ClassLibrary2\ConcreteFacing\bi
 G:\01Thuctap\Training\Tran-Viet-Hoang\Addin1_wpf\ClassLibrary2\ConcreteFacing\obj\Debug\ConcreteFacing.csproj.AssemblyReference.cache
 G:\01Thuctap\Training\Tran-Viet-Hoang\Addin1_wpf\ClassLibrary2\ConcreteFacing\obj\Debug\ConcreteFacing_MarkupCompile.cache
 G:\01Thuctap\Training\Tran-Viet-Hoang\Addin1_wpf\ClassLibrary2\ConcreteFacing\obj\Debug\ConcreteFacing.g.resources
-G:\01Thuctap\Training\Tran-Viet-Hoang\Addin1_wpf\ClassLibrary2\ConcreteFacing\obj\Debug\ConcreteFacing.Properties.Resources.resources
-G:\01Thuctap\Training\Tran-Viet-Hoang\Addin1_wpf\ClassLibrary2\ConcreteFacing\obj\Debug\ConcreteFacing.csproj.GenerateResource.cache
 G:\01Thuctap\Training\Tran-Viet-Hoang\Addin1_wpf\ClassLibrary2\ConcreteFacing\obj\Debug\ConcreteFacing.csproj.CoreCompileInputs.cache
 G:\01Thuctap\Training\Tran-Viet-Hoang\Addin1_wpf\ClassLibrary2\ConcreteFacing\obj\Debug\ConcreteFacing.dll
 G:\01Thuctap\Training\Tran-Viet-Hoang\Addin1_wpf\ClassLibrary2\ConcreteFacing\obj\Debug\ConcreteFacing.pdb

@@ -65,7 +65,13 @@
     <Compile Include="Common\AllowBeamAndColumn.cs" />
     <Compile Include="CmdCreateConcreteFacing.cs" />
     <Compile Include="DATA\CategoryViewModel.cs" />
+    <Compile Include="DATA\OptionsSetColumnData.cs" />
+    <Compile Include="DATA\OptionsSetBeamData.cs" />
+    <Compile Include="DATA\OptionsSetData.cs" />
     <Compile Include="DATA\OptionViewModel.cs" />
+    <Compile Include="DATA\UserOptions.cs" />
+    <Compile Include="Process\ConditionalObjectPicking\ObjectTypeCondition.cs" />
+    <Compile Include="Process\ObjectCoverSet\DirectShapeSet.cs" />
     <Compile Include="UI\ViewModel\MainViewModel.cs" />
     <Compile Include="UI\ViewModel\RelayCommand.cs" />
     <Compile Include="UI\Views\MainView.xaml.cs">
@@ -82,10 +88,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <None Include="ConcreteFacing.addin">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -95,7 +97,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Facelayout\" />
     <Folder Include="UI\Model\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

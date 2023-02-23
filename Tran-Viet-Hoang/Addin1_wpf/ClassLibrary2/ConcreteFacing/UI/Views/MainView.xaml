@@ -6,7 +6,7 @@
         WindowStartupLocation="CenterScreen"
         mc:Ignorable="d"
         x:Name="window"
-             d:DesignHeight="700" d:DesignWidth="1300" Height="700" Width="1300">
+             d:DesignHeight="700" d:DesignWidth="1500" Height="700" Width="1500">
     <Window.Resources>
         <Style TargetType="Button">
             <Setter Property="Margin" Value="5,5,5,5" />
@@ -41,8 +41,8 @@
                 <Image Grid.Row="0" 
                         Source="{Binding CoverFaceImgSource}"
                        Stretch="Uniform"
-                       Height="200"
-                       Width="350"></Image>
+                       Height="{Binding imgheight}"
+                       Width="{Binding imgwidth}"></Image>
                 <CheckBox Grid.Row="1"
                           Content="{Binding CoverFaceContent}"
                           IsChecked="{Binding CoverFaceIsCheck, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
@@ -62,7 +62,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="900" />
+            <ColumnDefinition Width="1100" />
             <ColumnDefinition Width="180" />
         </Grid.ColumnDefinitions>
 

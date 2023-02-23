@@ -43,7 +43,7 @@ namespace HumanCommuntity
             hocsinh.Communicate(); // hiding....: Students are so noisy
             hocsinh1.Communicate(); // hiding....: Students are so noisy
             Console.Write("\n");
-            hocsinh_undergraduate.Communicate(); // hiding....: Students are so noisy
+            hocsinh_undergraduate.Communicate(); //  not hiding....: Students are so noisy
             hocsinh_undergraduate1.Communicate(); // hiding....: Students are not noisy
 
             human.Job();         //not override
