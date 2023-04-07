@@ -1,0 +1,7 @@
+D:\Training\Vi-Du-For\Vi-Du-For\bin\Debug\Vi-Du-For.exe.config
+D:\Training\Vi-Du-For\Vi-Du-For\bin\Debug\Vi-Du-For.exe
+D:\Training\Vi-Du-For\Vi-Du-For\bin\Debug\Vi-Du-For.pdb
+D:\Training\Vi-Du-For\Vi-Du-For\obj\Debug\Vi-Du-For.csproj.AssemblyReference.cache
+D:\Training\Vi-Du-For\Vi-Du-For\obj\Debug\Vi-Du-For.csproj.CoreCompileInputs.cache
+D:\Training\Vi-Du-For\Vi-Du-For\obj\Debug\Vi-Du-For.exe
+D:\Training\Vi-Du-For\Vi-Du-For\obj\Debug\Vi-Du-For.pdb
