@@ -1,0 +1,7 @@
+D:\Training\Vi-Du-Interface\Vi-Du-Interface\bin\Debug\Vi-Du-Interface.exe.config
+D:\Training\Vi-Du-Interface\Vi-Du-Interface\bin\Debug\Vi-Du-Interface.exe
+D:\Training\Vi-Du-Interface\Vi-Du-Interface\bin\Debug\Vi-Du-Interface.pdb
+D:\Training\Vi-Du-Interface\Vi-Du-Interface\obj\Debug\Vi-Du-Interface.csproj.AssemblyReference.cache
+D:\Training\Vi-Du-Interface\Vi-Du-Interface\obj\Debug\Vi-Du-Interface.csproj.CoreCompileInputs.cache
+D:\Training\Vi-Du-Interface\Vi-Du-Interface\obj\Debug\Vi-Du-Interface.exe
+D:\Training\Vi-Du-Interface\Vi-Du-Interface\obj\Debug\Vi-Du-Interface.pdb
