@@ -28,7 +28,14 @@ namespace Vi_Du_Interface
 
             animal.speak();
 
+            string test = "asdaf,adfag,asdga,gaega";
+            var y = test.Split(',');
+         //   int a = 789;
+         //   string h = "d";
+         //   double b = (double)a;
+         // //  b = double.Parse(h);
+         //var t=   double.TryParse(h, out double c);
             Console.ReadKey();
         }
     }
-}
+    }
