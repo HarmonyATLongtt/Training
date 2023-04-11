@@ -69,6 +69,7 @@ namespace BaiTap_OOP_Bai2
     class Program
     {
         static List<Person> peopleList = new List<Person>();
+
         static void Main(string[] args)
         {
             Init();
