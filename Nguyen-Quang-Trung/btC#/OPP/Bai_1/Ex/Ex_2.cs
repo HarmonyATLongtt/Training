@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Bai_1
+namespace Bai_1.Ex
 {
-    internal class Bai_2
+    public class Ex_2
     {
-        private static void Main(string[] args)
+        public static void Execution()
         {
             List<Person> listInfor = new List<Person>();
             // Person tinhtoan = new Person();
@@ -101,24 +101,6 @@ namespace Bai_1
             } while (inputvalue3);
             TaxData hesothue = new TaxData();
             infor.TaxCoe = hesothue.GetTaxCoe(infor.Age, infor.Income);
-            //do
-            //{
-            //    Console.Write("Nhap Taxcoe: ");
-            //    try
-            //    {
-            //        infor.TaxCoe = Convert.ToDouble(Console.ReadLine());
-            //        inputvalue4 = false;
-            //    }
-            //    catch (FormatException)
-            //    {
-            //        Console.WriteLine("Xay ra loi: Format Exception");
-            //        inputvalue4 = true;
-            //    }
-            //    finally
-            //    {
-            //        Console.Write("");
-            //    }
-            //} while (inputvalue4);
             listInfor.Add(infor);
         }
 

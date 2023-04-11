@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Bai_1
+namespace Bai_1.Ex
 {
-    internal class Bai_1
+    public class Ex_1
     {
-        private static void Main(string[] args)
+        public static void Execution()
         {
             List<Person> listInfor = new List<Person>();
             // Person tinhtoan = new Person();
