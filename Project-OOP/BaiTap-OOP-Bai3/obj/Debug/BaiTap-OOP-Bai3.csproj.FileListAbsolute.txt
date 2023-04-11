@@ -1,0 +1,6 @@
+D:\Training\BaiTap-OOP\BaiTap-OOP-Bai3\bin\Debug\BaiTap-OOP-Bai3.exe.config
+D:\Training\BaiTap-OOP\BaiTap-OOP-Bai3\bin\Debug\BaiTap-OOP-Bai3.exe
+D:\Training\BaiTap-OOP\BaiTap-OOP-Bai3\bin\Debug\BaiTap-OOP-Bai3.pdb
+D:\Training\BaiTap-OOP\BaiTap-OOP-Bai3\obj\Debug\BaiTap-OOP-Bai3.csproj.CoreCompileInputs.cache
+D:\Training\BaiTap-OOP\BaiTap-OOP-Bai3\obj\Debug\BaiTap-OOP-Bai3.exe
+D:\Training\BaiTap-OOP\BaiTap-OOP-Bai3\obj\Debug\BaiTap-OOP-Bai3.pdb

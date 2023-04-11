@@ -4,4 +4,3 @@ D:\Training\C_Co_Ban\ArrayList\bin\Debug\ArrayList.pdb
 D:\Training\C_Co_Ban\ArrayList\obj\Debug\Array-List-Co-Ban.csproj.CoreCompileInputs.cache
 D:\Training\C_Co_Ban\ArrayList\obj\Debug\ArrayList.exe
 D:\Training\C_Co_Ban\ArrayList\obj\Debug\ArrayList.pdb
-D:\Training\C_Co_Ban\ArrayList\obj\Debug\Array-List-Co-Ban.csproj.AssemblyReference.cache
