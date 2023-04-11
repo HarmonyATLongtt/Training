@@ -5,3 +5,10 @@ E:\trainC#\testC_sharp\btC#\OPP\Bai_1\obj\Debug\Bai_1.csprojAssemblyReference.ca
 E:\trainC#\testC_sharp\btC#\OPP\Bai_1\obj\Debug\Bai_1.csproj.CoreCompileInputs.cache
 E:\trainC#\testC_sharp\btC#\OPP\Bai_1\obj\Debug\Bai_1.exe
 E:\trainC#\testC_sharp\btC#\OPP\Bai_1\obj\Debug\Bai_1.pdb
+E:\trainC#\Training\Nguyen-Quang-Trung\btC#\OPP\Bai_1\bin\Debug\Bai_1.exe.config
+E:\trainC#\Training\Nguyen-Quang-Trung\btC#\OPP\Bai_1\bin\Debug\Bai_1.exe
+E:\trainC#\Training\Nguyen-Quang-Trung\btC#\OPP\Bai_1\bin\Debug\Bai_1.pdb
+E:\trainC#\Training\Nguyen-Quang-Trung\btC#\OPP\Bai_1\obj\Debug\Bai_1.csprojAssemblyReference.cache
+E:\trainC#\Training\Nguyen-Quang-Trung\btC#\OPP\Bai_1\obj\Debug\Bai_1.csproj.CoreCompileInputs.cache
+E:\trainC#\Training\Nguyen-Quang-Trung\btC#\OPP\Bai_1\obj\Debug\Bai_1.exe
+E:\trainC#\Training\Nguyen-Quang-Trung\btC#\OPP\Bai_1\obj\Debug\Bai_1.pdb

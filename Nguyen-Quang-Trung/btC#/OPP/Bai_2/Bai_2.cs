@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Bai_1
 {
-    internal class Bai_1
+    internal class Bai_2
     {
         private static void Main(string[] args)
         {
@@ -42,7 +42,7 @@ namespace Bai_1
         {
             Person infor = new Person();
             Console.WriteLine("Moi nhap thong tin.....");
-            bool inputvalue1, inputvalue2, inputvalue3, inputvalue4;
+            bool inputvalue1, inputvalue2, inputvalue3; //inputvalue4;
             do
             {
                 Console.Write("Nhap ID: ");
@@ -99,35 +99,36 @@ namespace Bai_1
                     Console.Write("");
                 }
             } while (inputvalue3);
-
-            do
-            {
-                Console.Write("Nhap Taxcoe: ");
-                try
-                {
-                    infor.TaxCoe = Convert.ToDouble(Console.ReadLine());
-                    inputvalue4 = false;
-                }
-                catch (FormatException)
-                {
-                    Console.WriteLine("Xay ra loi: Format Exception");
-                    inputvalue4 = true;
-                }
-                finally
-                {
-                    Console.Write("");
-                }
-            } while (inputvalue4);
+            TaxData hesothue = new TaxData();
+            infor.TaxCoe = hesothue.GetTaxCoe(infor.Age, infor.Income);
+            //do
+            //{
+            //    Console.Write("Nhap Taxcoe: ");
+            //    try
+            //    {
+            //        infor.TaxCoe = Convert.ToDouble(Console.ReadLine());
+            //        inputvalue4 = false;
+            //    }
+            //    catch (FormatException)
+            //    {
+            //        Console.WriteLine("Xay ra loi: Format Exception");
+            //        inputvalue4 = true;
+            //    }
+            //    finally
+            //    {
+            //        Console.Write("");
+            //    }
+            //} while (inputvalue4);
             listInfor.Add(infor);
         }
 
         public static void Output(List<Person> listInfor)
         {
-            Console.WriteLine("{0, -5} {1, -20} {2, -5}",
-               "ID", "Name", "Income");
+            Console.WriteLine("{0, -5} {1, -20} {2, -10} {3, -5}",
+               "ID", "Name", "Income", "TaxCoe");
             foreach (Person infor in listInfor)
             {
-                Console.WriteLine("{0, -5} {1, -20} {2, -5}", infor.ID, infor.Name, infor.Income);
+                Console.WriteLine("{0, -5} {1, -20} {2, -10} {3, -5}", infor.ID, infor.Name, infor.Income, infor.TaxCoe);
             }
         }
     }
