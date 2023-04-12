@@ -72,10 +72,14 @@ namespace Bai_1.Ex
             Console.WriteLine("1. Student");
             Console.WriteLine("2. Teacher");
             Console.WriteLine("3. Employee");
+            Console.WriteLine("0. Thoat");
             Console.Write("Lua chon cua ban: ");
             int doituong_input = int.Parse(Console.ReadLine());
             switch (doituong_input)
             {
+                case 0:
+                    return;
+
                 case 1:
                     do
                     {
@@ -265,8 +269,8 @@ namespace Bai_1.Ex
                             Console.Write("");
                         }
                     } while (inputvalue3);
-                    nv.TaxCoe = hesothue.GetTaxCoe(hs.Age, hs.Income);
-                    listInfor.Add(hs);
+                    nv.TaxCoe = hesothue.GetTaxCoe(nv.Age, nv.Income);
+                    listInfor.Add(nv);
                     break;
 
                 default:
@@ -280,28 +284,37 @@ namespace Bai_1.Ex
             var count_hs = listInfor.OfType<Student>().ToList();
             Console.WriteLine("Student: " + count_hs.Count);
             Console.WriteLine("{0, -5} {1, -20} {2, -5} {3, -20} {4, -10}",
-               "ID", "Name", "Age", "School", "Class");
-            foreach (Student hs in listInfor)
+                                 "ID", "Name", "Age", "School", "Class");
+            foreach (Interface_IPerson p in listInfor)
             {
-                Console.WriteLine("{0, -5} {1, -20} {2, -5} {3, -20} {4, -10}", hs.ID, hs.Name, hs.Age, hs.School, hs.Class);
+                if (p is Student hs)
+                {
+                    Console.WriteLine("{0, -5} {1, -20} {2, -5} {3, -20} {4, -10}", hs.ID, hs.Name, hs.Age, hs.School, hs.Class);
+                }
             }
 
             var count_gv = listInfor.OfType<Teacher>().ToList();
             Console.WriteLine("Teacher: " + count_gv.Count);
             Console.WriteLine("{0, -5} {1, -20} {2, -5} {3, -20} {4, -10} {5, -5}",
-               "ID", "Name", "Age", "School", "Income", "TaxCoe");
-            foreach (Teacher gv in listInfor)
+                               "ID", "Name", "Age", "School", "Income", "TaxCoe");
+            foreach (Interface_IPerson p in listInfor)
             {
-                Console.WriteLine("{0, -5} {1, -20} {2, -5} {3, -20} {4, -10} {5, -5}", gv.ID, gv.Name, gv.Age, gv.School, gv.Income, gv.TaxCoe);
+                if (p is Teacher gv)
+                {
+                    Console.WriteLine("{0, -5} {1, -20} {2, -5} {3, -20} {4, -10} {5, -5}", gv.ID, gv.Name, gv.Age, gv.School, gv.Income, gv.TaxCoe);
+                }
             }
 
             var count_nv = listInfor.OfType<Employee>().ToList();
             Console.WriteLine("Employee: " + count_nv.Count);
             Console.WriteLine("{0, -5} {1, -20} {2, -5} {3, -20} {4, -20} {5, -10} {6, -5}",
-               "ID", "Name", "Age", "Company", "JobTitle", "Income", "TaxCoe");
-            foreach (Employee nv in listInfor)
+                              "ID", "Name", "Age", "Company", "JobTitle", "Income", "TaxCoe");
+            foreach (Interface_IPerson p in listInfor)
             {
-                Console.WriteLine("{0, -5} {1, -20} {2, -5} {3, -20} {4, -20} {5, -10} {6, -5}", nv.ID, nv.Name, nv.Age, nv.Company, nv.JobTitle, nv.Income, nv.TaxCoe);
+                if (p is Employee nv)
+                {
+                    Console.WriteLine("{0, -5} {1, -20} {2, -5} {3, -20} {4, -20} {5, -10} {6, -5}", nv.ID, nv.Name, nv.Age, nv.Company, nv.JobTitle, nv.Income, nv.TaxCoe);
+                }
             }
         }
     }
