@@ -10,5 +10,12 @@ namespace Bai_1
     {
         public string Class { get; set; }
         public string School { get; set; }
+
+        public override string ToString()
+        {
+            string baseIfo = base.ToString();
+            string info = string.Format("{0}\t{1}\t{2}", baseIfo, Class, School);
+            return info;
+        }
     }
 }

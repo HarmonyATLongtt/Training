@@ -12,3 +12,10 @@ E:\trainC#\Training\Nguyen-Quang-Trung\btC#\OPP\Bai_1\obj\Debug\Bai_1.csprojAsse
 E:\trainC#\Training\Nguyen-Quang-Trung\btC#\OPP\Bai_1\obj\Debug\Bai_1.csproj.CoreCompileInputs.cache
 E:\trainC#\Training\Nguyen-Quang-Trung\btC#\OPP\Bai_1\obj\Debug\Bai_1.exe
 E:\trainC#\Training\Nguyen-Quang-Trung\btC#\OPP\Bai_1\obj\Debug\Bai_1.pdb
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen-Quang-Trung\btC#\OPP\Bai_1\bin\Debug\Bai_1.exe.config
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen-Quang-Trung\btC#\OPP\Bai_1\bin\Debug\Bai_1.exe
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen-Quang-Trung\btC#\OPP\Bai_1\bin\Debug\Bai_1.pdb
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen-Quang-Trung\btC#\OPP\Bai_1\obj\Debug\Bai_1.csproj.AssemblyReference.cache
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen-Quang-Trung\btC#\OPP\Bai_1\obj\Debug\Bai_1.csproj.CoreCompileInputs.cache
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen-Quang-Trung\btC#\OPP\Bai_1\obj\Debug\Bai_1.exe
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen-Quang-Trung\btC#\OPP\Bai_1\obj\Debug\Bai_1.pdb
