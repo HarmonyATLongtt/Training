@@ -29,11 +29,9 @@ namespace Bai_1
             return Income * TaxCoe;
         }
 
-        public string GetInfor(string key)
+        public string GetInfor(string key, string value)
         {
-            Console.Write("Nhap ten nguoi muon truy van thong tin: ");
-            key = Convert.ToString(Console.ReadLine());
-            if (key == this.Name)
+            if (key == value)
             {
                 return $"ID: {ID}, Name: {Name}, Age: {Age}";
             }

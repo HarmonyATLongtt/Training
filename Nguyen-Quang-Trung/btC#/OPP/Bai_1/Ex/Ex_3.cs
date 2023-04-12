@@ -39,13 +39,16 @@ namespace Bai_1.Ex
                         break;
 
                     case 4:
-                        //Interface_IPerson timkiem = new Interface_IPerson();
-                        //string keyword;
-                        //foreach (var item in listInfor)
-                        //{
-                        //    keyword = item.ToString();
-                        //    timkiem.GetInfor(keyword);
-                        //}
+                        Console.Write("Nhap ten nguoi muon truy van thong tin: ");
+                        string key = Convert.ToString(Console.ReadLine());
+                        Interface_IPerson find = new Interface_IPerson();
+                        var names = listInfor.Select(p => p.Name).ToArray();
+
+                        foreach (string item in names)
+                        {
+                            key = item;
+                            find.GetInfor(key, item);
+                        }
                         break;
 
                     default:
