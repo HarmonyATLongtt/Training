@@ -43,13 +43,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Employee.cs" />
     <Compile Include="Ex\Ex_1.cs" />
     <Compile Include="Ex\Ex_2.cs" />
     <Compile Include="Ex\Ex_3.cs" />
-    <Compile Include="Person.cs" />
+    <Compile Include="Interface IPerson.cs" />
     <Compile Include="MainEx.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Student.cs" />
     <Compile Include="TaxData.cs" />
+    <Compile Include="Teacher.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

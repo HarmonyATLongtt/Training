@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Bai_1
 {
-    public class TaxData : Person
+    public class TaxData : Interface_IPerson
     {
         public double GetTaxCoe(int Age, double Income)
         {

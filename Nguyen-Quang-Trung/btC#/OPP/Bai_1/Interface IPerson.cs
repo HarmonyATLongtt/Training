@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Bai_1
 {
-    public class Person
+    public class Interface_IPerson
     {
         public int ID { get; set; }
         public string Name { get; set; }
@@ -14,7 +14,7 @@ namespace Bai_1
         public double Income { get; set; }
         public double TaxCoe { get; set; } // hệ số thuế
 
-        public bool Equals(Person p)
+        public bool Equals(Interface_IPerson p)
         {
             if (p == null)
             {
@@ -27,6 +27,21 @@ namespace Bai_1
         public double GetTax(double Income, double TaxCoe)
         {
             return Income * TaxCoe;
+        }
+
+        public string GetInfor(string key)
+        {
+            Console.Write("Nhap ten nguoi muon truy van thong tin: ");
+            key = Convert.ToString(Console.ReadLine());
+            if (key == this.Name)
+            {
+                return $"ID: {ID}, Name: {Name}, Age: {Age}";
+            }
+            else
+            {
+                Console.WriteLine("Khong co thong tin trong co so du lieu");
+                return null;
+            }
         }
     }
 }
