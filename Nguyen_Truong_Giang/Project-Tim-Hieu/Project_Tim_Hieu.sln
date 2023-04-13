@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Array-List-Co-Ban", "ArrayL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vi-Du-LinQ", "Vi-Du-LinQ\Vi-Du-LinQ.csproj", "{AE9D30C2-1865-41CD-9B74-ABCD942B028F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vi-Du-Regular-Expression", "Vi-Du-Regular-Expression\Vi-Du-Regular-Expression.csproj", "{93C6D711-F4BA-425F-9CB2-7B03B6FD5717}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{AE9D30C2-1865-41CD-9B74-ABCD942B028F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE9D30C2-1865-41CD-9B74-ABCD942B028F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AE9D30C2-1865-41CD-9B74-ABCD942B028F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93C6D711-F4BA-425F-9CB2-7B03B6FD5717}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93C6D711-F4BA-425F-9CB2-7B03B6FD5717}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93C6D711-F4BA-425F-9CB2-7B03B6FD5717}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93C6D711-F4BA-425F-9CB2-7B03B6FD5717}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

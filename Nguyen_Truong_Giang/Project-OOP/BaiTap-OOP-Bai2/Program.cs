@@ -9,30 +9,39 @@ namespace BaiTap_OOP_Bai2
     public class TaxData {
         public static double GetTaxCoe(int age, double income)
         {
-            if(age < 0)
+            double heSoThue = 0;
+            if (age < 18)
             {
-                return 0;
+                return heSoThue = 0;
             }
-            else if (income <= 9000000)
+            else if (age >= 18)
             {
-                return 0.05;
-            }
-            else if (income <= 15000000)
-            {
-                return 0.1;
-            }
-            else if (income <= 20000000)
-            {
-                return 0.15;
-            }
-            else if (income <= 30000000)
-            {
-                return 0.2;
+                if(income <= 9000000)
+                {
+                    heSoThue = 0.05;
+                }
+                else if (income > 9000000 && income <= 15000000)
+                {
+                    heSoThue = 0.1;
+                }
+                else if (income > 15000000 && income <= 20000000)
+                {
+                    heSoThue = 0.15;
+                }
+                else if (income > 20000000 && income <= 30000000)
+                {
+                    heSoThue = 0.2;
+                }
+                else
+                {
+                    heSoThue = 0;
+                }
             }
             else
             {
-                return 0.25;
+                heSoThue = 0;
             }
+            return heSoThue;
         }
     }
 
@@ -90,17 +99,17 @@ namespace BaiTap_OOP_Bai2
         {
             TaxData taxData = new TaxData();
             peopleList.Add(new Person (1, "Nguyen Truong Giang", 22, 15000000, taxData ));
-            peopleList.Add(new Person (1, "Nguyen Truong Giang", 22, 15000000, taxData ));
-            peopleList.Add(new Person ( 2, "Nguyen Linh Giang", 23, 3000000, taxData ));
-            peopleList.Add(new Person ( 3, "Nguyen Trung",22, 25000000, taxData ));
-            peopleList.Add(new Person ( 4, "Tran The Long", 28, 30000000, taxData ));
+            peopleList.Add(new Person (2, "Nguyen Quang Trung", 17, 1500000, taxData ));
+            peopleList.Add(new Person ( 3, "Nguyen Linh Giang", 23, 3000000, taxData ));
+            peopleList.Add(new Person ( 4, "Nguyen Trung",22, 25000000, taxData ));
+            peopleList.Add(new Person ( 5, "Tran The Long", 28, 30000000, taxData ));
         }
 
         static void Output()
         {
             foreach (var person in peopleList)
             {
-                Console.WriteLine($"Id: {person.Id}, Name: {person.Name}, Tax: {person.GetTax()}");
+                Console.WriteLine($"Id: {person.Id}, Name: {person.Name}, Tax: {person.GetTax()}, Luong: {person.Income}, HeSoThue: {person.TaxCoe}");
             }
             Console.ReadLine();
         }

@@ -10,30 +10,39 @@ namespace BaiTap_OOP_Bai3
     {
         public static double GetTaxCoe(int age, double income)
         {
-            if (age < 0)
+            double heSoThue = 0;
+            if (age < 18)
             {
-                return 0;
+                return heSoThue = 0;
             }
-            else if (income <= 9000000)
+            else if (age >= 18)
             {
-                return 0.05;
-            }
-            else if (income <= 15000000)
-            {
-                return 0.1;
-            }
-            else if (income <= 20000000)
-            {
-                return 0.15;
-            }
-            else if (income <= 30000000)
-            {
-                return 0.2;
+                if (income <= 9000000)
+                {
+                    heSoThue = 0.05;
+                }
+                else if (income > 9000000 && income <= 15000000)
+                {
+                    heSoThue = 0.1;
+                }
+                else if (income > 15000000 && income <= 20000000)
+                {
+                    heSoThue = 0.15;
+                }
+                else if (income > 20000000 && income <= 30000000)
+                {
+                    heSoThue = 0.2;
+                }
+                else
+                {
+                    heSoThue = 0;
+                }
             }
             else
             {
-                return 0.25;
+                heSoThue = 0;
             }
+            return heSoThue;
         }
     }
 
@@ -225,55 +234,44 @@ namespace BaiTap_OOP_Bai3
             employeeList.Add(new Employee(1, "Jinx", 27, "Harmony A","Deverloper", 30000000, taxData));
             employeeList.Add(new Employee(2, "Giang", 29, "Harmony B", "Tester", 25000000, taxData));
 
-
             List<Person> people = new List<Person>();
             OutputStudent(studentList);
             Console.WriteLine("***************************** \n");
             OutputTeacher(teacherList);
             Console.WriteLine("***************************** \n");
             OutputEmployee(employeeList);
-
         }
 
         public static void OutputStudent(List<Student> studentList)
         {
-            int studentCount = 0;
 
             foreach (var students in studentList)
             {
-                studentCount++;
-                var student = (Student)students;
-                Console.WriteLine($"{student.GetInfo()}");
+                Console.WriteLine($"{students.GetInfo()}");
             }
-            Console.WriteLine($"Total Students: {studentCount}\n");
+            Console.WriteLine($"Total Students: {studentList.Count}\n");
             Console.ReadLine();
         }
 
         public static void OutputTeacher(List<Teacher> teacherList)
         {
-            int teacherCount = 0;
 
             foreach (var teachers in teacherList)
             {
-                teacherCount++;
-                var teacher = (Teacher)teachers;
-                Console.WriteLine($"{teacher.GetInfo()}");
+                Console.WriteLine($"{teachers.GetInfo()}");
             }
-            Console.WriteLine($"Total Teacher: {teacherCount}\n");
+            Console.WriteLine($"Total Teacher: {teacherList.Count}\n");
             Console.ReadLine();
         }
 
         public static void OutputEmployee(List<Employee> employeeList)
         {
-            int employeeCount = 0;
 
             foreach (var employees in employeeList)
             {
-                employeeCount++;
-                var employee = (Employee)employees;
-                Console.WriteLine($"{employee.GetInfo()}");
+                Console.WriteLine($"{employees.GetInfo()}");
             }
-            Console.WriteLine($"Total Employees: {employeeCount}\n");
+            Console.WriteLine($"Total Employees: {employeeList.Count}\n");
             Console.ReadLine();
         }
     }

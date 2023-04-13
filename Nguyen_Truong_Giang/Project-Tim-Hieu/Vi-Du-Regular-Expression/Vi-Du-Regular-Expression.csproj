@@ -7,7 +7,7 @@
     <ProjectGuid>{93C6D711-F4BA-425F-9CB2-7B03B6FD5717}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>Vi_Du_Regular_Expression</RootNamespace>
-    <AssemblyName>Vi_Du_Regular_Expression</AssemblyName>
+    <AssemblyName>Vi-Du-Regular-Expression</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

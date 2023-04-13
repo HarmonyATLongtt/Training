@@ -11,3 +11,10 @@ D:\Training\Project-OOP\BaiTap-OOP-Bai3\obj\Debug\BaiTap-OOP-Bai3.pdb
 D:\Training\Project-OOP\BaiTap-OOP-Bai3\bin\Debug\BaiTap-OOP-Bai3.exe.config
 D:\Training\Project-OOP\BaiTap-OOP-Bai3\bin\Debug\BaiTap-OOP-Bai3.exe
 D:\Training\Project-OOP\BaiTap-OOP-Bai3\bin\Debug\BaiTap-OOP-Bai3.pdb
+D:\Training\Nguyen_Truong_Giang\Project-OOP\BaiTap-OOP-Bai3\bin\Debug\BaiTap-OOP-Bai3.exe.config
+D:\Training\Nguyen_Truong_Giang\Project-OOP\BaiTap-OOP-Bai3\bin\Debug\BaiTap-OOP-Bai3.exe
+D:\Training\Nguyen_Truong_Giang\Project-OOP\BaiTap-OOP-Bai3\bin\Debug\BaiTap-OOP-Bai3.pdb
+D:\Training\Nguyen_Truong_Giang\Project-OOP\BaiTap-OOP-Bai3\obj\Debug\BaiTap-OOP-Bai3.csproj.AssemblyReference.cache
+D:\Training\Nguyen_Truong_Giang\Project-OOP\BaiTap-OOP-Bai3\obj\Debug\BaiTap-OOP-Bai3.csproj.CoreCompileInputs.cache
+D:\Training\Nguyen_Truong_Giang\Project-OOP\BaiTap-OOP-Bai3\obj\Debug\BaiTap-OOP-Bai3.exe
+D:\Training\Nguyen_Truong_Giang\Project-OOP\BaiTap-OOP-Bai3\obj\Debug\BaiTap-OOP-Bai3.pdb

@@ -12,3 +12,10 @@ D:\Training\Project-OOP\BaiTap-OOP-Bai2\obj\Debug\BaiTap-OOP-Bai2.csproj.Assembl
 D:\Training\Project-OOP\BaiTap-OOP-Bai2\obj\Debug\BaiTap-OOP-Bai2.csproj.CoreCompileInputs.cache
 D:\Training\Project-OOP\BaiTap-OOP-Bai2\obj\Debug\BaiTap-OOP-Bai2.exe
 D:\Training\Project-OOP\BaiTap-OOP-Bai2\obj\Debug\BaiTap-OOP-Bai2.pdb
+D:\Training\Nguyen_Truong_Giang\Project-OOP\BaiTap-OOP-Bai2\bin\Debug\BaiTap-OOP-Bai2.exe.config
+D:\Training\Nguyen_Truong_Giang\Project-OOP\BaiTap-OOP-Bai2\bin\Debug\BaiTap-OOP-Bai2.exe
+D:\Training\Nguyen_Truong_Giang\Project-OOP\BaiTap-OOP-Bai2\bin\Debug\BaiTap-OOP-Bai2.pdb
+D:\Training\Nguyen_Truong_Giang\Project-OOP\BaiTap-OOP-Bai2\obj\Debug\BaiTap-OOP-Bai2.csproj.AssemblyReference.cache
+D:\Training\Nguyen_Truong_Giang\Project-OOP\BaiTap-OOP-Bai2\obj\Debug\BaiTap-OOP-Bai2.csproj.CoreCompileInputs.cache
+D:\Training\Nguyen_Truong_Giang\Project-OOP\BaiTap-OOP-Bai2\obj\Debug\BaiTap-OOP-Bai2.exe
+D:\Training\Nguyen_Truong_Giang\Project-OOP\BaiTap-OOP-Bai2\obj\Debug\BaiTap-OOP-Bai2.pdb
