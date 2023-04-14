@@ -281,39 +281,6 @@ namespace Bai_1.Ex
 
         public static void Output(List<Interface_IPerson> listInfor)
         {
-            //var count_hs = listInfor.OfType<Student>().ToList();
-            //Console.WriteLine("Student: " + count_hs.Count);
-            //Console.WriteLine("{0, -5} {1, -20} {2, -5} {3, -20} {4, -10}",
-            //    "ID", "Name", "Age", "School", "Class");
-            //foreach (Interface_IPerson p in listInfor)
-            //{
-            //    if (p is Student hs)
-            //    {
-            //        Console.WriteLine("{0, -5} {1, -20} {2, -5} {3, -20} {4, -10}", hs.ID, hs.Name, hs.Age, hs.School, hs.Class);
-            //    }
-            //}
-            //var count_gv = listInfor.OfType<Teacher>().ToList();
-            //Console.WriteLine("Teacher: " + count_gv.Count);
-            //Console.WriteLine("{0, -5} {1, -20} {2, -5} {3, -20} {4, -10} {5, -5}",
-            //                   "ID", "Name", "Age", "School", "Income", "TaxCoe");
-            //foreach (Interface_IPerson p in listInfor)
-            //{
-            //    if (p is Teacher gv)
-            //    {
-            //        Console.WriteLine("{0, -5} {1, -20} {2, -5} {3, -20} {4, -10} {5, -5}", gv.ID, gv.Name, gv.Age, gv.School, gv.Income, gv.TaxCoe);
-            //    }
-            //}
-            //var count_nv = listInfor.OfType<Employee>().ToList();
-            //Console.WriteLine("Employee: " + count_nv.Count);
-            //Console.WriteLine("{0, -5} {1, -20} {2, -5} {3, -20} {4, -20} {5, -10} {6, -5}",
-            //                   "ID", "Name", "Age", "Company", "JobTitle", "Income", "TaxCoe");
-            //foreach (Interface_IPerson p in listInfor)
-            //{
-            //    if (p is Employee nv)
-            //    {
-            //        Console.WriteLine("{0, -5} {1, -20} {2, -5} {3, -20} {4, -20} {5, -10} {6, -5}", nv.ID, nv.Name, nv.Age, nv.Company, nv.JobTitle, nv.Income, nv.TaxCoe);
-            //    }
-            //}
             var count_hs = listInfor.OfType<Student>().ToList();
             Console.WriteLine("Student: " + count_hs.Count);
             Console.WriteLine("{0, -5} {1, -20} {2, -5} {3, -20} {4, -10}",
