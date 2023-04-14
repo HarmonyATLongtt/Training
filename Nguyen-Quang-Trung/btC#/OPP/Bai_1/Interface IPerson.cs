@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Bai_1
 {
@@ -44,7 +42,7 @@ namespace Bai_1
 
         public override string ToString()
         {
-            return string.Format("{0}\t{1}\t{2}\t{3}\t{4}", ID, Name, Age, Income, TaxCoe);
+            return string.Format("{0, -5} {1, -20} {2, -5}", ID, Name, Age);
         }
     }
 }

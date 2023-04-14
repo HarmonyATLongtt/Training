@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Bai_1.Ex
 {
@@ -11,7 +8,6 @@ namespace Bai_1.Ex
         public static void Execution()
         {
             List<Interface_IPerson> listInfor = new List<Interface_IPerson>();
-            // Person tinhtoan = new Person();
             while (true)
             {
                 Console.WriteLine("*****Menu tuy chon*****");
@@ -19,88 +15,104 @@ namespace Bai_1.Ex
                 Console.WriteLine("2. Hien thi thong tin");
                 Console.WriteLine("3. Kiem tra trung lap");
                 Console.WriteLine("0. Thoat");
-                Console.Write("Nhap tuy chon: ");
-                int luachon = Convert.ToInt16(Console.ReadLine());
-                switch (luachon)
+            nhapLai:
+                Console.Write("Lua chon cua ban la: ");
+                if (int.TryParse(Console.ReadLine(), out int luaChon))
                 {
-                    case 0:
-                        return;
+                    switch (luaChon)
+                    {
+                        case 0:
+                            return;
 
-                    case 1:
-                        Init(listInfor);
-                        break;
+                        case 1:
+                            Init(listInfor);
+                            break;
 
-                    case 2:
-                        Output(listInfor);
-                        break;
+                        case 2:
+                            Output(listInfor);
+                            break;
+
+                        case 3:
+                            Console.WriteLine("Tinh nang nay chua hoan thien.....");
+                            break;
+
+                        default:
+                            Console.WriteLine("Lua chon cua ban hien gio khong co. Moi lua chon lai voi 0/1/2/3.....");
+                            break;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Nhap sai cu phap.Hay nhap 1 so.....");
+                    goto nhapLai;
                 }
             }
-            Console.ReadKey();
         }
 
         public static void Init(List<Interface_IPerson> listInfor)
         {
             Interface_IPerson infor = new Interface_IPerson();
             Console.WriteLine("Moi nhap thong tin.....");
-            bool inputvalue1, inputvalue2, inputvalue3; //inputvalue4;
+            bool checkId, checkAge, checkIncome;
+            // tạo vòng lặp để khi nhập sai thì yêu cầu nhập lại luôn ngay sau đó
             do
             {
                 Console.Write("Nhap ID: ");
                 try
                 {
                     infor.ID = Convert.ToInt32(Console.ReadLine());
-                    inputvalue1 = false;
+                    checkId = false;
                 }
                 catch (FormatException)
                 {
                     Console.WriteLine("Xay ra loi: Format Exception");
-                    inputvalue1 = true;
+                    checkId = true;
                 }
                 finally
                 {
                     Console.Write("");
                 }
-            } while (inputvalue1);
+            } while (checkId);
             Console.Write("Nhap Name: ");
-            infor.Name = Convert.ToString(Console.ReadLine());
+            infor.Name = Console.ReadLine();
             do
             {
                 Console.Write("Nhap Age: ");
                 try
                 {
                     infor.Age = Convert.ToInt32(Console.ReadLine());
-                    inputvalue2 = false;
+                    checkAge = false;
                 }
                 catch (FormatException)
                 {
                     Console.WriteLine("Xay ra loi: Format Exception");
-                    inputvalue2 = true;
+                    checkAge = true;
                 }
                 finally
                 {
                     Console.Write("");
                 }
-            } while (inputvalue2);
+            } while (checkAge);
             do
             {
                 Console.Write("Nhap Income: ");
                 try
                 {
                     infor.Income = Convert.ToDouble(Console.ReadLine());
-                    inputvalue3 = false;
+                    checkIncome = false;
                 }
                 catch (FormatException)
                 {
                     Console.WriteLine("Xay ra loi: Format Exception");
-                    inputvalue3 = true;
+                    checkIncome = true;
                 }
                 finally
                 {
                     Console.Write("");
                 }
-            } while (inputvalue3);
-            TaxData hesothue = new TaxData();
-            infor.TaxCoe = hesothue.GetTaxCoe(infor.Age, infor.Income);
+            } while (checkIncome);
+            TaxData heSoThue = new TaxData();
+            infor.TaxCoe = heSoThue.GetTaxCoe(infor.Age, infor.Income);
             listInfor.Add(infor);
         }
 

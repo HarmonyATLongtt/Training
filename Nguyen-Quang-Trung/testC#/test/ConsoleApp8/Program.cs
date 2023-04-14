@@ -21,11 +21,6 @@ namespace ConsoleApp8
     {
         private static void Main(string[] args)
         {
-            Calculator calc = new Calculator();
-            calc.Add(3, 5; =>
-            {
-                Console.WriteLine("Result: " + result);
-            });
         }
     }
 }

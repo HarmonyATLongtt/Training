@@ -1,9 +1,5 @@
 ﻿using Bai_1.Ex;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Bai_1
 {
@@ -19,31 +15,42 @@ namespace Bai_1
                 Console.WriteLine("2. Bai 2");
                 Console.WriteLine("3. Bai 3");
                 Console.WriteLine("0. Thoat");
+            nhapLai:
                 Console.Write("Lua chon cua ban la: ");
-                int luachon = int.Parse(Console.ReadLine());
-                switch (luachon)
+                if (int.TryParse(Console.ReadLine(), out int luaChon))
                 {
-                    case 0:
-                        Console.WriteLine("Chuong trinh se thoat.....");
-                        return;
+                    switch (luaChon)
+                    {
+                        case 0:
+                            Console.WriteLine("Chuong trinh se thoat.....");
+                            return;
 
-                    case 1:
-                        Console.WriteLine("Ban da chon bai 1.....");
-                        Ex_1.Execution();
-                        break;
+                        case 1:
+                            Console.WriteLine("Ban da chon bai 1.....");
+                            Ex_1.Execution();
+                            break;
 
-                    case 2:
-                        Console.WriteLine("Ban da chon bai 2.....");
-                        Ex_2.Execution();
-                        break;
+                        case 2:
+                            Console.WriteLine("Ban da chon bai 2.....");
+                            Ex_2.Execution();
+                            break;
 
-                    case 3:
-                        Console.WriteLine("Ban da chon bai 3.....");
-                        Ex_3.Execution();
-                        break;
+                        case 3:
+                            Console.WriteLine("Ban da chon bai 3.....");
+                            Ex_3.Execution();
+                            break;
+
+                        default:
+                            Console.WriteLine("Lua chon cua ban hien gio khong co. Moi lua chon lai voi 0/1/2/3.....");
+                            break;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Nhap sai cu phap.Hay nhap 1 so.....");
+                    goto nhapLai;
                 }
             }
-            Console.ReadKey();
         }
     }
 }

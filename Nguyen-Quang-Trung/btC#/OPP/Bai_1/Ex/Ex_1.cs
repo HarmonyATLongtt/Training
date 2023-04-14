@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Bai_1.Ex
 {
@@ -18,23 +15,38 @@ namespace Bai_1.Ex
                 Console.WriteLine("2. Hien thi thong tin");
                 Console.WriteLine("3. Kiem tra trung lap");
                 Console.WriteLine("0. Thoat");
-                Console.Write("Nhap tuy chon: ");
-                int luachon = Convert.ToInt16(Console.ReadLine());
-                switch (luachon)
+            nhapLai:
+                Console.Write("Lua chon cua ban la: ");
+                if (int.TryParse(Console.ReadLine(), out int luaChon))
                 {
-                    case 0:
-                        return;
+                    switch (luaChon)
+                    {
+                        case 0:
+                            return;
 
-                    case 1:
-                        Init(listInfor);
-                        break;
+                        case 1:
+                            Init(listInfor);
+                            break;
 
-                    case 2:
-                        Output(listInfor);
-                        break;
+                        case 2:
+                            Output(listInfor);
+                            break;
+
+                        case 3:
+                            Console.WriteLine("Tinh nang nay chua hoan thien.....");
+                            break;
+
+                        default:
+                            Console.WriteLine("Lua chon cua ban hien gio khong co. Moi lua chon lai voi 0/1/2/3.....");
+                            break;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Nhap sai cu phap.Hay nhap 1 so.....");
+                    goto nhapLai;
                 }
             }
-            Console.ReadKey();
         }
 
         public static void Init(List<Interface_IPerson> listInfor)
@@ -61,7 +73,7 @@ namespace Bai_1.Ex
                 }
             } while (inputvalue1);
             Console.Write("Nhap Name: ");
-            infor.Name = Convert.ToString(Console.ReadLine());
+            infor.Name = Console.ReadLine();
             do
             {
                 Console.Write("Nhap Age: ");

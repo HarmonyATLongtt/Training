@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Bai_1
+﻿namespace Bai_1
 {
     public class Student : Interface_IPerson
     {
@@ -13,9 +7,9 @@ namespace Bai_1
 
         public override string ToString()
         {
-            string baseIfo = base.ToString();
-            string info = string.Format("{0}\t{1}\t{2}", baseIfo, Class, School);
-            return info;
+            string baseInfor = base.ToString();
+            string infor = string.Format("{0} {1, -20} {2, -10}", baseInfor, Class, School);
+            return infor;
         }
     }
 }
