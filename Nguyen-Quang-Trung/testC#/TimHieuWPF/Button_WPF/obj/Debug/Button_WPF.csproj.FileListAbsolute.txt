@@ -12,3 +12,4 @@ E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuWPF\Button_WPF\obj\Debug\Bu
 E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuWPF\Button_WPF\obj\Debug\Button_WPF.csproj.CoreCompileInputs.cache
 E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuWPF\Button_WPF\obj\Debug\Button_WPF.exe
 E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuWPF\Button_WPF\obj\Debug\Button_WPF.pdb
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuWPF\Button_WPF\obj\Debug\Button_WPF.csprojAssemblyReference.cache

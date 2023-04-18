@@ -25,9 +25,19 @@ namespace Button_WPF
             InitializeComponent();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("hello");
-        }
+        //private void ToggleButton_Click(object sender, RoutedEventArgs e)
+        //{
+        //    btn.Background = Brushes.Yellow;
+        //}
+
+        //private void Button_Click(object sender, RoutedEventArgs e)
+        //{
+        //    MessageBox.Show("hello");
+        //}
+
+        //private void Btn_Click(object sender, RoutedEventArgs e)
+        //{
+        //    list2.Visibility = list2.Visibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed;
+        //}
     }
 }

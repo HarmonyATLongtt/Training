@@ -5,15 +5,29 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Button_WPF"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="600">
     <Grid>
-        <Button Content="click"
+        <!--<Button Content="click"
                 Width="100"
                 Height="100"
                 Background="Aqua"
                 FontSize="30"
                 FontFamily="arial"
                 FontWeight="Bold" Click="Button_Click">
-        </Button>
+        </Button>-->
+        <!--<StackPanel x:Name="list1" Height="150" VerticalAlignment="Top">
+            <RadioButton IsChecked="True" Content="1"></RadioButton>
+            <RadioButton Content="2"></RadioButton>
+            <RadioButton Content="3"></RadioButton>
+            <StackPanel x:Name="list2" Visibility="Collapsed">
+                <RadioButton Content="4"></RadioButton>
+                <RadioButton Content="5"></RadioButton>
+                <RadioButton Content="6"></RadioButton>
+            </StackPanel>
+            <Button x:Name="btn" Click="Btn_Click"
+                    Content="click" Height="50" Width="100" HorizontalAlignment="Left" />
+        </StackPanel>-->
+        <ToggleButton x:Name="btn" Height="50" Width="100"
+                      Content="click"></ToggleButton>
     </Grid>
 </Window>
