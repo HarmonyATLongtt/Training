@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.33423.255
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextBlock_WPF", "TextBlock_WPF\TextBlock_WPF.csproj", "{F9F190B1-B2FF-4B53-BF2D-45E2DDC2F534}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Button_WPF", "Button_WPF\Button_WPF.csproj", "{D14B750D-E183-4CFF-9FF4-8682BF1439FF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextBox_WPF", "TextBox_WPF\TextBox_WPF.csproj", "{3C3B53C6-9225-4317-AE5C-EEC293A2FE43}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Binding_WPF", "Binding_WPF\Binding_WPF.csproj", "{7BE773D2-E5E6-4891-AC1C-92F3D8AAEE26}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grid_WPF", "Grid_WPF\Grid_WPF.csproj", "{34D3FB1D-0549-401F-B578-192DCBB8CAB8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Margin-Padding_WPF", "Margin-Padding_WPF\Margin-Padding_WPF.csproj", "{96961190-E37A-424D-BA44-EECD77FAFC2B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F9F190B1-B2FF-4B53-BF2D-45E2DDC2F534}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9F190B1-B2FF-4B53-BF2D-45E2DDC2F534}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9F190B1-B2FF-4B53-BF2D-45E2DDC2F534}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9F190B1-B2FF-4B53-BF2D-45E2DDC2F534}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D14B750D-E183-4CFF-9FF4-8682BF1439FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D14B750D-E183-4CFF-9FF4-8682BF1439FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D14B750D-E183-4CFF-9FF4-8682BF1439FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D14B750D-E183-4CFF-9FF4-8682BF1439FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C3B53C6-9225-4317-AE5C-EEC293A2FE43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C3B53C6-9225-4317-AE5C-EEC293A2FE43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C3B53C6-9225-4317-AE5C-EEC293A2FE43}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C3B53C6-9225-4317-AE5C-EEC293A2FE43}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7BE773D2-E5E6-4891-AC1C-92F3D8AAEE26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7BE773D2-E5E6-4891-AC1C-92F3D8AAEE26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7BE773D2-E5E6-4891-AC1C-92F3D8AAEE26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7BE773D2-E5E6-4891-AC1C-92F3D8AAEE26}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34D3FB1D-0549-401F-B578-192DCBB8CAB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34D3FB1D-0549-401F-B578-192DCBB8CAB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34D3FB1D-0549-401F-B578-192DCBB8CAB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34D3FB1D-0549-401F-B578-192DCBB8CAB8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{96961190-E37A-424D-BA44-EECD77FAFC2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96961190-E37A-424D-BA44-EECD77FAFC2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96961190-E37A-424D-BA44-EECD77FAFC2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96961190-E37A-424D-BA44-EECD77FAFC2B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6F4337A0-9D6D-4E44-A3AD-99864444EA74}
+	EndGlobalSection
+EndGlobal

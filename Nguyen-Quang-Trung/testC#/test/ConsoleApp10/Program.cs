@@ -34,4 +34,3 @@ namespace ConsoleApp10
                 writer.Flush();
             }
         }
-    }
