@@ -29,6 +29,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Style_WPF", "Style_WPF\Styl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataTemple_WPF", "DataTemple_WPF\DataTemple_WPF.csproj", "{51C53D0F-B909-4DBA-A279-52BF806D38E7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Combobox_WPF", "Combobox_WPF\Combobox_WPF.csproj", "{9FD2FA94-59CC-490F-8518-993D43D27A24}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ListView_WPF", "ListView_WPF\ListView_WPF.csproj", "{881054A4-CF62-4C09-A5D9-C0FCF95DBA15}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +91,14 @@ Global
 		{51C53D0F-B909-4DBA-A279-52BF806D38E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{51C53D0F-B909-4DBA-A279-52BF806D38E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{51C53D0F-B909-4DBA-A279-52BF806D38E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9FD2FA94-59CC-490F-8518-993D43D27A24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FD2FA94-59CC-490F-8518-993D43D27A24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FD2FA94-59CC-490F-8518-993D43D27A24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FD2FA94-59CC-490F-8518-993D43D27A24}.Release|Any CPU.Build.0 = Release|Any CPU
+		{881054A4-CF62-4C09-A5D9-C0FCF95DBA15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{881054A4-CF62-4C09-A5D9-C0FCF95DBA15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{881054A4-CF62-4C09-A5D9-C0FCF95DBA15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{881054A4-CF62-4C09-A5D9-C0FCF95DBA15}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
