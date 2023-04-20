@@ -1,0 +1,7 @@
+D:\Training\Nguyen_Truong_Giang\Project-Tim-Hieu\Vi-Du-Exception\bin\Debug\Vi-Du-Exception.exe.config
+D:\Training\Nguyen_Truong_Giang\Project-Tim-Hieu\Vi-Du-Exception\bin\Debug\Vi-Du-Exception.exe
+D:\Training\Nguyen_Truong_Giang\Project-Tim-Hieu\Vi-Du-Exception\bin\Debug\Vi-Du-Exception.pdb
+D:\Training\Nguyen_Truong_Giang\Project-Tim-Hieu\Vi-Du-Exception\obj\Debug\Vi-Du-Exception.csproj.AssemblyReference.cache
+D:\Training\Nguyen_Truong_Giang\Project-Tim-Hieu\Vi-Du-Exception\obj\Debug\Vi-Du-Exception.csproj.CoreCompileInputs.cache
+D:\Training\Nguyen_Truong_Giang\Project-Tim-Hieu\Vi-Du-Exception\obj\Debug\Vi-Du-Exception.exe
+D:\Training\Nguyen_Truong_Giang\Project-Tim-Hieu\Vi-Du-Exception\obj\Debug\Vi-Du-Exception.pdb
