@@ -1,0 +1,55 @@
+﻿<Window x:Class="Ex_WPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:fa="http://schemas.fontawesome.io/icons/"
+        xmlns:local="clr-namespace:Ex_WPF"
+        mc:Ignorable="d"
+        Background="Transparent" 
+        Title="MainWindow" Height="450" Width="800">
+
+
+    <Grid Background="#202123" RenderTransformOrigin="0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="50" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal">
+            <Label Foreground="White" Content="Management" FontSize="24" Margin="10" />
+        </StackPanel>
+
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="0" Text="{Binding Test}" IsEnabled="{Binding ElementName=ckbTest,Path=IsChecked}"/>
+            <CheckBox Grid.Column="1" Name="ckbTest"/>
+        </Grid>
+      
+
+        <!-- DataGrid -->
+        <DataGrid Background="#444654" x:Name="studentsDataGrid" Grid.Row="1" AutoGenerateColumns="False"
+                  ItemsSource="{Binding Students}" >
+            <DataGrid.Columns>
+                <DataGridTextColumn  Width="30" Header="ID" Binding="{Binding ID}"/>
+                <DataGridTextColumn  Width="*"  Header="Name" Binding="{Binding Name}"/>
+                <DataGridTextColumn Width="50"  Header="Age" Binding="{Binding Age}"/>
+                <DataGridTextColumn Width="*"  Header="Address" Binding="{Binding Address}"/>
+                <DataGridTextColumn Width="100"  Header="TaxFactor" Binding="{Binding TaxFactor}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <StackPanel  Grid.Row="2" >
+            <!--Thêm các control-->
+            <Button Content="Import"  Margin="10 10 10 0" Style="{StaticResource buttonMain}"/>
+            <Button Content="Export"  Margin="10" Style="{StaticResource buttonMain}"/>
+        </StackPanel>
+
+    </Grid>
+</Window>

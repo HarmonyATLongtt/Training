@@ -1,0 +1,23 @@
+D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\Ex WPF.exe.config
+D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\Ex WPF.exe
+D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\Ex WPF.pdb
+D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\ExcelDataReader.dll
+D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\ExcelDataReader.pdb
+D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\ExcelDataReader.xml
+D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.csproj.AssemblyReference.cache
+D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\MainWindow.g.cs
+D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\App.g.cs
+D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF_MarkupCompile.cache
+D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF_MarkupCompile.lref
+D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\MainWindow.baml
+D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.g.resources
+D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex_WPF.Properties.Resources.resources
+D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.csproj.GenerateResource.cache
+D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.csproj.CoreCompileInputs.cache
+D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.csproj.CopyComplete
+D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.exe
+D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.pdb
+D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\ExcelDataReader.DataSet.dll
+D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\ExcelDataReader.DataSet.pdb
+D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\ExcelDataReader.DataSet.xml
+D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\App.baml
