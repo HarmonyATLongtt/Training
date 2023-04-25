@@ -12,3 +12,4 @@ E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuWPF\ListView_WPF\obj\Debug\
 E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuWPF\ListView_WPF\obj\Debug\ListView_WPF.csproj.CoreCompileInputs.cache
 E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuWPF\ListView_WPF\obj\Debug\ListView_WPF.exe
 E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuWPF\ListView_WPF\obj\Debug\ListView_WPF.pdb
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuWPF\ListView_WPF\obj\Debug\ListView_WPF.csprojAssemblyReference.cache
