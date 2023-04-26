@@ -13,7 +13,6 @@
             <Setter Property="Height" Value="30"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             
-
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -23,6 +22,23 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#c9c9c9"/>
+                    <Setter Property="Foreground" Value="#161616"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+
+
+        <Style x:Key="radioBtn" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+
+            
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Background" Value="#c9c9c9"/>
