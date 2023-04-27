@@ -81,6 +81,17 @@ namespace Bai_2.ViewModel
                 MessageBox.Show("Đường dẫn không hợp lệ");
                 return;
             }
+            var package = new ExcelPackage(new FileInfo(filePath));
+            ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+            foreach (var dataTable in _listDataTable)
+            {
+                if (dataTable != null && !string.IsNullOrEmpty(dataTable.TableName))
+                {
+                    var workSheet = package.Workbook.Worksheets.Add(dataTable.TableName);
+                    workSheet.Cells.LoadFromDataTable(dataTable, true);
+                }
+            }
+            package.Save();
         }
 
         public void SelectSheet(object obj)
@@ -116,13 +127,25 @@ namespace Bai_2.ViewModel
             }
             var package = new ExcelPackage(new FileInfo(filePath));
             ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+            int i = 1;
             foreach (var workSheet in package.Workbook.Worksheets)
             {
-                var dataTable = new DataTable(workSheet.Name);
+                var dataTable = new DataTable();
+                dataTable.TableName = $"Table ({i})";
                 dataTable = workSheet.Cells[1, 1, workSheet.Dimension.End.Row, workSheet.Dimension.End.Column].ToDataTable(c =>
                 {
                     c.FirstRowIsColumnNames = true;
                 });
+                string newTableName = workSheet.Name;
+                while (_listDataTable.Any(dt => dt.TableName == newTableName))
+                {
+                    newTableName = $"{workSheet.Name} ({i})";
+                    i++;
+                }
+
+                // Gán tên mới cho bảng
+                dataTable.TableName = newTableName;
+
                 _listDataTable.Add(dataTable);
                 _listSheet.Add(workSheet.Name);
             }

@@ -38,7 +38,7 @@
         <ListBox Grid.Column="1" Margin="10,195,5,10" ItemsSource="{Binding SheetName}" SelectedItem="{Binding SelectedSheet, Mode=TwoWay}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <Button Content="{Binding}" Command="{Binding SelectedSheetCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" CommandParameter="{Binding}" ></Button>
+                    <TextBlock Text="{Binding}"></TextBlock>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
