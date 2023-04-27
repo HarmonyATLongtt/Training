@@ -19,8 +19,8 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="670" />
-            <ColumnDefinition Width="120" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="auto" />
         </Grid.ColumnDefinitions>
         <DataGrid Grid.Column="0" Margin="10" AutoGenerateColumns="True" ItemsSource="{Binding CurrentSheet.DefaultView}">
         </DataGrid>
@@ -35,7 +35,7 @@
                 <Button Content="Export" Style="{StaticResource StyleButton}" Command="{Binding ExportFileCommand}"></Button>
             </StackPanel>
         </GroupBox>
-        <ListBox Grid.Column="1" Margin="10,195,5,10" ItemsSource="{Binding SheetName}" SelectedItem="{Binding SelectedSheet, Mode=TwoWay}">
+        <ListBox Grid.Column="1" Margin="10,195,5,10" ItemsSource="{Binding SheetName}" SelectedItem="{Binding SelectedIndex}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding}"></TextBlock>
