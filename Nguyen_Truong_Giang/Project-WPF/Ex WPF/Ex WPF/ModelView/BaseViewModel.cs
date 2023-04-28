@@ -8,6 +8,7 @@ using System.Data;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using LicenseContext = OfficeOpenXml.LicenseContext;
 
 namespace Ex_WPF.ModelView
@@ -16,10 +17,28 @@ namespace Ex_WPF.ModelView
     {
         public ObservableCollection<Person> _selection = new ObservableCollection<Person>();
 
-        public string sheetName = "Sheet1";
-        public string sheetStudent = "Student";
-        public string sheetTeacher = "Teacher";
-        public string sheetEmployee = "Employees";
+        private Brush _mouseEnter = new SolidColorBrush(Colors.LightCyan);
+
+        private Brush _mouseLeave = new SolidColorBrush(Colors.White);
+
+        public Brush MouseHover
+        {
+            get { return _mouseEnter; }
+            set
+            {
+                _mouseEnter = value;
+                RaisePropertiesChanged("MouseHover");
+            }
+        }
+        public Brush MouseLeave
+        {
+            get { return _mouseLeave; }
+            set
+            {
+                _mouseLeave = value;
+                RaisePropertiesChanged("MouseLeave");
+            }
+        }
         public ObservableCollection<Person> Selection
         {
             get => _selection;
@@ -36,12 +55,19 @@ namespace Ex_WPF.ModelView
 
         public ObservableCollection<Person> _employee = new ObservableCollection<Person>();
 
+        public ObservableCollection<Person> _nextSheet = new ObservableCollection<Person>();
+
+        public ObservableCollection<Person> _backSheet = new ObservableCollection<Person>();
+
+
         public ICommand ImportFileCommand { get; set; }
         public ICommand ExportFileCommand { get; set; }
         public ICommand ClearCommand { get; set; }
         public ICommand SelectionSheet1Command { get; set; }
         public ICommand SelectionSheet2Command { get; set; }
         public ICommand SelectionSheet3Command { get; set; }
+        public ICommand NextSheetCommand { get; set; }
+        public ICommand BackSheetCommand { get; set; }
 
         public BaseViewModel()
         {
@@ -51,9 +77,52 @@ namespace Ex_WPF.ModelView
             SelectionSheet2Command = new RelayCommand<object>(SelectionSheet2);
             SelectionSheet3Command = new RelayCommand<object>(SelectionSheet3);
             ClearCommand = new RelayCommand<object>(Clear);
+            NextSheetCommand = new RelayCommand<object>(NextSheet);
+            BackSheetCommand = new RelayCommand<object>(BackSheet);
 
             //SheetName = "Students";
         }
+
+
+        private int index = 0;
+        private DataTableCollection sheets;
+
+        private void InitSheet(int indexSheet)
+        {
+            if (index <= sheets.Count - 1)
+            {
+                _selection.Clear();
+
+                var bindingList = new BindingList<Person>();
+                DataTable sheet = sheets[index];
+
+                for (int indexRow = 0; indexRow < sheet.Rows.Count; indexRow++)
+                {
+                    DataRow row = sheet.Rows[indexRow];
+                    Person person = new Person();
+                    person.ID = row[0].ToString();
+                    person.Name = row[1].ToString();
+                    person.Age = int.Parse(row[2].ToString());
+                    person.Address = row[3].ToString();
+                    person.TaxFactor = double.Parse(row[4].ToString());
+                    //add item into the list you want
+                    bindingList.Add(person);
+
+                    Person persons = new Person()
+                    {
+                        ID = person.ID,
+                        Name = person.Name,
+                        Age = person.Age,
+                        Address = person.Address,
+                        TaxFactor = person.TaxFactor,
+                    };
+                    _selection.Add(persons);
+                }
+            }
+
+
+        }
+
         public void ImportFile(object obj)
         {
             // Khởi tạo OpenFileDialog để lựa chọn file excel
@@ -72,120 +141,51 @@ namespace Ex_WPF.ModelView
                     {
 
                         var dataSet = reader.AsDataSet();
-                        DataTable sheet = dataSet.Tables[sheetName];
 
                         // Đọc dữ liệu từ sheet vào DataTable
                         reader.Read();
 
-
-                        var Student = reader.AsDataSet(new ExcelDataSetConfiguration()
+                        sheets = reader.AsDataSet(new ExcelDataSetConfiguration()
                         {
                             ConfigureDataTable = (_) => new ExcelDataTableConfiguration()
                             {
                                 UseHeaderRow = true
                             }
-                        }).Tables["Student"];
+                        }).Tables;
 
-                        var bindingList = new BindingList<Person>();
+                        InitSheet(0);
 
-                        // Lấy ra list Student và lưu vào biến
-                        for (int indexRow = 0; indexRow < Student.Rows.Count; indexRow++)
-                        {
-                            DataRow row = Student.Rows[indexRow];
-                            Person student = new Person();
-                            student.ID = row[0].ToString();
-                            student.Name = row[1].ToString();
-                            student.Age = int.Parse(row[2].ToString());
-                            student.Address = row[3].ToString();
-                            student.TaxFactor = double.Parse(row[4].ToString());
+                        //var bindingList = new BindingList<Person>();
 
-                            bindingList.Add(student);
+                        //DataTable sheet = sheets[index];
 
-                            Person studentss = new Person()
-                            {
-                                ID = student.ID,
-                                Name = student.Name,
-                                Age = student.Age,
-                                Address = student.Address,
-                                TaxFactor = student.TaxFactor,
-                            };
-                            _student.Add(studentss);
-                        }
+                        //for (int indexRow = 0; indexRow < sheet.Rows.Count; indexRow++)
+                        //{
+                        //    DataRow row = sheet.Rows[indexRow];
+                        //    Person person = new Person();
+                        //    person.ID = row[0].ToString();
+                        //    person.Name = row[1].ToString();
+                        //    person.Age = int.Parse(row[2].ToString());
+                        //    person.Address = row[3].ToString();
+                        //    person.TaxFactor = double.Parse(row[4].ToString());
+                        //    //add item into the list you want
+                        //    bindingList.Add(person);
 
+                        //    Person persons = new Person()
+                        //    {
+                        //        ID = person.ID,
+                        //        Name = person.Name,
+                        //        Age = person.Age,
+                        //        Address = person.Address,
+                        //        TaxFactor = person.TaxFactor,
+                        //    };
+                        //    _selection.Add(persons);
+                        //}
 
-                        // Lấy ra list Teacher và lưu vào biến
-                        var Teacher = reader.AsDataSet(new ExcelDataSetConfiguration()
-                        {
-                            ConfigureDataTable = (_) => new ExcelDataTableConfiguration()
-                            {
-                                UseHeaderRow = true
-                            }
-                        }).Tables["Teacher"];
-
-
-                        for (int indexRow = 0; indexRow < Teacher.Rows.Count; indexRow++)
-                        {
-                            DataRow row = Teacher.Rows[indexRow];
-                            Person teacher = new Person();
-                            teacher.ID = row[0].ToString();
-                            teacher.Name = row[1].ToString();
-                            teacher.Age = int.Parse(row[2].ToString());
-                            teacher.Address = row[3].ToString();
-                            teacher.TaxFactor = double.Parse(row[4].ToString());
-
-                            bindingList.Add(teacher);
-
-                            Person teachers = new Person()
-                            {
-                                ID = teacher.ID,
-                                Name = teacher.Name,
-                                Age = teacher.Age,
-                                Address = teacher.Address,
-                                TaxFactor = teacher.TaxFactor,
-                            };
-                            _teacher.Add(teachers);
-                        }
-
-                        // Lấy ra list Employee và lưu vào biến
-                        var Employees = reader.AsDataSet(new ExcelDataSetConfiguration()
-                        {
-                            ConfigureDataTable = (_) => new ExcelDataTableConfiguration()
-                            {
-                                UseHeaderRow = true
-                            }
-                        }).Tables["Employees"];
-
-
-                        for (int indexRow = 0; indexRow < Employees.Rows.Count; indexRow++)
-                        {
-                            DataRow row = Employees.Rows[indexRow];
-                            Person employee = new Person();
-                            employee.ID = row[0].ToString();
-                            employee.Name = row[1].ToString();
-                            employee.Age = int.Parse(row[2].ToString());
-                            employee.Address = row[3].ToString();
-                            employee.TaxFactor = double.Parse(row[4].ToString());
-
-                            bindingList.Add(employee);
-
-                            Person employees = new Person()
-                            {
-                                ID = employee.ID,
-                                Name = employee.Name,
-                                Age = employee.Age,
-                                Address = employee.Address,
-                                TaxFactor = employee.TaxFactor,
-                            };
-                            _employee.Add(employees);
-                        }
-
-
-                        // Binding dữ liệu lên ListView
-                        //studentsDataGrid.ItemsSource = dt.DefaultView; 
                     }
                 }
 
-                Selection = _student;
+                Selection = _selection;
             }
         }
 
@@ -293,6 +293,38 @@ namespace Ex_WPF.ModelView
             _teacher.Clear();
             _employee.Clear();
             MessageBox.Show("Clear successful!");
+        }
+
+        public void NextSheet(object obj)
+        {
+            index++;
+            if (index >= 0)
+            {
+                InitSheet(index);
+            }
+            if(index >= sheets.Count)
+            {
+                index = 0;
+                InitSheet(index);
+                MessageBox.Show("No more sheets, go back to first sheets !");
+            }
+
+        }
+
+        public void BackSheet(object obj)
+        {
+            index--;
+            if(index >= 0)
+            {
+                InitSheet(index);
+            }
+            if (index < 0)
+            {
+                index = 0;
+                InitSheet(index);
+                MessageBox.Show("This is the first sheet !");
+            }
+
         }
     }
 }

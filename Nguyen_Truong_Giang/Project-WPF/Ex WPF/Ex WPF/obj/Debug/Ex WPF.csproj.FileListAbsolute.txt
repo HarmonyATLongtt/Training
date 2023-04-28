@@ -38,3 +38,5 @@ D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.cspro
 D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.csproj.CopyComplete
 D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.exe
 D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.pdb
+D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\FontAwesome.WPF.dll
+D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\FontAwesome.WPF.xml

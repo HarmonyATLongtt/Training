@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel;
-
+using System.Windows.Media;
 
 namespace Ex_WPF.ModelView
 {

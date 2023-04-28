@@ -2,10 +2,13 @@
 using ExcelDataReader;
 using Microsoft.Win32;
 using OfficeOpenXml;
+using System.Collections.ObjectModel;
 using System.Data;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using LicenseContext = OfficeOpenXml.LicenseContext;
 
 namespace Ex_WPF
@@ -15,6 +18,7 @@ namespace Ex_WPF
     /// </summary>
     public partial class MainWindow : Window
     {
+        public object data { get; private set; }
 
         public MainWindow()
         {
@@ -79,7 +83,7 @@ namespace Ex_WPF
                         }).Tables["Student"];
 
                         // Binding dữ liệu lên ListView
-                        studentsDataGrid.ItemsSource = dt.DefaultView;
+                        DataGrid.ItemsSource = dt.DefaultView;
                     }
                 }
             }
@@ -105,7 +109,7 @@ namespace Ex_WPF
                         var worksheet = excelPackage.Workbook.Worksheets.Add("Student");
 
                         // Lấy dữ liệu từ ListView và đưa vào DataTable
-                        DataTable dt = ((DataView)studentsDataGrid.ItemsSource).ToTable();
+                        DataTable dt = ((DataView)DataGrid.ItemsSource).ToTable();
 
                         // Lưu dữ liệu vào worksheet
                         worksheet.Cells.LoadFromDataTable(dt, true);
@@ -128,6 +132,42 @@ namespace Ex_WPF
             {
                 // Hủy bỏ và đóng màn hình view
                 Close();
+            }
+        }
+
+        private void Cell_MouseMove(object sender, MouseEventArgs e)
+        {
+            var rowIndex = DataGrid.SelectedIndex;
+
+
+            if (sender is DataGridCell cell)
+            {
+                // Xác định hàng và cột của cell được di chuyển
+                var row = cell.DataContext as ObservableCollection<object>;
+                //var rowIndex = (row != null) ? data.IndexOf(row) : -1;
+                var columnIndex = cell.Column.DisplayIndex;
+
+                // Gán giá trị của thuộc tính Background của cell được di chuyển bằng màu LightCyan
+                var vm = DataContext as BaseViewModel;
+                if (vm != null)
+                {
+                    var brush = vm.MouseHover;
+                    cell.Background = brush;
+                }
+            }
+        }
+
+        private void Cell_MouseLeave(object sender, MouseEventArgs e)
+        {
+            var rowIndex = DataGrid.SelectedIndex;
+
+            if (sender is DataGridCell cell)
+            {
+                // Xác định hàng và cột của cell được di chuyển
+                var row = cell.DataContext as ObservableCollection<object>;
+                //var rowIndex = (row != null) ? Data.IndexOf(row) : -1;
+                var columnIndex = cell.Column.DisplayIndex;
+                cell.Background = Brushes.White;
             }
         }
     }

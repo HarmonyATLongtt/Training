@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:fa="http://schemas.fontawesome.io/icons/"
-        xmlns:local="clr-namespace:Ex_WPF"
         mc:Ignorable="d"
         KeyDown="OnKeyDown"
         Title="MainWindow" Height="450" Width="800">
@@ -25,8 +24,17 @@
         </StackPanel>
 
         <!-- DataGrid -->
-        <DataGrid x:Name="studentsDataGrid" Grid.Row="1" AutoGenerateColumns="False"
-                  ItemsSource="{Binding Selection}" >
+        <DataGrid x:Name="DataGrid" Grid.Row="1" AutoGenerateColumns="False"
+                  ItemsSource="{Binding Selection}">
+            <DataGrid.CellStyle>
+                <Style TargetType="DataGridCell">
+                    <EventSetter Event="MouseMove" Handler="Cell_MouseMove" />
+                    <Setter Property="Background" Value="{Binding MouseHover}" />
+
+                    <EventSetter Event="MouseLeave" Handler="Cell_MouseLeave" />
+                    <Setter Property="Background" Value="{Binding MouseLeave}" />
+                </Style>
+            </DataGrid.CellStyle>
             <DataGrid.Columns>
                 <DataGridTextColumn Width="30" Header="ID" Binding="{Binding ID}"/>
                 <DataGridTextColumn Width="*"  Header="Name" Binding="{Binding Name}"/>
@@ -52,13 +60,20 @@
                         Margin="10 0 10 10" Style="{StaticResource buttonMain}"/>
             </StackPanel>
 
-            <StackPanel Grid.Column="1">
-                <RadioButton Margin="10 15 10 5"  Content="Student" Command="{Binding SelectionSheet1Command}"
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <!--<RadioButton Margin="10 15 10 5"  Content="Student" Command="{Binding SelectionSheet1Command}"
                              Style="{StaticResource radioBtn}" IsChecked="True"/>
                 <RadioButton Margin="10 5 10 5"  Content="Teacher" Command="{Binding SelectionSheet2Command}"
                              Style="{StaticResource radioBtn}"/>
                     <RadioButton Margin="10 5 10 5"  Content="Employee" Command="{Binding SelectionSheet3Command}"
-                             Style="{StaticResource radioBtn}"/>
+                             Style="{StaticResource radioBtn}"/>-->
+                <Button Style="{StaticResource buttonBlack}" Command="{Binding BackSheetCommand}">
+                    <fa:ImageAwesome Icon="AngleLeft" Width="25" Height="25" Foreground="White" Margin="-3 0 0 0" />
+                </Button>
+                <Button Style="{StaticResource buttonBlack}" Margin="-10" Command="{Binding NextSheetCommand}">
+                    <fa:ImageAwesome Icon="AngleRight" Width="25" Height="25" Foreground="White" Margin="3 0 0 0" />
+                </Button>
+                
             </StackPanel>
         </Grid>
 
