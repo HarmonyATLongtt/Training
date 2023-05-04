@@ -20,12 +20,13 @@
 
         <!-- Header -->
         <StackPanel Grid.Row="0" Orientation="Horizontal">
-            <Label Foreground="Black" FontWeight="SemiBold" Content="Management" FontSize="24" Margin="10" />
+            <Label Foreground="Black" FontWeight="SemiBold" FontSize="24" Margin="10"
+                   Content="{Binding SheetName}" />
         </StackPanel>
 
         <!-- DataGrid -->
-        <DataGrid x:Name="DataGrid" Grid.Row="1" AutoGenerateColumns="False"
-                  ItemsSource="{Binding Selection}">
+        <DataGrid x:Name="DataGrid" Grid.Row="1" AutoGenerateColumns="True"
+                  ItemsSource="{Binding DataTable}">
             <DataGrid.CellStyle>
                 <Style TargetType="DataGridCell">
                     <EventSetter Event="MouseMove" Handler="Cell_MouseMove" />
@@ -35,13 +36,13 @@
                     <Setter Property="Background" Value="{Binding MouseLeave}" />
                 </Style>
             </DataGrid.CellStyle>
-            <DataGrid.Columns>
-                <DataGridTextColumn Width="30" Header="ID" Binding="{Binding ID}"/>
-                <DataGridTextColumn Width="*"  Header="Name" Binding="{Binding Name}"/>
-                <DataGridTextColumn Width="50"  Header="Age" Binding="{Binding Age}"/>
-                <DataGridTextColumn Width="*"  Header="Address" Binding="{Binding Address}"/>
-                <DataGridTextColumn Width="100"  Header="TaxFactor" Binding="{Binding TaxFactor}"/>
-            </DataGrid.Columns>
+            <!--<DataGrid.Columns>
+                <DataGridTextColumn Width="30"  Binding="{Binding ID}"/>
+                <DataGridTextColumn Width="*"   Binding="{Binding Name}"/>
+                <DataGridTextColumn Width="50"   Binding="{Binding Age}"/>
+                <DataGridTextColumn Width="*"   Binding="{Binding Address}"/>
+                <DataGridTextColumn Width="100"   Binding="{Binding TaxFactor}"/>
+            </DataGrid.Columns>-->
         </DataGrid>
 
         <Grid Grid.Row="4" >

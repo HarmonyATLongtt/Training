@@ -2,10 +2,12 @@
 using GalaSoft.MvvmLight.CommandWpf;
 using Microsoft.Win32;
 using OfficeOpenXml;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -20,6 +22,18 @@ namespace Ex_WPF.ModelView
         private Brush _mouseEnter = new SolidColorBrush(Colors.LightCyan);
 
         private Brush _mouseLeave = new SolidColorBrush(Colors.White);
+
+        public string sheetName;
+        public string SheetName
+        {
+            get => sheetName;
+            set
+            {
+                sheetName = value;
+                RaisePropertiesChanged(nameof(SheetName));
+            }
+        }
+
 
         public Brush MouseHover
         {
@@ -48,16 +62,27 @@ namespace Ex_WPF.ModelView
                 RaisePropertiesChanged(nameof(Selection));
             }
         }
+        private List<DataTable> _dataTables = new List<DataTable>();
+        private DataTable _dataTable;
+        public DataTable DataTable
+        {
+            get => _dataTable;
+            set
+            {
+                _dataTable = value;
+                RaisePropertiesChanged(nameof(DataTable));
+            }
+        }
 
-        public ObservableCollection<Person> _student = new ObservableCollection<Person>();
+        //public ObservableCollection<Person> _student = new ObservableCollection<Person>();
 
-        public ObservableCollection<Person> _teacher = new ObservableCollection<Person>();
+        //public ObservableCollection<Person> _teacher = new ObservableCollection<Person>();
 
-        public ObservableCollection<Person> _employee = new ObservableCollection<Person>();
+        //public ObservableCollection<Person> _employee = new ObservableCollection<Person>();
 
-        public ObservableCollection<Person> _nextSheet = new ObservableCollection<Person>();
+        //public ObservableCollection<Person> _nextSheet = new ObservableCollection<Person>();
 
-        public ObservableCollection<Person> _backSheet = new ObservableCollection<Person>();
+        //public ObservableCollection<Person> _backSheet = new ObservableCollection<Person>();
 
 
         public ICommand ImportFileCommand { get; set; }
@@ -73,10 +98,7 @@ namespace Ex_WPF.ModelView
             ClearCommand = new RelayCommand<object>(Clear);
             NextSheetCommand = new RelayCommand<object>(NextSheet);
             BackSheetCommand = new RelayCommand<object>(BackSheet);
-
-            //SheetName = "Students";
         }
-
 
         private int index = 0;
         private DataTableCollection sheets;
@@ -90,31 +112,10 @@ namespace Ex_WPF.ModelView
                 var bindingList = new BindingList<Person>();
                 DataTable sheet = sheets[index];
 
-                for (int indexRow = 0; indexRow < sheet.Rows.Count; indexRow++)
-                {
-                    DataRow row = sheet.Rows[indexRow];
-                    Person person = new Person();
-                    person.ID = row[0].ToString();
-                    person.Name = row[1].ToString();
-                    person.Age = int.Parse(row[2].ToString());
-                    person.Address = row[3].ToString();
-                    person.TaxFactor = double.Parse(row[4].ToString());
-                    //add item into the list you want
-                    bindingList.Add(person);
+                var sheetNames = sheet.TableName;
+                SheetName = sheetNames;
 
-                    Person persons = new Person()
-                    {
-                        ID = person.ID,
-                        Name = person.Name,
-                        Age = person.Age,
-                        Address = person.Address,
-                        TaxFactor = person.TaxFactor,
-                    };
-                    _selection.Add(persons);
-                }
             }
-
-
         }
 
         public void ImportFile(object obj)
@@ -133,9 +134,8 @@ namespace Ex_WPF.ModelView
                 {
                     using (var reader = ExcelReaderFactory.CreateReader(stream))
                     {
-
                         var dataSet = reader.AsDataSet();
-
+                        var sheetNames = dataSet.Tables.Cast<DataTable>().Select(table => table.TableName).ToList();
                         // Đọc dữ liệu từ sheet vào DataTable
                         reader.Read();
 
@@ -146,40 +146,21 @@ namespace Ex_WPF.ModelView
                                 UseHeaderRow = true
                             }
                         }).Tables;
+                        _dataTables.Clear();
+                        foreach (DataTable sheet in sheets)
+                        {
+                            _dataTables.Add(sheet);
+                        }
 
-                        InitSheet(0);
-
-                        //var bindingList = new BindingList<Person>();
-
-                        //DataTable sheet = sheets[index];
-
-                        //for (int indexRow = 0; indexRow < sheet.Rows.Count; indexRow++)
-                        //{
-                        //    DataRow row = sheet.Rows[indexRow];
-                        //    Person person = new Person();
-                        //    person.ID = row[0].ToString();
-                        //    person.Name = row[1].ToString();
-                        //    person.Age = int.Parse(row[2].ToString());
-                        //    person.Address = row[3].ToString();
-                        //    person.TaxFactor = double.Parse(row[4].ToString());
-                        //    //add item into the list you want
-                        //    bindingList.Add(person);
-
-                        //    Person persons = new Person()
-                        //    {
-                        //        ID = person.ID,
-                        //        Name = person.Name,
-                        //        Age = person.Age,
-                        //        Address = person.Address,
-                        //        TaxFactor = person.TaxFactor,
-                        //    };
-                        //    _selection.Add(persons);
-                        //}
-
+                        DataTable = _dataTables.FirstOrDefault();
+                        SheetName = DataTable.TableName;
+                        // InitSheet(0);
+                        reader.Close();
                     }
+                    stream.Close();
                 }
 
-                Selection = _selection;
+                //  Selection = _selection;
             }
         }
 
@@ -189,78 +170,91 @@ namespace Ex_WPF.ModelView
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "Excel Files|*.xlsx;*.xls;*.xlsm";
 
+
+            //// Tạo package mới
+            //ExcelPackage excelPackage = new ExcelPackage();
+
+            //// Đặt tên file
+            //string fileName = "export.xlsx";
+
+            // Lặp qua từng sheet trong danh sách sheets
             if (saveFileDialog.ShowDialog() == true)
             {
-                using (ExcelPackage package = new ExcelPackage())
+                using (ExcelPackage excelPackage = new ExcelPackage())
                 {
-                    ExcelWorksheet newSheet = package.Workbook.Worksheets.Add("Sheet1");
-                    newSheet.Cells[1, 1].Value = "ID";
-                    newSheet.Cells[1, 2].Value = "Name";
-                    newSheet.Cells[1, 3].Value = "Age";
-                    newSheet.Cells[1, 4].Value = "Address";
-                    newSheet.Cells[1, 5].Value = "TaxFactor";
+                    foreach (DataTable sheet in sheets)
+                    {  // Tạo một worksheet mới trong package
+                        ExcelWorksheet excelWorksheet = excelPackage.Workbook.Worksheets.Add(sheet.TableName);
+                        for (int j = 0; j < sheet.Columns.Count; j++)
+                        {
+                            excelWorksheet.Cells[1, j + 1].Value = sheet.Columns[j].ColumnName;
+                        }
+                      
 
-                    int rowIndex = 2;
-                    foreach (Person person in Selection)
-                    {
-                        newSheet.Cells[rowIndex, 1].Value = person.ID;
-                        newSheet.Cells[rowIndex, 2].Value = person.Name;
-                        newSheet.Cells[rowIndex, 3].Value = person.Age;
-                        newSheet.Cells[rowIndex, 4].Value = person.Address;
-                        newSheet.Cells[rowIndex, 5].Value = person.TaxFactor;
-                        rowIndex++;
+                        // Đổ dữ liệu vào worksheet
+                        for (int i = 0; i < sheet.Rows.Count; i++)
+                        {
+                            for (int j = 0; j < sheet.Columns.Count; j++)
+                            {
+                                excelWorksheet.Cells[i + 2, j + 1].Value = sheet.Rows[i][j];
+                            }
+                        }
                     }
-                    package.SaveAs(new FileInfo(saveFileDialog.FileName));
+                    excelPackage.SaveAs(new FileStream(saveFileDialog.FileName, FileMode.Create));
+                    excelPackage.Dispose();
+                    MessageBox.Show("Export successful");
                 }
+            } 
 
-                MessageBox.Show("Export successful!");
-            }
-            else
-            {
-                MessageBox.Show("Err!");
-                return;
-            }
+        //    // Lưu file Excel
+        //    using (var fileStream = new FileStream(fileName, FileMode.Create))
+        //    {
+        //        excelPackage.SaveAs(fileStream);
+        //    }
         }
 
         public void Clear(object obj)
         {
-            _student.Clear();
-            _teacher.Clear();
-            _employee.Clear();
             _selection.Clear();
+            _dataTable.Clear();
+            _dataTables.Clear();
             MessageBox.Show("Clear successful!");
         }
 
         public void NextSheet(object obj)
         {
             index++;
-            if (index >= 0)
+            if (_dataTables.IndexOf(DataTable) >= 0)
             {
                 InitSheet(index);
+                int i = _dataTables.IndexOf(DataTable);
+                DataTable = _dataTables[(i + 1) % _dataTables.Count];
             }
-            if (index >= sheets.Count)
+            if (index >= _dataTables.Count)
             {
                 index = 0;
                 InitSheet(index);
-                MessageBox.Show("No more sheets, go back to first sheets !");
+                new DataTable();
             }
 
+            //SheetName = DataTable.TableName;
+            //DataTable = i >= 0 ? _dataTables[(i + 1) % _dataTables.Count] : new DataTable();
         }
 
         public void BackSheet(object obj)
         {
-            index--;
-            if (index >= 0)
+
+            
+            if (_dataTables.Count >= index)
             {
-                InitSheet(index);
-            }
-            if (index < 0)
-            {
-                index = 0;
-                InitSheet(index);
-                MessageBox.Show("This is the first sheet !");
+                InitSheet(index--);
+                int i = _dataTables.IndexOf(DataTable);
+                DataTable = _dataTables[(i - 1) % _dataTables.Count];
             }
 
+            //int i = _dataTables.IndexOf(DataTable);
+            //SheetName = DataTable.TableName;
+            //DataTable = i >= 0 ? _dataTables[(i - 1) % _dataTables.Count] : new DataTable();
         }
     }
 }
