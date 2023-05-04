@@ -31,6 +31,7 @@
         </Grid.ColumnDefinitions>
         <DataGrid Grid.Column="0" Margin="10" AutoGenerateColumns="True" ItemsSource="{Binding CurrentSheet.DefaultView}" CellStyle="{StaticResource DataGridCellStyle}">
         </DataGrid>
+
         <GroupBox Grid.Column="1" Margin="5,10,5,240">
             <GroupBox.Header>
                 <TextBlock FontWeight="Bold" FontSize="15">
@@ -40,9 +41,10 @@
             <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                 <Button Content="Import" Style="{StaticResource StyleButton}" Command="{Binding ImportFileCommand}"></Button>
                 <Button Content="Export" Style="{StaticResource StyleButton}" Command="{Binding ExportFileCommand}"></Button>
+                <Button Content="Clear" Style="{StaticResource StyleButton}" Command="{Binding ClearCommand}"></Button>
             </StackPanel>
         </GroupBox>
-        <ListBox Grid.Column="1" Margin="10,195,5,10" ItemsSource="{Binding SheetName}" SelectedItem="{Binding SelectedIndex}">
+        <ListBox Grid.Column="1" Margin="10,195,5,10" ItemsSource="{Binding SheetName}" SelectedItem="{Binding SelectedSheet}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding}"></TextBlock>

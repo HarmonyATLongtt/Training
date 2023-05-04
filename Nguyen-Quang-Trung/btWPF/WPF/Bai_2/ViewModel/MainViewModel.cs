@@ -1,16 +1,11 @@
 ﻿using Microsoft.Win32;
 using OfficeOpenXml;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace Bai_2.ViewModel
@@ -44,33 +39,43 @@ namespace Bai_2.ViewModel
         private ObservableCollection<DataTable> _listDataTable = new ObservableCollection<DataTable>();
         public ObservableCollection<string> _listSheet = new ObservableCollection<string>();
 
-        //private string _selectedSheet;
+        private string _selectedSheet;
 
-        //public string SelectedSheet
-        //{
-        //    get { return _selectedSheet; }
-        //    set
-        //    {
-        //        _selectedSheet = value;
-        //        int index = SheetName.IndexOf(value);
-        //        CurrentSheet = _listDataTable[index];
-        //    }
-        //}
+        public string SelectedSheet
+        {
+            get { return _selectedSheet; }
+            set
+            {
+                _selectedSheet = value;
+                int index = SheetName.IndexOf(value);
+                CurrentSheet = index >= 0 ? _listDataTable[index] : new DataTable();
+                OnPropertyChanged(nameof(SelectedSheet));
+            }
+        }
 
         public ICommand ImportFileCommand { get; set; }
         public ICommand ExportFileCommand { get; set; }
-        //public ICommand SelectSheetCommand { get; set; }
+        public ICommand ClearCommand { get; set; }
 
         public MainViewModel()
         {
             ImportFileCommand = new RelayCommand<object>(ImportFile);
-            _listDataTable.Clear();
             ExportFileCommand = new RelayCommand<object>(ExportFile);
-            //SelectSheetCommand = new RelayCommand<object>(SelectSheet);
+            ClearCommand = new RelayCommand<object>(Clear);
+        }
+
+        public void Clear(object obj)
+        {
+            _listSheet.Clear();
+            _listDataTable.Clear();
+            CurrentSheet.Clear();
+            SheetName.Clear();
         }
 
         public void ExportFile(object obj)
         {
+            //try
+            //{
             string filePath = "";
             SaveFileDialog exportFile = new SaveFileDialog();
             exportFile.Filter = "Excel files (*.xlsx)|*.xlsx|Text files (*.txt)|*.txt|All files (*.*)|*.*";
@@ -95,25 +100,18 @@ namespace Bai_2.ViewModel
                 }
             }
             package.Save();
+            //}
+            //catch (Exception e)
+            //{
+            //    MessageBox.Show(e.ToString());
+            //}
         }
-
-        //public void SelectSheet(object obj)
-        //{
-        //    if (SheetName == null || SheetName.Count == 0)
-        //    {
-        //        return;
-        //    }
-        //    string selectedSheet = obj as string;
-        //    int index = SheetName.IndexOf(selectedSheet);
-        //    CurrentSheet = _listDataTable[index];
-        //}
 
         public void ImportFile(object obj)
         {
+            //try
+            //{
             string filePath = "";
-            //var listDataTable = new List<DataTable>();
-            //var listSheet = new List<string>();
-
             var importFileDialog = new OpenFileDialog();
             importFileDialog.Filter = "Excel files (*.xlsx)|*.xlsx|Text files (*.txt)|*.txt|All files (*.*)|*.*";
             importFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
@@ -177,7 +175,12 @@ namespace Bai_2.ViewModel
                 _listSheet.Add(workSheet.Name);
             }
             SheetName = _listSheet;
-            CurrentSheet = _listDataTable[2];
+            CurrentSheet = _listDataTable[0];
+            //}
+            //catch (Exception e)
+            //{
+            //    MessageBox.Show(e.ToString());
+            //}
         }
     }
 }
