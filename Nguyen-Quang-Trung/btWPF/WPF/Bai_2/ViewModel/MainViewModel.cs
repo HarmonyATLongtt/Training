@@ -74,113 +74,113 @@ namespace Bai_2.ViewModel
 
         public void ExportFile(object obj)
         {
-            //try
-            //{
-            string filePath = "";
-            SaveFileDialog exportFile = new SaveFileDialog();
-            exportFile.Filter = "Excel files (*.xlsx)|*.xlsx|Text files (*.txt)|*.txt|All files (*.*)|*.*";
-            exportFile.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            if (exportFile.ShowDialog() == true)
+            try
             {
-                filePath = exportFile.FileName;
-            }
-            else if (string.IsNullOrEmpty(filePath))
-            {
-                MessageBox.Show("Đường dẫn không hợp lệ");
-                return;
-            }
-            var package = new ExcelPackage(new FileInfo(filePath));
-            ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
-            foreach (var dataTable in _listDataTable)
-            {
-                if (dataTable != null && !string.IsNullOrEmpty(dataTable.TableName))
+                string filePath = "";
+                SaveFileDialog exportFile = new SaveFileDialog();
+                exportFile.Filter = "Excel files (*.xlsx)|*.xlsx|Text files (*.txt)|*.txt|All files (*.*)|*.*";
+                exportFile.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                if (exportFile.ShowDialog() == true)
                 {
-                    var workSheet = package.Workbook.Worksheets.Add(dataTable.TableName);
-                    workSheet.Cells.LoadFromDataTable(dataTable, true);
+                    filePath = exportFile.FileName;
                 }
+                else if (string.IsNullOrEmpty(filePath))
+                {
+                    MessageBox.Show("Đường dẫn không hợp lệ");
+                    return;
+                }
+                var package = new ExcelPackage(new FileInfo(filePath));
+                ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+                foreach (var dataTable in _listDataTable)
+                {
+                    if (dataTable != null && !string.IsNullOrEmpty(dataTable.TableName))
+                    {
+                        var workSheet = package.Workbook.Worksheets.Add(dataTable.TableName);
+                        workSheet.Cells.LoadFromDataTable(dataTable, true);
+                    }
+                }
+                package.Save();
             }
-            package.Save();
-            //}
-            //catch (Exception e)
-            //{
-            //    MessageBox.Show(e.ToString());
-            //}
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
         }
 
         public void ImportFile(object obj)
         {
-            //try
-            //{
-            string filePath = "";
-            var importFileDialog = new OpenFileDialog();
-            importFileDialog.Filter = "Excel files (*.xlsx)|*.xlsx|Text files (*.txt)|*.txt|All files (*.*)|*.*";
-            importFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            if (importFileDialog.ShowDialog() == true)
+            try
             {
-                filePath = importFileDialog.FileName;
-            }
-            if (string.IsNullOrEmpty(filePath))
-            {
-                MessageBox.Show("Đường dẫn không hợp lệ");
-                return;
-            }
-            var package = new ExcelPackage(new FileInfo(filePath));
-            ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
-            int x = 1;
-            foreach (var workSheet in package.Workbook.Worksheets)
-            {
-                var dataTable = new DataTable();
-                // Thêm tên cột vào DataTable
-                for (int i = 1; i <= workSheet.Dimension.End.Column; i++)
+                string filePath = "";
+                var importFileDialog = new OpenFileDialog();
+                importFileDialog.Filter = "Excel files (*.xlsx)|*.xlsx|Text files (*.txt)|*.txt|All files (*.*)|*.*";
+                importFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                if (importFileDialog.ShowDialog() == true)
                 {
-                    dataTable.Columns.Add(workSheet.Cells[1, i].Value.ToString());
+                    filePath = importFileDialog.FileName;
                 }
-                // Duyệt từng cell trong tệp Excel và thêm vào DataTable
-                for (int row = 2; row <= workSheet.Dimension.End.Row; row++)
+                if (string.IsNullOrEmpty(filePath))
                 {
-                    DataRow dr = dataTable.NewRow();
-
-                    for (int col = 1; col <= workSheet.Dimension.End.Column; col++)
+                    MessageBox.Show("Đường dẫn không hợp lệ");
+                    return;
+                }
+                var package = new ExcelPackage(new FileInfo(filePath));
+                ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+                int x = 1;
+                foreach (var workSheet in package.Workbook.Worksheets)
+                {
+                    var dataTable = new DataTable();
+                    // Thêm tên cột vào DataTable
+                    for (int i = 1; i <= workSheet.Dimension.End.Column; i++)
                     {
-                        if (workSheet.Cells[row, col].Value != null)
+                        dataTable.Columns.Add(workSheet.Cells[1, i].Value.ToString());
+                    }
+                    // Duyệt từng cell trong tệp Excel và thêm vào DataTable
+                    for (int row = 2; row <= workSheet.Dimension.End.Row; row++)
+                    {
+                        DataRow dr = dataTable.NewRow();
+
+                        for (int col = 1; col <= workSheet.Dimension.End.Column; col++)
                         {
-                            if (workSheet.Cells[row, col].Value.GetType() == typeof(DateTime))
+                            if (workSheet.Cells[row, col].Value != null)
                             {
-                                dr[col - 1] = workSheet.Cells[row, col].GetValue<DateTime>();
+                                if (workSheet.Cells[row, col].Value.GetType() == typeof(DateTime))
+                                {
+                                    dr[col - 1] = workSheet.Cells[row, col].GetValue<DateTime>();
+                                }
+                                else
+                                {
+                                    dr[col - 1] = workSheet.Cells[row, col].Value.ToString();
+                                }
                             }
                             else
                             {
-                                dr[col - 1] = workSheet.Cells[row, col].Value.ToString();
+                                dr[col - 1] = DBNull.Value;
                             }
                         }
-                        else
-                        {
-                            dr[col - 1] = DBNull.Value;
-                        }
+
+                        dataTable.Rows.Add(dr);
                     }
 
-                    dataTable.Rows.Add(dr);
-                }
+                    string newTableName = workSheet.Name;
+                    while (_listDataTable.Any(dt => dt.TableName == newTableName))
+                    {
+                        newTableName = $"{workSheet.Name} ({x})";
+                        x++;
+                    }
+                    // Gán tên mới cho bảng
+                    dataTable.TableName = newTableName;
 
-                string newTableName = workSheet.Name;
-                while (_listDataTable.Any(dt => dt.TableName == newTableName))
-                {
-                    newTableName = $"{workSheet.Name} ({x})";
-                    x++;
+                    _listDataTable.Add(dataTable);
+                    _listSheet.Add(workSheet.Name);
                 }
-                // Gán tên mới cho bảng
-                dataTable.TableName = newTableName;
-
-                _listDataTable.Add(dataTable);
-                _listSheet.Add(workSheet.Name);
+                SheetName = _listSheet;
+                CurrentSheet = _listDataTable[0];
             }
-            SheetName = _listSheet;
-            CurrentSheet = _listDataTable[0];
-            //}
-            //catch (Exception e)
-            //{
-            //    MessageBox.Show(e.ToString());
-            //}
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
         }
     }
 }
