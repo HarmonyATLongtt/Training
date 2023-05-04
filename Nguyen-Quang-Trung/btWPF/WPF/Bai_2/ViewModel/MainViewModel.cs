@@ -64,6 +64,7 @@ namespace Bai_2.ViewModel
         public MainViewModel()
         {
             ImportFileCommand = new RelayCommand<object>(ImportFile);
+            _listDataTable.Clear();
             ExportFileCommand = new RelayCommand<object>(ExportFile);
             //SelectSheetCommand = new RelayCommand<object>(SelectSheet);
         }

@@ -15,6 +15,13 @@
             <Setter Property="Height" Value="25"></Setter>
             <Setter Property="Margin" Value="10"></Setter>
         </Style>
+        <Style x:Key="DataGridCellStyle" TargetType="DataGridCell">
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="LightCyan" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
 
     <Grid>
@@ -22,7 +29,7 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="auto" />
         </Grid.ColumnDefinitions>
-        <DataGrid Grid.Column="0" Margin="10" AutoGenerateColumns="True" ItemsSource="{Binding CurrentSheet.DefaultView}">
+        <DataGrid Grid.Column="0" Margin="10" AutoGenerateColumns="True" ItemsSource="{Binding CurrentSheet.DefaultView}" CellStyle="{StaticResource DataGridCellStyle}">
         </DataGrid>
         <GroupBox Grid.Column="1" Margin="5,10,5,240">
             <GroupBox.Header>
