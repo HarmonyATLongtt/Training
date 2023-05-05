@@ -189,7 +189,6 @@ namespace Ex_WPF.ModelView
                         {
                             excelWorksheet.Cells[1, j + 1].Value = sheet.Columns[j].ColumnName;
                         }
-                      
 
                         // Đổ dữ liệu vào worksheet
                         for (int i = 0; i < sheet.Rows.Count; i++)
@@ -204,13 +203,7 @@ namespace Ex_WPF.ModelView
                     excelPackage.Dispose();
                     MessageBox.Show("Export successful");
                 }
-            } 
-
-        //    // Lưu file Excel
-        //    using (var fileStream = new FileStream(fileName, FileMode.Create))
-        //    {
-        //        excelPackage.SaveAs(fileStream);
-        //    }
+            }
         }
 
         public void Clear(object obj)
@@ -244,7 +237,7 @@ namespace Ex_WPF.ModelView
         public void BackSheet(object obj)
         {
 
-            
+
             if (_dataTables.Count >= index)
             {
                 InitSheet(index--);

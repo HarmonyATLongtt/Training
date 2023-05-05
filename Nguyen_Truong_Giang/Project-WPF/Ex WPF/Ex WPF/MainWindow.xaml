@@ -6,7 +6,7 @@
         xmlns:fa="http://schemas.fontawesome.io/icons/"
         mc:Ignorable="d"
         KeyDown="OnKeyDown"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="600">
 
 
     <Grid RenderTransformOrigin="0,0">
@@ -36,13 +36,6 @@
                     <Setter Property="Background" Value="{Binding MouseLeave}" />
                 </Style>
             </DataGrid.CellStyle>
-            <!--<DataGrid.Columns>
-                <DataGridTextColumn Width="30"  Binding="{Binding ID}"/>
-                <DataGridTextColumn Width="*"   Binding="{Binding Name}"/>
-                <DataGridTextColumn Width="50"   Binding="{Binding Age}"/>
-                <DataGridTextColumn Width="*"   Binding="{Binding Address}"/>
-                <DataGridTextColumn Width="100"   Binding="{Binding TaxFactor}"/>
-            </DataGrid.Columns>-->
         </DataGrid>
 
         <Grid Grid.Row="4" >
@@ -62,29 +55,15 @@
             </StackPanel>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <!--<RadioButton Margin="10 15 10 5"  Content="Student" Command="{Binding SelectionSheet1Command}"
-                             Style="{StaticResource radioBtn}" IsChecked="True"/>
-                <RadioButton Margin="10 5 10 5"  Content="Teacher" Command="{Binding SelectionSheet2Command}"
-                             Style="{StaticResource radioBtn}"/>
-                    <RadioButton Margin="10 5 10 5"  Content="Employee" Command="{Binding SelectionSheet3Command}"
-                             Style="{StaticResource radioBtn}"/>-->
                 <Button Style="{StaticResource buttonBlack}" Command="{Binding BackSheetCommand}">
-                    <fa:ImageAwesome Icon="AngleLeft" Width="25" Height="25" Foreground="White" Margin="-3 0 0 0" />
+                    <fa:ImageAwesome Icon="AngleLeft" Width="25" Height="25" Foreground="Black" Margin="-3 0 0 0" />
                 </Button>
                 <Button Style="{StaticResource buttonBlack}" Margin="-10" Command="{Binding NextSheetCommand}">
-                    <fa:ImageAwesome Icon="AngleRight" Width="25" Height="25" Foreground="White" Margin="3 0 0 0" />
+                    <fa:ImageAwesome Icon="AngleRight" Width="25" Height="25" Foreground="Black" Margin="3 0 0 0" />
                 </Button>
                 
             </StackPanel>
         </Grid>
 
-        <!--<Grid Grid.Row="3">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="0" Text="{Binding Test}" IsEnabled="{Binding ElementName=ckbTest,Path=IsChecked}"/>
-            <CheckBox Grid.Column="1" Name="ckbTest"/>
-        </Grid>-->
     </Grid>
 </Window>
