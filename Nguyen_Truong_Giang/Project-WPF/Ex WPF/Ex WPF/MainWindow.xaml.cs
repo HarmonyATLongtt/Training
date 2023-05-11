@@ -1,4 +1,5 @@
 ﻿using Ex_WPF.ModelView;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -17,6 +18,7 @@ namespace Ex_WPF
         public MainWindow()
         {
             InitializeComponent();
+
 
             DataContext = new BaseViewModel();
         }

@@ -15,6 +15,7 @@ using LicenseContext = OfficeOpenXml.LicenseContext;
 
 namespace Ex_WPF.ModelView
 {
+
     class BaseViewModel : MainViewModel
     {
         public ObservableCollection<Person> _selection = new ObservableCollection<Person>();
@@ -24,6 +25,30 @@ namespace Ex_WPF.ModelView
         private Brush _mouseLeave = new SolidColorBrush(Colors.White);
 
         public string sheetName;
+
+        public ObservableCollection<string> _listSheet = new ObservableCollection<string>();
+        public ObservableCollection<string> ListSheet
+        {
+            get => _listSheet;
+            set
+            {
+                _listSheet = value;
+                RaisePropertiesChanged(nameof(ListSheet));
+            }
+        }
+
+        public ObservableCollection<Person> _lstPerson = new ObservableCollection<Person>();
+        public ObservableCollection<Person> ListPerson
+        {
+            get => _lstPerson;
+            set
+            {
+                _lstPerson = value;
+                RaisePropertiesChanged(nameof(ListPerson));
+            }
+        }
+
+
         public string SheetName
         {
             get => sheetName;
@@ -114,7 +139,6 @@ namespace Ex_WPF.ModelView
 
                 var sheetNames = sheet.TableName;
                 SheetName = sheetNames;
-
             }
         }
 
@@ -135,7 +159,6 @@ namespace Ex_WPF.ModelView
                     using (var reader = ExcelReaderFactory.CreateReader(stream))
                     {
                         var dataSet = reader.AsDataSet();
-                        var sheetNames = dataSet.Tables.Cast<DataTable>().Select(table => table.TableName).ToList();
                         // Đọc dữ liệu từ sheet vào DataTable
                         reader.Read();
 
@@ -147,10 +170,14 @@ namespace Ex_WPF.ModelView
                             }
                         }).Tables;
                         _dataTables.Clear();
+
                         foreach (DataTable sheet in sheets)
                         {
                             _dataTables.Add(sheet);
+                            _listSheet.Add(sheet.TableName);
                         }
+
+                        ListSheet = _listSheet;
 
                         DataTable = _dataTables.FirstOrDefault();
                         SheetName = DataTable.TableName;
@@ -243,6 +270,10 @@ namespace Ex_WPF.ModelView
                 InitSheet(index--);
                 int i = _dataTables.IndexOf(DataTable);
                 DataTable = _dataTables[(i - 1) % _dataTables.Count];
+            }
+            else
+            {
+                new DataTable();
             }
 
             //int i = _dataTables.IndexOf(DataTable);

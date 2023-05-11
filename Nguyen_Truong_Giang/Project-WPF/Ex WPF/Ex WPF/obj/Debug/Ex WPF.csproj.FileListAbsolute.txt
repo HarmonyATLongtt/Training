@@ -40,3 +40,45 @@ D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.cspro
 D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.exe
 D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.pdb
 D:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.csproj.AssemblyReference.cache
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\Ex WPF.exe.config
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\Ex WPF.exe
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\Ex WPF.pdb
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\CommonServiceLocator.dll
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\EPPlus.dll
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\EPPlus.Interfaces.dll
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\EPPlus.System.Drawing.dll
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\ExcelDataReader.DataSet.dll
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\ExcelDataReader.dll
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\FontAwesome.WPF.dll
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\GalaSoft.MvvmLight.dll
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\GalaSoft.MvvmLight.Extras.dll
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\GalaSoft.MvvmLight.Platform.dll
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\Microsoft.IO.RecyclableMemoryStream.dll
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\System.Windows.Interactivity.dll
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\EPPlus.xml
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\ExcelDataReader.pdb
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\ExcelDataReader.xml
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\ExcelDataReader.DataSet.pdb
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\ExcelDataReader.DataSet.xml
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\FontAwesome.WPF.xml
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\GalaSoft.MvvmLight.pdb
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\GalaSoft.MvvmLight.xml
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\GalaSoft.MvvmLight.Extras.pdb
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\GalaSoft.MvvmLight.Extras.xml
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\GalaSoft.MvvmLight.Platform.pdb
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\GalaSoft.MvvmLight.Platform.xml
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\Microsoft.IO.RecyclableMemoryStream.xml
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.csproj.AssemblyReference.cache
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\MainWindow.baml
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\MainWindow.g.cs
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\App.g.cs
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF_MarkupCompile.cache
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF_MarkupCompile.lref
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\App.baml
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.g.resources
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex_WPF.Properties.Resources.resources
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.csproj.GenerateResource.cache
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.csproj.CoreCompileInputs.cache
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.csproj.CopyComplete
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.exe
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.pdb
