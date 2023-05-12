@@ -8,7 +8,7 @@ namespace Bai_1.Ex
     {
         public static void Execution()
         {
-            List<Interface_IPerson> listInfor = new List<Interface_IPerson>();
+            List<Person> listInfor = new List<Person>();
             while (true)
             {
                 Console.WriteLine("*****Menu tuy chon*****");
@@ -41,7 +41,7 @@ namespace Bai_1.Ex
                         case 4:
                             Console.Write("Nhap ten nguoi muon truy van thong tin: ");
                             string key = Convert.ToString(Console.ReadLine());
-                            Interface_IPerson find = new Interface_IPerson();
+                            Person find = new Person();
                             var names = listInfor.Select(p => p.Name).ToArray();
 
                             foreach (string item in names)
@@ -64,7 +64,7 @@ namespace Bai_1.Ex
             }
         }
 
-        public static void Init(List<Interface_IPerson> listInfor)
+        public static void Init(List<Person> listInfor)
         {
             Student hs = new Student();
             Teacher gv = new Teacher();
@@ -279,13 +279,13 @@ namespace Bai_1.Ex
             }
         }
 
-        public static void Output(List<Interface_IPerson> listInfor)
+        public static void Output(List<Person> listInfor)
         {
             var count_hs = listInfor.OfType<Student>().ToList();
             Console.WriteLine("Student: " + count_hs.Count);
             Console.WriteLine("{0, -5} {1, -20} {2, -5} {3, -20} {4, -10}",
                 "ID", "Name", "Age", "School", "Class");
-            foreach (Interface_IPerson infor in listInfor)
+            foreach (Person infor in listInfor)
             {
                 if (infor is Student hs)
                 {
@@ -296,7 +296,7 @@ namespace Bai_1.Ex
             Console.WriteLine("Teacher: " + count_gv.Count);
             Console.WriteLine("{0, -5} {1, -20} {2, -5} {3, -20} {4, -10} {5, -5}",
                                "ID", "Name", "Age", "School", "Income", "TaxCoe");
-            foreach (Interface_IPerson infor in listInfor)
+            foreach (Person infor in listInfor)
             {
                 if (infor is Teacher gv)
                 {
@@ -307,7 +307,7 @@ namespace Bai_1.Ex
             Console.WriteLine("Employee: " + count_nv.Count);
             Console.WriteLine("{0, -5} {1, -20} {2, -5} {3, -20} {4, -20} {5, -10} {6, -5}",
                                "ID", "Name", "Age", "Company", "JobTitle", "Income", "TaxCoe");
-            foreach (Interface_IPerson infor in listInfor)
+            foreach (Person infor in listInfor)
             {
                 if (infor is Employee nv)
                 {

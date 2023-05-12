@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Bai_1
 {
-    public class Interface_IPerson
+    public class Person : IPerson
     {
         public int ID { get; set; }
         public string Name { get; set; }
@@ -12,7 +12,7 @@ namespace Bai_1
         public double Income { get; set; }
         public double TaxCoe { get; set; } // hệ số thuế
 
-        public bool Equals(Interface_IPerson p)
+        public bool Equals(Person p)
         {
             if (p == null)
             {

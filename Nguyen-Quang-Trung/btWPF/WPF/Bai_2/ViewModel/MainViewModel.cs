@@ -24,7 +24,7 @@ namespace Bai_2.ViewModel
             }
         }
 
-        public ObservableCollection<string> _sheetName;
+        public ObservableCollection<string> _sheetName = new ObservableCollection<string>();
 
         public ObservableCollection<string> SheetName
         {
@@ -37,7 +37,7 @@ namespace Bai_2.ViewModel
         }
 
         private ObservableCollection<DataTable> _listDataTable = new ObservableCollection<DataTable>();
-        public ObservableCollection<string> _listSheet = new ObservableCollection<string>();
+        //public ObservableCollection<string> _listSheet = new ObservableCollection<string>();
 
         private string _selectedSheet;
 
@@ -66,7 +66,7 @@ namespace Bai_2.ViewModel
 
         public void Clear(object obj)
         {
-            _listSheet.Clear();
+            //_listSheet.Clear();
             _listDataTable.Clear();
             CurrentSheet.Clear();
             SheetName.Clear();
@@ -172,9 +172,11 @@ namespace Bai_2.ViewModel
                     dataTable.TableName = newTableName;
 
                     _listDataTable.Add(dataTable);
-                    _listSheet.Add(workSheet.Name);
+                    //_listSheet.Add(workSheet.Name);
+                    _sheetName.Add(workSheet.Name);
                 }
-                SheetName = _listSheet;
+                SheetName = _sheetName;
+                //SheetName = _listSheet;
                 CurrentSheet = _listDataTable[0];
             }
             catch (Exception e)

@@ -7,7 +7,7 @@ namespace Bai_1.Ex
     {
         public static void Execution()
         {
-            List<Interface_IPerson> listInfor = new List<Interface_IPerson>();
+            List<Person> listInfor = new List<Person>();
             while (true)
             {
                 Console.WriteLine("*****Menu tuy chon*****");
@@ -49,9 +49,9 @@ namespace Bai_1.Ex
             }
         }
 
-        public static void Init(List<Interface_IPerson> listInfor)
+        public static void Init(List<Person> listInfor)
         {
-            Interface_IPerson infor = new Interface_IPerson();
+            Person infor = new Person();
             Console.WriteLine("Moi nhap thong tin.....");
             bool inputvalue1, inputvalue2, inputvalue3, inputvalue4;
             do
@@ -132,11 +132,11 @@ namespace Bai_1.Ex
             listInfor.Add(infor);
         }
 
-        public static void Output(List<Interface_IPerson> listInfor)
+        public static void Output(List<Person> listInfor)
         {
             Console.WriteLine("{0, -5} {1, -20} {2, -5}",
                "ID", "Name", "Income");
-            foreach (Interface_IPerson infor in listInfor)
+            foreach (Person infor in listInfor)
             {
                 Console.WriteLine("{0, -5} {1, -20} {2, -5}", infor.ID, infor.Name, infor.Income);
             }

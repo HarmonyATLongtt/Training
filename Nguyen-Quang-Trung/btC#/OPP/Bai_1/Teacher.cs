@@ -1,6 +1,6 @@
 ﻿namespace Bai_1
 {
-    public class Teacher : Interface_IPerson
+    internal class Teacher : Person
     {
         public string School { get; set; }
 

@@ -1,6 +1,6 @@
 ﻿namespace Bai_1
 {
-    public class TaxData : Interface_IPerson
+    public class TaxData : Person
     {
         public double GetTaxCoe(int Age, double Income)
         {
