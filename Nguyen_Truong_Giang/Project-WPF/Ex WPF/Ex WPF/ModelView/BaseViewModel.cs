@@ -48,7 +48,6 @@ namespace Ex_WPF.ModelView
             }
         }
 
-
         public string SheetName
         {
             get => sheetName;
@@ -56,6 +55,7 @@ namespace Ex_WPF.ModelView
             {
                 sheetName = value;
                 RaisePropertiesChanged(nameof(SheetName));
+                UpdateSelectedDataTable();
             }
         }
 
@@ -99,30 +99,21 @@ namespace Ex_WPF.ModelView
             }
         }
 
-        //public ObservableCollection<Person> _student = new ObservableCollection<Person>();
-
-        //public ObservableCollection<Person> _teacher = new ObservableCollection<Person>();
-
-        //public ObservableCollection<Person> _employee = new ObservableCollection<Person>();
-
-        //public ObservableCollection<Person> _nextSheet = new ObservableCollection<Person>();
-
-        //public ObservableCollection<Person> _backSheet = new ObservableCollection<Person>();
-
-
         public ICommand ImportFileCommand { get; set; }
         public ICommand ExportFileCommand { get; set; }
         public ICommand ClearCommand { get; set; }
         public ICommand NextSheetCommand { get; set; }
         public ICommand BackSheetCommand { get; set; }
+        public ICommand SelectedCommand { get; set; }
 
         public BaseViewModel()
         {
-            ImportFileCommand = new RelayCommand<object>(ImportFile);
+            ImportFileCommand = new RelayCommand(ImportFile);
             ExportFileCommand = new RelayCommand<object>(ExportFile);
             ClearCommand = new RelayCommand<object>(Clear);
             NextSheetCommand = new RelayCommand<object>(NextSheet);
             BackSheetCommand = new RelayCommand<object>(BackSheet);
+            SelectedCommand = new RelayCommand(UpdateSelectedDataTable);
         }
 
         private int index = 0;
@@ -142,7 +133,27 @@ namespace Ex_WPF.ModelView
             }
         }
 
-        public void ImportFile(object obj)
+
+        private DataTable _selectedDataTable;
+
+        public DataTable SelectedDataTable
+        {
+            get => _selectedDataTable; 
+            set
+            {
+                _selectedDataTable = value;
+                RaisePropertiesChanged(nameof(SelectedDataTable));
+            }
+        }
+
+        private void UpdateSelectedDataTable()
+        {
+            var name = DataTable.TableName;
+            SelectedDataTable = _dataTables.FirstOrDefault(dt => dt.TableName == SheetName);
+            DataTable = SelectedDataTable;
+        }
+
+        public void ImportFile()
         {
             // Khởi tạo OpenFileDialog để lựa chọn file excel
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -177,17 +188,14 @@ namespace Ex_WPF.ModelView
                             _listSheet.Add(sheet.TableName);
                         }
 
-                        ListSheet = _listSheet;
-
                         DataTable = _dataTables.FirstOrDefault();
                         SheetName = DataTable.TableName;
+                        UpdateSelectedDataTable();
                         // InitSheet(0);
                         reader.Close();
                     }
                     stream.Close();
                 }
-
-                //  Selection = _selection;
             }
         }
 
@@ -280,5 +288,6 @@ namespace Ex_WPF.ModelView
             //SheetName = DataTable.TableName;
             //DataTable = i >= 0 ? _dataTables[(i - 1) % _dataTables.Count] : new DataTable();
         }
+
     }
 }

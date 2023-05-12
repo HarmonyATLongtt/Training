@@ -6,7 +6,7 @@
         xmlns:fa="http://schemas.fontawesome.io/icons/"
         mc:Ignorable="d"
         KeyDown="OnKeyDown"
-        Title="MainWindow" Height="450" Width="600">
+        Title="MainWindow" Height="450" Width="700">
 
 
     <Grid RenderTransformOrigin="0,0">
@@ -54,7 +54,7 @@
                         Margin="10 0 10 10" Style="{StaticResource buttonMain}"/>
             </StackPanel>
             
-            <StackPanel Grid.Column="1" Orientation="Horizontal">
+            <StackPanel Grid.Column="2" Orientation="Horizontal">
                 <Button Style="{StaticResource buttonBlack}" Command="{Binding BackSheetCommand}">
                     <fa:ImageAwesome Icon="AngleLeft" Width="25" Height="25" Foreground="Black" Margin="-3 0 0 0" />
                 </Button>
@@ -64,10 +64,10 @@
                 
             </StackPanel>
 
-            <StackPanel Grid.Column="2">
+            <StackPanel Grid.Column="1">
                 <Label Foreground="Black" FontWeight="SemiBold" FontSize="12" Margin="5"
                    Content="List Sheet"/>
-                <ListView x:Name="listSheet" Margin="10 0 10 10" ItemsSource="{Binding ListSheet}">
+                <ListView x:Name="listSheet" Margin="10 0 10 10" ItemsSource="{Binding ListSheet}" SelectedItem="{Binding SheetName}">
                     <!--<ListView.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Age}"/>
