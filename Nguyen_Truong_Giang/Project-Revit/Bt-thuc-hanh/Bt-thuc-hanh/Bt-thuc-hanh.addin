@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Command">
+    <Text>Command Bt-thuc-hanh</Text>
+    <Description>Some description for Bt-thuc-hanh</Description>
+    <Assembly>Bt-thuc-hanh.dll</Assembly>
+    <FullClassName>Bt_thuc_hanh.Command</FullClassName>
+    <ClientId>ef6fc7f6-29b8-48df-907a-6ff6bc157442</ClientId>
+    <VendorId>com.typepad.thebuildingcoder</VendorId>
+    <VendorDescription>The Building Coder, http://thebuildingcoder.typepad.com</VendorDescription>
+  </AddIn>
+  <AddIn Type="Application">
+    <Name>Application Bt-thuc-hanh</Name>
+    <Assembly>Bt-thuc-hanh.dll</Assembly>
+    <FullClassName>Bt_thuc_hanh.App</FullClassName>
+    <ClientId>68a16aa9-78a0-4925-8963-eee999b5d693</ClientId>
+    <VendorId>com.typepad.thebuildingcoder</VendorId>
+    <VendorDescription>The Building Coder, http://thebuildingcoder.typepad.com</VendorDescription>
+  </AddIn>
+</RevitAddIns>

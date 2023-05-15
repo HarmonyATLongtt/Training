@@ -1,0 +1,12 @@
+C:\Users\giang\source\repos\ClassLibrary1\ClassLibrary1\obj\Debug\ClassLibrary1.csproj.CoreCompileInputs.cache
+C:\Users\giang\source\repos\ClassLibrary1\ClassLibrary1\bin\Debug\ClassLibrary1.dll
+C:\Users\giang\source\repos\ClassLibrary1\ClassLibrary1\bin\Debug\ClassLibrary1.pdb
+C:\Users\giang\source\repos\ClassLibrary1\ClassLibrary1\obj\Debug\ClassLibrary1.dll
+C:\Users\giang\source\repos\ClassLibrary1\ClassLibrary1\obj\Debug\ClassLibrary1.pdb
+C:\Users\giang\AppData\Roaming\Autodesk\Revit\Addins\2021\ExternalApplication.cs
+C:\Users\giang\AppData\Roaming\Autodesk\Revit\Addins\2021\MyFirstCommand.addin
+C:\Users\giang\AppData\Roaming\Autodesk\Revit\Addins\2021\ClassLibrary1.dll
+C:\Users\giang\AppData\Roaming\Autodesk\Revit\Addins\2021\ClassLibrary1.pdb
+C:\Users\giang\source\repos\ClassLibrary1\ClassLibrary1\bin\debug\ExternalApplication.cs
+C:\Users\giang\source\repos\ClassLibrary1\ClassLibrary1\bin\debug\ClassLibrary1.addin
+C:\Users\giang\source\repos\ClassLibrary1\ClassLibrary1\obj\Debug\ClassLibrary1.csproj.AssemblyReference.cache

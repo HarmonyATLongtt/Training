@@ -1,0 +1,157 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<RevitAddIns>
+	<AddIn Type="Command">
+		<Name>ClassLibrary1</Name>
+		<FullClassName>ClassLibrary1.HelloWorld</FullClassName>
+		<Text>Get Element</Text>
+		<Description>Get ID from a Element </Description>
+		<VisibilityMode>AlwaysVisible</VisibilityMode>
+		<Assembly>ClassLibrary1.dll</Assembly>
+		<AddInId>E64136E4-FA6B-48B2-9375-715A7F11581F</AddInId>
+		<VendorId>ADSK</VendorId>
+		<VendorDescription>Autodesk, Inc, www.autodesk.com</VendorDescription>
+	</AddIn>
+
+	<AddIn Type="Command">
+		<Name>ClassLibrary1</Name>
+		<FullClassName>ClassLibrary1.CollectionDoors</FullClassName>
+		<Text>Collection Doors</Text>
+		<Description>Collection Doors from project</Description>
+		<VisibilityMode>AlwaysVisible</VisibilityMode>
+		<Assembly>ClassLibrary1.dll</Assembly>
+		<AddInId>2F4D6FFB-A614-4879-9AB9-845410F23AC0</AddInId>
+		<VendorId>ADSK</VendorId>
+		<VendorDescription>Autodesk, Inc, www.autodesk.com</VendorDescription>
+	</AddIn>
+
+	<AddIn Type="Command">
+		<Name>ClassLibrary1</Name>
+		<FullClassName>ClassLibrary1.DeleteElement</FullClassName>
+		<Text>Delete Element</Text>
+		<Description>Delete a element from Revit</Description>
+		<VisibilityMode>AlwaysVisible</VisibilityMode>
+		<Assembly>ClassLibrary1.dll</Assembly>
+		<AddInId>4D1EF6FF-DE0A-4684-9FB0-598C12BD8034</AddInId>
+		<VendorId>ADSK</VendorId>
+		<VendorDescription>Autodesk, Inc, www.autodesk.com</VendorDescription>
+	</AddIn>
+
+	<AddIn Type="Command">
+		<Name>ClassLibrary1</Name>
+		<FullClassName>ClassLibrary1.PlaceWall</FullClassName>
+		<Text>PlaceWall</Text>
+		<Description>PlaceWall from Revit</Description>
+		<VisibilityMode>AlwaysVisible</VisibilityMode>
+		<Assembly>ClassLibrary1.dll</Assembly>
+		<AddInId>CF833218-6665-4B47-A1E7-D49577B1E31E</AddInId>
+		<VendorId>ADSK</VendorId>
+		<VendorDescription>Autodesk, Inc, www.autodesk.com</VendorDescription>
+	</AddIn>
+
+	<AddIn Type="Command">
+		<Name>ClassLibrary1</Name>
+		<FullClassName>ClassLibrary1.PlaceFamily</FullClassName>
+		<Text>PlaceTableFamily</Text>
+		<Description>PlaceTableFamily from Revit</Description>
+		<VisibilityMode>AlwaysVisible</VisibilityMode>
+		<Assembly>ClassLibrary1.dll</Assembly>
+		<AddInId>26E90337-B605-4BFD-BB04-7C3268B31567</AddInId>
+		<VendorId>ADSK</VendorId>
+		<VendorDescription>Autodesk, Inc, www.autodesk.com</VendorDescription>
+	</AddIn>
+
+	<AddIn Type="Command">
+		<Name>ClassLibrary1</Name>
+		<FullClassName>ClassLibrary1.CreateNewFloor</FullClassName>
+		<Text>CreateNewFloor</Text>
+		<Description>CreateNewFloor from Revit</Description>
+		<VisibilityMode>AlwaysVisible</VisibilityMode>
+		<Assembly>ClassLibrary1.dll</Assembly>
+		<AddInId>0195780D-15C5-456A-9959-5C5EA03D3774</AddInId>
+		<VendorId>ADSK</VendorId>
+		<VendorDescription>Autodesk, Inc, www.autodesk.com</VendorDescription>
+	</AddIn>
+
+	<AddIn Type="Command">
+		<Name>ClassLibrary1</Name>
+		<FullClassName>ClassLibrary1.GetParameter</FullClassName>
+		<Text>Get Head Height</Text>
+		<Description>Info Head Height from Revit</Description>
+		<VisibilityMode>AlwaysVisible</VisibilityMode>
+		<Assembly>ClassLibrary1.dll</Assembly>
+		<AddInId>D3C5C325-501F-4784-861C-6B540BE5421D</AddInId>
+		<VendorId>ADSK</VendorId>
+		<VendorDescription>Autodesk, Inc, www.autodesk.com</VendorDescription>
+	</AddIn>
+
+	<AddIn Type="Command">
+		<Name>ClassLibrary1</Name>
+		<FullClassName>ClassLibrary1.SetParameter</FullClassName>
+		<Text>Set Head Height</Text>
+		<Description>Set Head Height from Revit</Description>
+		<VisibilityMode>AlwaysVisible</VisibilityMode>
+		<Assembly>ClassLibrary1.dll</Assembly>
+		<AddInId>0720813D-6D3E-4B11-B278-DE53A8F31C3E</AddInId>
+		<VendorId>ADSK</VendorId>
+		<VendorDescription>Autodesk, Inc, www.autodesk.com</VendorDescription>
+	</AddIn>
+
+	<AddIn Type="Command">
+		<Name>ClassLibrary1</Name>
+		<FullClassName>ClassLibrary1.ChangeLocation</FullClassName>
+		<Text>ChangeLocation</Text>
+		<Description>ChangeLocation from Revit</Description>
+		<VisibilityMode>AlwaysVisible</VisibilityMode>
+		<Assembly>ClassLibrary1.dll</Assembly>
+		<AddInId>A0A0E0D8-EA43-47B9-8860-E599EDD6F2B5</AddInId>
+		<VendorId>ADSK</VendorId>
+		<VendorDescription>Autodesk, Inc, www.autodesk.com</VendorDescription>
+	</AddIn>
+
+	<AddIn Type="Command">
+		<Name>ClassLibrary1</Name>
+		<FullClassName>ClassLibrary1.EditElement</FullClassName>
+		<Text>Move And Rotate</Text>
+		<Description>Move And Rotate Elemet</Description>
+		<VisibilityMode>AlwaysVisible</VisibilityMode>
+		<Assembly>ClassLibrary1.dll</Assembly>
+		<AddInId>FE3F5127-0DA5-4E78-9177-537725EED295</AddInId>
+		<VendorId>ADSK</VendorId>
+		<VendorDescription>Autodesk, Inc, www.autodesk.com</VendorDescription>
+	</AddIn>
+
+	<AddIn Type="Command">
+		<Name>ClassLibrary1</Name>
+		<FullClassName>ClassLibrary1.CreateViewPlan</FullClassName>
+		<Text>Create View Plan</Text>
+		<Description>Create View Plan</Description>
+		<VisibilityMode>AlwaysVisible</VisibilityMode>
+		<Assembly>ClassLibrary1.dll</Assembly>
+		<AddInId>96B8F6D5-4A24-412F-B6D8-7CCC5CE368EB</AddInId>
+		<VendorId>ADSK</VendorId>
+		<VendorDescription>Autodesk, Inc, www.autodesk.com</VendorDescription>
+	</AddIn>
+
+	<AddIn Type="Command">
+		<Name>ClassLibrary1</Name>
+		<FullClassName>ClassLibrary1.GetParaWalls</FullClassName>
+		<Text>Get Parameter Wall</Text>
+		<Description>Get Parameter Wall</Description>
+		<VisibilityMode>AlwaysVisible</VisibilityMode>
+		<Assembly>ClassLibrary1.dll</Assembly>
+		<AddInId>3EB0ADC2-2663-4228-990B-A832BFE4A2A4</AddInId>
+		<VendorId>ADSK</VendorId>
+		<VendorDescription>Autodesk, Inc, www.autodesk.com</VendorDescription>
+	</AddIn>
+
+	<AddIn Type="Application">
+		<Name>MyFirstApplication</Name>
+		<Assembly>ClassLibrary1.dll</Assembly>
+		<Text>Application</Text>
+		<Description>Application</Description>
+		<AddInId>5DB800A4-7774-435E-9816-2213614FD501</AddInId>
+		<FullClassName>ClassLibrary1.ExternalApplication</FullClassName>
+		<VendorId>ADSK</VendorId>
+		<VendorDescription>Autodesk, Inc, www.autodesk.com</VendorDescription>
+	</AddIn>
+</RevitAddIns>
