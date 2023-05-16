@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+	<AddIn Type="Command">
+		<Text>FilterInstance ExRevitAPI</Text>
+		<Description>Filter Instance for ExRevitAPI</Description>
+		<Assembly>ExRevitAPI.dll</Assembly>
+		<FullClassName>ExRevitAPI.FilterInstance</FullClassName>
+		<ClientId>f248fe37-8d4f-4dfd-9517-c90f7dd87e0c</ClientId>
+		<VendorId>com.typepad.thebuildingcoder</VendorId>
+		<VendorDescription>The Building Coder, http://thebuildingcoder.typepad.com</VendorDescription>
+	</AddIn>
+
+	<AddIn Type="Command">
+		<Text>infoParameter ExRevitAPI</Text>
+		<Description>info Parameter for ExRevitAPI</Description>
+		<Assembly>ExRevitAPI.dll</Assembly>
+		<FullClassName>ExRevitAPI.infoParameter</FullClassName>
+		<ClientId>A86C1D38-49BF-4D52-9807-5BA2828E6868</ClientId>
+		<VendorId>com.typepad.thebuildingcoder</VendorId>
+		<VendorDescription>The Building Coder, http://thebuildingcoder.typepad.com</VendorDescription>
+	</AddIn>
+
+	<AddIn Type="Command">
+		<Text>AddFileRevit ExRevitAPI</Text>
+		<Description>AddFile for ExRevitAPI</Description>
+		<Assembly>ExRevitAPI.dll</Assembly>
+		<FullClassName>ExRevitAPI.AddFileRevit</FullClassName>
+		<ClientId>196D7EE1-69D0-4ECE-9430-3C66BFD7B26E</ClientId>
+		<VendorId>com.typepad.thebuildingcoder</VendorId>
+		<VendorDescription>The Building Coder, http://thebuildingcoder.typepad.com</VendorDescription>
+	</AddIn>
+
+	<AddIn Type="Application">
+		<Name>Application ExRevitAPI</Name>
+		<Assembly>ExRevitAPI.dll</Assembly>
+		<FullClassName>ExRevitAPI.App</FullClassName>
+		<ClientId>268fd4fb-8255-47bb-8a20-aa454c537e85</ClientId>
+		<VendorId>com.typepad.thebuildingcoder</VendorId>
+		<VendorDescription>The Building Coder, http://thebuildingcoder.typepad.com</VendorDescription>
+	</AddIn>
+</RevitAddIns>

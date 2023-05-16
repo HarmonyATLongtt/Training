@@ -1,0 +1,6 @@
+E:\Training\Nguyen_Truong_Giang\Project-Revit\ExRevitAPI\ExRevitAPI\bin\Debug\ExRevitAPI.dll
+E:\Training\Nguyen_Truong_Giang\Project-Revit\ExRevitAPI\ExRevitAPI\bin\Debug\ExRevitAPI.pdb
+E:\Training\Nguyen_Truong_Giang\Project-Revit\ExRevitAPI\ExRevitAPI\obj\Debug\ExRevitAPI.csproj.AssemblyReference.cache
+E:\Training\Nguyen_Truong_Giang\Project-Revit\ExRevitAPI\ExRevitAPI\obj\Debug\ExRevitAPI.csproj.CoreCompileInputs.cache
+E:\Training\Nguyen_Truong_Giang\Project-Revit\ExRevitAPI\ExRevitAPI\obj\Debug\ExRevitAPI.dll
+E:\Training\Nguyen_Truong_Giang\Project-Revit\ExRevitAPI\ExRevitAPI\obj\Debug\ExRevitAPI.pdb
