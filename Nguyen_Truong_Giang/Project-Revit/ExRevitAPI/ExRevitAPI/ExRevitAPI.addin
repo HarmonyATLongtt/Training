@@ -30,6 +30,16 @@
 		<VendorDescription>The Building Coder, http://thebuildingcoder.typepad.com</VendorDescription>
 	</AddIn>
 
+	<AddIn Type="Command">
+		<Text>CreateGridRevit ExRevitAPI</Text>
+		<Description>CreateGrid for ExRevitAPI</Description>
+		<Assembly>ExRevitAPI.dll</Assembly>
+		<FullClassName>ExRevitAPI.CreateGridRevit</FullClassName>
+		<ClientId>929AEBC1-BF5D-4D52-AC33-AD860798C840</ClientId>
+		<VendorId>com.typepad.thebuildingcoder</VendorId>
+		<VendorDescription>The Building Coder, http://thebuildingcoder.typepad.com</VendorDescription>
+	</AddIn>
+
 	<AddIn Type="Application">
 		<Name>Application ExRevitAPI</Name>
 		<Assembly>ExRevitAPI.dll</Assembly>

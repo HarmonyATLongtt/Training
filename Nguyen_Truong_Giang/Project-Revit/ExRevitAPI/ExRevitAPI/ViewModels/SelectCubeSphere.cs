@@ -1,9 +1,6 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using ExRevitAPI.ModelView;
-using System;
-using System.Collections.Generic;
 using Application = Autodesk.Revit.ApplicationServices.Application;
 
 namespace ExRevitAPI
@@ -17,8 +14,6 @@ namespace ExRevitAPI
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Application app = uiapp.Application;
             Document doc = uidoc.Document;
-
-
 
             SelectView wpfForm = new SelectView(doc);
 

@@ -1,9 +1,9 @@
 ﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
 using ExRevitAPI.Models;
 using GalaSoft.MvvmLight.Command;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Input;
 
 namespace ExRevitAPI.ModelView
@@ -67,30 +67,42 @@ namespace ExRevitAPI.ModelView
             }
         }
 
+        private void CreateGird(Document doc)
+        {
+            // Tạo hai điểm đại diện cho đường Grid
+            XYZ pointA = new XYZ(0, 0, 0);
+            XYZ pointB = new XYZ(50, 0, 0);
+
+            XYZ pointC = new XYZ(25, -25, 0);
+            XYZ pointD = new XYZ(25, 25, 0);
+
+            // Tạo đường Grid từ hai điểm trên
+            Line line1 = Line.CreateBound(pointA, pointB);
+            Line line2 = Line.CreateBound(pointC, pointD);
+
+            // Tạo Grid từ đường Grid
+            using (Transaction trans = new Transaction(doc, "Create Grids"))
+            {
+                trans.Start();
+                Grid grid1 = Grid.Create(doc, line1);
+                Grid grid2 = Grid.Create(doc, line2);
+
+                IntersectionResultArray intersectionResults = new IntersectionResultArray();
+
+                SetComparisonResult result = line1.Intersect(line2, out intersectionResults);
+
+                // Đặt tên cho hai Grid
+                grid1.Name = "Grid1";
+                grid2.Name = "Grid2";
+
+                trans.Commit();
+            }
+        }
+
         private void CreateCube(Document doc, double dimension)
         {
             List<Curve> profile = new List<Curve>();
             dimension = Dimension;
-
-            //Grid grid1;
-            //Grid grid2;
-            //grid1.Curve is Line line1;  
-            //grid2.Curve
-
-            //IntersectionResultArray intersectionResults = new IntersectionResultArray();
-
-            //List<XYZ> points = new List<XYZ>();
-
-            //SetComparisonResult result = line1.Intersect(line2, out intersectionResults);
-
-            //if (result == SetComparisonResult.Overlap)
-            //{
-            //    foreach (IntersectionResult intersectionResult in intersectionResults)
-            //    {
-            //        XYZ point = intersectionResult.XYZPoint;
-            //        points.Add(point);
-            //    }
-            //}
 
             // Tạo các điểm đại diện cho các đỉnh của hình lập phương
             XYZ pointA = XYZ.Zero;
@@ -111,27 +123,63 @@ namespace ExRevitAPI.ModelView
             curveLoop.Append(lineCD);
             curveLoop.Append(lineDA);
 
+            List<XYZ> points = new List<XYZ>();
+
+            // Tạo hai điểm đại diện cho đường Grid
+            XYZ A = new XYZ(0, 0, 0);
+            XYZ B = new XYZ(100, 0, 0);
+
+            XYZ C = new XYZ(50, -50, 0);
+            XYZ D = new XYZ(50, 50, 0);
+
+            // Tạo đường Grid từ hai điểm trên
+            Line line1 = Line.CreateBound(A, B);
+            Line line2 = Line.CreateBound(C, D);
+
+            IntersectionResultArray intersectionResults = new IntersectionResultArray();
+
+            SetComparisonResult result = line1.Intersect(line2, out intersectionResults);
+
+            if (result == SetComparisonResult.Overlap)
+            {
+                foreach (IntersectionResult intersectionResult in intersectionResults)
+                {
+                    XYZ point = intersectionResult.XYZPoint;
+                    points.Add(point);
+                }
+            }
+
             // Tạo SolidOptions để chỉ định các tùy chọn cho việc tạo hình lập phương.
             SolidOptions options = new SolidOptions(ElementId.InvalidElementId, ElementId.InvalidElementId);
 
             // Tạo Frame để xác định vị trí và hướng của hình lập phương.
             // Đặt trung tâm tại điểm XYZ.Zero và xác định hướng trục X, trục Z và trục Y.
-            Frame frame = new Frame(pointA, XYZ.BasisX, -XYZ.BasisZ, XYZ.BasisY);
-            if (Frame.CanDefineRevitGeometry(frame) == true) // Kiểm tra xem Frame có thể định nghĩa hình học trong Revit hay không.
+            foreach (var point in points)
             {
-                //Solid cube = GeometryCreationUtilities.CreateRevolvedGeometry(frame, new CurveLoop[] { curveLoop }, 0, 2 * Math.PI, options);
-                Solid cube = GeometryCreationUtilities.CreateExtrusionGeometry(new CurveLoop[] { curveLoop }, XYZ.BasisZ, dimension);
-
-                using (Transaction t = new Transaction(doc, "Create cube direct shape"))
+                Frame frame = new Frame(point, XYZ.BasisX, -XYZ.BasisZ, XYZ.BasisY);
+                if (Frame.CanDefineRevitGeometry(frame) == true) // Kiểm tra xem Frame có thể định nghĩa hình học trong Revit hay không.
                 {
-                    t.Start();
-                    // Tạo một đối tượng DirectShape trong tài liệu Revit.
-                    DirectShape ds = DirectShape.CreateElement(doc, new ElementId(BuiltInCategory.OST_GenericModel));
+                    //Solid cube = GeometryCreationUtilities.CreateRevolvedGeometry(frame, new CurveLoop[] { curveLoop }, 0, 2 * Math.PI, options);
+                    Solid cube = GeometryCreationUtilities.CreateExtrusionGeometry(new CurveLoop[] { curveLoop }, XYZ.BasisZ, dimension);
 
-                    ds.ApplicationId = "Application id";
-                    ds.ApplicationDataId = "Geometry object id";
-                    ds.SetShape(new GeometryObject[] { cube }); // Sử dụng DirectShape.SetShape để gán hình lập phương vào DirectShape.
-                    t.Commit();
+                    using (Transaction t = new Transaction(doc, "Create cube direct shape"))
+                    {
+                        t.Start();
+                        Grid grid1 = Grid.Create(doc, line1);
+                        Grid grid2 = Grid.Create(doc, line2);
+                        // Đặt tên cho hai Grid
+                        grid1.Name = "Grid1";
+                        grid2.Name = "Grid2";
+                        // Tạo một đối tượng DirectShape trong tài liệu Revit.
+                        DirectShape ds = DirectShape.CreateElement(doc, new ElementId(BuiltInCategory.OST_GenericModel));
+
+                        ds.ApplicationId = "Application id";
+                        ds.ApplicationDataId = "Geometry object id";
+                        ds.SetShape(new GeometryObject[] { cube }); // Sử dụng DirectShape.SetShape để gán hình lập phương vào DirectShape.
+                        TaskDialog.Show("Tạo khối lập phương", "Đã tạo thành công hình lập phương" + "\n" +
+                                        "Category Name:  " + ds.Category.Name);
+                        t.Commit();
+                    }
                 }
             }
         }
@@ -172,6 +220,8 @@ namespace ExRevitAPI.ModelView
                     ds.ApplicationId = "Application id";
                     ds.ApplicationDataId = "Geometry object id";
                     ds.SetShape(new GeometryObject[] { sphere }); //Sử dụng DirectShape.SetShape để gán hình cầu vào DirectShape.
+                    TaskDialog.Show("Tạo hình cầu", "Đã tạo thành công hình cầu" + "\n" +
+                                    "Category Name:  " + ds.Category.Name);
                     t.Commit();
                 }
             }

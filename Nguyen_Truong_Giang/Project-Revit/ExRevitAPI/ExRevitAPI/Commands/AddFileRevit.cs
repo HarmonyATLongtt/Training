@@ -62,6 +62,7 @@ namespace ExRevitAPI
                                 // Family đã được tải thành công
                                 if (familySymbol != null)
                                 {
+
                                     var t = doc.Create.NewFamilyInstance(new XYZ(0, 0, 0), familySymbol, level, Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
                                     string name = familyFilePath;
                                     TaskDialog.Show("Family đã được tải thành công", name + " đã được tải thành công");

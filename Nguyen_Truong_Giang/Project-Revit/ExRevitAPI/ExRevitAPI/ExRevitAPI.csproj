@@ -73,6 +73,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\AddFileRevit.cs" />
+    <Compile Include="Commands\CreateGrids.cs" />
     <Compile Include="Commands\FilterInstance.cs" />
     <Compile Include="Commands\InfoParameter.cs" />
     <Compile Include="Models\SelectModel.cs" />
