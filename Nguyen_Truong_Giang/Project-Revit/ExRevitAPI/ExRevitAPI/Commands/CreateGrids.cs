@@ -27,13 +27,13 @@ namespace ExRevitAPI.Commands
                 try
                 {
                     // Create the geometry line which the grid locates
-                    XYZ start = new XYZ(0, 0, 0);
-                    XYZ end = new XYZ(0, 50, 0);
+                    XYZ A = new XYZ(0, 0, 0);
+                    XYZ B = new XYZ(100, 0, 0);
 
-                    XYZ startB = new XYZ(-50, 25, 0);
-                    XYZ endB = new XYZ(0, 0, 0);
-                    Line geomLine = Line.CreateBound(start, end);
-                    Line geomLineB = Line.CreateBound(startB, endB);
+                    XYZ C = new XYZ(50, -50, 0);
+                    XYZ D = new XYZ(50, 50, 0);
+                    Line geomLine = Line.CreateBound(A, B);
+                    Line geomLineB = Line.CreateBound(C, D);
 
                     // Create a grid using the geometry line
                     Grid lineGrid = Grid.Create(doc, geomLine);

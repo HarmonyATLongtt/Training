@@ -72,10 +72,13 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\AddFile-Checkintersect.cs" />
     <Compile Include="Commands\AddFileRevit.cs" />
+    <Compile Include="Commands\CheckIntersect.cs" />
     <Compile Include="Commands\CreateGrids.cs" />
     <Compile Include="Commands\FilterInstance.cs" />
     <Compile Include="Commands\InfoParameter.cs" />
+    <Compile Include="GridFilterSelection.cs" />
     <Compile Include="Models\SelectModel.cs" />
     <Compile Include="ModelView\BaseModelView.cs" />
     <Compile Include="ModelView\MainModelView.cs" />

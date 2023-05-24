@@ -13,7 +13,10 @@
         </Grid.RowDefinitions>
 
         <Label Grid.Row="0" Content="Select Cube or Sphere" Foreground="Black" Margin="10,10,10.4,49.6" />
-        <ComboBox x:Name="Title_Block" Grid.Row="0" Margin="10,45,10.4,9.6" ItemsSource="{Binding SelectShapre}" SelectedItem="{Binding SelecShapeValue}">
+        <ComboBox x:Name="Title_Block" Grid.Row="0" Margin="10,40,10.4,9.6" 
+                  ItemsSource="{Binding SelectShapre}" 
+                  SelectedItem="{Binding SelecShapeValue}" 
+                  SelectedIndex="{Binding TheSelectedIndex}">
         </ComboBox>
 
         <TextBlock Text="Dimension:" Margin="10,10.4,224.4,40.4" Grid.Row="1" />

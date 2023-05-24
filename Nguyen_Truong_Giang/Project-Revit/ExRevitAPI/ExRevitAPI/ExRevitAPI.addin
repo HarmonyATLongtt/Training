@@ -40,6 +40,26 @@
 		<VendorDescription>The Building Coder, http://thebuildingcoder.typepad.com</VendorDescription>
 	</AddIn>
 
+	<AddIn Type="Command">
+		<Text>CheckGrid ExRevitAPI</Text>
+		<Description>CheckGrid for ExRevitAPI</Description>
+		<Assembly>ExRevitAPI.dll</Assembly>
+		<FullClassName>ExRevitAPI.CheckGrid</FullClassName>
+		<ClientId>A5C9A4A9-DB94-47D8-A569-62E18050B48E</ClientId>
+		<VendorId>com.typepad.thebuildingcoder</VendorId>
+		<VendorDescription>The Building Coder, http://thebuildingcoder.typepad.com</VendorDescription>
+	</AddIn>
+
+	<AddIn Type="Command">
+		<Text>AddFile-Checkintersect ExRevitAPI</Text>
+		<Description>AddFile-Checkintersect</Description>
+		<Assembly>ExRevitAPI.dll</Assembly>
+		<FullClassName>ExRevitAPI.AddFile-Checkintersect</FullClassName>
+		<ClientId>3CF75947-F5B8-4BCB-A6EF-0676E2A94E43</ClientId>
+		<VendorId>com.typepad.thebuildingcoder</VendorId>
+		<VendorDescription>The Building Coder, http://thebuildingcoder.typepad.com</VendorDescription>
+	</AddIn>
+
 	<AddIn Type="Application">
 		<Name>Application ExRevitAPI</Name>
 		<Assembly>ExRevitAPI.dll</Assembly>
