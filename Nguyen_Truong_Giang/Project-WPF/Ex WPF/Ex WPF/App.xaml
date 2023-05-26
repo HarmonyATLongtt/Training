@@ -7,6 +7,7 @@
     <Application.Resources>
 
         <Style x:Key="buttonMain" TargetType="Button">
+            <Setter Property="Margin" Value="5" />
             <Setter Property="Background" Value="Silver" />
             <Setter Property="Foreground" Value="Black" />
             <Setter Property="FontSize" Value="15" />

@@ -97,6 +97,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Converter\TitleConverter.cs" />
     <Compile Include="ModelView\BaseViewModel.cs" />
     <Compile Include="ModelView\MainViewModel.cs" />
     <Compile Include="Person.cs" />

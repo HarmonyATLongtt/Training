@@ -31,6 +31,7 @@ namespace ClassLibrary1
 
                 if (r != null)
                 {
+                    var elemType = doc.GetElement(element.GetTypeId()) as ElementType;
                     Parameter para = element.LookupParameter("Head Height");
 
                     InternalDefinition def = para.Definition as InternalDefinition;

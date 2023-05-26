@@ -82,3 +82,46 @@ E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.cspro
 E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.csproj.CopyComplete
 E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.exe
 E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.pdb
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\Ex WPF.exe.config
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\Ex WPF.exe
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\Ex WPF.pdb
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\CommonServiceLocator.dll
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\EPPlus.dll
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\EPPlus.Interfaces.dll
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\EPPlus.System.Drawing.dll
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\ExcelDataReader.DataSet.dll
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\ExcelDataReader.dll
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\FontAwesome.WPF.dll
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\GalaSoft.MvvmLight.dll
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\GalaSoft.MvvmLight.Extras.dll
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\GalaSoft.MvvmLight.Platform.dll
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\Microsoft.IO.RecyclableMemoryStream.dll
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\System.Windows.Interactivity.dll
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\EPPlus.xml
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\ExcelDataReader.pdb
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\ExcelDataReader.xml
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\ExcelDataReader.DataSet.pdb
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\ExcelDataReader.DataSet.xml
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\FontAwesome.WPF.xml
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\GalaSoft.MvvmLight.pdb
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\GalaSoft.MvvmLight.xml
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\GalaSoft.MvvmLight.Extras.pdb
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\GalaSoft.MvvmLight.Extras.xml
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\GalaSoft.MvvmLight.Platform.pdb
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\GalaSoft.MvvmLight.Platform.xml
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\bin\Debug\Microsoft.IO.RecyclableMemoryStream.xml
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.csproj.AssemblyReference.cache
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\MainWindow.baml
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\MainWindow.g.cs
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\App.g.cs
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF_MarkupCompile.cache
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF_MarkupCompile.lref
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\App.baml
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.g.resources
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex_WPF.Properties.Resources.resources
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.csproj.GenerateResource.cache
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.csproj.CoreCompileInputs.cache
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.csproj.CopyComplete
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.exe
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.pdb
+D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\GeneratedInternalTypeHelper.g.cs

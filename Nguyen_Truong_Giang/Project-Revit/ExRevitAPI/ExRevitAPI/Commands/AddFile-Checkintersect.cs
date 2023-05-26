@@ -150,11 +150,12 @@ namespace ExRevitAPI.Commands
 
         public Level SetLevel(Document doc)
         {
+
             FilteredElementCollector levelCollector = new FilteredElementCollector(doc);
             Level level = levelCollector
                 .OfCategory(BuiltInCategory.OST_Levels)
                 .WhereElementIsNotElementType()
-                .Cast<Level>().First(x => x.Name == "Level 1");
+                .Cast<Level>().FirstOrDefault(x => x.Name == "Level 1");
 
             return level;
         }

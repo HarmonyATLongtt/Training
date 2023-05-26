@@ -817,17 +817,6 @@ Please follow Revit standards to create task dialogs. The standards are listed i
    2016
 </since>
     </member>
-    <member name="M:Autodesk.Revit.UI.UIFabricationUtils.SetReportBinaryPath(Autodesk.Revit.DB.Document,System.String)">
-      <summary>
-   set path where qrcode and barcode Dlls can be found
-</summary>
-      <exception cref="T:Autodesk.Revit.Exceptions.ArgumentNullException">
-   A non-optional argument was NULL
-</exception>
-      <since>
-   2016
-</since>
-    </member>
     <member name="M:Autodesk.Revit.UI.UIFabricationUtils.EditConfiguration(Autodesk.Revit.DB.Document,System.String,System.String)">
       <returns>
    returns if the configuration was changed
@@ -3966,19 +3955,19 @@ Use of this class is not supported in Revit Macros.
         <code lang="VB" source="..\..\..\RevitAdditions\Source\Addons\Snippets\VBNETSnippets\Autodesk_Revit\RibbonPanel.vb" region="Autodesk.Revit.UI.RadioButtonGroup" />
       </example>
     </member>
-    <member name="M:XYZUtils.vecsAreParallelExact(XYZUtils.XYZ!System.Runtime.CompilerServices.IsConst*!System.Runtime.CompilerServices.IsImplicitlyDereferenced,XYZUtils.XYZ!System.Runtime.CompilerServices.IsConst*!System.Runtime.CompilerServices.IsImplicitlyDereferenced)">
+    <member name="M:vecsAreParallelExact(XYZ!System.Runtime.CompilerServices.IsConst*!System.Runtime.CompilerServices.IsImplicitlyDereferenced,XYZ!System.Runtime.CompilerServices.IsConst*!System.Runtime.CompilerServices.IsImplicitlyDereferenced)">
 Determines whether vectors are parallel within DOUBLE_EPS 
 Returns: if parallel =&gt; 1
          if not or if either is {0,0,0}. =&gt; 0
          if antiparallel =&gt; -1
 </member>
-    <member name="M:XYZUtils.vecsAreParallelApprox(XYZUtils.XYZ!System.Runtime.CompilerServices.IsConst*!System.Runtime.CompilerServices.IsImplicitlyDereferenced,XYZUtils.XYZ!System.Runtime.CompilerServices.IsConst*!System.Runtime.CompilerServices.IsImplicitlyDereferenced)">
+    <member name="M:vecsAreParallelApprox(XYZ!System.Runtime.CompilerServices.IsConst*!System.Runtime.CompilerServices.IsImplicitlyDereferenced,XYZ!System.Runtime.CompilerServices.IsConst*!System.Runtime.CompilerServices.IsImplicitlyDereferenced)">
 Determines whether vectors are parallel within ANGLE_EPS 
 Returns: if parallel =&gt; 1
          if not or if either is {0,0,0}. =&gt; 0
          if antiparallel =&gt; -1
 </member>
-    <member name="M:XYZUtils.almostEqual(XYZUtils.XYZ!System.Runtime.CompilerServices.IsConst*!System.Runtime.CompilerServices.IsImplicitlyDereferenced,XYZUtils.XYZ!System.Runtime.CompilerServices.IsConst*!System.Runtime.CompilerServices.IsImplicitlyDereferenced)">
+    <member name="M:almostEqual(XYZ!System.Runtime.CompilerServices.IsConst*!System.Runtime.CompilerServices.IsImplicitlyDereferenced,XYZ!System.Runtime.CompilerServices.IsConst*!System.Runtime.CompilerServices.IsImplicitlyDereferenced)">
 Returns true when the two vectors are almost equal.
 NOTE that the applied tolerance scales with the length of the 
 vectors.
@@ -3987,7 +3976,7 @@ In 3D modeling, a tolerance such as Revit's vertex tolerance
 (TessEpsCntrl::getVertexEps) should be used.
 Use this only in special cases."
 </member>
-    <member name="M:XYZUtils.tripleProduct(XYZUtils.XYZ!System.Runtime.CompilerServices.IsConst*!System.Runtime.CompilerServices.IsImplicitlyDereferenced,XYZUtils.XYZ!System.Runtime.CompilerServices.IsConst*!System.Runtime.CompilerServices.IsImplicitlyDereferenced,XYZUtils.XYZ!System.Runtime.CompilerServices.IsConst*!System.Runtime.CompilerServices.IsImplicitlyDereferenced)">
+    <member name="M:tripleProduct(XYZ!System.Runtime.CompilerServices.IsConst*!System.Runtime.CompilerServices.IsImplicitlyDereferenced,XYZ!System.Runtime.CompilerServices.IsConst*!System.Runtime.CompilerServices.IsImplicitlyDereferenced,XYZ!System.Runtime.CompilerServices.IsConst*!System.Runtime.CompilerServices.IsImplicitlyDereferenced)">
 The triple product of of three vectors vec0, vec1, vec2 is defined as
    dot(cross(vec0, vec1), vec2).
 
@@ -3995,52 +3984,52 @@ It is equal to the signed volume of the parallelepiped spanned by the three vect
 It is zero if and only if the vectors are linearly dependent. This function is equivalent
 to the Vec3d function vecVolume.
 </member>
-    <member name="M:XYZUtils.asUnitOrZero(XYZUtils.XYZ!System.Runtime.CompilerServices.IsConst*!System.Runtime.CompilerServices.IsImplicitlyDereferenced)">
-Convert the input xyz into a unit vector.
-IF the vector cannot be made a unit vector
-THEN the function will return std::nullopt.
-</member>
-    <member name="M:XYZUtils.cross(XYZUtils.XYZ!System.Runtime.CompilerServices.IsConst*!System.Runtime.CompilerServices.IsImplicitlyDereferenced,XYZUtils.XYZ!System.Runtime.CompilerServices.IsConst*!System.Runtime.CompilerServices.IsImplicitlyDereferenced)">
+    <member name="M:cross(XYZ!System.Runtime.CompilerServices.IsConst*!System.Runtime.CompilerServices.IsImplicitlyDereferenced,XYZ!System.Runtime.CompilerServices.IsConst*!System.Runtime.CompilerServices.IsImplicitlyDereferenced)">
 Treats lhs and rhs as vectors and returns their cross product.
 </member>
-    <member name="M:XYZUtils.dot(XYZUtils.XYZ!System.Runtime.CompilerServices.IsConst*!System.Runtime.CompilerServices.IsImplicitlyDereferenced,XYZUtils.XYZ!System.Runtime.CompilerServices.IsConst*!System.Runtime.CompilerServices.IsImplicitlyDereferenced)">
+    <member name="M:dot(XYZ!System.Runtime.CompilerServices.IsConst*!System.Runtime.CompilerServices.IsImplicitlyDereferenced,XYZ!System.Runtime.CompilerServices.IsConst*!System.Runtime.CompilerServices.IsImplicitlyDereferenced)">
 Treats lhs and rhs as vectors and returns their dot product.
 </member>
-    <member name="M:XYZUtils.XYZ.normalized">
+    <member name="M:XYZ.normalized">
 returns a parallel unit vector or zero vector
 </member>
-    <member name="M:XYZUtils.XYZ.unit">
+    <member name="M:XYZ.unit">
 make this a unit vector or return ERR_NULL_VECTOR
 </member>
-    <member name="M:XYZUtils.XYZ.#ctor(System.Double,System.Double,System.Double)">
+    <member name="M:XYZ.#ctor(System.Double,System.Double,System.Double)">
 construct XYZ from components
 </member>
-    <member name="M:XYZUtils.XYZ.#ctor(System.Double!System.Runtime.CompilerServices.IsConst*)">
+    <member name="M:XYZ.#ctor(System.Double!System.Runtime.CompilerServices.IsConst*)">
 construct XYZ from Vec3d
 </member>
-    <member name="M:XYZUtils.XYZ.basis(System.Int32)">
+    <member name="M:XYZ.basis(System.Int32)">
 returns a unit vector in the X, Y or Z direction for dim values of 0, 1 or 2 respectively
 </member>
-    <member name="M:XYZUtils.XYZ.basisZ">
+    <member name="M:XYZ.basisZ">
 returns a unit vector in the Z-direction (0, 0, 1)
 </member>
-    <member name="M:XYZUtils.XYZ.basisY">
+    <member name="M:XYZ.basisY">
 returns a unit vector in the Y-direction (0, 1, 0)
 </member>
-    <member name="M:XYZUtils.XYZ.basisX">
+    <member name="M:XYZ.basisX">
 returns a unit vector in the X-direction (1, 0, 0)
 </member>
-    <member name="M:XYZUtils.XYZ.zero">
+    <member name="M:XYZ.zero">
 returns (0, 0, 0)
 </member>
-    <member name="T:XYZUtils.XYZ">
-      <summary>
-'XYZUtils::XYZ' is a class that represents a 3d vector or a 3d point.
-</summary>
-      <remarks>
-By default XYZUtils::XYZ is initialized to {0.0, 0.0, 0.0}.
-</remarks>
-    </member>
+    <member name="T:XYZ">
+
+A self-initializing 3d point/vector class.
+
+Notes:
+This is intended to be a drop-in replacement for Vec3d.  This means transparent operations with
+Vec3d, AKA double*, methods.  This means the compiler may not catch some type errors.
+
+XYZ can be returned by value because the worst that can happen is gratuitous copying of 24
+bytes, and we can live with it. In general, we let the compiler figure out the temporary
+storage and optimize inline functions.
+
+</member>
     <member name="F:CBitmapRenderTarget.m_pBitmapRenderTarget">
       <summary>
 A pointer to an ID2D1BitmapRenderTarget object.
@@ -12605,29 +12594,24 @@ If current active document is changed.
    Releases ownership of worksets and borrowed elements that have not been changed.
 </summary>
     </member>
-    <member name="F:Autodesk.Revit.UI.PostableCommand.ExportCADFormatsSTL">
-      <summary>
-   Creates DWG, DXF, DGN, SAT, or STL files.
-</summary>
-    </member>
     <member name="F:Autodesk.Revit.UI.PostableCommand.ExportCADFormatsACIS_SAT">
       <summary>
-   Creates DWG, DXF, DGN, SAT, or STL files.
+   Creates DWG, DXF, DGN, or SAT files.
 </summary>
     </member>
     <member name="F:Autodesk.Revit.UI.PostableCommand.ExportCADFormatsDGN">
       <summary>
-   Creates DWG, DXF, DGN, SAT, or STL files.
+   Creates DWG, DXF, DGN, or SAT files.
 </summary>
     </member>
     <member name="F:Autodesk.Revit.UI.PostableCommand.ExportCADFormatsDXF">
       <summary>
-   Creates DWG, DXF, DGN, SAT, or STL files.
+   Creates DWG, DXF, DGN, or SAT files.
 </summary>
     </member>
     <member name="F:Autodesk.Revit.UI.PostableCommand.ExportCADFormatsDWG">
       <summary>
-   Creates DWG, DXF, DGN, SAT, or STL files.
+   Creates DWG, DXF, DGN, or SAT files.
 </summary>
     </member>
     <member name="F:Autodesk.Revit.UI.PostableCommand.ExportDWFOrDWFx">

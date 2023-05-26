@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Autodesk.Revit.Attributes;
+﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using System;
+using System.Linq;
 
 namespace ClassLibrary1
 {
     [TransactionAttribute(TransactionMode.Manual)]
-    class PlaceFamily : IExternalCommand
+    internal class PlaceFamily : IExternalCommand
     {
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
@@ -21,21 +18,11 @@ namespace ClassLibrary1
             Document doc = uidoc.Document;
 
             //find Family
-            FilteredElementCollector collecter = new FilteredElementCollector(doc);
-            FamilySymbol symbol = collecter.OfClass(typeof(FamilySymbol))
-                .WhereElementIsElementType()
-                .Cast<FamilySymbol>().FirstOrDefault(x => x.Name == "Default");
-
-            //FamilySymbol symbol = null;
-
-            //foreach (FamilySymbol sym in symbols)
-            //{
-            //    if(sym.Name == "Default")
-            //    {
-            //        symbol = sym as FamilySymbol;
-            //        break;
-            //    }
-            //}
+            FamilySymbol symbol = new FilteredElementCollector(doc)
+                                .WhereElementIsElementType()
+                                .OfClass(typeof(FamilySymbol))
+                                .Cast<FamilySymbol>()
+                                .FirstOrDefault(x => x.Name == "Default");
 
             if (symbol != null)
             {
@@ -58,13 +45,12 @@ namespace ClassLibrary1
                     return Result.Failed;
                 }
             }
-            else {
-                TaskDialog.Show("symbol not found","found");
+            else
+            {
+                TaskDialog.Show("symbol not found", "found");
             }
-
 
             return Result.Cancelled;
         }
     }
-
 }
