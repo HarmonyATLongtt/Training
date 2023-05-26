@@ -74,6 +74,7 @@
   <ItemGroup>
     <Compile Include="Commands\AddFile-Checkintersect.cs" />
     <Compile Include="Commands\AddFileRevit.cs" />
+    <Compile Include="Commands\ChangeParameter.cs" />
     <Compile Include="Commands\CheckIntersect.cs" />
     <Compile Include="Commands\CreateGrids.cs" />
     <Compile Include="Commands\FilterInstance.cs" />

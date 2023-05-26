@@ -60,6 +60,16 @@
 		<VendorDescription>The Building Coder, http://thebuildingcoder.typepad.com</VendorDescription>
 	</AddIn>
 
+	<AddIn Type="Command">
+		<Text>ChangeParameter</Text>
+		<Description>ChangeParameter</Description>
+		<Assembly>ExRevitAPI.dll</Assembly>
+		<FullClassName>ExRevitAPI.ChangeParameter</FullClassName>
+		<ClientId>710E8D26-D71E-45C9-937F-B27F3CE55BA7</ClientId>
+		<VendorId>com.typepad.thebuildingcoder</VendorId>
+		<VendorDescription>The Building Coder, http://thebuildingcoder.typepad.com</VendorDescription>
+	</AddIn>
+
 	<AddIn Type="Application">
 		<Name>Application ExRevitAPI</Name>
 		<Assembly>ExRevitAPI.dll</Assembly>

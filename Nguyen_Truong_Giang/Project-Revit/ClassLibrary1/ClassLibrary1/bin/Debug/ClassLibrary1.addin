@@ -144,6 +144,18 @@
 		<VendorDescription>Autodesk, Inc, www.autodesk.com</VendorDescription>
 	</AddIn>
 
+	<AddIn Type="Command">
+		<Name>ClassLibrary1</Name>
+		<FullClassName>ClassLibrary1.ViewwModel.LoadLevelinView</FullClassName>
+		<Text>LoadLevelinView</Text>
+		<Description>LoadLevelinView</Description>
+		<VisibilityMode>AlwaysVisible</VisibilityMode>
+		<Assembly>ClassLibrary1.dll</Assembly>
+		<AddInId>415A1DC2-AE0E-4D72-A8C3-2623C7F593EC</AddInId>
+		<VendorId>ADSK</VendorId>
+		<VendorDescription>Autodesk, Inc, www.autodesk.com</VendorDescription>
+	</AddIn>
+
 	<AddIn Type="Application">
 		<Name>MyFirstApplication</Name>
 		<Assembly>ClassLibrary1.dll</Assembly>

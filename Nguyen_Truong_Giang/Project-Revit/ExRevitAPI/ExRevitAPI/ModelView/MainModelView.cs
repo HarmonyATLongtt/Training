@@ -128,16 +128,26 @@ namespace ExRevitAPI.ModelView
             curveLoop.Append(lineCD);
             curveLoop.Append(lineDA);
 
+            XYZ newPoint = new XYZ(0, 0, 0);
+
             // Tạo SolidOptions để chỉ định các tùy chọn cho việc tạo hình lập phương.
             SolidOptions options = new SolidOptions(ElementId.InvalidElementId, ElementId.InvalidElementId);
 
             // Tạo Frame để xác định vị trí và hướng của hình lập phương.
+            if(GetCreatePoint(doc) != null)
+            {
+                newPoint = GetCreatePoint(doc);
+            }
+            else
+            {
+                TaskDialog.Show("Không có giao điểm", "Không có giao điểm, đặt khối vào vị trí (0,0,0)");
+            }
+            Frame frame = new Frame(newPoint, XYZ.BasisX, -XYZ.BasisZ, XYZ.BasisY);
 
-            Frame frame = new Frame(GetCreatePoint(doc), XYZ.BasisX, -XYZ.BasisZ, XYZ.BasisY);
             if (Frame.CanDefineRevitGeometry(frame) == true) // Kiểm tra xem Frame có thể định nghĩa hình học trong Revit hay không.
             {
                 // Tính toán vector dịch chuyển từ điểm ban đầu của CurveLoop đến điểm mới
-                XYZ translationVector = GetCreatePoint(doc);
+                XYZ translationVector = newPoint;
 
                 // Di chuyển đoạn thẳng trong CurveLoop đến điểm mới
                 CurveLoop translatedCurveLoop = new CurveLoop();

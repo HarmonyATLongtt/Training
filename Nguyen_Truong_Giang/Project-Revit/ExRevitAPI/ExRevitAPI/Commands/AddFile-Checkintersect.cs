@@ -115,13 +115,17 @@ namespace ExRevitAPI.Commands
                         }
                         if (familySymbol != null)
                         {
-                            foreach (XYZ point in GetCreatePoint(doc))
+                            List<XYZ> newPoint = GetCreatePoint(doc);
+                            if (newPoint != null)
                             {
-                                if (point != null)
+                                foreach (XYZ point in newPoint)
                                 {
-                                    doc.Create.NewFamilyInstance(point, familySymbol, SetLevel(doc), Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
-                                    TaskDialog.Show("Family đã được tải thành công", familySymbol.FamilyName + " đã được tải thành công");
+                                    if (point != null)
+                                    {
+                                        doc.Create.NewFamilyInstance(point, familySymbol, SetLevel(doc), Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
+                                    }
                                 }
+                                TaskDialog.Show("Family đã được tải thành công", familySymbol.FamilyName + " đã được tải thành công");
                             }
 
                             //doc.Create.NewFamilyInstance(GetCreatePoint(doc), familySymbol, SetLevel(doc), Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
