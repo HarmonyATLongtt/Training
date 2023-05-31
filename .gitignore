@@ -8,3 +8,14 @@
 /Nguyen-Van-Mau/RevitAPI/RevitAPI_Sample/obj
 /Nguyen-Van-Mau/WPF/WPF_Sample/bin
 /Nguyen-Van-Mau/WPF/WPF_Sample/obj
+
+
+log.txt
+*.tmp
+bin
+obj
+Debug
+/.vs
+*.vs/
+.vs
+*.htm

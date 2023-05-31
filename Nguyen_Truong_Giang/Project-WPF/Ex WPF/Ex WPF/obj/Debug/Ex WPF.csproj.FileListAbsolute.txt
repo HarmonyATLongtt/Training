@@ -125,3 +125,4 @@ D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex
 D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.exe
 D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\Ex WPF.pdb
 D:\HarmonyAT\Quản lý\trainees\git\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\GeneratedInternalTypeHelper.g.cs
+E:\Training\Nguyen_Truong_Giang\Project-WPF\Ex WPF\Ex WPF\obj\Debug\GeneratedInternalTypeHelper.g.cs

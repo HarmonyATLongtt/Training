@@ -45,7 +45,7 @@ namespace ExRevitAPI.Commands
                 return dic.Values.ToList();
             else if (dic.Count > 1)
             {
-                TaskDialogResult result = (TaskDialogResult)showDialog();
+                TaskDialogResult result = (TaskDialogResult)ShowDialogPickPoint();
 
                 if (result == TaskDialogResult.CommandLink1) //chọn "Đặt 1 giao điểm"
                     return new List<XYZ> { SelectMultiIntersect(doc, dic) };
@@ -232,7 +232,7 @@ namespace ExRevitAPI.Commands
             return selectedPoint;
         }
 
-        public object showDialog()
+        public object ShowDialogPickPoint()
         {
             TaskDialog dialog = new TaskDialog("Lựa chọn đặt family");
             dialog.MainInstruction = "Chọn lựa chọn đặt family";
