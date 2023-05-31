@@ -11,7 +11,7 @@ using Application = Autodesk.Revit.ApplicationServices.Application;
 namespace ExRevitAPI.Commands
 {
     [Transaction(TransactionMode.Manual)]
-    internal class AddFile_Checkintersect : IExternalCommand
+    internal class AddFileCheckintersect : IExternalCommand
     {
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
@@ -27,16 +27,8 @@ namespace ExRevitAPI.Commands
 
         private List<XYZ> GetCreatePoint(Document doc)
         {
-            TaskDialog dialog = new TaskDialog("Lựa chọn đặt family");
-            dialog.MainInstruction = "Chọn lựa chọn đặt family";
-            dialog.MainContent = "lựa chọn đặt family lên 1 giao điểm hoặc tất cả giao điểm đã tìm thấy.";
-
-            dialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Đặt 1 giao điểm");
-
-            dialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink2, "Đặt tất cả giao điểm");
-
             //lay toan bo grid trong project
-            List<Grid> grids = getAllGrid(doc);
+            List<Grid> grids = GetAllGrid(doc);
 
             //tim giao diem cua 2 grid
             Dictionary<string, XYZ> dic = new Dictionary<string, XYZ>();
@@ -53,7 +45,8 @@ namespace ExRevitAPI.Commands
                 return dic.Values.ToList();
             else if (dic.Count > 1)
             {
-                TaskDialogResult result = dialog.Show();
+                TaskDialogResult result = (TaskDialogResult)showDialog();
+
                 if (result == TaskDialogResult.CommandLink1) //chọn "Đặt 1 giao điểm"
                     return new List<XYZ> { SelectMultiIntersect(doc, dic) };
                 else if (result == TaskDialogResult.CommandLink2) //chọn "Đặt tất cả giao điểm"
@@ -68,7 +61,7 @@ namespace ExRevitAPI.Commands
             }
         }
 
-        private List<Grid> getAllGrid(Document doc)
+        private List<Grid> GetAllGrid(Document doc)
         {
             return new FilteredElementCollector(doc).WhereElementIsNotElementType()
                                                     .OfCategory(BuiltInCategory.OST_Grids)
@@ -90,7 +83,7 @@ namespace ExRevitAPI.Commands
             return null;
         }
 
-        private void ImportRevitFile(Document doc)
+        private string ShowOpenFileDialog()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Family Files (*.rfa)|*.rfa";
@@ -99,38 +92,70 @@ namespace ExRevitAPI.Commands
             // Hiển thị hộp thoại chọn file
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                string filePath = openFileDialog.FileName;
+                return openFileDialog.FileName;
+            }
 
+            return null;
+        }
+
+        private bool LoadFamily(Document doc, string filePath, out Family family)
+        {
+            family = null;
+            bool load = doc.LoadFamily(filePath, out family);
+            return load;
+        }
+
+        private FamilySymbol GetActiveFamilySymbol(Document doc, Family family)
+        {
+            return doc.GetElement(family.GetFamilySymbolIds().First()) as FamilySymbol;
+        }
+
+        private void ActivateFamilySymbol(FamilySymbol familySymbol)
+        {
+            if (!familySymbol.IsActive)
+            {
+                familySymbol.Activate();
+            }
+        }
+
+        private void CreateFamilyInstances(Document doc, List<XYZ> points, FamilySymbol familySymbol)
+        {
+            foreach (XYZ point in points)
+            {
+                if (point != null)
+                {
+                    doc.Create.NewFamilyInstance(point, familySymbol, SetLevel(doc), Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
+                }
+            }
+        }
+
+        private void ImportRevitFile(Document doc)
+        {
+            string filePath = ShowOpenFileDialog();
+            // Hiển thị hộp thoại chọn file
+
+            if (filePath != null)
+            {
                 using (Transaction trans = new Transaction(doc, "import File to REVIT"))
                 {
                     trans.Start();
                     Family family = null;
-                    bool load = doc.LoadFamily(filePath, out family);
+                    bool load = LoadFamily(doc, filePath, out family);
                     if (load && family != null)
                     {
-                        FamilySymbol familySymbol = doc.GetElement(family.GetFamilySymbolIds().First()) as FamilySymbol;
-                        if (!familySymbol.IsActive)
-                        {
-                            familySymbol.Activate();
-                        }
+                        FamilySymbol familySymbol = GetActiveFamilySymbol(doc, family);
+                        ActivateFamilySymbol(familySymbol);
+
                         if (familySymbol != null)
                         {
                             List<XYZ> newPoint = GetCreatePoint(doc);
                             if (newPoint != null)
                             {
-                                foreach (XYZ point in newPoint)
-                                {
-                                    if (point != null)
-                                    {
-                                        doc.Create.NewFamilyInstance(point, familySymbol, SetLevel(doc), Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
-                                    }
-                                }
-                                TaskDialog.Show("Family đã được tải thành công", familySymbol.FamilyName + " đã được tải thành công");
+                                CreateFamilyInstances(doc, newPoint, familySymbol);
                             }
-
-                            //doc.Create.NewFamilyInstance(GetCreatePoint(doc), familySymbol, SetLevel(doc), Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
-                            trans.Commit();
+                            TaskDialog.Show("Family đã được tải thành công", familySymbol.FamilyName + " đã được tải thành công");
                         }
+                        trans.Commit();
                     }
 
                     if (load == false)
@@ -158,34 +183,6 @@ namespace ExRevitAPI.Commands
                 .Cast<Level>().FirstOrDefault(x => x.Name == "Level 1");
 
             return level;
-        }
-
-        public List<XYZ> PickMultiIntersect(Document doc)
-        {
-            UIDocument uidoc = new UIDocument(doc);
-            Selection choices = uidoc.Selection;
-
-            Grid selectedGrid = null;
-            IList<Reference> gridRefs = null;
-
-            try
-            {
-                gridRefs = choices.PickObjects(ObjectType.Element, new GridFilterSelection());
-            }
-            catch (System.Exception)
-            {
-            }
-
-            if (gridRefs != null && gridRefs.Count > 1)
-            {
-                foreach (var refer in gridRefs)
-                {
-                    Grid grid = doc.GetElement(refer) as Grid;
-                    selectedGrid = grid;
-                }
-            }
-
-            return null;
         }
 
         public XYZ SelectMultiIntersect(Document doc, Dictionary<string, XYZ> points)
@@ -233,6 +230,21 @@ namespace ExRevitAPI.Commands
             }
 
             return selectedPoint;
+        }
+
+        public object showDialog()
+        {
+            TaskDialog dialog = new TaskDialog("Lựa chọn đặt family");
+            dialog.MainInstruction = "Chọn lựa chọn đặt family";
+            dialog.MainContent = "lựa chọn đặt family lên 1 giao điểm hoặc tất cả giao điểm đã tìm thấy.";
+
+            dialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Đặt 1 giao điểm");
+
+            dialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink2, "Đặt tất cả giao điểm");
+
+            TaskDialogResult result = dialog.Show();
+
+            return result;
         }
     }
 }
