@@ -1,7 +1,6 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Selection;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -175,7 +174,6 @@ namespace ExRevitAPI.Commands
 
         public Level SetLevel(Document doc)
         {
-
             FilteredElementCollector levelCollector = new FilteredElementCollector(doc);
             Level level = levelCollector
                 .OfCategory(BuiltInCategory.OST_Levels)
@@ -187,9 +185,6 @@ namespace ExRevitAPI.Commands
 
         public XYZ SelectMultiIntersect(Document doc, Dictionary<string, XYZ> points)
         {
-            UIDocument uidoc = new UIDocument(doc);
-            Selection choices = uidoc.Selection;
-
             XYZ selectedPoint = null;
 
             // danh sách các tùy chọn

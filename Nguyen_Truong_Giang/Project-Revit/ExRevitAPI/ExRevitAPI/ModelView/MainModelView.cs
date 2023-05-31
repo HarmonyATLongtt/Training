@@ -72,38 +72,6 @@ namespace ExRevitAPI.ModelView
             }
         }
 
-        private void CreateGird(Document doc)
-        {
-            // Tạo hai điểm đại diện cho đường Grid
-            XYZ pointA = new XYZ(0, 0, 0);
-            XYZ pointB = new XYZ(50, 0, 0);
-
-            XYZ pointC = new XYZ(25, -25, 0);
-            XYZ pointD = new XYZ(25, 25, 0);
-
-            // Tạo đường Grid từ hai điểm trên
-            Line line1 = Line.CreateBound(pointA, pointB);
-            Line line2 = Line.CreateBound(pointC, pointD);
-
-            // Tạo Grid từ đường Grid
-            using (Transaction trans = new Transaction(doc, "Create Grids"))
-            {
-                trans.Start();
-                Grid grid1 = Grid.Create(doc, line1);
-                Grid grid2 = Grid.Create(doc, line2);
-
-                IntersectionResultArray intersectionResults = new IntersectionResultArray();
-
-                SetComparisonResult result = line1.Intersect(line2, out intersectionResults);
-
-                // Đặt tên cho hai Grid
-                grid1.Name = "Grid1";
-                grid2.Name = "Grid2";
-
-                trans.Commit();
-            }
-        }
-
         private void CreateCube(Document doc, double dimension)
         {
             List<Curve> profile = new List<Curve>();
@@ -134,9 +102,12 @@ namespace ExRevitAPI.ModelView
             SolidOptions options = new SolidOptions(ElementId.InvalidElementId, ElementId.InvalidElementId);
 
             // Tạo Frame để xác định vị trí và hướng của hình lập phương.
-            if(GetCreatePoint(doc) != null)
+            if (GetCreatePoint(doc) != null)
             {
-                newPoint = GetCreatePoint(doc);
+                foreach (var item in GetCreatePoint(doc))
+                {
+                    newPoint = item;
+                }
             }
             else
             {
@@ -202,17 +173,23 @@ namespace ExRevitAPI.ModelView
             // Di chuyển CurveLoop để có tâm là điểm giao nhau
             CurveLoop translatedCurveLoop = new CurveLoop();
 
+            XYZ newpoint = new XYZ();
+
             foreach (Curve curve in curveLoop)
             {
-                Curve translatedCurve = curve.CreateTransformed(Transform.CreateTranslation(GetCreatePoint(doc)));
-                translatedCurveLoop.Append(translatedCurve);
+                foreach (var item in GetCreatePoint(doc))
+                {
+                    newpoint = item;
+                    Curve translatedCurve = curve.CreateTransformed(Transform.CreateTranslation(newpoint));
+                    translatedCurveLoop.Append(translatedCurve);
+                }
             }
 
             //Tạo SolidOptions để chỉ định các tùy chọn cho việc tạo hình cầu.
             SolidOptions options = new SolidOptions(ElementId.InvalidElementId, ElementId.InvalidElementId);
 
             //Tạo Frame để xác định vị trí và hướng của hình cầu.
-            Frame frame = new Frame(GetCreatePoint(doc), XYZ.BasisX, -XYZ.BasisZ, XYZ.BasisY);
+            Frame frame = new Frame(newpoint, XYZ.BasisX, -XYZ.BasisZ, XYZ.BasisY);
 
             //Kiểm tra xem Frame có thể định nghĩa hình học trong Revit hay không
             if (Frame.CanDefineRevitGeometry(frame) == true)
@@ -264,10 +241,12 @@ namespace ExRevitAPI.ModelView
             return null;
         }
 
-        private XYZ GetCreatePoint(Document doc)
+        private List<XYZ> GetCreatePoint(Document doc)
         {
             //lay toan bo grid trong project
             List<Grid> grids = getAllGrid(doc);
+
+            Dictionary<string, XYZ> dic = new Dictionary<string, XYZ>();
 
             //tim giao diem cua 2 grid
             List<XYZ> points = new List<XYZ>();
@@ -277,14 +256,21 @@ namespace ExRevitAPI.ModelView
                 {
                     XYZ p = GetIntersection(grids[i], grids[j]);
                     if (p != null)
-                        points.Add(p);
+                        dic.Add(grids[i].Name + "-" + grids[j].Name, p);
                 }
             }
-            if (points.Count == 1)
-                return points[0];
-            else if (points.Count > 1)
+            if (dic.Count == 1 && dic.Count <= 1)
+                return dic.Values.ToList();
+            else if (dic.Count > 1)
             {
-                return SelectMultiIntersect(doc, points);
+                TaskDialogResult result = (TaskDialogResult)ShowDialogPickPoint();
+
+                if (result == TaskDialogResult.CommandLink1) //chọn "Đặt 1 giao điểm"
+                    return new List<XYZ> { SelectMultiIntersect(doc, dic) };
+                else if (result == TaskDialogResult.CommandLink2) //chọn "Đặt tất cả giao điểm"
+                    return dic.Values.ToList();
+                else
+                    return null;
             }
             else
             {
@@ -293,7 +279,7 @@ namespace ExRevitAPI.ModelView
             }
         }
 
-        private XYZ SelectMultiIntersect(Document doc, List<XYZ> points)
+        private XYZ SelectMultiIntersect(Document doc, Dictionary<string, XYZ> points)
         {
             UIDocument uidoc = new UIDocument(doc);
             Selection choices = uidoc.Selection;
@@ -301,11 +287,11 @@ namespace ExRevitAPI.ModelView
             XYZ selectedPoint = null;
 
             // danh sách các tùy chọn
-            IList<string> options = new List<string>();
+            List<string> options = new List<string>();
 
-            foreach (XYZ point in points)
+            foreach (var dic in points)
             {
-                string option = $"Giao điểm: ({point.X}, {point.Y}, {point.Z})";
+                string option = $"Giao điểm: " + dic.Key;
                 options.Add(option);
             }
 
@@ -329,7 +315,7 @@ namespace ExRevitAPI.ModelView
                 int selectedIndex = (int)result - (int)TaskDialogCommandLinkId.CommandLink1;
                 if (selectedIndex >= 0 && selectedIndex < points.Count)
                 {
-                    selectedPoint = points[selectedIndex];
+                    selectedPoint = points.Values.ToList()[selectedIndex];
                 }
             }
             if (result == TaskDialogResult.Cancel)
@@ -338,6 +324,21 @@ namespace ExRevitAPI.ModelView
             }
 
             return selectedPoint;
+        }
+
+        public object ShowDialogPickPoint()
+        {
+            TaskDialog dialog = new TaskDialog("Lựa chọn đặt family");
+            dialog.MainInstruction = "Chọn lựa chọn đặt family";
+            dialog.MainContent = "lựa chọn đặt family lên 1 giao điểm hoặc tất cả giao điểm đã tìm thấy.";
+
+            dialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Đặt 1 giao điểm");
+
+            dialog.AddCommandLink(TaskDialogCommandLinkId.CommandLink2, "Đặt tất cả giao điểm");
+
+            TaskDialogResult result = dialog.Show();
+
+            return result;
         }
     }
 }
