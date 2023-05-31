@@ -1,0 +1,17 @@
+﻿<Window x:Class="Canvas_WPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Canvas_WPF"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="388" Width="520">
+    <Canvas>
+        <Button x:Name="btn1" Click="Btn1_Click"
+            Panel.ZIndex="2" Content="1" FontSize="50" Height="200" Width="100" Canvas.Left="232" Canvas.Top="120"  ></Button>
+        <Button x:Name="btn2" Click="Btn2_Click"
+            Panel.ZIndex="1" Content="2" FontSize="50" Height="200" Width="100" Canvas.Left="177" Canvas.Top="80"></Button>
+        <Button x:Name="btn3" Click="Btn3_Click"
+            Panel.ZIndex="0" Content="3" FontSize="50" Height="200" Width="100" Canvas.Left="127" Canvas.Top="40"></Button>
+    </Canvas>
+</Window>

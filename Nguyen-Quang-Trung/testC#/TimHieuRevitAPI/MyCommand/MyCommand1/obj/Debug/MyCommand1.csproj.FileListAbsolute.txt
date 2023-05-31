@@ -1,0 +1,7 @@
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuRevitAPI\MyCommand\MyCommand1\bin\Debug\MyCommand1.addin
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuRevitAPI\MyCommand\MyCommand1\bin\Debug\MyCommand1.dll
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuRevitAPI\MyCommand\MyCommand1\bin\Debug\MyCommand1.pdb
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuRevitAPI\MyCommand\MyCommand1\obj\Debug\MyCommand1.csproj.CoreCompileInputs.cache
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuRevitAPI\MyCommand\MyCommand1\obj\Debug\MyCommand1.dll
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuRevitAPI\MyCommand\MyCommand1\obj\Debug\MyCommand1.pdb
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuRevitAPI\MyCommand\MyCommand1\obj\Debug\MyCommand1.csprojAssemblyReference.cache

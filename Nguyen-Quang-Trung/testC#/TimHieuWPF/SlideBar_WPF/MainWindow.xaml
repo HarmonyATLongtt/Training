@@ -1,0 +1,15 @@
+﻿<Window x:Class="SlideBar_WPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SlideBar_WPF"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <StackPanel>
+            <Slider x:Name="slideMain" Maximum="100"></Slider>
+            <TextBox x:Name="inoutvalue" Text="{Binding Path=Value, ElementName=slideMain}" ></TextBox>
+        </StackPanel>
+    </Grid>
+</Window>

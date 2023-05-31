@@ -1,0 +1,7 @@
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\test\ConsoleApp10\bin\Debug\ConsoleApp10.exe.config
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\test\ConsoleApp10\bin\Debug\ConsoleApp10.exe
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\test\ConsoleApp10\bin\Debug\ConsoleApp10.pdb
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\test\ConsoleApp10\obj\Debug\ConsoleApp10.csprojAssemblyReference.cache
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\test\ConsoleApp10\obj\Debug\ConsoleApp10.csproj.CoreCompileInputs.cache
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\test\ConsoleApp10\obj\Debug\ConsoleApp10.exe
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\test\ConsoleApp10\obj\Debug\ConsoleApp10.pdb

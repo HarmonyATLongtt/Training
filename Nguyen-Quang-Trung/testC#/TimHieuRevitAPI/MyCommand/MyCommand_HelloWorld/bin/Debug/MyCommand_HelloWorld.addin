@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<RevitAddIns>
+  <AddIn Type="Command">
+    <Name>MyCommand_HelloWorld</Name>
+    <FullClassName>MyCommand_HelloWorld.HelloWorld</FullClassName>
+    <Text>Hello World</Text>
+    <Description>Show text "Hello World"</Description>
+    <VisibilityMode>AlwaysVisible</VisibilityMode>
+    <Assembly>MyCommand_HelloWorld.dll</Assembly>
+    <AddInId>d26aef94-ebd9-4c14-ba0c-66c02cd1ebd8</AddInId>
+    <VendorId>ADSK</VendorId>
+    <VendorDescription> trung </VendorDescription>
+  </AddIn>
+</RevitAddIns>

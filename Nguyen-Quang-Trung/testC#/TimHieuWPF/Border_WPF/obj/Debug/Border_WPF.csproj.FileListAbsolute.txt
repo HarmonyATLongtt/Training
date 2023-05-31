@@ -1,0 +1,15 @@
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuWPF\Border_WPF\bin\Debug\Border_WPF.exe.config
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuWPF\Border_WPF\bin\Debug\Border_WPF.exe
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuWPF\Border_WPF\bin\Debug\Border_WPF.pdb
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuWPF\Border_WPF\obj\Debug\Border_WPF.csprojAssemblyReference.cache
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuWPF\Border_WPF\obj\Debug\MainWindow.g.cs
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuWPF\Border_WPF\obj\Debug\App.g.cs
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuWPF\Border_WPF\obj\Debug\Border_WPF_MarkupCompile.cache
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuWPF\Border_WPF\obj\Debug\Border_WPF_MarkupCompile.lref
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuWPF\Border_WPF\obj\Debug\MainWindow.baml
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuWPF\Border_WPF\obj\Debug\Border_WPF.g.resources
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuWPF\Border_WPF\obj\Debug\Border_WPF.Properties.Resources.resources
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuWPF\Border_WPF\obj\Debug\Border_WPF.csproj.GenerateResource.cache
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuWPF\Border_WPF\obj\Debug\Border_WPF.csproj.CoreCompileInputs.cache
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuWPF\Border_WPF\obj\Debug\Border_WPF.exe
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuWPF\Border_WPF\obj\Debug\Border_WPF.pdb
