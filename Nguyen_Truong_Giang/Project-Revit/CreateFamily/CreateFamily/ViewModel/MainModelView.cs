@@ -2,6 +2,7 @@
 using CreateFamily.Model;
 using CreateFamily.Models;
 using CreateFamily.ModelView;
+using CreateFamily.Validate;
 using GalaSoft.MvvmLight.Command;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -58,7 +59,31 @@ namespace CreateFamily.ViewModel
             }
         }
 
-        private bool _labelVisibility = false;
+        private double _offsetValue = 0;
+
+        public double OffsetValue
+        {
+            get => _offsetValue;
+            set
+            {
+                _offsetValue = value;
+                OnPropertyChanged(nameof(OffsetValue));
+            }
+        }
+
+        private bool _propertyButton = false;
+
+        public bool PropertyButton
+        {
+            get { return _propertyButton; }
+            set
+            {
+                _propertyButton = value;
+                OnPropertyChanged(nameof(PropertyButton));
+            }
+        }
+
+        private bool _labelVisibility = true;
 
         public bool LabelVisibility
         {
@@ -120,11 +145,13 @@ namespace CreateFamily.ViewModel
 
             ImportFamilyCommand = new RelayCommand<Document>(ImportRevitFile);
 
-            LabelContent = "";
+            LabelContent = "Vui lòng import Family.";
 
             GetLevel(_model.Doc);
 
             GetCreatePoint(_model.Doc);
+
+            SelectLevel = ListLevel.FirstOrDefault();
         }
 
         public void CreateFamily(FamilySymbol familySymbol)
@@ -243,6 +270,7 @@ namespace CreateFamily.ViewModel
                         if (familySymbol != null)
                         {
                             LabelVisibility = false;
+                            PropertyButton = true;
                             showHideLabel("Family đã được tải thành công.");
 
                             if (!File.Exists(filePath))
@@ -254,6 +282,12 @@ namespace CreateFamily.ViewModel
                         }
 
                         trans.Commit();
+                    }
+                    else
+                    {
+                        LabelVisibility = false;
+                        PropertyButton = false;
+                        showHideLabel("Family đã tồn tại.");
                     }
                 }
             }
@@ -285,20 +319,38 @@ namespace CreateFamily.ViewModel
             {
                 trans.Start();
 
-                foreach (var item in intersection)
+                if (intersection.Any(x => x.IsChecked == true))
                 {
-                    if (item.IsChecked)
+                    foreach (var item in intersection)
                     {
-                        XYZ newPoint = item._model.Point;
-                        doc.Create.NewFamilyInstance(newPoint, familySymbol, SelectLevel, Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
-                        LabelVisibility = false;
-                        showHideLabel("Đã đặt family thành công.");
+                        if (item.IsChecked)
+                        {
+                            XYZ newPoint = item._model.Point;
+
+                            FamilyInstance instance = doc.Create.NewFamilyInstance(newPoint, familySymbol, SelectLevel, Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
+
+                            doc.Regenerate(); //tạo lại các yếu tố và đối tượng
+
+                            if (!double.IsNaN(OffsetValue))
+                            {
+                                Parameter para = instance.get_Parameter(BuiltInParameter.FAMILY_BASE_LEVEL_OFFSET_PARAM);
+
+                                para.Set(OffsetValue);
+                            }
+                        }
                     }
-                    if(!item.IsChecked)
-                    {
-                        LabelVisibility = false;
-                        showHideLabel("Vui lòng chọn giao điểm đặt Family.");
-                    }
+                    LabelVisibility = false;
+                    showHideLabel("Đã đặt family thành công.");
+                }
+                else if (intersection.Any(x => x.IsChecked == false))
+                {
+                    LabelVisibility = false;
+                    showHideLabel("Vui lòng chọn giao điểm đặt Family.");
+                }
+                if (SelectLevel == null)
+                {
+                    LabelVisibility = false;
+                    showHideLabel("Vui lòng chọn Level.");
                 }
 
                 trans.Commit();
@@ -336,5 +388,30 @@ namespace CreateFamily.ViewModel
 
             return LabelContent;
         }
+
+        public string this[string columnName]
+        {
+            get
+            {
+                if (columnName == nameof(OffsetValue))
+                {
+                    var validator = new DoubleValidator();
+                    var validationResult = validator.Validate(OffsetValue);
+                    if (!validationResult.IsValid)
+                    {
+                        return validationResult.Errors.FirstOrDefault()?.ErrorMessage;
+                    }
+                    else
+                    {
+                        LabelVisibility = false;
+                        return showHideLabel("Vui lòng nhập một số double");
+                    }
+                }
+
+                return null;
+            }
+        }
+
+        public string Error => null;
     }
 }

@@ -31,13 +31,13 @@ namespace ClassLibrary1
 
                 if (r != null)
                 {
-                    Parameter para = element.get_Parameter(BuiltInParameter.INSTANCE_HEAD_HEIGHT_PARAM);
+                    Parameter para = element.get_Parameter(BuiltInParameter.FAMILY_BASE_LEVEL_OFFSET_PARAM);
 
                     using (Transaction trans = new Transaction(doc, "Set Para"))
                     {
                         trans.Start();
 
-                        para.Set(6.5);
+                        para.Set(7);
 
                         trans.Commit();
                     }

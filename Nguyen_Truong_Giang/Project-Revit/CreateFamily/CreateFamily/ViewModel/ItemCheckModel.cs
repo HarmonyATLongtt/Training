@@ -43,5 +43,11 @@ namespace CreateFamily.ViewModel
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        public override string ToString()
+        {
+            return "Item name is : "  + this.Name;
+        }
+
     }
 }
