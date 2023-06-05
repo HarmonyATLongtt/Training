@@ -389,28 +389,28 @@ namespace CreateFamily.ViewModel
             return LabelContent;
         }
 
-        public string this[string columnName]
-        {
-            get
-            {
-                if (columnName == nameof(OffsetValue))
-                {
-                    var validator = new DoubleValidator();
-                    var validationResult = validator.Validate(OffsetValue);
-                    if (!validationResult.IsValid)
-                    {
-                        return validationResult.Errors.FirstOrDefault()?.ErrorMessage;
-                    }
-                    else
-                    {
-                        LabelVisibility = false;
-                        return showHideLabel("Vui lòng nhập một số double");
-                    }
-                }
+        //public string this[string columnName]
+        //{
+        //    get
+        //    {
+        //        if (columnName == nameof(OffsetValue))
+        //        {
+        //            var validator = new DoubleValidator();
+        //            var validationResult = validator.Validate(OffsetValue);
+        //            if (!validationResult.IsValid)
+        //            {
+        //                return validationResult.Errors.FirstOrDefault()?.ErrorMessage;
+        //            }
+        //            else
+        //            {
+        //                LabelVisibility = false;
+        //                return showHideLabel("Vui lòng nhập một số double");
+        //            }
+        //        }
 
-                return null;
-            }
-        }
+        //        return null;
+        //    }
+        //}
 
         public string Error => null;
     }

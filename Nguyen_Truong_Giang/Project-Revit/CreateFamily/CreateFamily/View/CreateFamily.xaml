@@ -40,9 +40,12 @@
                       FontSize="16">
 
             <TextBox Grid.Row="0" Height="30"  Margin="10" FontSize="14"
-                     Background="White"
-                     Text="{Binding OffsetValue, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
+                     Background="White"   PreviewTextInput="TextBox_PreviewTextInput"
+                     Text="{Binding OffsetValue, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
         </GroupBox>
+
+       
+
 
         <Grid Grid.Row="2" Margin="10 0 10 0">
             <Grid.RowDefinitions>
