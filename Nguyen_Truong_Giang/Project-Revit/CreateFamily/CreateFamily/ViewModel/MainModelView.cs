@@ -82,6 +82,18 @@ namespace CreateFamily.ViewModel
             }
         }
 
+        public FamilySymbol _setFamilySymbol;
+
+        public FamilySymbol SetFamilySymbol
+        {
+            get => _setFamilySymbol;
+            set
+            {
+                _setFamilySymbol = value;
+                OnPropertyChanged(nameof(SetFamilySymbol));
+            }
+        }
+
         private ObservableCollection<ItemCheckViewModel> _intersection;
 
         public ObservableCollection<ItemCheckViewModel> intersection
@@ -104,7 +116,8 @@ namespace CreateFamily.ViewModel
 
             Document doc = _model.Doc;
 
-            CreateFamilyCommand = new RelayCommand<Document>(CreateFamily);
+            CreateFamilyCommand = new RelayCommand<FamilySymbol>(CreateFamily);
+
             ImportFamilyCommand = new RelayCommand<Document>(ImportRevitFile);
 
             LabelContent = "";
@@ -114,8 +127,13 @@ namespace CreateFamily.ViewModel
             GetCreatePoint(_model.Doc);
         }
 
-        private void CreateFamily(Document doc)
+        public void CreateFamily(FamilySymbol familySymbol)
         {
+            Document doc = _model.Doc;
+
+            familySymbol = SetFamilySymbol;
+
+            CreateFamilyInstances(doc, familySymbol);
         }
 
         public void GetLevel(Document doc)
@@ -220,17 +238,16 @@ namespace CreateFamily.ViewModel
                         FamilySymbol familySymbol = GetActiveFamilySymbol(doc, family);
                         ActivateFamilySymbol(familySymbol);
 
+                        _setFamilySymbol = familySymbol;
+
                         if (familySymbol != null)
                         {
-                            foreach (var item in intersection)
-                            {
-                                doc.Create.NewFamilyInstance(item._model.Point, familySymbol, SelectLevel, Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
-                            }
-
+                            LabelVisibility = false;
                             showHideLabel("Family đã được tải thành công.");
 
                             if (!File.Exists(filePath))
                             {
+                                LabelVisibility = false;
                                 showHideLabel("Đường dẫn file không hợp lệ.");
                                 return;
                             }
@@ -262,13 +279,29 @@ namespace CreateFamily.ViewModel
             }
         }
 
-        private void CreateFamilyInstances(Document doc, List<XYZ> points, FamilySymbol familySymbol)
+        private void CreateFamilyInstances(Document doc, FamilySymbol familySymbol)
         {
-            foreach (XYZ point in points)
+            using (Transaction trans = new Transaction(doc, "Create Family"))
             {
-                if (point != null)
+                trans.Start();
+
+                foreach (var item in intersection)
                 {
+                    if (item.IsChecked)
+                    {
+                        XYZ newPoint = item._model.Point;
+                        doc.Create.NewFamilyInstance(newPoint, familySymbol, SelectLevel, Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
+                        LabelVisibility = false;
+                        showHideLabel("Đã đặt family thành công.");
+                    }
+                    if(!item.IsChecked)
+                    {
+                        LabelVisibility = false;
+                        showHideLabel("Vui lòng chọn giao điểm đặt Family.");
+                    }
                 }
+
+                trans.Commit();
             }
         }
 
@@ -297,8 +330,6 @@ namespace CreateFamily.ViewModel
 
         public string showHideLabel(string text)
         {
-            LabelVisibility = false;
-
             LabelContent = text;
 
             LabelVisibility = true;
