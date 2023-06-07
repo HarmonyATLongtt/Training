@@ -80,7 +80,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Commands\Command2.cs" />
+    <Compile Include="Commands\CreateGridDimension.cs" />
     <Compile Include="Validate\BooleanToVisibilityConverter.cs" />
     <Compile Include="Commands\importCreateFamily.cs" />
     <Compile Include="Model\ItemCheckModel.cs" />
