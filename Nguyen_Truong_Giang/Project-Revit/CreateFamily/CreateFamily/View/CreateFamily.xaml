@@ -88,7 +88,7 @@
                     Command="{Binding ImportFamilyCommand}" />
 
             <Button Grid.Column="1"
-                    Content="Create Family"
+                    Content="Create Column"
                     Margin="15"
                     Command="{Binding CreateFamilyCommand}"
                     IsEnabled="{Binding PropertyButton}" />

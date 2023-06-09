@@ -3,6 +3,7 @@ using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
+using System.Linq;
 
 namespace CreateFamily.Commands
 {
@@ -16,17 +17,14 @@ namespace CreateFamily.Commands
             Application app = uiapp.Application;
             Document doc = uidoc.Document;
 
-
-
-            Reference selectedFamilyRef = uidoc.Selection.PickObject(ObjectType.Element, "Please select a family");
-            Element selectedElement = doc.GetElement(selectedFamilyRef.ElementId);
+            Reference selectedFamilyRef = uidoc.Selection.PickObject(ObjectType.Element, "Please select a column");
+            FamilyInstance selectedElement = doc.GetElement(selectedFamilyRef.ElementId) as FamilyInstance;
 
             ReferenceArray referenceArray = new ReferenceArray();
             Options options = new Options();
             options.ComputeReferences = true;
             options.IncludeNonVisibleObjects = true;
-            options.View = uidoc.ActiveGraphicalView;
-            
+
             GeometryElement geometry = selectedElement.get_Geometry(options);
             if (geometry != null)
             {
@@ -34,32 +32,29 @@ namespace CreateFamily.Commands
                 {
                     if (geomObj is GeometryInstance geometryInstance)
                     {
-                        GeometryElement symbolGeometry = geometryInstance.GetInstanceGeometry();
+                        //GeometryElement symbolGeometry = geometryInstance.GetInstanceGeometry();
+
+                        GeometryElement symbolGeometry = selectedElement.HasModifiedGeometry()
+                                                        ? geometryInstance.GetInstanceGeometry()
+                                                        : geometryInstance.GetSymbolGeometry();
                         foreach (GeometryObject symbolGeomObj in symbolGeometry)
                         {
                             if (symbolGeomObj is Solid solid)
-                            {
-                                foreach (Face face in solid.Faces)
-                                {
-                                    if (face is PlanarFace pl && IsParallel(pl.FaceNormal, XYZ.BasisY))                            
-                                           referenceArray.Append(face.Reference);                                    
-                                      
-                                }
-                            }
+                                GetReferenceFromSolid(solid, XYZ.BasisY, ref referenceArray);
                         }
                     }
                     else if (geomObj is Solid solid)
-                    {
-                        foreach (Face face in solid.Faces)
-                        {
-                            if (face is PlanarFace pl && IsParallel(pl.FaceNormal, XYZ.BasisY))
-                                referenceArray.Append(face.Reference);
-                        }
-                    }
+                        GetReferenceFromSolid(solid, XYZ.BasisY, ref referenceArray);
                 }
             }
 
             View activeView = uidoc.ActiveGraphicalView;
+            DimensionType dimensionType = GetDimType(doc);
+            if (dimensionType == null)
+            {
+                System.Windows.Forms.MessageBox.Show("linear dimension type not found");
+                return Result.Cancelled;
+            }
 
             using (Transaction transaction = new Transaction(doc, "Create Dimension"))
             {
@@ -75,13 +70,63 @@ namespace CreateFamily.Commands
                 //arere.Append(uidoc.Selection.PickObject(ObjectType.Face));
                 //arere.Append(uidoc.Selection.PickObject(ObjectType.Face));
 
-                Line line = Line.CreateBound(new XYZ(p1.X, p1.Y, activeView.GenLevel.Elevation), new XYZ(p2.X, p2.Y, activeView.GenLevel.Elevation));
-                Dimension dim = doc.Create.NewDimension(activeView, line, referenceArray);
+                XYZ start = new XYZ(p1.X, p1.Y, 0);
+                XYZ end = new XYZ(p2.X, p2.Y, 0);
+
+                Line line = Line.CreateBound(start, end);
+                Dimension dim = doc.Create.NewDimension(activeView, line, referenceArray, dimensionType);
+                //System.Windows.Forms.MessageBox.Show(dim.Id.ToString());
+                Validate(referenceArray, selectedElement);
 
                 transaction.Commit();
             }
 
             return Result.Succeeded;
+        }
+
+        private void Validate(ReferenceArray refArr, Element elem)
+        {
+            FamilyInstance instance;
+            bool isInstance = false;
+            if (refArr != null && elem != null)
+            {
+                foreach (Reference reference in refArr)
+                {
+                    Element refElem = elem.Document.GetElement(reference);
+                    if (refElem.Id == elem.Id)
+                    {
+                        isInstance = true;
+                        System.Windows.Forms.MessageBox.Show("dim to instance");
+                        break;
+                    }
+                }
+            }
+            if (!isInstance)
+                System.Windows.Forms.MessageBox.Show("dim to symbol");
+        }
+
+        private void GetReferenceFromSolid(Solid solid, XYZ normal, ref ReferenceArray referenceArray)
+        {
+            if (solid != null
+                && solid.Volume > 0
+                && normal != null
+                && !normal.IsAlmostEqualTo(XYZ.Zero))
+            {
+                foreach (Face face in solid.Faces)
+                {
+                    if (face is PlanarFace pl && IsParallel(pl.FaceNormal, normal))
+                        referenceArray.Append(face.Reference);
+                }
+            }
+        }
+
+        private DimensionType GetDimType(Document doc)
+        {
+            return new FilteredElementCollector(doc)
+                    .WhereElementIsElementType()
+                    .OfClass(typeof(DimensionType))
+                    .Cast<DimensionType>()
+                    .FirstOrDefault(x => x.StyleType == DimensionStyleType.Linear);
         }
 
         private bool IsParallel(XYZ vector1, XYZ vector2)
