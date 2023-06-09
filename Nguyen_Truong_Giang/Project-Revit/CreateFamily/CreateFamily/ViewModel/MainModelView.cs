@@ -2,7 +2,6 @@
 using CreateFamily.Model;
 using CreateFamily.Models;
 using CreateFamily.ModelView;
-using CreateFamily.Validate;
 using GalaSoft.MvvmLight.Command;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -131,7 +130,6 @@ namespace CreateFamily.ViewModel
             }
         }
 
-        public ICommand SelectLevelCommand { get; set; }
         public ICommand CreateFamilyCommand { get; set; }
         public ICommand ImportFamilyCommand { get; set; }
 
@@ -388,30 +386,5 @@ namespace CreateFamily.ViewModel
 
             return LabelContent;
         }
-
-        //public string this[string columnName]
-        //{
-        //    get
-        //    {
-        //        if (columnName == nameof(OffsetValue))
-        //        {
-        //            var validator = new DoubleValidator();
-        //            var validationResult = validator.Validate(OffsetValue);
-        //            if (!validationResult.IsValid)
-        //            {
-        //                return validationResult.Errors.FirstOrDefault()?.ErrorMessage;
-        //            }
-        //            else
-        //            {
-        //                LabelVisibility = false;
-        //                return showHideLabel("Vui lòng nhập một số double");
-        //            }
-        //        }
-
-        //        return null;
-        //    }
-        //}
-
-        public string Error => null;
     }
 }

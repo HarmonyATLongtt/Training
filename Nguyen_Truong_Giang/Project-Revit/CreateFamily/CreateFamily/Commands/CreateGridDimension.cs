@@ -43,7 +43,7 @@ namespace CreateFamily.Commands
                         if (gridCurve is Line line)
                         {
                             Line lineUnbound = Line.CreateUnbound(line.Origin, line.Direction);
-                            var intersectionResult = lineUnbound.Project(selectedPoint);
+                            var intersectionResult = lineUnbound.Project(selectedPoint); //trả ra một Result XYZPoint
                             if (intersectionResult != null)
                                 points.Add(intersectionResult.XYZPoint);
                         }
@@ -52,7 +52,13 @@ namespace CreateFamily.Commands
 
                 Line lineDim = Line.CreateBound(points[0], points[1]);
 
-                doc.Create.NewDimension(activeView, lineDim, referenceArray);
+                if (activeView.ViewType == ViewType.FloorPlan)
+                {
+                    doc.Create.NewDimension(activeView, lineDim, referenceArray);
+                } else
+                {
+                    TaskDialog.Show("Message","Không phải mặt bằng");
+                }
 
                 transaction.Commit();
             }
