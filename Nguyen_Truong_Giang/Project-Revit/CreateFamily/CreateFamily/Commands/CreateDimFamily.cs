@@ -32,8 +32,6 @@ namespace CreateFamily.Commands
                 {
                     if (geomObj is GeometryInstance geometryInstance)
                     {
-                        //GeometryElement symbolGeometry = geometryInstance.GetInstanceGeometry();
-
                         GeometryElement symbolGeometry = selectedElement.HasModifiedGeometry()
                                                         ? geometryInstance.GetInstanceGeometry()
                                                         : geometryInstance.GetSymbolGeometry();
@@ -60,22 +58,14 @@ namespace CreateFamily.Commands
             {
                 transaction.Start();
 
-                //  XYZ startPoint = uidoc.Selection.PickPoint("Please select a point to create dimension");
-
-                // Line line = Line.CreateBound(startPoint, selectedFamilyRef.GlobalPoint);
                 XYZ p1 = uidoc.Selection.PickPoint();
                 XYZ p2 = uidoc.Selection.PickPoint();
-
-                //ReferenceArray arere = new ReferenceArray();
-                //arere.Append(uidoc.Selection.PickObject(ObjectType.Face));
-                //arere.Append(uidoc.Selection.PickObject(ObjectType.Face));
 
                 XYZ start = new XYZ(p1.X, p1.Y, 0);
                 XYZ end = new XYZ(p2.X, p2.Y, 0);
 
                 Line line = Line.CreateBound(start, end);
                 Dimension dim = doc.Create.NewDimension(activeView, line, referenceArray, dimensionType);
-                //System.Windows.Forms.MessageBox.Show(dim.Id.ToString());
                 Validate(referenceArray, selectedElement);
 
                 transaction.Commit();
@@ -86,7 +76,6 @@ namespace CreateFamily.Commands
 
         private void Validate(ReferenceArray refArr, Element elem)
         {
-            FamilyInstance instance;
             bool isInstance = false;
             if (refArr != null && elem != null)
             {

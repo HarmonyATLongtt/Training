@@ -5,93 +5,135 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:converters="clr-namespace:CreateFamily"
         mc:Ignorable="d"
-             Title="Create Family"
-             Height="600" Width="400">
+             Title="Create Columns"
+             Height="700" Width="600">
 
     <Window.Resources>
         <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="120" />
-            <RowDefinition Height="120" />
-            <RowDefinition Height="220" />
-            <RowDefinition Height="45" />
+            <RowDefinition Height="240" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <GroupBox Header="Select Level" Grid.Row="0"
-                      Height="100" Margin="10 10 10 0"
-                      VerticalAlignment="Top"
-                      FontSize="16">
-            <ComboBox Margin="10" Height="30" FontSize="14"
-                      ItemsSource="{Binding ListLevel}"
-                      SelectedItem="{Binding SelectLevel}">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Name}" />
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
-        </GroupBox>
 
-        <GroupBox Header="Offset (Feet to mm)" Grid.Row="1"
-                      Height="100" Margin="10 10 10 0"
-                      VerticalAlignment="Top"
-                      FontSize="16">
-
-            <TextBox Grid.Row="0" Height="30"  Margin="10" FontSize="14"
-                     Background="White"   PreviewTextInput="TextBox_PreviewTextInput"
-                     Text="{Binding OffsetValue, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
-        </GroupBox>
-
-       
-
-
-        <Grid Grid.Row="2" Margin="10 0 10 0">
+        <Grid Grid.Row="0">
             <Grid.RowDefinitions>
-                <RowDefinition Height="30" />
-                <RowDefinition />
+                <RowDefinition Height="120" />
+                <RowDefinition Height="120" />
             </Grid.RowDefinitions>
 
-            <CheckBox Grid.Row="0" Content="All"
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <GroupBox Header="Select Family" Grid.Row="0" Grid.Column="0"
+                   Height="100" Margin="10 10 10 0"
+                      VerticalAlignment="Top"
+                      FontSize="16">
+                <ComboBox ItemsSource="{Binding StructuralColumns}"
+                  DisplayMemberPath="Name"
+                  SelectedItem="{Binding SelectedColumnIndex}"
+                  Margin="10" Height="30" FontSize="14">
+                </ComboBox>
+            </GroupBox>
+
+            <GroupBox Header="Select Base Level" Grid.Row="0" Grid.Column="1"
+                      Height="100" Margin="10 10 10 0"
+                      VerticalAlignment="Top"
+                      FontSize="16">
+                <ComboBox Margin="10" Height="30" FontSize="14"
+                      ItemsSource="{Binding ListLevel}"
+                      SelectedItem="{Binding SelectLevel}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </GroupBox>
+
+            <GroupBox Header="Select Top Level" Grid.Row="1" Grid.Column="1"
+                      Height="100" Margin="10 10 10 0"
+                      VerticalAlignment="Top"
+                      FontSize="16">
+                <ComboBox Margin="10" Height="30" FontSize="14"
+                      ItemsSource="{Binding ListLevel}"
+                      SelectedItem="{Binding SelectLevel}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </GroupBox>
+
+            <GroupBox Header="Offset" Grid.Row="1"
+                      Height="100" Margin="10 10 10 0"
+                      VerticalAlignment="Top"
+                      FontSize="16">
+
+                <TextBox Grid.Row="0" Height="30"  Margin="10" FontSize="14"
+                     Background="White"   PreviewTextInput="TextBox_PreviewTextInput"
+                     Text="{Binding OffsetValue, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+            </GroupBox>
+        </Grid>
+
+        <Grid Grid.Row="1">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="310" />
+                <RowDefinition Height="50" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" Margin="10 0 10 0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <CheckBox Grid.Row="0" Content="All"
                           Height="20" Margin="5 5"
                           IsChecked="{Binding IsAllChecked}"
                           ClickMode="Press" />
 
-            <ListView Grid.Row="1" ItemsSource="{Binding intersection}"
+                <ListView Grid.Row="1" ItemsSource="{Binding intersection}"
                       VerticalContentAlignment="Top"
                       FontSize="14" ScrollViewer.VerticalScrollBarVisibility="Visible"
                        ScrollViewer.CanContentScroll="True">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <CheckBox Content="{Binding Name}" IsChecked="{Binding IsChecked}" />
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-        </Grid>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <CheckBox Content="{Binding Name}" IsChecked="{Binding IsChecked}" />
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
 
-        <Grid Grid.Row="3">
-            <Label Margin="8" FontSize="14" Foreground="#35b535"
+            <Grid Grid.Row="1">
+                <Label Margin="8" FontSize="14" Foreground="#35b535"
                    Content="{Binding LabelContent}" HorizontalAlignment="Center"
                    Visibility="{Binding LabelVisibility, Converter={StaticResource BooleanToVisibilityConverter}}" />
-        </Grid>
+            </Grid>
 
-        <Grid Grid.Row="4">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+            <Grid Grid.Row="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
 
-            <Button Grid.Column="0"
+                <Button Grid.Column="0"
                     Content="Import File Family"
                     Margin="15"
                     Command="{Binding ImportFamilyCommand}" />
 
-            <Button Grid.Column="1"
+                <Button Grid.Column="1"
                     Content="Create Column"
                     Margin="15"
                     Command="{Binding CreateFamilyCommand}"
                     IsEnabled="{Binding PropertyButton}" />
+            </Grid>
         </Grid>
     </Grid>
 </Window>

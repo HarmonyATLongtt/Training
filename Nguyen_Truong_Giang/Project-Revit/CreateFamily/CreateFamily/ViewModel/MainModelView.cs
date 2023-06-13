@@ -18,6 +18,30 @@ namespace CreateFamily.ViewModel
 
         private bool _isAllChecked;
 
+        private ObservableCollection<FamilySymbol> _structuralColumns;
+
+        public ObservableCollection<FamilySymbol> StructuralColumns
+        {
+            get { return _structuralColumns; }
+            set
+            {
+                _structuralColumns = value;
+                OnPropertyChanged(nameof(StructuralColumns));
+            }
+        }
+
+        private FamilySymbol _selectedColumnIndex;
+
+        public FamilySymbol SelectedColumnIndex
+        {
+            get { return _selectedColumnIndex; }
+            set
+            {
+                _selectedColumnIndex = value;
+                OnPropertyChanged(nameof(SelectedColumnIndex));
+            }
+        }
+
         public bool IsAllChecked
         {
             get => _isAllChecked;
@@ -70,7 +94,7 @@ namespace CreateFamily.ViewModel
             }
         }
 
-        private bool _propertyButton = false;
+        private bool _propertyButton = true;
 
         public bool PropertyButton
         {
@@ -143,11 +167,13 @@ namespace CreateFamily.ViewModel
 
             ImportFamilyCommand = new RelayCommand<Document>(ImportRevitFile);
 
-            LabelContent = "Vui lòng import Family.";
+            LabelContent = "Vui lòng chọn Family.";
 
             GetLevel(_model.Doc);
 
             GetCreatePoint(_model.Doc);
+
+            GetStructuralColumns(_model.Doc);
 
             SelectLevel = ListLevel.FirstOrDefault();
         }
@@ -156,7 +182,7 @@ namespace CreateFamily.ViewModel
         {
             Document doc = _model.Doc;
 
-            familySymbol = SetFamilySymbol;
+            familySymbol = SelectedColumnIndex;
 
             CreateFamilyInstances(doc, familySymbol);
         }
@@ -268,7 +294,8 @@ namespace CreateFamily.ViewModel
                         if (familySymbol != null)
                         {
                             LabelVisibility = false;
-                            PropertyButton = true;
+                            //PropertyButton = true;
+                            StructuralColumns.Add(familySymbol);
                             showHideLabel("Family đã được tải thành công.");
 
                             if (!File.Exists(filePath))
@@ -284,7 +311,7 @@ namespace CreateFamily.ViewModel
                     else
                     {
                         LabelVisibility = false;
-                        PropertyButton = false;
+                        PropertyButton = true;
                         showHideLabel("Family đã tồn tại.");
                     }
                 }
@@ -295,6 +322,7 @@ namespace CreateFamily.ViewModel
         {
             family = null;
             bool load = doc.LoadFamily(filePath, out family);
+
             return load;
         }
 
@@ -324,6 +352,10 @@ namespace CreateFamily.ViewModel
                         if (item.IsChecked)
                         {
                             XYZ newPoint = item._model.Point;
+
+                            familySymbol = SelectedColumnIndex;
+
+                            ActivateFamilySymbol(familySymbol);
 
                             FamilyInstance instance = doc.Create.NewFamilyInstance(newPoint, familySymbol, SelectLevel, Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
 
@@ -385,6 +417,28 @@ namespace CreateFamily.ViewModel
             LabelVisibility = true;
 
             return LabelContent;
+        }
+
+        public ObservableCollection<FamilySymbol> GetStructuralColumns(Document doc)
+        {
+            StructuralColumns = new ObservableCollection<FamilySymbol>();
+
+            FilteredElementCollector collector = new FilteredElementCollector(doc);
+            ICollection<Element> familySymbols = collector
+                .OfClass(typeof(FamilySymbol))
+                .OfCategory(BuiltInCategory.OST_StructuralColumns)
+                .ToElements();
+
+            foreach (Element elm in familySymbols)
+            {
+                FamilySymbol familySymbol = elm as FamilySymbol;
+                if (familySymbol != null)
+                {
+                    StructuralColumns.Add(familySymbol);
+                }
+            }
+
+            return StructuralColumns;
         }
     }
 }
