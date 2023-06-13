@@ -17,7 +17,7 @@ namespace CreateFamily
             InitializeComponent();
 
             SelectModel model = new SelectModel(doc);
-            DataContext = new MainModelView(model);
+            DataContext = new MainViewModel(model);
         }
 
         private void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)

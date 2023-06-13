@@ -5,8 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:converters="clr-namespace:CreateFamily"
         mc:Ignorable="d"
-             Title="Create Columns"
-             Height="700" Width="600">
+        Title="Create Columns"
+        Height="750" Width="500"
+        MinHeight="750" MinWidth="500"
+        MaxHeight="750" MaxWidth="500"
+        ResizeMode="CanResizeWithGrip"
+        WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
         <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
@@ -35,17 +39,20 @@
                 <ComboBox ItemsSource="{Binding StructuralColumns}"
                   DisplayMemberPath="Name"
                   SelectedItem="{Binding SelectedColumnIndex}"
-                  Margin="10" Height="30" FontSize="14">
+                  Margin="10" Height="30" FontSize="14"
+                  IsEditable="True"
+                  IsReadOnly="True" Text="-- Select Family --">
                 </ComboBox>
             </GroupBox>
 
-            <GroupBox Header="Select Base Level" Grid.Row="0" Grid.Column="1"
+            <GroupBox Header="Select Base Level" Grid.Row="1" Grid.Column="0"
                       Height="100" Margin="10 10 10 0"
                       VerticalAlignment="Top"
                       FontSize="16">
                 <ComboBox Margin="10" Height="30" FontSize="14"
                       ItemsSource="{Binding ListLevel}"
-                      SelectedItem="{Binding SelectLevel}">
+                      SelectedItem="{Binding SelectLevel}"
+                      IsEnabled="{Binding LevelVisibility}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Name}" />
@@ -60,7 +67,8 @@
                       FontSize="16">
                 <ComboBox Margin="10" Height="30" FontSize="14"
                       ItemsSource="{Binding ListLevel}"
-                      SelectedItem="{Binding SelectLevel}">
+                      SelectedItem="{Binding SelectTopLevel}"
+                      IsEnabled="{Binding LevelVisibility}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Name}" />
@@ -69,14 +77,15 @@
                 </ComboBox>
             </GroupBox>
 
-            <GroupBox Header="Offset" Grid.Row="1"
+            <GroupBox Header="Base Offset" Grid.Row="0" Grid.Column="1"
                       Height="100" Margin="10 10 10 0"
                       VerticalAlignment="Top"
                       FontSize="16">
 
                 <TextBox Grid.Row="0" Height="30"  Margin="10" FontSize="14"
                      Background="White"   PreviewTextInput="TextBox_PreviewTextInput"
-                     Text="{Binding OffsetValue, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+                     Text="{Binding OffsetValue, UpdateSourceTrigger=PropertyChanged,
+                    Mode=TwoWay}" />
             </GroupBox>
         </Grid>
 
@@ -84,6 +93,7 @@
 
             <Grid.RowDefinitions>
                 <RowDefinition Height="310" />
+                <RowDefinition Height="40" />
                 <RowDefinition Height="50" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
@@ -112,6 +122,12 @@
             </Grid>
 
             <Grid Grid.Row="1">
+                <CheckBox IsChecked="{Binding DeleteAllColumn}" Height="30" Margin="10 10" FontSize="14">
+                    <TextBlock Text="Xóa các Columns đã tạo trên View."/>
+                </CheckBox>
+            </Grid>
+
+            <Grid Grid.Row="2">
                 <Label Margin="8" FontSize="14" Foreground="#35b535"
                    Content="{Binding LabelContent}" HorizontalAlignment="Center"
                    Visibility="{Binding LabelVisibility, Converter={StaticResource BooleanToVisibilityConverter}}" />

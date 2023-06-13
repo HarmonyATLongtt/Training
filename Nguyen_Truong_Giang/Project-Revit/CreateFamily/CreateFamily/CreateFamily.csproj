@@ -57,6 +57,7 @@
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="PresentationFramework.Aero2" />
     <Reference Include="RevitAPI">
       <HintPath>C:\Program Files\Autodesk\Revit 2021\RevitAPI.dll</HintPath>
       <Private>False</Private>
@@ -87,9 +88,9 @@
     <Compile Include="Model\ItemCheckModel.cs" />
     <Compile Include="Model\SelectModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ViewModel\BaseModelView.cs" />
+    <Compile Include="ViewModel\BaseViewModel.cs" />
     <Compile Include="ViewModel\ItemCheckViewModel.cs" />
-    <Compile Include="ViewModel\MainModelView.cs" />
+    <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="View\CreateFamily.xaml.cs">
       <DependentUpon>CreateFamily.xaml</DependentUpon>
     </Compile>

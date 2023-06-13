@@ -2,7 +2,7 @@
 
 namespace CreateFamily.ModelView
 {
-    internal class BaseModelView : INotifyPropertyChanged
+    internal class BaseViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 

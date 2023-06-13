@@ -30,34 +30,10 @@ namespace ExRevitAPI
             FilteredElementCollector collector = new FilteredElementCollector(doc);
             ICollection<Element> allElements = collector.WhereElementIsNotElementType().ToElements();
 
-            // Đếm số lượng category
-            HashSet<string> categories = new HashSet<string>();
-            foreach (Element element in allElements)
-            {
-                categories.Add(element.Name);
-            }
-            int categoryCount = categories.Count;
+            List<Category> listCate = new List<Category>();
 
-            // Đếm số lượng family
-            HashSet<string> families = new HashSet<string>();
-            foreach (Element element in allElements)
-            {
-                families.Add(element.Name);
-            }
-            int familyCount = families.Count;
-
-            // Đếm số lượng type
-            int typeCount = allElements.Select(element => element.GetTypeId()).Distinct().Count();
-
-            // Đếm số lượng instance
-            int instanceCount = allElements.Count;
-
-            // In ra thông tin
-            TaskDialog.Show("Instance Information",
-                "Số lượng Category: " + categoryCount.ToString() + "\n" +
-                "Số lượng Family: " + familyCount.ToString() + "\n" +
-                "Số lượng Type: " + typeCount.ToString() + "\n" +
-                "Số lượng Instance: " + instanceCount.ToString());
+            var listKhongTrungLapID = allElements.GroupBy(x => x.Category).Select(g => g.Key).ToList();
+            var listKhongTrungLapID2 = allElements.Select(g => g.Category).Distinct().Cast<Category>().ToList();
 
             return Result.Succeeded;
         }

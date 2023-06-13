@@ -7,8 +7,9 @@
     "\\ClassLibrary1\\Properties",
     "\\ClassLibrary1\\View",
     "\\ClassLibrary1\\Vieww",
-    "\\ClassLibrary1\\ViewwModel"
+    "\\ClassLibrary1\\ViewwModel",
+    "\\packages"
   ],
-  "SelectedNode": "\\ClassLibrary1.sln",
+  "SelectedNode": "\\ClassLibrary1\\ClassLibrary1.addin",
   "PreviewInSolutionExplorer": false
 }

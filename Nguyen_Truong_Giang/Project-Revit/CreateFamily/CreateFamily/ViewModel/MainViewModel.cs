@@ -12,7 +12,7 @@ using System.Windows.Input;
 
 namespace CreateFamily.ViewModel
 {
-    internal class MainModelView : BaseModelView
+    internal class MainViewModel : BaseViewModel
     {
         private SelectModel _model;
 
@@ -39,6 +39,12 @@ namespace CreateFamily.ViewModel
             {
                 _selectedColumnIndex = value;
                 OnPropertyChanged(nameof(SelectedColumnIndex));
+
+                if (SelectedColumnIndex != null)
+                {
+                    LevelVisibility = true;
+                    PropertyButton = true;
+                }
             }
         }
 
@@ -82,6 +88,18 @@ namespace CreateFamily.ViewModel
             }
         }
 
+        private Level _selecToptlevel;
+
+        public Level SelectTopLevel
+        {
+            get => _selecToptlevel;
+            set
+            {
+                _selecToptlevel = value;
+                OnPropertyChanged(nameof(SelectTopLevel));
+            }
+        }
+
         private double _offsetValue = 0;
 
         public double OffsetValue
@@ -94,7 +112,7 @@ namespace CreateFamily.ViewModel
             }
         }
 
-        private bool _propertyButton = true;
+        private bool _propertyButton = false;
 
         public bool PropertyButton
         {
@@ -115,6 +133,30 @@ namespace CreateFamily.ViewModel
             {
                 _labelVisibility = value;
                 OnPropertyChanged(nameof(LabelVisibility));
+            }
+        }
+
+        private bool _levelVisibility = false;
+
+        public bool LevelVisibility
+        {
+            get { return _levelVisibility; }
+            set
+            {
+                _levelVisibility = value;
+                OnPropertyChanged(nameof(LevelVisibility));
+            }
+        }
+
+        private bool _deleteAllColumn;
+
+        public bool DeleteAllColumn
+        {
+            get { return _deleteAllColumn; }
+            set
+            {
+                _deleteAllColumn = value;
+                OnPropertyChanged(nameof(DeleteAllColumn));
             }
         }
 
@@ -157,7 +199,7 @@ namespace CreateFamily.ViewModel
         public ICommand CreateFamilyCommand { get; set; }
         public ICommand ImportFamilyCommand { get; set; }
 
-        public MainModelView(SelectModel model)
+        public MainViewModel(SelectModel model)
         {
             _model = model;
 
@@ -176,6 +218,8 @@ namespace CreateFamily.ViewModel
             GetStructuralColumns(_model.Doc);
 
             SelectLevel = ListLevel.FirstOrDefault();
+
+            SelectTopLevel = ListLevel.FirstOrDefault();
         }
 
         public void CreateFamily(FamilySymbol familySymbol)
@@ -183,6 +227,11 @@ namespace CreateFamily.ViewModel
             Document doc = _model.Doc;
 
             familySymbol = SelectedColumnIndex;
+
+            if (DeleteAllColumn == true)
+            {
+                DeleleColumnInView(doc);
+            }
 
             CreateFamilyInstances(doc, familySymbol);
         }
@@ -294,7 +343,6 @@ namespace CreateFamily.ViewModel
                         if (familySymbol != null)
                         {
                             LabelVisibility = false;
-                            //PropertyButton = true;
                             StructuralColumns.Add(familySymbol);
                             showHideLabel("Family đã được tải thành công.");
 
@@ -311,7 +359,7 @@ namespace CreateFamily.ViewModel
                     else
                     {
                         LabelVisibility = false;
-                        PropertyButton = true;
+
                         showHideLabel("Family đã tồn tại.");
                     }
                 }
@@ -345,42 +393,63 @@ namespace CreateFamily.ViewModel
             {
                 trans.Start();
 
-                if (intersection.Any(x => x.IsChecked == true))
+                if (intersection != null)
                 {
-                    foreach (var item in intersection)
+                    if (intersection.Any(x => x.IsChecked == true))
                     {
-                        if (item.IsChecked)
+                        foreach (var item in intersection)
                         {
-                            XYZ newPoint = item._model.Point;
-
-                            familySymbol = SelectedColumnIndex;
-
-                            ActivateFamilySymbol(familySymbol);
-
-                            FamilyInstance instance = doc.Create.NewFamilyInstance(newPoint, familySymbol, SelectLevel, Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
-
-                            doc.Regenerate(); //tạo lại các yếu tố và đối tượng
-
-                            if (!double.IsNaN(OffsetValue))
+                            if (item.IsChecked)
                             {
-                                Parameter para = instance.get_Parameter(BuiltInParameter.FAMILY_BASE_LEVEL_OFFSET_PARAM);
+                                XYZ newPoint = item._model.Point;
 
-                                para.Set(OffsetValue);
+                                familySymbol = SelectedColumnIndex;
+
+                                ActivateFamilySymbol(familySymbol);
+
+                                if (SelectTopLevel != null && !double.IsNaN(OffsetValue) && SelectTopLevel.Equals(SelectLevel) == false)
+                                {
+                                    FamilyInstance instance = doc.Create.NewFamilyInstance(newPoint, familySymbol, SelectLevel, Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
+
+                                    doc.Regenerate(); //tạo lại các yếu tố và đối tượng
+
+                                    Parameter paraTopLevel = instance.get_Parameter(BuiltInParameter.FAMILY_TOP_LEVEL_PARAM);
+
+                                    paraTopLevel.Set(SelectTopLevel.Id);
+
+                                    doc.Regenerate(); //tạo lại các yếu tố và đối tượng
+
+                                    Parameter para = instance.get_Parameter(BuiltInParameter.FAMILY_BASE_LEVEL_OFFSET_PARAM);
+
+                                    para.Set(MillimetersToFeet(OffsetValue));
+
+                                    LabelVisibility = false;
+                                    showHideLabel("Đã đặt family thành công.");
+                                }
+                                else if (SelectTopLevel.Equals(SelectLevel))
+                                {
+                                    LabelVisibility = false;
+                                    showHideLabel("Base Level và Top Level không thể giống nhau.");
+                                }
                             }
                         }
                     }
-                    LabelVisibility = false;
-                    showHideLabel("Đã đặt family thành công.");
+                    else if (intersection.Any(x => x.IsChecked == false))
+                    {
+                        LabelVisibility = false;
+                        showHideLabel("Vui lòng chọn giao điểm đặt Family.");
+                    }
+
+                    if (SelectLevel == null)
+                    {
+                        LabelVisibility = false;
+                        showHideLabel("Vui lòng chọn Level.");
+                    }
                 }
-                else if (intersection.Any(x => x.IsChecked == false))
+                else
                 {
                     LabelVisibility = false;
-                    showHideLabel("Vui lòng chọn giao điểm đặt Family.");
-                }
-                if (SelectLevel == null)
-                {
-                    LabelVisibility = false;
-                    showHideLabel("Vui lòng chọn Level.");
+                    showHideLabel("Vui lòng thêm các đối tượng Grid để tạo giao điểm.");
                 }
 
                 trans.Commit();
@@ -439,6 +508,36 @@ namespace CreateFamily.ViewModel
             }
 
             return StructuralColumns;
+        }
+
+        public double MillimetersToFeet(double feet)
+        {
+            const double millimetersPerFoot = 0.00328084;
+            return feet * millimetersPerFoot;
+        }
+
+        public void DeleleColumnInView(Document doc)
+        {
+            using (Transaction trans = new Transaction(doc, "Delete Columns"))
+            {
+                trans.Start();
+
+                List<ViewSchedule> columns = new List<ViewSchedule>();
+
+                // Lọc các phần tử cột trên View
+                FilteredElementCollector collector = new FilteredElementCollector(doc);
+                ICollection<Element> elements = collector.OfCategory(BuiltInCategory.OST_StructuralColumns)
+                    .WhereElementIsNotElementType()
+                    .ToElements();
+
+                // Xóa từng cột
+                foreach (var column in elements)
+                {
+                    doc.Delete(column.Id);
+                }
+
+                trans.Commit();
+            }
         }
     }
 }
