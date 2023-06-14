@@ -228,11 +228,6 @@ namespace CreateFamily.ViewModel
 
             familySymbol = SelectedColumnIndex;
 
-            if (DeleteAllColumn == true)
-            {
-                DeleleColumnInView(doc);
-            }
-
             CreateFamilyInstances(doc, familySymbol);
         }
 
@@ -407,29 +402,36 @@ namespace CreateFamily.ViewModel
 
                                 ActivateFamilySymbol(familySymbol);
 
-                                if (SelectTopLevel != null && !double.IsNaN(OffsetValue) && SelectTopLevel.Equals(SelectLevel) == false)
+                                if (SelectTopLevel.Equals(SelectLevel) == false)
                                 {
-                                    FamilyInstance instance = doc.Create.NewFamilyInstance(newPoint, familySymbol, SelectLevel, Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
+                                    CreateColumns(doc, newPoint, familySymbol);
 
-                                    doc.Regenerate(); //tạo lại các yếu tố và đối tượng
-
-                                    Parameter paraTopLevel = instance.get_Parameter(BuiltInParameter.FAMILY_TOP_LEVEL_PARAM);
-
-                                    paraTopLevel.Set(SelectTopLevel.Id);
-
-                                    doc.Regenerate(); //tạo lại các yếu tố và đối tượng
-
-                                    Parameter para = instance.get_Parameter(BuiltInParameter.FAMILY_BASE_LEVEL_OFFSET_PARAM);
-
-                                    para.Set(MillimetersToFeet(OffsetValue));
+                                    if (DeleteAllColumn == true)
+                                    {
+                                        DeleleColumnInView(doc);
+                                    }
 
                                     LabelVisibility = false;
-                                    showHideLabel("Đã đặt family thành công.");
+
+                                    showHideLabel("Đã đặt Columns thành công.");
                                 }
-                                else if (SelectTopLevel.Equals(SelectLevel))
+                                else if (SelectTopLevel.Equals(SelectLevel) && OffsetValue == 0)
                                 {
                                     LabelVisibility = false;
-                                    showHideLabel("Base Level và Top Level không thể giống nhau.");
+                                    showHideLabel("Base Level và Top Level giống nhau thì Base Offset phải khác 0.");
+                                }
+                                else if (OffsetValue != 0 && SelectTopLevel.Equals(SelectLevel))
+                                {
+                                    CreateColumns(doc, newPoint, familySymbol);
+
+                                    if (DeleteAllColumn == true)
+                                    {
+                                        DeleleColumnInView(doc);
+                                    }
+
+                                    LabelVisibility = false;
+
+                                    showHideLabel("Đã đặt Columns thành công.");
                                 }
                             }
                         }
@@ -454,6 +456,23 @@ namespace CreateFamily.ViewModel
 
                 trans.Commit();
             }
+        }
+
+        public void CreateColumns(Document doc, XYZ newPoint, FamilySymbol familySymbol)
+        {
+            FamilyInstance instance = doc.Create.NewFamilyInstance(newPoint, familySymbol, SelectLevel, Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
+
+            doc.Regenerate(); //tạo lại các yếu tố và đối tượng
+
+            Parameter paraTopLevel = instance.get_Parameter(BuiltInParameter.FAMILY_TOP_LEVEL_PARAM);
+
+            paraTopLevel.Set(SelectTopLevel.Id);
+
+            doc.Regenerate(); //tạo lại các yếu tố và đối tượng
+
+            Parameter para = instance.get_Parameter(BuiltInParameter.FAMILY_BASE_LEVEL_OFFSET_PARAM);
+
+            para.Set(MillimetersToFeet(OffsetValue));
         }
 
         public XYZ SelectMultiIntersect(Document doc, Dictionary<string, XYZ> points)
@@ -518,25 +537,18 @@ namespace CreateFamily.ViewModel
 
         public void DeleleColumnInView(Document doc)
         {
-            using (Transaction trans = new Transaction(doc, "Delete Columns"))
+            List<ViewSchedule> columns = new List<ViewSchedule>();
+
+            // Lọc các phần tử cột trên View
+            FilteredElementCollector collector = new FilteredElementCollector(doc);
+            ICollection<Element> elements = collector.OfCategory(BuiltInCategory.OST_StructuralColumns)
+                .WhereElementIsNotElementType()
+                .ToElements();
+
+            // Xóa từng cột
+            foreach (var column in elements)
             {
-                trans.Start();
-
-                List<ViewSchedule> columns = new List<ViewSchedule>();
-
-                // Lọc các phần tử cột trên View
-                FilteredElementCollector collector = new FilteredElementCollector(doc);
-                ICollection<Element> elements = collector.OfCategory(BuiltInCategory.OST_StructuralColumns)
-                    .WhereElementIsNotElementType()
-                    .ToElements();
-
-                // Xóa từng cột
-                foreach (var column in elements)
-                {
-                    doc.Delete(column.Id);
-                }
-
-                trans.Commit();
+                doc.Delete(column.Id);
             }
         }
     }

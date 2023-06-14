@@ -1,19 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <RevitAddIns>
   <AddIn Type="Command">
-    <Text>Command RebbonAdd</Text>
-    <Description>Some description for RebbonAdd</Description>
-    <Assembly>RebbonAdd.dll</Assembly>
-    <FullClassName>RebbonAdd.Command</FullClassName>
-    <ClientId>0350d5b2-5458-4bed-bce1-cc7b50a7fc1f</ClientId>
+    <Text>Command RibbonAdd</Text>
+    <Description>Some description for RibbonAdd</Description>
+    <Assembly>RibbonAdd.dll</Assembly>
+    <FullClassName>RibbonAdd.Command</FullClassName>
+    <ClientId>5656d5d5-7717-4039-8f2d-e64cda1b934e</ClientId>
     <VendorId>com.typepad.thebuildingcoder</VendorId>
     <VendorDescription>The Building Coder, http://thebuildingcoder.typepad.com</VendorDescription>
   </AddIn>
   <AddIn Type="Application">
-    <Name>Application RebbonAdd</Name>
-    <Assembly>RebbonAdd.dll</Assembly>
-    <FullClassName>RebbonAdd.App</FullClassName>
-    <ClientId>bcc7430b-20b7-4178-a66d-a60203d4d0fc</ClientId>
+    <Name>Application RibbonAdd</Name>
+    <Assembly>RibbonAdd.dll</Assembly>
+    <FullClassName>RibbonAdd.App</FullClassName>
+    <ClientId>606aa028-7a1c-477a-844a-71f995c969e5</ClientId>
     <VendorId>com.typepad.thebuildingcoder</VendorId>
     <VendorDescription>The Building Coder, http://thebuildingcoder.typepad.com</VendorDescription>
   </AddIn>

@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("RebbonAdd")]
-[assembly: AssemblyDescription("Revit Add-In Description for RebbonAdd")]
+[assembly: AssemblyTitle("RibbonAdd")]
+[assembly: AssemblyDescription("Revit Add-In Description for RibbonAdd")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Autodesk Inc.")]
-[assembly: AssemblyProduct("RebbonAdd Revit C# .NET Add-In")]
+[assembly: AssemblyProduct("RibbonAdd Revit C# .NET Add-In")]
 [assembly: AssemblyCopyright("Copyright 2019 (C) Jeremy Tammik, Autodesk Inc.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
