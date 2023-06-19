@@ -228,6 +228,11 @@ namespace CreateFamily.ViewModel
 
             familySymbol = SelectedColumnIndex;
 
+            if (DeleteAllColumn == true)
+            {
+                DeleleColumnInView(doc);
+            }
+
             CreateFamilyInstances(doc, familySymbol);
         }
 
@@ -406,11 +411,6 @@ namespace CreateFamily.ViewModel
                                 {
                                     CreateColumns(doc, newPoint, familySymbol);
 
-                                    if (DeleteAllColumn == true)
-                                    {
-                                        DeleleColumnInView(doc);
-                                    }
-
                                     LabelVisibility = false;
 
                                     showHideLabel("Đã đặt Columns thành công.");
@@ -422,14 +422,9 @@ namespace CreateFamily.ViewModel
                                 }
                                 else if (OffsetValue != 0 && SelectTopLevel.Equals(SelectLevel))
                                 {
-                                    CreateColumns(doc, newPoint, familySymbol);
-
-                                    if (DeleteAllColumn == true)
-                                    {
-                                        DeleleColumnInView(doc);
-                                    }
-
                                     LabelVisibility = false;
+
+                                    CreateColumns(doc, newPoint, familySymbol);
 
                                     showHideLabel("Đã đặt Columns thành công.");
                                 }
@@ -531,24 +526,32 @@ namespace CreateFamily.ViewModel
 
         public double MillimetersToFeet(double feet)
         {
+            //UnitUtils.ConvertFromInternalUnit
             const double millimetersPerFoot = 0.00328084;
             return feet * millimetersPerFoot;
         }
 
         public void DeleleColumnInView(Document doc)
         {
-            List<ViewSchedule> columns = new List<ViewSchedule>();
-
-            // Lọc các phần tử cột trên View
-            FilteredElementCollector collector = new FilteredElementCollector(doc);
-            ICollection<Element> elements = collector.OfCategory(BuiltInCategory.OST_StructuralColumns)
-                .WhereElementIsNotElementType()
-                .ToElements();
-
-            // Xóa từng cột
-            foreach (var column in elements)
+            using (Transaction trans = new Transaction(doc, "Delete Columns"))
             {
-                doc.Delete(column.Id);
+                trans.Start();
+
+                List<ViewSchedule> columns = new List<ViewSchedule>();
+
+                // Lọc các phần tử cột trên View
+                FilteredElementCollector collector = new FilteredElementCollector(doc);
+                ICollection<Element> elements = collector.OfCategory(BuiltInCategory.OST_StructuralColumns)
+                    .WhereElementIsNotElementType()
+                    .ToElements();
+
+                // Xóa từng cột
+                foreach (var column in elements)
+                {
+                    doc.Delete(column.Id);
+                }
+
+                trans.Commit();
             }
         }
     }
