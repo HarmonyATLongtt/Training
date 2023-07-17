@@ -1,0 +1,30 @@
+E:\InternApp\Trains\NguyenVanViet\bin\Debug\net6.0\NguyenVanViet.exe
+E:\InternApp\Trains\NguyenVanViet\bin\Debug\net6.0\NguyenVanViet.deps.json
+E:\InternApp\Trains\NguyenVanViet\bin\Debug\net6.0\NguyenVanViet.runtimeconfig.json
+E:\InternApp\Trains\NguyenVanViet\bin\Debug\net6.0\NguyenVanViet.dll
+E:\InternApp\Trains\NguyenVanViet\bin\Debug\net6.0\NguyenVanViet.pdb
+E:\InternApp\Trains\NguyenVanViet\obj\Debug\net6.0\NguyenVanViet.csproj.AssemblyReference.cache
+E:\InternApp\Trains\NguyenVanViet\obj\Debug\net6.0\NguyenVanViet.GeneratedMSBuildEditorConfig.editorconfig
+E:\InternApp\Trains\NguyenVanViet\obj\Debug\net6.0\NguyenVanViet.AssemblyInfoInputs.cache
+E:\InternApp\Trains\NguyenVanViet\obj\Debug\net6.0\NguyenVanViet.AssemblyInfo.cs
+E:\InternApp\Trains\NguyenVanViet\obj\Debug\net6.0\NguyenVanViet.csproj.CoreCompileInputs.cache
+E:\InternApp\Trains\NguyenVanViet\obj\Debug\net6.0\NguyenVanViet.dll
+E:\InternApp\Trains\NguyenVanViet\obj\Debug\net6.0\refint\NguyenVanViet.dll
+E:\InternApp\Trains\NguyenVanViet\obj\Debug\net6.0\NguyenVanViet.pdb
+E:\InternApp\Trains\NguyenVanViet\obj\Debug\net6.0\NguyenVanViet.genruntimeconfig.cache
+E:\InternApp\Trains\NguyenVanViet\obj\Debug\net6.0\ref\NguyenVanViet.dll
+E:\Intern App\Trains\NguyenVanViet\bin\Debug\net6.0\NguyenVanViet.exe
+E:\Intern App\Trains\NguyenVanViet\bin\Debug\net6.0\NguyenVanViet.deps.json
+E:\Intern App\Trains\NguyenVanViet\bin\Debug\net6.0\NguyenVanViet.runtimeconfig.json
+E:\Intern App\Trains\NguyenVanViet\bin\Debug\net6.0\NguyenVanViet.dll
+E:\Intern App\Trains\NguyenVanViet\bin\Debug\net6.0\NguyenVanViet.pdb
+E:\Intern App\Trains\NguyenVanViet\obj\Debug\net6.0\NguyenVanViet.csproj.AssemblyReference.cache
+E:\Intern App\Trains\NguyenVanViet\obj\Debug\net6.0\NguyenVanViet.GeneratedMSBuildEditorConfig.editorconfig
+E:\Intern App\Trains\NguyenVanViet\obj\Debug\net6.0\NguyenVanViet.AssemblyInfoInputs.cache
+E:\Intern App\Trains\NguyenVanViet\obj\Debug\net6.0\NguyenVanViet.AssemblyInfo.cs
+E:\Intern App\Trains\NguyenVanViet\obj\Debug\net6.0\NguyenVanViet.csproj.CoreCompileInputs.cache
+E:\Intern App\Trains\NguyenVanViet\obj\Debug\net6.0\NguyenVanViet.dll
+E:\Intern App\Trains\NguyenVanViet\obj\Debug\net6.0\refint\NguyenVanViet.dll
+E:\Intern App\Trains\NguyenVanViet\obj\Debug\net6.0\NguyenVanViet.pdb
+E:\Intern App\Trains\NguyenVanViet\obj\Debug\net6.0\NguyenVanViet.genruntimeconfig.cache
+E:\Intern App\Trains\NguyenVanViet\obj\Debug\net6.0\ref\NguyenVanViet.dll
