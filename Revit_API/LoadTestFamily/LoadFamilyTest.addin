@@ -1,0 +1,11 @@
+﻿<?xml version="1.0"	 encoding="utf-8" standalone="no"?>
+<RevitAddIns>
+	<AddIn type="Application">
+		<Name>Pick Object</Name>
+		<Assembly>LoadTestFamily.dll</Assembly>
+		<AddInId>65A1077D-830F-552F-A697-2D80F22834C7</AddInId>
+		<FullClassName>LoadTestFamily.Class1</FullClassName>
+		<VendorId>Chin-Su</VendorId>
+		<VendorDescription>None</VendorDescription>
+	</AddIn>
+</RevitAddIns>
