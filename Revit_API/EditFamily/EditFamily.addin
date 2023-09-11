@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+
+<RevitAddIns>
+	<AddIn type="Command">
+		<Name>Edit Family</Name>
+		<ClientId>20FD145B-2F7F-4E90-8CD3-576BF4A123F7</ClientId>
+		<FullClassName>EditFamily.Class1</FullClassName>
+		<Assembly>EditFamily.dll</Assembly>
+	</AddIn>
+</RevitAddIns>
