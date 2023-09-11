@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+
+<RevitAddIns>
+	<AddIn type="Command">
+		<Name>Filter</Name>
+		<FullClassName>Filter.Main</FullClassName>
+		<Assembly>Filter.dll</Assembly>
+		<ClinetId>024E085F-7B03-4015-90AC-132EF471A004</ClinetId>
+	</AddIn>
+</RevitAddIns>
