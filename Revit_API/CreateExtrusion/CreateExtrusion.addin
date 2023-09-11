@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+
+<RevitAddIns>
+	<AddIn type="Command">
+		<Name>Create Extrusion</Name>
+		<ClientId>A5349055-C35F-4E8E-BB48-00BD5CE80C6B</ClientId>
+		<FullClassName>CreateExtrusion.Class1</FullClassName>
+		<Assembly>CreateExtrusion.dll</Assembly>
+	</AddIn>
+</RevitAddIns>
