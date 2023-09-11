@@ -31,6 +31,8 @@ namespace Bai_3
         public string Class { get; set; }
         public string  School { get; set; }
 
+        public Student() { } // Declare constructor with empty param
+
         public Student(int id, string name, int age, float income, string clas, string school, TaxData taxData) // Declare constructor with other params
         {
             Id = id;
@@ -150,15 +152,11 @@ namespace Bai_3
             }
 
                 Console.WriteLine("Employee: " + employeeCount);
-            //foreach (IPerson item in li)
-            //{
-            //    if (item is Employee)
-            //        item.GetInfo();
-            //}
-            List<Employee> empl = (from x in li
-                        where x is Employee
-                        select x as Employee).ToList();
-            List<Employee> employ =li.Where(x=> x is Employee).Cast<Employee>().ToList();
+            foreach (IPerson item in li)
+            {
+                if (item is Employee)
+                    item.GetInfo();
+            }
         }
     }
 

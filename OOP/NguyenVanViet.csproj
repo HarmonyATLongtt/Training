@@ -5,7 +5,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <StartupObject>Bai_1.Bai_1</StartupObject>
+    <StartupObject>Bai_3.Bai_3</StartupObject>
   </PropertyGroup>
 
 </Project>
