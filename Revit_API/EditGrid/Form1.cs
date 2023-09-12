@@ -6,6 +6,7 @@ namespace EditGrid
     public partial class Form1 : Form
     {
         public double distance;
+        public bool check = false;
         public Form1()
         {
             InitializeComponent();
@@ -14,6 +15,7 @@ namespace EditGrid
         private void btnOk_Click(object sender, EventArgs e)
         {
             double.TryParse(txtDistance.Text, out distance);
+            check = true;
             Close();
             return;
         }

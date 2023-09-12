@@ -18,6 +18,11 @@ namespace EditGrid
             Reference r1 = uiDoc.Selection.PickObject(Autodesk.Revit.UI.Selection.ObjectType.Element, new FilterElementExtension(e => e is Grid), "Select first grid");
             Reference r2 = uiDoc.Selection.PickObject(Autodesk.Revit.UI.Selection.ObjectType.Element, new FilterElementExtension(e => e is Grid), "Select second grid");
 
+            // Create references array
+            ReferenceArray references = new ReferenceArray();
+            references.Append(r1);
+            references.Append(r2);
+
             // Get element from reference
             Element e1 = doc.GetElement(r1);
             Element e2 = doc.GetElement(r2);
@@ -28,7 +33,6 @@ namespace EditGrid
 
             // Create line to get length of it
             Line line = Line.CreateBound(p1, p2);
-            TaskDialog.Show("Distance between two grid", "Distance is: " + UnitUtils.ConvertFromInternalUnits(line.Length, DisplayUnitType.DUT_MILLIMETERS).ToString());
 
             // Get origin distance between two grid
             double originDis = line.Length;
@@ -38,28 +42,36 @@ namespace EditGrid
             // Get direction normalize
             direction = direction.Normalize();
 
-            // Create form get input from user
-            Form1 f = new Form1();
-            f.ShowDialog();
-
-            // Get new distance from user
-            double newDis = UnitUtils.ConvertToInternalUnits(f.distance, DisplayUnitType.DUT_MILLIMETERS);
-
-            double t;
-
-            // Check if new distance < origin distance then vector is minus
-            if (originDis > newDis)
-            {
-                t = -newDis + originDis;
-            }
-            else
-                t = newDis - originDis;
-
             try
             {
                 using (var trans = new Transaction(doc, "Create dimension"))
                 {
                     trans.Start();
+
+                    Dimension dim = doc.Create.NewDimension(doc.ActiveView, line, references);
+                    if (dim.Value != -1)
+                    {
+                        TaskDialog.Show("Distance between two grid", "Distance is: " + UnitUtils.ConvertFromInternalUnits(line.Length, DisplayUnitType.DUT_MILLIMETERS).ToString());
+                    }
+                    else
+                    {
+                        message = "Two grid just select is not prallel!";
+                        return Result.Failed;
+                    }
+
+                    // Create form get input from user
+                    Form1 f = new Form1();
+                    f.ShowDialog();
+
+                    // Get new distance from user
+                    double newDis = UnitUtils.ConvertToInternalUnits(f.distance, DisplayUnitType.DUT_MILLIMETERS);
+
+                    // Calculate t is coefficient of direction vector to move
+                    double t = 0;
+                    if (f.check)
+                    {
+                        t = newDis - originDis;
+                    }
 
                     ElementTransformUtils.MoveElement(doc, e2.Id, t * direction);
 
