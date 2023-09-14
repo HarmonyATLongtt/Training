@@ -7,6 +7,7 @@ namespace EditGrid
     {
         public double distance;
         public bool check = false;
+
         public Form1()
         {
             InitializeComponent();

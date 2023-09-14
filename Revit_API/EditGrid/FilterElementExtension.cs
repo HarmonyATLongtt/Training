@@ -12,6 +12,7 @@ namespace EditGrid
         {
             this.validateElement = validateElement;
         }
+
         public bool AllowElement(Element elem)
         {
             return validateElement(elem);

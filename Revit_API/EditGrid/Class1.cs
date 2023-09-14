@@ -29,7 +29,25 @@ namespace EditGrid
 
             // Get origin of grid
             XYZ p1 = ((e1 as Grid).Curve as Line).Origin;
-            XYZ p2 = ((e2 as Grid).Curve as Line).Origin;
+            XYZ originOfP2 = ((e2 as Grid).Curve as Line).Origin;
+            XYZ p2 = null;
+            UV uv = new UV();
+            double distance = 0;
+
+            // Calculate point 2
+            Plane planeReference = Plane.CreateByNormalAndOrigin(((e1 as Grid).Curve as Line).Direction, p1);
+            planeReference.Project(originOfP2, out uv, out distance);
+
+            double angle = planeReference.Normal.AngleTo(originOfP2 - p1);
+
+            if (angle > Math.PI / 2)
+            {
+                p2 = planeReference.Normal * distance + originOfP2;
+            }
+            else
+            {
+                p2 = originOfP2 - planeReference.Normal * distance;
+            }
 
             // Create line to get length of it
             Line line = Line.CreateBound(p1, p2);
@@ -55,7 +73,7 @@ namespace EditGrid
                     }
                     else
                     {
-                        message = "Two grid just select is not prallel!";
+                        message = "Two grid just select is not parallel!";
                         return Result.Failed;
                     }
 
