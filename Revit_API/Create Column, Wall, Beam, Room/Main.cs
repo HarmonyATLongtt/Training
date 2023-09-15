@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Security.Policy;
 using System.Windows.Media.Imaging;
 
 namespace CreateColumnApi
@@ -92,12 +93,18 @@ namespace CreateColumnApi
 
             if(panel.AddItem(new PushButtonData("Select Element", "Get Information", assemblyPath, "CreateColumnApi.SelectCommand")) is PushButton selectButton)
             {
+                Uri uri = new Uri(@"D:\Training\Revit_API\Create Column, Wall, Beam, Room\Icons\Infor.png");
+                BitmapImage image = new BitmapImage(uri);
+                selectButton.Image = image;
                 selectButton.ToolTip = "Select an element and get its information...";
             }
 
             panel.AddSeparator();
             if (panel.AddItem(new PushButtonData("Set Comments", "Set Comments", assemblyPath, "CreateColumnApi.SetCommentsCommand")) is PushButton setCommentsButton)
             {
+                Uri uri = new Uri(@"D:\Training\Revit_API\Create Column, Wall, Beam, Room\Icons\Set.png");
+                BitmapImage image = new BitmapImage(uri);
+                setCommentsButton.Image = image;
                 setCommentsButton.ToolTip = "Select an element and set its comments...";
             }
 
