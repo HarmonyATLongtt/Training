@@ -1,8 +1,0 @@
-D:\Training\Revit_API\EditGrid\bin\Debug\EditGrid.dll
-D:\Training\Revit_API\EditGrid\bin\Debug\EditGrid.pdb
-D:\Training\Revit_API\EditGrid\obj\Debug\EditGrid.csproj.AssemblyReference.cache
-D:\Training\Revit_API\EditGrid\obj\Debug\EditGrid.Form1.resources
-D:\Training\Revit_API\EditGrid\obj\Debug\EditGrid.csproj.GenerateResource.cache
-D:\Training\Revit_API\EditGrid\obj\Debug\EditGrid.csproj.CoreCompileInputs.cache
-D:\Training\Revit_API\EditGrid\obj\Debug\EditGrid.dll
-D:\Training\Revit_API\EditGrid\obj\Debug\EditGrid.pdb

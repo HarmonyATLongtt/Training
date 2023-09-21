@@ -38,6 +38,7 @@ namespace EditGrid
             Plane planeReference = Plane.CreateByNormalAndOrigin(((e1 as Grid).Curve as Line).Direction, p1);
             planeReference.Project(originOfP2, out uv, out distance);
 
+            // Get angle to get reference point
             double angle = planeReference.Normal.AngleTo(originOfP2 - p1);
 
             if (angle > Math.PI / 2)
