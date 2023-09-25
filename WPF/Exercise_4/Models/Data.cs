@@ -1,18 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Data;
 
-namespace Exercise_1.Models
+namespace Exercise_4.Models
 {
     public class Data
     {
-        public DataTable _Data { get; set; }
-        public Data()
+        private DataTable _dataOfTable;
+
+        public DataTable DataOfTable
         {
-            _Data = new DataTable();
+            get => _dataOfTable;
+            set => _dataOfTable = value;
+        }
+
+        private string _name;
+
+        public string Name
+        {
+            get => _name;
+            set => _name = value;
         }
     }
 }
