@@ -1,5 +1,7 @@
 ﻿using NguyenVanViet.Core;
 
+#nullable enable
+
 namespace NguyenVanViet.Models
 {
     public class Person

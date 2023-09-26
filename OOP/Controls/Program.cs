@@ -1,5 +1,10 @@
 ﻿using NguyenVanViet.Core;
 using NguyenVanViet.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+#nullable enable
 
 namespace NguyenVanViet.Controls
 {

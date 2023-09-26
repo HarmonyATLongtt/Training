@@ -1,4 +1,5 @@
 ﻿using NguyenVanViet.Controls;
+using System;
 
 namespace Views
 {
@@ -9,6 +10,8 @@ namespace Views
             Program p = new Program();
             p.Init(true, NguyenVanViet.Core.ExerciseEnum.Bai_3);
             p.Output(true);
+
+            Console.Read();
         }
     }
 }
