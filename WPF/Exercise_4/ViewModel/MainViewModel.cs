@@ -20,12 +20,18 @@ namespace Exercise_4.ViewModel
             "Student", "Teacher", "Employee"
         };
 
-        private List<Data> _listData;
+        private DataCollection _listData;
 
-        public List<Data> ListData
+        public DataCollection ListData
         {
-            get { return _listData; }
-            set { _listData = value; }
+            get
+            {
+                return _listData;
+            }
+            set
+            {
+                _listData = value;
+            }
         }
 
         private Data _selectedItem;
@@ -78,15 +84,20 @@ namespace Exercise_4.ViewModel
                     if (!checkExist)
                     {
                         ListData.Clear();
+                        SelectedItem = null;
                         MessageBox.Show("File is not in correct format!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
                     }
                     MessageBox.Show("Import file successful!", "Message", MessageBoxButton.OK);
-                    SelectedItem = ListData[0];
                 }
+                SelectedItem = ListData[0];
             }
             catch
-            { }
+            {
+                ListData.Clear();
+                SelectedItem = null;
+                MessageBox.Show("File is not in correct format!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void ExportFile(object obj)
@@ -123,7 +134,7 @@ namespace Exercise_4.ViewModel
 
         public MainViewModel()
         {
-            _listData = new List<Data>();
+            _listData = new DataCollection();
             ImportFileCommand = new RelayCommand(ImportFile, (e) => true);
             ExportFileCommand = new RelayCommand(ExportFile, (e) => true);
         }
