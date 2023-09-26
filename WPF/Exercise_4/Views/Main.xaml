@@ -32,8 +32,7 @@
                       HorizontalAlignment="Left"
                       ItemsSource="{Binding ListData}"
                       DisplayMemberPath="Name"
-                      SelectedIndex="0"
-                      SelectedValuePath="DataOfTable">
+                      SelectedItem="{Binding SelectedItem}">
             </ComboBox>
         </TabPanel>
 
@@ -50,7 +49,7 @@
                   Height="250"
                   CanUserAddRows="False"
                   Visibility="{Binding ElementName=txtVisible, Path=Text}"
-                  ItemsSource="{Binding ElementName=cboTable, Path=SelectedItem.DataOfTable}">
+                  ItemsSource="{Binding SelectedItem.DataOfTable}">
             <DataGrid.CellStyle>
                 <Style TargetType="DataGridCell">
                     <Style.Triggers>

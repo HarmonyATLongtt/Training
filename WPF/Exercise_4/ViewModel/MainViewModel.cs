@@ -3,28 +3,41 @@ using Exercise_4.Commands;
 using Exercise_4.Models;
 using Microsoft.Win32;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Data;
-using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 
 namespace Exercise_4.ViewModel
 {
-    public class MainViewModel
+    public class MainViewModel : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+
         // Create a hash set to check sheet name
         private readonly HashSet<string> _sheetName = new HashSet<string>()
         {
             "Student", "Teacher", "Employee"
         };
 
-        private ObservableCollection<Data> _listData;
+        private List<Data> _listData;
 
-        public ObservableCollection<Data> ListData
+        public List<Data> ListData
         {
             get { return _listData; }
             set { _listData = value; }
+        }
+
+        private Data _selectedItem;
+
+        public Data SelectedItem
+        {
+            get => _selectedItem;
+            set
+            {
+                _selectedItem = value;
+                OnPropertyChanged(nameof(SelectedItem));
+            }
         }
 
         public ICommand ImportFileCommand { get; set; }
@@ -54,24 +67,8 @@ namespace Exercise_4.ViewModel
                     {
                         DataTable data = new DataTable();
                         // Get table in sheet
-                        var table = ws.Tables.FirstOrDefault();
+                        data = ws.Table(0).AsNativeDataTable();
 
-                        if (table != null)
-                        {
-                            // Get header
-                            foreach (var i in table.Fields)
-                                data.Columns.Add(i.Name);
-                            // Get data
-                            foreach (var tableRow in table.DataRange.RowsUsed())
-                            {
-                                var dataRow = data.NewRow();
-                                foreach (var i in tableRow.Cells())
-                                {
-                                    dataRow[i.WorksheetColumn().ColumnNumber() - 1] = i.Value;
-                                }
-                                data.Rows.Add(dataRow);
-                            }
-                        }
                         ListData.Add(new Data() { DataOfTable = data, Name = ws.Name });
                         if (!_sheetName.Contains(ws.Name))
                         {
@@ -85,6 +82,7 @@ namespace Exercise_4.ViewModel
                         return;
                     }
                     MessageBox.Show("Import file successful!", "Message", MessageBoxButton.OK);
+                    SelectedItem = ListData[0];
                 }
             }
             catch
@@ -125,9 +123,14 @@ namespace Exercise_4.ViewModel
 
         public MainViewModel()
         {
-            _listData = new ObservableCollection<Data>();
+            _listData = new List<Data>();
             ImportFileCommand = new RelayCommand(ImportFile, (e) => true);
             ExportFileCommand = new RelayCommand(ExportFile, (e) => true);
+        }
+
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }
