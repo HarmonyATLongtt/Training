@@ -37,7 +37,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>Views.Bai_1</StartupObject>
+    <StartupObject>OOP.Views.MainView</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -50,21 +50,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controls\Program.cs" />
-    <Compile Include="Core\ExerciseEnum.cs" />
+    <Compile Include="Programs\Bai_1.cs" />
+    <Compile Include="Programs\Bai_2.cs" />
+    <Compile Include="Programs\Bai_3.cs" />
     <Compile Include="Core\IPerson.cs" />
+    <Compile Include="Core\IProgram.cs" />
     <Compile Include="Core\TaxData.cs" />
     <Compile Include="Models\Employee.cs" />
     <Compile Include="Models\Person.cs" />
     <Compile Include="Models\Student.cs" />
     <Compile Include="Models\Teacher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Views\Bai_1.cs" />
-    <Compile Include="Views\Bai_2.cs" />
-    <Compile Include="Views\Bai_3.cs" />
+    <Compile Include="Views\MainView.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
