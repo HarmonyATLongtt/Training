@@ -3,6 +3,7 @@ using Exercise_4.Commands;
 using Exercise_4.Models;
 using Microsoft.Win32;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
 using System.Windows;
@@ -20,9 +21,9 @@ namespace Exercise_4.ViewModel
             "Student", "Teacher", "Employee"
         };
 
-        private DataCollection _listData;
+        private ObservableCollection<Data> _listData;
 
-        public DataCollection ListData
+        public ObservableCollection<Data> ListData
         {
             get
             {
@@ -134,7 +135,7 @@ namespace Exercise_4.ViewModel
 
         public MainViewModel()
         {
-            _listData = new DataCollection();
+            _listData = new ObservableCollection<Data>();
             ImportFileCommand = new RelayCommand(ImportFile, (e) => true);
             ExportFileCommand = new RelayCommand(ExportFile, (e) => true);
         }

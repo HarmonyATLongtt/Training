@@ -163,7 +163,6 @@
     <Compile Include="Commands\RelayCommand.cs" />
     <Compile Include="Converters\VisibleConverter.cs" />
     <Compile Include="Models\Data.cs" />
-    <Compile Include="Models\DataCollection.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="Views\Main.xaml.cs">
       <DependentUpon>Main.xaml</DependentUpon>
