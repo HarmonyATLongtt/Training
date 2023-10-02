@@ -1,4 +1,5 @@
-﻿using OOP.Programs;
+﻿using OOP.Core;
+using OOP.Programs;
 using System;
 
 namespace OOP.Views
@@ -21,34 +22,20 @@ namespace OOP.Views
 
                 if (int.TryParse(Console.ReadLine(), out choose))
                 {
+                    IProgram exercise = null;
                     Console.WriteLine();
                     switch (choose)
                     {
                         case 1:
-                            Bai_1 b1 = new Bai_1();
-                            b1.Init();
-                            b1.Output();
-                            Console.WriteLine();
-                            Console.Write("Enter any key to continue...");
-                            Console.ReadKey();
+                            exercise = new Bai_1();
                             break;
 
                         case 2:
-                            Bai_2 b2 = new Bai_2();
-                            b2.Init();
-                            b2.Output();
-                            Console.WriteLine();
-                            Console.Write("Enter any key to continue...");
-                            Console.ReadKey();
+                            exercise = new Bai_2();
                             break;
 
                         case 3:
-                            Bai_3 b3 = new Bai_3();
-                            b3.Init();
-                            b3.Output();
-                            Console.WriteLine();
-                            Console.Write("Enter any key to continue...");
-                            Console.ReadKey();
+                            exercise = new Bai_3();
                             break;
 
                         case 0:
@@ -60,6 +47,14 @@ namespace OOP.Views
                             Console.Write("Enter any key to continue...");
                             Console.ReadKey();
                             break;
+                    }
+                    if (exercise != null)
+                    {
+                        exercise.Init();
+                        exercise.Output();
+                        Console.WriteLine();
+                        Console.Write("Enter any key to continue...");
+                        Console.ReadKey();
                     }
                 }
                 else

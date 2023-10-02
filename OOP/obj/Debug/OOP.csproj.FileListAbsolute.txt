@@ -1,8 +1,0 @@
-D:\Training\OOP\bin\Debug\OOP.exe.config
-D:\Training\OOP\bin\Debug\OOP.exe
-D:\Training\OOP\bin\Debug\OOP.pdb
-D:\Training\OOP\obj\Debug\OOP.csproj.AssemblyReference.cache
-D:\Training\OOP\obj\Debug\OOP.csproj.SuggestedBindingRedirects.cache
-D:\Training\OOP\obj\Debug\OOP.csproj.CoreCompileInputs.cache
-D:\Training\OOP\obj\Debug\OOP.exe
-D:\Training\OOP\obj\Debug\OOP.pdb
