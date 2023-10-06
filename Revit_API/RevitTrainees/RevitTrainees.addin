@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+
+<RevitAddIns>
+	<AddIn type="Application">
+		<Name>Revit Trainees</Name>
+		<Assembly>RevitTrainees.dll</Assembly>
+		<ClientId>6371FB86-32AC-4B5A-AA3D-FB2A537EF898</ClientId>
+		<FullClassName>RevitTrainees.App</FullClassName>
+		<VendorId>Chin-Su</VendorId>
+	</AddIn>
+</RevitAddIns>

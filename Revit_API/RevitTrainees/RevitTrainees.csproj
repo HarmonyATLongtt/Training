@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{8EFB5321-B40D-42ED-B64B-7663A397AFC3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>RevitTrainees</RootNamespace>
+    <AssemblyName>RevitTrainees</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="RevitAPI">
+      <HintPath>C:\Program Files\Autodesk\Revit 2021\RevitAPI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="RevitAPIUI">
+      <HintPath>C:\Program Files\Autodesk\Revit 2021\RevitAPIUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="App.cs" />
+    <Compile Include="Commands\Cmd_CreateBeam.cs" />
+    <Compile Include="Commands\Cmd_CreateColumn.cs" />
+    <Compile Include="Commands\Cmd_CreateDimension.cs" />
+    <Compile Include="Commands\Cmd_CreateFamily.cs" />
+    <Compile Include="Commands\Cmd_CreateFloor.cs" />
+    <Compile Include="Commands\Cmd_CreateRoom.cs" />
+    <Compile Include="Commands\Cmd_CreateSchedule.cs" />
+    <Compile Include="Commands\Cmd_CreateSheet.cs" />
+    <Compile Include="Commands\Cmd_CreateTag.cs" />
+    <Compile Include="Commands\Cmd_CreateText.cs" />
+    <Compile Include="Commands\Cmd_CreateWall.cs" />
+    <Compile Include="Commands\Cmd_EditAndReloadFamily.cs" />
+    <Compile Include="Commands\Cmd_EditGrid.cs" />
+    <Compile Include="Commands\Cmd_FilterWall.cs" />
+    <Compile Include="Commands\Cmd_InstanceInLevel.cs" />
+    <Compile Include="Commands\Cmd_LoadFamily.cs" />
+    <Compile Include="Forms\Form_DistanceOfGrid.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Form_DistanceOfGrid.Designer.cs">
+      <DependentUpon>Form_DistanceOfGrid.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Form_FilterWall.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Form_FilterWall.Designer.cs">
+      <DependentUpon>Form_FilterWall.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Form_InstanceInLevel.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Form_InstanceInLevel.Designer.cs">
+      <DependentUpon>Form_InstanceInLevel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Models\LevelModel.cs" />
+    <Compile Include="Models\ViewModel.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils\FamilyOptions.cs" />
+    <Compile Include="Utils\FilterElementExtension.cs" />
+    <Compile Include="Utils\LoadFamily.cs" />
+    <Compile Include="Utils\SomeUtils.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="RevitTrainees.addin" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Forms\Form_DistanceOfGrid.resx">
+      <DependentUpon>Form_DistanceOfGrid.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Form_FilterWall.resx">
+      <DependentUpon>Form_FilterWall.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Form_InstanceInLevel.resx">
+      <DependentUpon>Form_InstanceInLevel.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy "$(TargetDir)RevitTrainees.dll" "$(ProgramData)\Autodesk\Revit\Addins\2021"
+
+if exist "$(ProjectDir)*.addin" copy "$(ProjectDir)*.addin" "$(ProgramData)\Autodesk\Revit\Addins\2021"</PostBuildEvent>
+  </PropertyGroup>
+</Project>
