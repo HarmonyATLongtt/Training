@@ -590,7 +590,7 @@
         {
             "{3C67513D-01DD-4637-8A68-80971EB9504F}:_03BE12A8756541A9846EDE21D6BF5246"
             {
-            "DefaultLocation" = "8:[ProgramFiles64Folder][Manufacturer]\\[ProductName]"
+            "DefaultLocation" = "8:C:\\ProgramData"
             "Name" = "8:#1925"
             "AlwaysCreate" = "11:FALSE"
             "Condition" = "8:"
@@ -706,7 +706,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Installer"
         "ProductCode" = "8:{746EB72F-266B-4605-9DFB-51E5AE96EAC5}"
-        "PackageCode" = "8:{8EA79654-2906-4DB1-9A7A-DB27BEB9FA8A}"
+        "PackageCode" = "8:{BDD12924-556C-438E-961B-43F9BB7B2B01}"
         "UpgradeCode" = "8:{3EF2AFFF-6CE8-4C75-9CB4-C875F93CD47A}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
