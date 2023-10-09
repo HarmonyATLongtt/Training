@@ -1,64 +1,35 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Events;
-using System;
-using System.Linq;
+using System.Collections.Generic;
 
 namespace Spam
 {
     [Transaction(TransactionMode.Manual)]
-    public class Class1 : IExternalCommand
+    public class Class1 : IExternalApplication
     {
-        private int oldCount = 0;
-        private int newCount = 0;
-
-        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
+        public Result OnShutdown(UIControlledApplication application)
         {
-            UIApplication uiApp = commandData.Application;
-            UIDocument uiDoc = uiApp.ActiveUIDocument;
-            Document doc = uiDoc.Document;
-
-            using (var trans = new Transaction(doc, "Text Note Creation"))
-            {
-                uiApp.Idling += new EventHandler<Autodesk.Revit.UI.Events.IdlingEventArgs>(idleUpdate);
-
-                oldCount = new FilteredElementCollector(doc)
-                .WhereElementIsNotElementType()
-                .WhereElementIsViewIndependent()
-                .ToList()
-                .Count();
-
-                trans.Commit();
-            }
-
             return Result.Succeeded;
         }
 
-        private void idleUpdate(object sender, IdlingEventArgs e)
+        public Result OnStartup(UIControlledApplication application)
         {
-            UIApplication uiApp = sender as UIApplication;
-            UIDocument uiDoc = uiApp.ActiveUIDocument;
-            Document doc = uiDoc.Document;
+            application.ControlledApplication.DocumentChanged +=
+                new System.EventHandler<Autodesk.Revit.DB.Events.DocumentChangedEventArgs>(DocumentChangedEvent);
+            return Result.Succeeded;
+        }
 
-            // Create a filtered element collector to find deleted elements
-            newCount = new FilteredElementCollector(doc)
-                .WhereElementIsNotElementType()
-                .WhereElementIsViewIndependent()
-                .ToList()
-                .Count();
+        private void DocumentChangedEvent(object sender, DocumentChangedEventArgs e)
+        {
+            ICollection<ElementId> oElementAdded = e.GetAddedElementIds();
+            ICollection<ElementId> oElementDeleted = e.GetDeletedElementIds();
 
-            // Check if there are any deleted elements
-            if (oldCount > newCount)
-            {
-                TaskDialog.Show("Element Deletion Notification", $"{oldCount - newCount} elements were deleted.");
-                oldCount = newCount;
-            }
-            else if (newCount > oldCount)
-            {
-                TaskDialog.Show("Element Deletion Notification", $"{-oldCount + newCount} elements were created.");
-                oldCount = newCount;
-            }
+            if (oElementAdded.Count > 0)
+                TaskDialog.Show("A", "Add: " + oElementAdded.Count.ToString());
+            if (oElementDeleted.Count > 0)
+                TaskDialog.Show("A", "Delete: " + oElementDeleted.Count.ToString());
         }
     }
 }
