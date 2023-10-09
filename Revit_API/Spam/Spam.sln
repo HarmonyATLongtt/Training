@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34031.279
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Spam", "Spam.csproj", "{8B659192-F782-4124-9AD5-2E5A147FE019}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Default = Debug|Default
+		Release|Default = Release|Default
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8B659192-F782-4124-9AD5-2E5A147FE019}.Debug|Default.ActiveCfg = Debug|Any CPU
+		{8B659192-F782-4124-9AD5-2E5A147FE019}.Debug|Default.Build.0 = Debug|Any CPU
+		{8B659192-F782-4124-9AD5-2E5A147FE019}.Release|Default.ActiveCfg = Release|Any CPU
+		{8B659192-F782-4124-9AD5-2E5A147FE019}.Release|Default.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F56EA04A-4940-4AFD-91C1-93713DD79BDC}
+	EndGlobalSection
+EndGlobal

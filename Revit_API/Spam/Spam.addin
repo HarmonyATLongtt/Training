@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+
+<RevitAddIns>
+	<AddIn type="Command">
+		<Assembly>E:\Intern App\Revit_API\Spam\bin\Debug\Spam.dll</Assembly>
+		<AddInId>9FD871C0-447B-4DB9-A469-81F100E4AE7D</AddInId>
+		<FullClassName>Spam.Class1</FullClassName>
+		<Text>Spam</Text>
+		<VendorId>ChinSu</VendorId>
+	</AddIn>
+</RevitAddIns>
