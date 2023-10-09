@@ -31,6 +31,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="RevitAPI">
       <HintPath>C:\Program Files\Autodesk\Revit 2021\RevitAPI.dll</HintPath>
       <Private>False</Private>
@@ -108,11 +110,27 @@
       <DependentUpon>Form_InstanceInLevel.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Icons\Beam.ico" />
+    <Content Include="Icons\Column.ico" />
+    <Content Include="Icons\CreateFamily.ico" />
+    <Content Include="Icons\Dimension.ico" />
+    <Content Include="Icons\EditFamily.ico" />
+    <Content Include="Icons\EditGrid.ico" />
+    <Content Include="Icons\FilterWall.ico" />
+    <Content Include="Icons\Floor.ico" />
+    <Content Include="Icons\Level.ico" />
+    <Content Include="Icons\LoadFamily.ico" />
+    <Content Include="Icons\Room.ico" />
+    <Content Include="Icons\Schedule.ico" />
+    <Content Include="Icons\Sheet.ico" />
+    <Content Include="Icons\Tag.ico" />
+    <Content Include="Icons\Text.ico" />
+    <Content Include="Icons\Wall.ico" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetDir)RevitTrainees.dll" "$(ProgramData)\Autodesk\Revit\Addins\2021"
-
-if exist "$(ProjectDir)*.addin" copy "$(ProjectDir)*.addin" "$(ProgramData)\Autodesk\Revit\Addins\2021"</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
 </Project>
