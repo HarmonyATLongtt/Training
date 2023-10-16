@@ -78,16 +78,19 @@ namespace Bai_3
             }
 
             Console.WriteLine("\nStudent: "+isStudent);
+            Student.Title();
             foreach(Student st in stList)
             {
                 st.GetInfo();
             }
             Console.WriteLine("\nTeacher: " + isTeacher);
+            Teacher.Title();
             foreach (Teacher t in tList)
             {
                 t.GetInfo();
             }
             Console.WriteLine("\nEmployee: " + isEmployee);
+            Employee.Title();
             foreach (Employee e in eList)
             {
                 e.GetInfo();

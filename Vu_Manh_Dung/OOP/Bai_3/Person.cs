@@ -50,7 +50,7 @@ namespace Bai_3
 
         public static void Title()
         {
-            Console.WriteLine("==========PERSON LIST==========");
+            Console.WriteLine("\t\t==========PERSON LIST==========");
             Console.Write(String.Format($"{"ID",0}{"Name",20}{"Age",10}"));
         }
 

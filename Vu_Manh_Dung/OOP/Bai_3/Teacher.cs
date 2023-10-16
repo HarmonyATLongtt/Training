@@ -27,7 +27,7 @@ namespace Bai_3
         public static void Title()
         {
             Person.Title();
-            Console.Write(String.Format($"{"School",20}{"Income",20}{"Taxcoe",20}"));
+            Console.WriteLine(String.Format($"{"School",20}{"Income",20}{"Taxcoe",20}"));
 
         }
 
