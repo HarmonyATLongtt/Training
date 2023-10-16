@@ -8,12 +8,14 @@ namespace Bai_2
 {
     public class Person
     {
-        public string Id { get; set; }
-        public string Name { get; set; }
+        public string? Id { get; set; }
+        public string? Name { get; set; }
         public int Age { get; set; }
-        public int Income { get; set; }
+        public double Income { get; set; }
         public float Taxcoe { get; set; }
-        public Person(string id, string name, int age, int income, TaxData taxcoe)
+
+        public Person() { }
+        public Person(string id, string name, int age, double income, TaxData taxcoe)
         {
             Id = id;
             Name = name;
@@ -28,8 +30,31 @@ namespace Bai_2
         }
         public float GetTax()
         {
-            return Income * Taxcoe;
+            return (float) Income * Taxcoe;
+        }
+        public void Init()
+        {
+            Console.Write("Person id: ");
+            Id = Console.ReadLine();
+            Console.Write("Person name: ");
+            Name = Console.ReadLine();
+            Console.Write("Person age: ");
+            Age = int.Parse(Console.ReadLine());
+            Console.Write("Incom: ");
+            Income = double.Parse(Console.ReadLine());
+            Console.Write("Taxcoe: ");
+            Taxcoe = float.Parse(Console.ReadLine());
         }
 
+        public static void Title()
+        {
+            Console.WriteLine("==========PERSON LIST==========");
+            Console.WriteLine(String.Format($"{"ID",0}{"Name",20}{"Tax",10}"));
+        }
+
+        public void Output()
+        {
+            Console.WriteLine(String.Format($"{Id,0}{Name,20}{GetTax(),10}"));
+        }
     }
 }

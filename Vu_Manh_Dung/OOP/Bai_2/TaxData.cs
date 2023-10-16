@@ -8,7 +8,7 @@ namespace Bai_2
 {
     public class TaxData
     {
-        public float GetTaxCoe(int Age, int Income)
+        public float GetTaxCoe(int Age, double Income)
         {
             if (Age < 18) return 0;
             else

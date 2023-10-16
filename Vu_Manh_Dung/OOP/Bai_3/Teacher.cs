@@ -8,16 +8,33 @@ namespace Bai_3
 {
     public class Teacher:Person
     {
-        public string School { get; set; }
+        public School school = new School();
 
-        public Teacher(string id,string name,int age, int income, TaxData taxcoe, string school):base(id,name,age,income,taxcoe)
+        public Teacher() { }
+
+        public Teacher(string id,string name,int age, int income, TaxData taxcoe, string schoolname):base(id,name,age,income,taxcoe)
         {
-            this.School = school;
+            school.Name = schoolname;
         }
 
-        public override string GetInfo()
+        public override void Init()
         {
-            return base.GetInfo() + $"{School}\t{Income}\t{Taxcoe}";
+            base.Init();
+            Console.Write("School: ");
+            school.Name = Console.ReadLine();
+        }
+
+        public static void Title()
+        {
+            Person.Title();
+            Console.Write(String.Format($"{"School",20}{"Income",20}{"Taxcoe",20}"));
+
+        }
+
+        override public void GetInfo()
+        {
+            base.GetInfo();
+            Console.WriteLine(String.Format($"{school.Name,20}{Income,20}{Taxcoe,20}"));
         }
     }
 }

@@ -4,7 +4,56 @@ namespace Bai_3
 {
     public class Program
     {
+        static void TypeOfPerson()
+        {
+            Console.WriteLine("======Type of person=====");
+            Console.WriteLine("1. Student");
+            Console.WriteLine("2. Teacher");
+            Console.WriteLine("3. Employee");
+        }
+        static void Init(List<Person> list, TaxData tax)
+        {
+            //hardcode
+            list.Add(new Student("P01", "Nguyen Van A", 15, "ABC", "a1"));
+            list.Add(new Student("P02", "Nguyen Van A", 15, "ABC", "a1"));
+            list.Add(new Student("P03", "Nguyen Van A", 15, "ABC", "a2"));
+            list.Add(new Student("P04", "Nguyen Van A", 15, "ABC", "a2"));
+            list.Add(new Teacher("P05", "Nguyen Van B", 18, 10000000, tax, "ABC"));
+            list.Add(new Teacher("P06", "Nguyen Van C", 20, 20000000, tax, "ABC"));
+            list.Add(new Teacher("P07", "Nguyen Van A", 15, 10000000, tax, "ABC"));
+            list.Add(new Employee("P08", "Nguyen Van B", 18, 10000000, tax, "HAT", "Team Leader"));
+            list.Add(new Employee("P09", "Nguyen Van C", 20, 20000000, tax, "HAT", "CEO"));
 
+
+            Console.Write("Number of person: ");
+            int n = int.Parse(Console.ReadLine());
+            for(int i=0; i<n; i++)
+            {
+                TypeOfPerson();
+                Console.Write("Choose: ");
+                int choose = int.Parse(Console.ReadLine());
+                switch(choose)
+                {
+                    case 1:
+                        Student st = new Student();
+                        st.Init();
+                        list.Add(st);
+                        break;
+                    case 2:
+                        Teacher t = new Teacher();
+                        t.Init();
+                        list.Add(t);
+                        break;
+                    case 3:
+                        Employee e = new Employee();
+                        e.Init();
+                        list.Add(e);
+                        break;
+                    
+                }
+            }
+
+        }
         static void Output(List<Person> list)
         {
             int isStudent = 0, isTeacher = 0, isEmployee = 0;
@@ -31,17 +80,17 @@ namespace Bai_3
             Console.WriteLine("\nStudent: "+isStudent);
             foreach(Student st in stList)
             {
-                Console.WriteLine(st.GetInfo());
+                st.GetInfo();
             }
             Console.WriteLine("\nTeacher: " + isTeacher);
             foreach (Teacher t in tList)
             {
-                Console.WriteLine(t.GetInfo());
+                t.GetInfo();
             }
             Console.WriteLine("\nEmployee: " + isEmployee);
             foreach (Employee e in eList)
             {
-                Console.WriteLine(e.GetInfo());
+                e.GetInfo();
             }
         }
 
@@ -49,15 +98,7 @@ namespace Bai_3
         {
             List<Person> list = new List<Person>();
             TaxData tax = new TaxData();
-            list.Add(new Student("P01", "Nguyen Van A", 15, "ABC", "a1"));
-            list.Add(new Student("P02", "Nguyen Van A", 15, "ABC", "a1"));
-            list.Add(new Student("P03", "Nguyen Van A", 15, "ABC", "a2"));
-            list.Add(new Student("P04", "Nguyen Van A", 15, "ABC", "a2"));
-            list.Add(new Teacher("P05", "Nguyen Van B", 18, 10000000, tax, "ABC"));
-            list.Add(new Teacher("P06", "Nguyen Van C", 20, 20000000, tax, "ABC"));
-            list.Add(new Teacher("P07", "Nguyen Van A", 15, 10000000, tax, "ABC"));
-            list.Add(new Employee("P08", "Nguyen Van B", 18, 10000000, tax, "HAT", "HR"));
-            list.Add(new Employee("P09", "Nguyen Van C", 20, 20000000, tax, "HAT", "CEO"));
+            Init(list, tax);
             Output(list);
         }
     }
