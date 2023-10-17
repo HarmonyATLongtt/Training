@@ -44,16 +44,10 @@ namespace Create_ModelLine
                     {
                         trans.Start();
 
-                        XYZ origin;
-                        if (f.Level != null)
-                        {
-                            origin = new XYZ(0, 0, f.Level.Elevation);
-                        }
-                        else
-                            origin = new XYZ(0, 0, f.SelectedView.GenLevel.Elevation);
+                        double elevation = f.Level != null ? f.Level.Elevation : f.SelectedView.GenLevel.Elevation;
+                        XYZ origin = new XYZ(0, 0, elevation);
 
-                        for (int i = 0; i < points.Count; i++)
-                            points[i] = new XYZ(points[i].X, points[i].Y, origin.Z);
+                        points.ConvertAll(e => new XYZ(e.X, e.Y, elevation));
 
                         for (int i = 0; i < points.Count - 1; i++)
                             curveArray.Append(Line.CreateBound(points[i], points[i + 1]));

@@ -12,7 +12,7 @@ namespace Create_ModelLine.Forms
         private Document doc = null;
         private List<LevelModel> levelModels;
         private List<ViewModel> viewModels;
-        private List<ModelLineModel> modelLines;
+        private List<Element> modelLines;
 
         private Level _level;
 
@@ -46,8 +46,9 @@ namespace Create_ModelLine.Forms
             this.doc = doc;
             levelModels = new List<LevelModel>();
             viewModels = new List<ViewModel>();
-            modelLines = new List<ModelLineModel>();
+            modelLines = new List<Element>();
 
+            StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             InitializeComponent();
         }
 
@@ -59,12 +60,12 @@ namespace Create_ModelLine.Forms
 
             foreach (var ele in lineTemp.GetLineStyleIds().OrderBy(ele => doc.GetElement(ele).Name))
             {
-                modelLines.Add(new ModelLineModel() { Name = doc.GetElement(ele).Name, LineStyle = ele });
+                modelLines.Add(doc.GetElement(ele));
             }
 
             cboLineStyle.DataSource = modelLines;
             cboLineStyle.DisplayMember = "Name";
-            cboLineStyle.ValueMember = "LineStyle";
+            cboLineStyle.ValueMember = "Id";
 
             doc.Delete(lineTemp.Id);
 

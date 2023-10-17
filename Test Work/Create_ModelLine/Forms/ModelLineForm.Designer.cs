@@ -45,6 +45,7 @@
             // 
             resources.ApplyResources(this.rdModelLine, "rdModelLine");
             this.rdModelLine.Checked = true;
+            this.rdModelLine.Cursor = System.Windows.Forms.Cursors.Hand;
             this.rdModelLine.Name = "rdModelLine";
             this.rdModelLine.TabStop = true;
             this.rdModelLine.UseVisualStyleBackColor = true;
@@ -53,6 +54,7 @@
             // rdDetailLine
             // 
             resources.ApplyResources(this.rdDetailLine, "rdDetailLine");
+            this.rdDetailLine.Cursor = System.Windows.Forms.Cursors.Hand;
             this.rdDetailLine.Name = "rdDetailLine";
             this.rdDetailLine.UseVisualStyleBackColor = true;
             this.rdDetailLine.CheckedChanged += new System.EventHandler(this.rdDetailLine_CheckedChanged);
@@ -73,6 +75,7 @@
             // cboLevel_View
             // 
             resources.ApplyResources(this.cboLevel_View, "cboLevel_View");
+            this.cboLevel_View.BackColor = System.Drawing.SystemColors.Window;
             this.cboLevel_View.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboLevel_View.FormattingEnabled = true;
             this.cboLevel_View.Name = "cboLevel_View";
@@ -85,22 +88,30 @@
             // cboLineStyle
             // 
             resources.ApplyResources(this.cboLineStyle, "cboLineStyle");
+            this.cboLineStyle.BackColor = System.Drawing.SystemColors.Window;
             this.cboLineStyle.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboLineStyle.ForeColor = System.Drawing.SystemColors.WindowText;
             this.cboLineStyle.FormattingEnabled = true;
             this.cboLineStyle.Name = "cboLineStyle";
             // 
             // btnOk
             // 
             resources.ApplyResources(this.btnOk, "btnOk");
+            this.btnOk.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.btnOk.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnOk.FlatAppearance.BorderColor = System.Drawing.Color.Black;
             this.btnOk.Name = "btnOk";
-            this.btnOk.UseVisualStyleBackColor = true;
+            this.btnOk.UseVisualStyleBackColor = false;
             this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
             // 
             // btnCancel
             // 
             resources.ApplyResources(this.btnCancel, "btnCancel");
+            this.btnCancel.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.btnCancel.FlatAppearance.BorderColor = System.Drawing.Color.Black;
+            this.btnCancel.ForeColor = System.Drawing.SystemColors.ControlText;
             this.btnCancel.Name = "btnCancel";
-            this.btnCancel.UseVisualStyleBackColor = true;
+            this.btnCancel.UseVisualStyleBackColor = false;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
             // ModelLineForm
