@@ -28,8 +28,6 @@ namespace Create_ModelLine
                     if (f.Break)
                         return Result.Succeeded;
 
-                    trans.Commit();
-
                     while (true)
                     {
                         points.Add(uiDoc.Selection.PickPoint("Pick point to create lines..."));
