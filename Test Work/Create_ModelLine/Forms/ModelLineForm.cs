@@ -1,5 +1,4 @@
 ﻿using Autodesk.Revit.DB;
-using Create_ModelLine.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,8 +9,8 @@ namespace Create_ModelLine.Forms
     public partial class ModelLineForm : System.Windows.Forms.Form
     {
         private Document doc = null;
-        private List<LevelModel> levelModels;
-        private List<ViewModel> viewModels;
+        private List<Level> levelModels;
+        private List<View> viewModels;
         private List<Element> modelLines;
 
         private Level _level;
@@ -44,8 +43,8 @@ namespace Create_ModelLine.Forms
         public ModelLineForm(Document doc)
         {
             this.doc = doc;
-            levelModels = new List<LevelModel>();
-            viewModels = new List<ViewModel>();
+            levelModels = new List<Level>();
+            viewModels = new List<View>();
             modelLines = new List<Element>();
 
             StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -69,36 +68,26 @@ namespace Create_ModelLine.Forms
 
             doc.Delete(lineTemp.Id);
 
-            List<Level> levels = new FilteredElementCollector(doc)
+            levelModels = new FilteredElementCollector(doc)
                 .WhereElementIsNotElementType()
                 .OfClass(typeof(Level))
                 .Cast<Level>()
                 .OrderBy(ls => ls.Elevation)
                 .ToList();
 
-            foreach (Level level in levels)
-            {
-                levelModels.Add(new LevelModel() { Level = level, Name = level.Name });
-            }
-
-            foreach (View v in GetAllViews(doc))
-            {
-                viewModels.Add(new ViewModel() { ViewSelect = v, Name = v.ViewType + ": " + v.Name });
-            }
+            viewModels = GetAllViews(doc);
 
             if (rdModelLine.Checked == true)
             {
                 lbView_Level.Text = "Level:";
                 cboLevel_View.DataSource = levelModels;
                 cboLevel_View.DisplayMember = "Name";
-                cboLevel_View.ValueMember = "Level";
             }
             else
             {
                 lbView_Level.Text = "View:";
                 cboLevel_View.DataSource = viewModels;
-                cboLevel_View.DisplayMember = "Name";
-                cboLevel_View.ValueMember = "ViewSelect";
+                cboLevel_View.DisplayMember = "Title";
             }
             Break = true;
         }
@@ -108,15 +97,13 @@ namespace Create_ModelLine.Forms
             lbView_Level.Text = "Level:";
             cboLevel_View.DataSource = levelModels;
             cboLevel_View.DisplayMember = "Name";
-            cboLevel_View.ValueMember = "Level";
         }
 
         private void rdDetailLine_CheckedChanged(object sender, EventArgs e)
         {
             lbView_Level.Text = "View:";
             cboLevel_View.DataSource = viewModels;
-            cboLevel_View.DisplayMember = "Name";
-            cboLevel_View.ValueMember = "ViewSelect";
+            cboLevel_View.DisplayMember = "Title";
         }
 
         private List<View> GetAllViews(Document doc)
@@ -132,7 +119,7 @@ namespace Create_ModelLine.Forms
                     views.Add(view);
             }
 
-            return views;
+            return views.OrderBy(v => v.Name).ToList();
         }
 
         private void btnOk_Click(object sender, EventArgs e)
@@ -141,12 +128,12 @@ namespace Create_ModelLine.Forms
             {
                 Level = null;
                 detailCheck = true;
-                SelectedView = cboLevel_View.SelectedValue as View;
+                SelectedView = viewModels[cboLevel_View.SelectedIndex];
             }
             else
             {
                 SelectedView = null;
-                Level = cboLevel_View.SelectedValue as Level;
+                Level = levelModels[cboLevel_View.SelectedIndex];
             }
 
             ModelLineSelect = cboLineStyle.SelectedValue as ElementId;

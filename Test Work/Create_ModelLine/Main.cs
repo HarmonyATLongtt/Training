@@ -47,7 +47,7 @@ namespace Create_ModelLine
                         double elevation = f.Level != null ? f.Level.Elevation : f.SelectedView.GenLevel.Elevation;
                         XYZ origin = new XYZ(0, 0, elevation);
 
-                        points.ConvertAll(e => new XYZ(e.X, e.Y, elevation));
+                        points = points.ConvertAll(p => new XYZ(p.X, p.Y, elevation));
 
                         for (int i = 0; i < points.Count - 1; i++)
                             curveArray.Append(Line.CreateBound(points[i], points[i + 1]));
@@ -55,14 +55,14 @@ namespace Create_ModelLine
 
                         if (f.detailCheck)
                         {
-                            DetailCurveArray detailCurveArray = doc.Create.NewDetailCurveArray(f.SelectedView, curveArray) as DetailCurveArray;
+                            DetailCurveArray detailCurveArray = doc.Create.NewDetailCurveArray(f.SelectedView, curveArray);
                             foreach (DetailLine detailLine in detailCurveArray)
                                 detailLine.LineStyle = doc.GetElement(f.ModelLineSelect);
                         }
                         else
                         {
                             SketchPlane plane = SketchPlane.Create(doc, Plane.CreateByNormalAndOrigin(new XYZ(0, 0, 1), origin));
-                            ModelCurveArray modelCurveArray = doc.Create.NewModelCurveArray(curveArray, plane) as ModelCurveArray;
+                            ModelCurveArray modelCurveArray = doc.Create.NewModelCurveArray(curveArray, plane);
                             foreach (ModelLine modelLine in modelCurveArray)
                                 modelLine.LineStyle = doc.GetElement(f.ModelLineSelect);
                         }

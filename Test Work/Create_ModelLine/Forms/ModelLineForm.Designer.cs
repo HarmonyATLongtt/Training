@@ -128,7 +128,6 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "ModelLineForm";
-            this.TopMost = true;
             this.Load += new System.EventHandler(this.ModelLineForm_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();

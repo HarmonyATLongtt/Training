@@ -59,8 +59,6 @@
     <Compile Include="Forms\ModelLineForm.Designer.cs">
       <DependentUpon>ModelLineForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Models\LevelModel.cs" />
-    <Compile Include="Models\ViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />
