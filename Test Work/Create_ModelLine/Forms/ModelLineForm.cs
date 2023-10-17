@@ -66,8 +66,6 @@ namespace Create_ModelLine.Forms
             cboLineStyle.DisplayMember = "Name";
             cboLineStyle.ValueMember = "Id";
 
-            doc.Delete(lineTemp.Id);
-
             levelModels = new FilteredElementCollector(doc)
                 .WhereElementIsNotElementType()
                 .OfClass(typeof(Level))
