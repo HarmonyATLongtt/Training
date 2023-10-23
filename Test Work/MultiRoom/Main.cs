@@ -27,17 +27,17 @@ namespace MultiRoom
             foreach (var roomsItem in roomsSelection)
                 rooms.Add(doc.GetElement(roomsItem) as Room);
 
+            // Set option to get bound of room
             SpatialElementBoundaryOptions optios = new SpatialElementBoundaryOptions();
             optios.SpatialElementBoundaryLocation = SpatialElementBoundaryLocation.Center;
 
             int index = 1;
             double totalArea = 0;
-
             using (var trans = new Transaction(doc))
             {
                 #region Load Family and merge room
 
-                trans.Start("Load family...");
+                trans.Start("Create rectangle...");
                 // Load family
                 Family family = new LoadFamily().GetFamily(doc);
                 FamilySymbol symbol = doc.GetElement(family.GetFamilySymbolIds().First()) as FamilySymbol;
@@ -59,15 +59,10 @@ namespace MultiRoom
                         roomsSolid = CreateExtrusionGeometry(profileLoops);
                 }
 
-                trans.Commit();
-
                 #endregion Load Family and merge room
 
-                while (Math.Round(roomsSolid.SurfaceArea, 5) > 0)
+                while (roomsSolid.SurfaceArea > 0)
                 {
-                    #region Create family instance
-
-                    trans.Start("Create family instace number " + index);
                     // Get all edges is line bottom and top of solid
                     List<Line> lines = new List<Line>();
                     foreach (Edge i in roomsSolid.Edges)
@@ -84,12 +79,13 @@ namespace MultiRoom
 
                     // Get line have y min
                     var firstLine = tempLines.First();
+
                     double firstX = Math.Round(firstLine.GetEndPoint(0).X, 5);
                     double secondX = Math.Round(firstLine.GetEndPoint(1).X, 5);
 
                     // Remove line was picked from list
                     lines.Remove(firstLine);
-
+                    tempLines = lines.OrderBy(lin => lin.GetEndPoint(0).X);
                     // Get point follow direction left to right
                     if (firstX > secondX)
                     {
@@ -98,9 +94,11 @@ namespace MultiRoom
                         firstX = temp;
                     }
 
-                    // Find y min, where have line intersect
+                    // Find area max
                     double yMin = double.MaxValue;
-                    foreach (Line line in lines)
+                    double yMax = 0, maxArea = 0, tempX = 0;
+                    FamilyInstance instance = null;
+                    foreach (Line line in tempLines)
                     {
                         double fx = Math.Round(line.GetEndPoint(0).X, 5);
                         double sx = Math.Round(line.GetEndPoint(1).X, 5);
@@ -117,51 +115,83 @@ namespace MultiRoom
                         {
                             if (yMin > Math.Round(line.GetEndPoint(0).Y, 5))
                                 yMin = Math.Round(line.GetEndPoint(0).Y, 5);
+                            if (!symbol.IsActive)
+                                symbol.Activate();
+
+                            if (sx >= secondX)
+                                sx = secondX;
+
+                            if (maxArea < (sx - firstX) * (yMin - firstLine.GetEndPoint(0).Y))
+                            {
+                                maxArea = (sx - firstX) * (yMin - firstLine.GetEndPoint(0).Y);
+                                yMax = yMin;
+                                tempX = sx;
+                            }
                         }
                     }
 
-                    // Create family instance and set parameter for it
-                    if (!symbol.IsActive)
-                        symbol.Activate();
-                    XYZ location = new XYZ((secondX + firstX) / 2, (firstLine.GetEndPoint(0).Y + yMin) / 2, 0);
-                    var instance = doc.Create.NewFamilyInstance(location, symbol, Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
-                    instance.LookupParameter("エリア・幅").Set(secondX - firstX);
-                    instance.LookupParameter("エリア・長さ").Set(yMin - firstLine.GetEndPoint(0).Y);
-                    instance.LookupParameter("エリア名称").Set(index++.ToString());
+                    XYZ location = new XYZ((tempX + firstX) / 2, (firstLine.GetEndPoint(0).Y + yMax) / 2, 0);
 
-                    trans.Commit();
+                    // Handle line have small length
+                    if (Math.Round(tempX - firstX, 2) != 0)
+                    {
+                        instance = doc.Create.NewFamilyInstance(location, symbol, Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
 
-                    #endregion Create family instance
+                        instance.LookupParameter("エリア・幅").Set(tempX - firstX);
+                        instance.LookupParameter("エリア・長さ").Set(yMax - firstLine.GetEndPoint(0).Y);
 
-                    // Calculate total area
-                    totalArea += instance.LookupParameter("エリア・面積").AsDouble();
+                        doc.Regenerate();
 
-                    #region Create new room from instace was placed and calculate area not set
-
-                    trans.Start("Execute some task...");
+                        instance.LookupParameter("エリア名称").Set(index++.ToString());
+                        totalArea += instance.LookupParameter("エリア・面積").AsDouble();
+                    }
 
                     double z = 0;
-                    XYZ p1 = new XYZ(firstX, yMin, z);
+                    XYZ p1 = new XYZ(firstX, yMax, z);
                     XYZ p2 = new XYZ(firstX, firstLine.GetEndPoint(0).Y, z);
-                    XYZ p3 = new XYZ(secondX, firstLine.GetEndPoint(0).Y, z);
-                    XYZ p4 = new XYZ(secondX, yMin, z);
+                    XYZ p3 = new XYZ(tempX, firstLine.GetEndPoint(0).Y, z);
+                    XYZ p4 = new XYZ(tempX, yMax, z);
 
                     CurveLoop curves = new CurveLoop();
-                    curves.Append(Line.CreateBound(p1, p2));
-                    curves.Append(Line.CreateBound(p2, p3));
-                    curves.Append(Line.CreateBound(p3, p4));
-                    curves.Append(Line.CreateBound(p4, p1));
+                    bool check = false;
+
+                    try
+                    {
+                        curves.Append(Line.CreateBound(p1, p2));
+                        curves.Append(Line.CreateBound(p2, p3));
+                        curves.Append(Line.CreateBound(p3, p4));
+                        curves.Append(Line.CreateBound(p4, p1));
+                    }
+                    catch
+                    {
+                        // Handle not create sloid has small length
+                        p1 = new XYZ(firstX, yMax, z);
+                        p2 = new XYZ(firstX, firstLine.GetEndPoint(0).Y, z);
+                        p3 = new XYZ(firstX + 0.01, firstLine.GetEndPoint(0).Y, z);
+                        p4 = new XYZ(firstX + 0.01, yMax, z);
+
+                        curves = new CurveLoop();
+                        curves.Append(Line.CreateBound(p1, p2));
+                        curves.Append(Line.CreateBound(p2, p3));
+                        curves.Append(Line.CreateBound(p3, p4));
+                        curves.Append(Line.CreateBound(p4, p1));
+                        check = true;
+                    }
 
                     profileLoops.Clear();
                     profileLoops.Add(curves);
 
                     var tempRoomSolid = CreateExtrusionGeometry(profileLoops);
 
-                    roomsSolid = BooleanOperationsUtils.ExecuteBooleanOperation(roomsSolid, tempRoomSolid, BooleanOperationsType.Difference);
-                    trans.Commit();
-
-                    #endregion Create new room from instace was placed and calculate area not set
+                    if (!check)
+                        roomsSolid = BooleanOperationsUtils.ExecuteBooleanOperation(roomsSolid, tempRoomSolid, BooleanOperationsType.Difference);
+                    else
+                    {
+                        var sameSolid = BooleanOperationsUtils.ExecuteBooleanOperation(roomsSolid, tempRoomSolid, BooleanOperationsType.Intersect);
+                        roomsSolid = BooleanOperationsUtils.ExecuteBooleanOperation(roomsSolid, sameSolid, BooleanOperationsType.Difference);
+                    }
                 }
+                trans.Commit();
                 totalArea = UnitUtils.ConvertFromInternalUnits(totalArea, DisplayUnitType.DUT_SQUARE_METERS);
                 TaskDialog.Show("Message", "Total family instace was placed: " + (index - 1) +
                     "\nTotal area of family instace was placed: " + totalArea + "m" + (char)178);
