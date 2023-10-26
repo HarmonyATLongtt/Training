@@ -1,0 +1,19 @@
+﻿<UserControl x:Class="APP_WPF_MVVM.View.view"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:APP_WPF_MVVM.View"
+             xmlns:viewmodel ="clr-namespace:APP_WPF_MVVM.ViewModel" xmlns:i="clr-namespace:Microsoft.VisualBasic;assembly=Microsoft.VisualBasic.Core" xmlns:i1="http://schemas.microsoft.com/expression/2010/interactivity" d:DataContext="{d:DesignInstance Type=viewmodel:MainViewModel}"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+
+    <Grid x:Name="bo" HorizontalAlignment="Center" Width="800" Height="450" VerticalAlignment="Top">
+        <DataGrid x:Name="dtg1" ItemsSource="{Binding UserList}"  Margin="61,126,61,126"/>
+        <Button Content="Import" Command="{Binding ImportCommand}" HorizontalAlignment="Left" Margin="198,360,0,0" VerticalAlignment="Top" Height="32" Width="68"/>
+        <Button x:Name="btnexport" Command="{Binding ExportCommand}" Content="Export" HorizontalAlignment="Left" Margin="548,360,0,0" VerticalAlignment="Top" Height="33" Width="67"/>
+        <ComboBox x:Name="cbo1" SelectedIndex="{Binding Index}"  ItemsSource="{Binding SheetNames}"  HorizontalAlignment="Left" Margin="61,55,0,0" VerticalAlignment="Top" Width="120" Text="Sheet"/>
+        <Label x:Name="txtsheet" Content="Sheets" HorizontalAlignment="Left" Margin="61,26,0,0" VerticalAlignment="Top" HorizontalContentAlignment="Center" FontSize="14" FontWeight="Bold" Background="#FFD6CDCD" Cursor="AppStarting"/>
+    </Grid>
+
+</UserControl>

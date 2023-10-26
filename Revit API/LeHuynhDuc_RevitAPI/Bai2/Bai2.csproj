@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{196A0853-A0A0-4CDC-A506-225EB747FF67}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Bai2</RootNamespace>
+    <AssemblyName>Bai2</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Bai2.addin</ApplicationManifest>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="RevitAPI">
+      <HintPath>C:\Program Files\Autodesk\Revit 2021\RevitAPI.dll</HintPath>
+    </Reference>
+    <Reference Include="RevitAPIUI">
+      <HintPath>C:\Program Files\Autodesk\Revit 2021\RevitAPIUI.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Add_Field_Schedule.cs" />
+    <Compile Include="Add_View_Sheet.cs" />
+    <Compile Include="Create_Dimension.cs" />
+    <Compile Include="Create_Grid.cs" />
+    <Compile Include="Create_Instance.cs" />
+    <Compile Include="Create_Floor.cs" />
+    <Compile Include="Create_Level.cs" />
+    <Compile Include="Create_NewFamily.cs" />
+    <Compile Include="Create_Region.cs" />
+    <Compile Include="Create_Schedule.cs" />
+    <Compile Include="Create_Sheet.cs" />
+    <Compile Include="Create_Tag.cs" />
+    <Compile Include="Create_Text.cs" />
+    <Compile Include="Create_View.cs" />
+    <Compile Include="Create_ViewPlane.cs" />
+    <Compile Include="Create_Wall.cs" />
+    <Compile Include="ExternalApplication.cs" />
+    <Compile Include="FamilyLoadOptions.cs" />
+    <Compile Include="Filtered_window.cs" />
+    <Compile Include="Filtered_wall.cs" />
+    <Compile Include="Filter_Schedule.cs" />
+    <Compile Include="Find_Intersector.cs" />
+    <Compile Include="Formating_Schedule.cs" />
+    <Compile Include="Geometry_Solid.cs" />
+    <Compile Include="GetLoaded_Symbols.cs" />
+    <Compile Include="Filter_Door.cs" />
+    <Compile Include="Grouping_Header_Schedule.cs" />
+    <Compile Include="HelloWorld.cs" />
+    <Compile Include="Line_Left_Right.cs" />
+    <Compile Include="Load_Family.cs" />
+    <Compile Include="MyFirstCommand.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Retrieving_All_Levels.cs" />
+    <Compile Include="Selection_Element.cs" />
+    <Compile Include="Sorting_Grouping_Schedule.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Bai2.addin">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

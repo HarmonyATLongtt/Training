@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<RevitAddIns>
+
+	<AddIn Type="Application">
+		<Name>App</Name>
+		<Assembly>D:\ThucTap\WPF1\LeHuynhDuc_RevitAPI_New1\RevitAPI_B1\bin\Debug\RevitAPI_B1.dll</Assembly>
+		<!--<Assembly>RevitAPI_B1.dll</Assembly>-->
+		<AddInId>9D1F3D07-6F9B-4E89-8307-D11D829FF66F</AddInId>
+		<FullClassName>RevitAPI_B1.App</FullClassName>
+		<VendorId>ADSK</VendorId>
+		<VendorDescription>Autodesk, www.autodesk.com</VendorDescription>
+	</AddIn>	
+
+	
+</RevitAddIns>

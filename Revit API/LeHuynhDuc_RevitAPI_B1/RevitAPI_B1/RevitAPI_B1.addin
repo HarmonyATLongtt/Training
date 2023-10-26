@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<RevitAddIns>
+	<AddIn Type="Command">
+		<Assembly>D:\ThucTap\Revit\RevitAPI_B1\RevitAPI_B1\bin\Debug\RevitAPI_B1.dll</Assembly>
+		<AddInId>D5007B7B-6772-445E-9E2D-8BBEC7294600</AddInId>
+		<FullClassName>RevitAPI_B1.Commands.CmdCreate_Floor</FullClassName>
+		<Text>Create_Floor</Text>
+		<VendorId>ADSK</VendorId>
+		<VendorDescription>Autodesk, www.autodesk.com</VendorDescription>
+	</AddIn>
+	<AddIn Type="Application">
+		<Name>App</Name>
+		<Assembly>D:\ThucTap\Revit\RevitAPI_B1\RevitAPI_B1\bin\Debug\RevitAPI_B1.dll</Assembly>
+		<AddInId>9D1F3D07-6F9B-4E89-8307-D11D829FF66F</AddInId>
+		<FullClassName>RevitAPI_B1.App</FullClassName>
+		<VendorId>ADSK</VendorId>
+		<VendorDescription>Autodesk, www.autodesk.com</VendorDescription>
+	</AddIn>
+	<AddIn Type="DBApplication">
+		<Name>Event</Name>
+		<Assembly>D:\ThucTap\Revit\RevitAPI_B1\RevitAPI_B1\bin\Debug\RevitAPI_B1.dll</Assembly>
+		<AddInId>CF493215-CABE-47AD-BAAC-A0CA84E7A6DA</AddInId>
+		<FullClassName>RevitAPI_B1.ExternalApplication_Event</FullClassName>
+		<VendorId>ADSK</VendorId>
+		<VendorDescription>Autodesk, www.autodesk.com</VendorDescription>
+	</AddIn>
+	
+</RevitAddIns>

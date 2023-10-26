@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<RevitAddIns>
+	<AddIn Type="Command">
+		<Assembly>D:\ThucTap\Revit\Bai2\Bai2\bin\Debug\Bai2.dll</Assembly>
+		<AddInId>BCC442E5-3935-4343-852C-04255E4D06EA</AddInId>
+		<FullClassName>Bai2.MyFirstCommand</FullClassName>
+		<Text>GetElementID</Text>
+		<VendorId>DucLe</VendorId>
+		<VendorDescription>Autodesk, www.autodesk.com</VendorDescription>
+	</AddIn>
+	<AddIn Type="Command">
+		<Assembly>D:\ThucTap\Revit\Bai2\Bai2\bin\Debug\Bai2.dll</Assembly>
+		<AddInId>082C705C-9BDD-4B93-BAA5-AA81282F0A45</AddInId>
+		<FullClassName>Bai2.HelloWorld</FullClassName>
+		<Text>Message</Text>
+		<VendorId>ADSK</VendorId>
+		<VendorDescription>Autodesk, www.autodesk.com</VendorDescription>
+	</AddIn>
+	<AddIn Type="Application">
+		<Name>ExternalApplication</Name>
+		<Assembly>D:\ThucTap\Revit\Bai2\Bai2\bin\Debug\Bai2.dll</Assembly>
+		<AddInId>E6262222-1F89-4C8A-A171-463CB7DF7E31</AddInId>
+		<FullClassName>Bai2.ExternalApplication</FullClassName>
+		<VendorId>ADSK</VendorId>
+		<VendorDescription>Autodesk, www.autodesk.com</VendorDescription>
+	</AddIn>
+</RevitAddIns>

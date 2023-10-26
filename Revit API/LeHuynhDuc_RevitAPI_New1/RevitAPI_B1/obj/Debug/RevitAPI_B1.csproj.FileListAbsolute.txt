@@ -1,0 +1,17 @@
+D:\ThucTap\Revit\RevitAPI_B1\RevitAPI_B1\bin\Debug\RevitAPI_B1.dll
+D:\ThucTap\Revit\RevitAPI_B1\RevitAPI_B1\bin\Debug\RevitAPI_B1.pdb
+D:\ThucTap\Revit\RevitAPI_B1\RevitAPI_B1\obj\Debug\RevitAPI_B1.csproj.AssemblyReference.cache
+D:\ThucTap\Revit\RevitAPI_B1\RevitAPI_B1\obj\Debug\RevitAPI_B1.csproj.CoreCompileInputs.cache
+D:\ThucTap\Revit\RevitAPI_B1\RevitAPI_B1\obj\Debug\RevitAPI_B1.dll
+D:\ThucTap\Revit\RevitAPI_B1\RevitAPI_B1\obj\Debug\RevitAPI_B1.pdb
+D:\ThucTap\Revit\RevitAPI_B1\RevitAPI_B1\bin\Debug\RevitAPI_B1.addin
+D:\ThucTap\Revit\RevitAPI_B1\RevitAPI_B1\obj\Debug\RevitAPI_B1.Form1.resources
+D:\ThucTap\Revit\RevitAPI_B1\RevitAPI_B1\obj\Debug\RevitAPI_B1.csproj.GenerateResource.cache
+D:\ThucTap\Revit\RevitAPI_B1\RevitAPI_B1\obj\Debug\RevitAPI_B1.Forms.FormCreateLine.resources
+D:\ThucTap\WPF1\LeHuynhDuc_RevitAPI_New1\RevitAPI_B1\bin\Debug\RevitAPI_B1.addin
+D:\ThucTap\WPF1\LeHuynhDuc_RevitAPI_New1\RevitAPI_B1\bin\Debug\RevitAPI_B1.dll
+D:\ThucTap\WPF1\LeHuynhDuc_RevitAPI_New1\RevitAPI_B1\bin\Debug\RevitAPI_B1.pdb
+D:\ThucTap\WPF1\LeHuynhDuc_RevitAPI_New1\RevitAPI_B1\obj\Debug\RevitAPI_B1.csproj.AssemblyReference.cache
+D:\ThucTap\WPF1\LeHuynhDuc_RevitAPI_New1\RevitAPI_B1\obj\Debug\RevitAPI_B1.csproj.CoreCompileInputs.cache
+D:\ThucTap\WPF1\LeHuynhDuc_RevitAPI_New1\RevitAPI_B1\obj\Debug\RevitAPI_B1.dll
+D:\ThucTap\WPF1\LeHuynhDuc_RevitAPI_New1\RevitAPI_B1\obj\Debug\RevitAPI_B1.pdb
