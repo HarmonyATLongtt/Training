@@ -16,6 +16,12 @@ namespace OOP.Models
             Company = company;
             JobTitle = jobTitle;
         }
+        public override void Init()
+        {
+            base.Init();
+            Console.Write("Comapy: "); Company = Console.ReadLine();
+            Console.Write("Job title: "); JobTitle = Console.ReadLine();
+        }
         public static void Title()
         {
             Person.Title();

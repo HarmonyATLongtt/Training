@@ -30,6 +30,14 @@ namespace OOP.Models
         {
             return Income * Taxcoe.GetTaxCoe(Age, Income);
         }
+        public virtual void Init()
+        {
+            Console.Write("Id: "); Id = Console.ReadLine();
+            Console.Write("Name: "); Name = Console.ReadLine();
+            Console.Write("Age: "); Age = int.Parse(Console.ReadLine());
+            Console.Write("Income: "); Income = double.Parse(Console.ReadLine());
+        }
+
         public static void Title()
         {
             Console.Write($"{"Id",5}{"Name",20}{"Age",10}");

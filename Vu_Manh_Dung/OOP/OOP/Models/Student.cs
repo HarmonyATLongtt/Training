@@ -6,12 +6,17 @@ namespace OOP.Models
     {
         public string Class { get; set; }
         public School School = new School();
-        public Student()
-        { }
+        public Student() { }
         public Student(string id, string name, int age, double income, string _class, string schoolname):base(id, name, age, income)
         {
             Class = _class;
             School.Name = schoolname;
+        }
+        public override void Init()
+        {
+            base.Init();
+            Console.Write("Class: "); Class = Console.ReadLine();
+            Console.Write("School: "); School.Name= Console.ReadLine();
         }
         public static void Title()
         {

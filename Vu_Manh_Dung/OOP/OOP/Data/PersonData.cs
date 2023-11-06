@@ -7,6 +7,33 @@ namespace OOP.Data
 {
     public static class PersonData
     {
+
+        private static void SelectTypePerson(ref Person p)
+        {
+            Console.WriteLine("=====Select=====");
+            Console.WriteLine("1. Student");
+            Console.WriteLine("2. Teacher");
+            Console.WriteLine("3. Employee");
+            Console.Write("Choose: ");
+            int select = int.Parse(Console.ReadLine());
+            switch (select)
+            {
+                case 1:
+                    p = new Student();
+                    break;
+                case 2:
+                    p = new Teacher();
+                    break;
+                case 3:
+                    p = new Employee();
+                    break;
+                default:
+                    Console.WriteLine("Please select again...");
+                    SelectTypePerson(ref p);
+                    break;
+            }
+            
+        }
         public static void Init(List<Person> list)
         {
             list.Add(new Student("sv01", "Student 1", 20, 0, "IT1", "HaUI"));
@@ -24,6 +51,18 @@ namespace OOP.Data
             list.Add(new Employee("epl01", "Employee 1", 24, 10000000, "HarmonyAT", "IT"));
             list.Add(new Employee("epl03", "Employee 3", 26, 17000000, "HarmonyAT", "IT"));
             list.Add(new Employee("epl02", "Employee 2", 25, 20000000, "HarmonyAT", "IT"));
+
+            Console.Write("Number of person: ");
+            int amount = int.Parse(Console.ReadLine());
+            int element = 0;
+            while(element < amount)
+            {
+                Person p = null;
+                SelectTypePerson(ref p);
+                p.Init();
+                list.Add(p);
+                element++;
+            }
         }
 
         public static void Output(List<Person> list)

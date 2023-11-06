@@ -14,6 +14,11 @@ namespace OOP.Models
         {
             School.Name = schoolname;
         }
+        public override void Init()
+        {
+            base.Init();
+            Console.Write("School: "); School.Name = Console.ReadLine();
+        }
         public static void Title(){
             Person.Title();
             Console.WriteLine($"{"School",10}{"Income",20}{"Tax",20}");
