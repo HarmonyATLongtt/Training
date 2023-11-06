@@ -1,0 +1,7 @@
+D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\OOP\OOP\bin\Debug\OOP.exe.config
+D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\OOP\OOP\bin\Debug\OOP.exe
+D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\OOP\OOP\bin\Debug\OOP.pdb
+D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\OOP\OOP\obj\Debug\OOP.csproj.AssemblyReference.cache
+D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\OOP\OOP\obj\Debug\OOP.csproj.CoreCompileInputs.cache
+D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\OOP\OOP\obj\Debug\OOP.exe
+D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\OOP\OOP\obj\Debug\OOP.pdb
