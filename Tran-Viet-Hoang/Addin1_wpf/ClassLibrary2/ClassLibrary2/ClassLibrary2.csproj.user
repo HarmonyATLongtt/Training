@@ -4,4 +4,8 @@
     <StartAction>Program</StartAction>
     <StartProgram>G:\RV21\Revit 2021\Revit.exe</StartProgram>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM64'">
+    <StartProgram>G:\RV21\Revit 2021\Revit.exe</StartProgram>
+    <StartAction>Program</StartAction>
+  </PropertyGroup>
 </Project>
