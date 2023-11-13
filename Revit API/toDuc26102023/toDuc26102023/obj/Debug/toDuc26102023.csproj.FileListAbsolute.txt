@@ -1,0 +1,7 @@
+D:\ThucTap\GitHub\Revit API\toDuc26102023\toDuc26102023\bin\Debug\toDuc26102023.dll
+D:\ThucTap\GitHub\Revit API\toDuc26102023\toDuc26102023\bin\Debug\toDuc26102023.pdb
+D:\ThucTap\GitHub\Revit API\toDuc26102023\toDuc26102023\obj\Debug\toDuc26102023.csproj.AssemblyReference.cache
+D:\ThucTap\GitHub\Revit API\toDuc26102023\toDuc26102023\obj\Debug\toDuc26102023.csproj.CoreCompileInputs.cache
+D:\ThucTap\GitHub\Revit API\toDuc26102023\toDuc26102023\obj\Debug\toDuc26102023.dll
+D:\ThucTap\GitHub\Revit API\toDuc26102023\toDuc26102023\obj\Debug\toDuc26102023.pdb
+D:\ThucTap\GitHub\Revit API\toDuc26102023\toDuc26102023\bin\Debug\ToDuc_26102023.addin

@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<RevitAddIns>
+	<AddIn Type="Application">
+		<Name>App</Name>
+		<Assembly>D:\ThucTap\GitHub\Revit API\toDuc26102023\toDuc26102023\bin\Debug\toDuc26102023.dll</Assembly>
+		<AddInId>36B89608-A163-4FEA-8ABE-5DF69DEE1384</AddInId>
+		<FullClassName>toDuc26102023.App</FullClassName>
+		<VendorId>DucLe</VendorId>
+		<VendorDescription>DucLe</VendorDescription>
+	</AddIn>
+</RevitAddIns>

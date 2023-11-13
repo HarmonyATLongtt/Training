@@ -15,3 +15,10 @@ D:\ThucTap\WPF1\LeHuynhDuc_RevitAPI_New1\RevitAPI_B1\obj\Debug\RevitAPI_B1.cspro
 D:\ThucTap\WPF1\LeHuynhDuc_RevitAPI_New1\RevitAPI_B1\obj\Debug\RevitAPI_B1.csproj.CoreCompileInputs.cache
 D:\ThucTap\WPF1\LeHuynhDuc_RevitAPI_New1\RevitAPI_B1\obj\Debug\RevitAPI_B1.dll
 D:\ThucTap\WPF1\LeHuynhDuc_RevitAPI_New1\RevitAPI_B1\obj\Debug\RevitAPI_B1.pdb
+D:\ThucTap\GitHub\Revit API\LeHuynhDuc_RevitAPI_New1\RevitAPI_B1\bin\Debug\RevitAPI_B1.addin
+D:\ThucTap\GitHub\Revit API\LeHuynhDuc_RevitAPI_New1\RevitAPI_B1\bin\Debug\RevitAPI_B1.dll
+D:\ThucTap\GitHub\Revit API\LeHuynhDuc_RevitAPI_New1\RevitAPI_B1\bin\Debug\RevitAPI_B1.pdb
+D:\ThucTap\GitHub\Revit API\LeHuynhDuc_RevitAPI_New1\RevitAPI_B1\obj\Debug\RevitAPI_B1.csproj.AssemblyReference.cache
+D:\ThucTap\GitHub\Revit API\LeHuynhDuc_RevitAPI_New1\RevitAPI_B1\obj\Debug\RevitAPI_B1.csproj.CoreCompileInputs.cache
+D:\ThucTap\GitHub\Revit API\LeHuynhDuc_RevitAPI_New1\RevitAPI_B1\obj\Debug\RevitAPI_B1.dll
+D:\ThucTap\GitHub\Revit API\LeHuynhDuc_RevitAPI_New1\RevitAPI_B1\obj\Debug\RevitAPI_B1.pdb
