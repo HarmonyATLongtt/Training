@@ -1,7 +1,0 @@
-D:\Training\C_Co_Ban\C_Co_Ban\bin\Debug\C_Co_Ban.exe.config
-D:\Training\C_Co_Ban\C_Co_Ban\bin\Debug\C_Co_Ban.exe
-D:\Training\C_Co_Ban\C_Co_Ban\bin\Debug\C_Co_Ban.pdb
-D:\Training\C_Co_Ban\C_Co_Ban\obj\Debug\C_Co_Ban.csproj.AssemblyReference.cache
-D:\Training\C_Co_Ban\C_Co_Ban\obj\Debug\C_Co_Ban.csproj.CoreCompileInputs.cache
-D:\Training\C_Co_Ban\C_Co_Ban\obj\Debug\C_Co_Ban.exe
-D:\Training\C_Co_Ban\C_Co_Ban\obj\Debug\C_Co_Ban.pdb
