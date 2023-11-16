@@ -6,8 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Windows;
 using toDuc26102023.Models;
 
 namespace toDuc26102023.Commands
@@ -72,7 +70,6 @@ namespace toDuc26102023.Commands
                         {
                             defaultLine.Add(ListLine1[0]);
                             linetg = ListLine1[0];
-                            d++;
                         }
                         else
                         {
@@ -82,7 +79,6 @@ namespace toDuc26102023.Commands
                                 { 
                                     linetg = line;
                                     defaultLine.Add(linetg);
-                                    d++;
                                     break;
                                 } 
                                 else if (equalPoints(linetg.GetEndPoint(1), line.GetEndPoint(1)) 
@@ -90,11 +86,11 @@ namespace toDuc26102023.Commands
                                 {
                                     linetg = Line.CreateBound(line.GetEndPoint(1), line.GetEndPoint(0));      
                                     defaultLine.Add(linetg);
-                                    d++;
                                     break;
                                 }
                             }
                         }
+                        d++;
                     }
                     foreach(Line line in defaultLine)
                     {
