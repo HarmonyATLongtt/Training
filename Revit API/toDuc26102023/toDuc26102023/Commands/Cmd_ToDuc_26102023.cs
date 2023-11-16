@@ -135,19 +135,24 @@ namespace toDuc26102023.Commands
                             //Tìm điểm còn lại của tam giác phù hợp điều kiện (khoảng cách xa nhất, 
                             Tamgiac newtg = new Tamgiac(point, p1, p2);
                             if (CheckTamGiac(newtg.Dinh1, newtg.Dinh2, newtg.Dinh3))
-                            if (maxkc < KC(line, point)
-                                && checkGiaoNhau(lines, p1, point)
-                                && checkGiaoNhau(lines, p2, point)
-                                && equalPoints(point, p1) == false
-                                && equalPoints(point, p2) == false
-                                && checkGiaoTamGiac(ListLine, p1, point)
-                                && checkGiaoTamGiac(ListLine, p2, point)
-                                && Math.Round(newtg.DienTich(), 7) == Math.Round(DienTichGiaoNhau(fullSolid, SolidTamGiac(newtg)), 7)
-                                )
+                            try 
                             {
-                                maxkc = KC(line, point);
-                                point1 = point;
+                                if (maxkc < KC(line, point)
+                                   && checkGiaoNhau(lines, p1, point)
+                                   && checkGiaoNhau(lines, p2, point)
+                                   && equalPoints(point, p1) == false
+                                   && equalPoints(point, p2) == false
+                                   && checkGiaoTamGiac(ListLine, p1, point)
+                                   && checkGiaoTamGiac(ListLine, p2, point)
+                                   && Math.Round(newtg.DienTich(), 7) == Math.Round(DienTichGiaoNhau(fullSolid, SolidTamGiac(newtg)), 7)
+                                   )
+                                {
+                                    maxkc = KC(line, point);
+                                    point1 = point;
+                                }
                             }
+                           catch(Exception x)
+                            { }
 
                         }
 
@@ -174,28 +179,34 @@ namespace toDuc26102023.Commands
                                     if (equalPoints(points[i], points[j]) == false
                                         && equalPoints(points[i], points[k]) == false
                                         && equalPoints(points[j], points[k]) == false
+                                        && CheckTamGiac(points[i], points[j], points[k])
                                         )
                                         ListTamGiac.Add(new Tamgiac(points[i], points[j], points[k]));
                                 }
                         foreach (Tamgiac tamgiac in ListTamGiac)
                         {
-                            if (Math.Round(tamgiac.DienTich(), 7) == Math.Round(DienTichGiaoNhau(fullSolid, SolidTamGiac(tamgiac)), 7)
-                                && CheckTrungTamGiac21(tamgiacs, tamgiac)
-
-                                && checkGiaoTamGiac(ListLine, tamgiac.Dinh1, tamgiac.Dinh2)
-                                && checkGiaoTamGiac(ListLine, tamgiac.Dinh1, tamgiac.Dinh3)
-                                && checkGiaoTamGiac(ListLine, tamgiac.Dinh2, tamgiac.Dinh3)
-                                )
+                            try
                             {
-                                TongDienTich -= Math.Round(tamgiac.DienTich(), 7);
-                                tamgiacs.Add(tamgiac);
-                                Line l1 = Line.CreateBound(tamgiac.Dinh1, tamgiac.Dinh2);
-                                Line l2 = Line.CreateBound(tamgiac.Dinh2, tamgiac.Dinh3);
-                                Line l3 = Line.CreateBound(tamgiac.Dinh3, tamgiac.Dinh1);
-                                ListLine.Add(l1);
-                                ListLine.Add(l2);
-                                ListLine.Add(l3);
+                                if (Math.Round(tamgiac.DienTich(), 7) == Math.Round(DienTichGiaoNhau(fullSolid, SolidTamGiac(tamgiac)), 7)
+                                    && CheckTrungTamGiac21(tamgiacs, tamgiac)
+
+                                    && checkGiaoTamGiac(ListLine, tamgiac.Dinh1, tamgiac.Dinh2)
+                                    && checkGiaoTamGiac(ListLine, tamgiac.Dinh1, tamgiac.Dinh3)
+                                    && checkGiaoTamGiac(ListLine, tamgiac.Dinh2, tamgiac.Dinh3)
+                                    )
+                                {
+                                    TongDienTich -= Math.Round(tamgiac.DienTich(), 7);
+                                    tamgiacs.Add(tamgiac);
+                                    Line l1 = Line.CreateBound(tamgiac.Dinh1, tamgiac.Dinh2);
+                                    Line l2 = Line.CreateBound(tamgiac.Dinh2, tamgiac.Dinh3);
+                                    Line l3 = Line.CreateBound(tamgiac.Dinh3, tamgiac.Dinh1);
+                                    ListLine.Add(l1);
+                                    ListLine.Add(l2);
+                                    ListLine.Add(l3);
+                                }
                             }
+                            catch(Exception rx)
+                            { }
                             if (TongDienTich == 0)
                                 break;
                         }
@@ -206,9 +217,9 @@ namespace toDuc26102023.Commands
                     //Dùng đường dẫn tương đối
                     string relativePath = "Family/TCエリア・三角寸法(面積用).rfa";
                     string absolutePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), relativePath);
-                    LoadFamily(doc, relativePath);
+                    //LoadFamily(doc, relativePath);
                     //dùng đường dẫn tuyệt đối
-                    //LoadFamily(doc, "D:/ThucTap/Revit/ToDuc_26102023/TCエリア・三角寸法(面積用).rfa");
+                    LoadFamily(doc, "D:/ThucTap/Revit/ToDuc_26102023/TCエリア・三角寸法(面積用).rfa");
                     DatFamily(doc, tamgiacs);
                     transg.Assimilate();
                 }
@@ -331,9 +342,9 @@ namespace toDuc26102023.Commands
         }
         public bool CheckTamGiac(XYZ d1, XYZ d2, XYZ d3)
         {
-            double k1 = d1.DistanceTo(d2);
-            double k2 = d1.DistanceTo(d3);
-            double k3 = d3.DistanceTo(d2);
+            double k1 = Math.Round(d1.DistanceTo(d2), 5);
+            double k2 = Math.Round(d3.DistanceTo(d2), 5);
+            double k3 = Math.Round(d1.DistanceTo(d3), 5);
             if (k1 + k2 > k3 &&
                 k1 + k3 > k2 &&
                 k2 + k3 > k1
