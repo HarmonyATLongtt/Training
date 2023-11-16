@@ -226,6 +226,7 @@ namespace toDuc26102023.Commands
             }
             catch (Exception ex)
             {
+
                 return Result.Cancelled;
             }
 
