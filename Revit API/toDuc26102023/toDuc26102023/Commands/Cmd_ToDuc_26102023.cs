@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Windows;
 using toDuc26102023.Models;
 
@@ -32,6 +33,7 @@ namespace toDuc26102023.Commands
                 List<Tamgiac> tamgiacs = new List<Tamgiac>();
                 //List các cạnh của tam giác đã tìm được
                 List<Line> ListLine = new List<Line>();
+                List<Line> ListLine1 = new List<Line>();
                 //Tổng diện tích của vùng khép kín bởi line đã chọn
                 double TongDienTich = 0;
                 //solid được tạo từ các line đã chọn
@@ -46,11 +48,14 @@ namespace toDuc26102023.Commands
                         Element element = doc.GetElement(elementid1);
                         if (element is ModelLine)
                         {
+                            
                             //lấy ra các điểm và modeline cho vào list từ các line đã chọn
                             ModelLine line = element as ModelLine;
                             lines.Add(line);
                             Curve curve = line.GeometryCurve;
+                            ListLine1.Add(curve as Line);
                             points.Add(curve.GetEndPoint(0));
+                            points.Add(curve.GetEndPoint(1));
                             points1.Add(curve.GetEndPoint(0));
                             points1.Add(curve.GetEndPoint(1));
                         }
@@ -58,11 +63,52 @@ namespace toDuc26102023.Commands
                     }
                     //tạo solid từ các line khép kín đã chọn
                     CurveLoop curveLoop = new CurveLoop();
-                    foreach (ModelLine line in lines)
+                    List<Line> defaultLine = new List<Line>();
+                    Line linetg = null;
+                    int d = 0;
+                    while(d != ListLine1.Count)
                     {
-                        Curve curve = line.GeometryCurve;
-                        curveLoop.Append(curve);
+                        if (defaultLine.Count == 0)
+                        {
+                            defaultLine.Add(ListLine1[0]);
+                            linetg = ListLine1[0];
+                            d++;
+                        }
+                        else
+                        {
+                            foreach(Line line in ListLine1)
+                            {
+                                if (equalPoints(linetg.GetEndPoint(1), line.GetEndPoint(0)))
+                                { 
+                                    linetg = line;
+                                    defaultLine.Add(linetg);
+                                    d++;
+                                    break;
+                                } 
+                                else if (equalPoints(linetg.GetEndPoint(1), line.GetEndPoint(1)) 
+                                                      && equalPoints(linetg.GetEndPoint(0), line.GetEndPoint(0))==false)
+                                {
+                                    linetg = Line.CreateBound(line.GetEndPoint(1), line.GetEndPoint(0));      
+                                    defaultLine.Add(linetg);
+                                    d++;
+                                    break;
+                                }
+                            }
+                        }
                     }
+                    foreach(Line line in defaultLine)
+                    {
+                        try
+                        {
+                            curveLoop.Append(line);
+                        }
+                        catch (Exception ex)
+                        {
+                            curveLoop.Append(Line.CreateBound(line.GetEndPoint(1), line.GetEndPoint(0)));
+                        }
+                    }
+
+
                     fullSolid = GeometryCreationUtilities.CreateExtrusionGeometry(new List<CurveLoop>() { curveLoop }, XYZ.BasisZ, 10);
                     foreach (Face f in fullSolid.Faces)
                     {
@@ -82,17 +128,17 @@ namespace toDuc26102023.Commands
                     //Duyệt qua từng modeline
                     foreach (ModelLine line in lines)
                     {
-
+                        
                         //Lấy ra 2 điểm mút của modeline
                         XYZ p1 = line.GeometryCurve.GetEndPoint(0);
                         XYZ p2 = line.GeometryCurve.GetEndPoint(1);
-                        XYZ point1 = new XYZ();
+                        XYZ point1 = new XYZ(-999999999, 999999999, 9999999999);
                         double maxkc = 0;
                         foreach (XYZ point in points)
                         {
                             //Tìm điểm còn lại của tam giác phù hợp điều kiện (khoảng cách xa nhất, 
                             Tamgiac newtg = new Tamgiac(point, p1, p2);
-
+                            if (CheckTamGiac(newtg.Dinh1, newtg.Dinh2, newtg.Dinh3))
                             if (maxkc < KC(line, point)
                                 && checkGiaoNhau(lines, p1, point)
                                 && checkGiaoNhau(lines, p2, point)
@@ -110,7 +156,7 @@ namespace toDuc26102023.Commands
                         }
 
                         Tamgiac tg = new Tamgiac(p1, p2, point1);
-                        if (CheckTrungTG(ListLine, tg))
+                        if (CheckTrungTG(ListLine, tg) && equalPoints(point1, new XYZ(-999999999, 999999999, 9999999999))==false)
                         {
                             TongDienTich -= Math.Round(tg.DienTich(), 7);
                             tamgiacs.Add(tg);
@@ -286,6 +332,19 @@ namespace toDuc26102023.Commands
             Line line1 = Line.CreateBound(p1, p2);
             XYZ point1 = line1.Project(point).XYZPoint;
             return Math.Sqrt((point.X - point1.X) * (point.X - point1.X) + (point.Y - point1.Y) * (point.Y - point1.Y));
+        }
+        public bool CheckTamGiac(XYZ d1, XYZ d2, XYZ d3)
+        {
+            double k1 = d1.DistanceTo(d2);
+            double k2 = d1.DistanceTo(d3);
+            double k3 = d3.DistanceTo(d2);
+            if (k1 + k2 > k3 &&
+                k1 + k3 > k2 &&
+                k2 + k3 > k1
+                )
+                return true;
+            else
+                return false;
         }
         public Solid SolidTamGiac(Tamgiac tamgiac)
         {
