@@ -6,7 +6,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Windows.Controls;
+using System.Windows.Shapes;
 using toDuc26102023.Models;
+using Line = Autodesk.Revit.DB.Line;
+using Path = System.IO.Path;
 
 namespace toDuc26102023.Commands
 {
@@ -60,52 +64,8 @@ namespace toDuc26102023.Commands
 
                     }
                     //tạo solid từ các line khép kín đã chọn
-                    CurveLoop curveLoop = new CurveLoop();
-                    List<Line> defaultLine = new List<Line>();
-                    Line linetg = null;
-                    int d = 0;
-                    while(d != ListLine1.Count)
-                    {
-                        if (defaultLine.Count == 0)
-                        {
-                            defaultLine.Add(ListLine1[0]);
-                            linetg = ListLine1[0];
-                        }
-                        else
-                        {
-                            foreach(Line line in ListLine1)
-                            {
-                                if (equalPoints(linetg.GetEndPoint(1), line.GetEndPoint(0)))
-                                { 
-                                    linetg = line;
-                                    defaultLine.Add(linetg);
-                                    break;
-                                } 
-                                else if (equalPoints(linetg.GetEndPoint(1), line.GetEndPoint(1)) 
-                                                      && equalPoints(linetg.GetEndPoint(0), line.GetEndPoint(0))==false)
-                                {
-                                    linetg = Line.CreateBound(line.GetEndPoint(1), line.GetEndPoint(0));      
-                                    defaultLine.Add(linetg);
-                                    break;
-                                }
-                            }
-                        }
-                        d++;
-                    }
-                    foreach(Line line in defaultLine)
-                    {
-                        try
-                        {
-                            curveLoop.Append(line);
-                        }
-                        catch (Exception ex)
-                        {
-                            curveLoop.Append(Line.CreateBound(line.GetEndPoint(1), line.GetEndPoint(0)));
-                        }
-                    }
-
-
-                    fullSolid = GeometryCreationUtilities.CreateExtrusionGeometry(new List<CurveLoop>() { curveLoop }, XYZ.BasisZ, 10);
+                    fullSolid = TaoSolidBao(ListLine1);
+                    //Lấy ra mặt đúng của solid vừa tạo
                     foreach (Face f in fullSolid.Faces)
                     {
                         XYZ normal = f.ComputeNormal(new UV(0, 0));
@@ -117,99 +77,15 @@ namespace toDuc26102023.Commands
                     }
                     //dien tích mặt solid 
                     TongDienTich = Math.Round(TongDienTich, 7);
-
                     //Sắp xếp modeline theo chiều giảm dần của length
                     LineLengthComparer comparer = new LineLengthComparer();
                     lines.Sort(comparer);
-                    //Duyệt qua từng modeline
-                    foreach (ModelLine line in lines)
-                    {
-                        
-                        //Lấy ra 2 điểm mút của modeline
-                        XYZ p1 = line.GeometryCurve.GetEndPoint(0);
-                        XYZ p2 = line.GeometryCurve.GetEndPoint(1);
-                        XYZ point1 = new XYZ(-999999999, 999999999, 9999999999);
-                        double maxkc = 0;
-                        foreach (XYZ point in points)
-                        {
-                            //Tìm điểm còn lại của tam giác phù hợp điều kiện (khoảng cách xa nhất, 
-                            Tamgiac newtg = new Tamgiac(point, p1, p2);
-                            if (CheckTamGiac(newtg.Dinh1, newtg.Dinh2, newtg.Dinh3))
-                            try 
-                            {
-                                if (maxkc < KC(line, point)
-                                   && checkGiaoNhau(lines, p1, point)
-                                   && checkGiaoNhau(lines, p2, point)
-                                   && equalPoints(point, p1) == false
-                                   && equalPoints(point, p2) == false
-                                   && checkGiaoTamGiac(ListLine, p1, point)
-                                   && checkGiaoTamGiac(ListLine, p2, point)
-                                   && Math.Round(newtg.DienTich(), 7) == Math.Round(DienTichGiaoNhau(fullSolid, SolidTamGiac(newtg)), 7)
-                                   )
-                                {
-                                    maxkc = KC(line, point);
-                                    point1 = point;
-                                }
-                            }
-                           catch(Exception x)
-                            { }
-
-                        }
-
-                        Tamgiac tg = new Tamgiac(p1, p2, point1);
-                        if (CheckTrungTG(ListLine, tg) && equalPoints(point1, new XYZ(-999999999, 999999999, 9999999999))==false)
-                        {
-                            TongDienTich -= Math.Round(tg.DienTich(), 7);
-                            tamgiacs.Add(tg);
-                            Line l1 = Line.CreateBound(tg.Dinh1, tg.Dinh2);
-                            Line l2 = Line.CreateBound(tg.Dinh2, tg.Dinh3);
-                            Line l3 = Line.CreateBound(tg.Dinh3, tg.Dinh1);
-                            ListLine.Add(l1);
-                            ListLine.Add(l2);
-                            ListLine.Add(l3);
-                        }
-                    }
+                    //Duyệt qua từng modeline để tìm tam giác
+                    TimTamGiac1(lines, points, ListLine, fullSolid, tamgiacs, TongDienTich);
+                    //Tìm những tam giác còn lại ở phần khuyết
                     if (TongDienTich > 0)
                     {
-                        List<Tamgiac> ListTamGiac = new List<Tamgiac>();
-                        for (int i = 0; i < points.Count; i++)
-                            for (int j = 0; j < points.Count; j++)
-                                for (int k = 0; k < points.Count; k++)
-                                {
-                                    if (equalPoints(points[i], points[j]) == false
-                                        && equalPoints(points[i], points[k]) == false
-                                        && equalPoints(points[j], points[k]) == false
-                                        && CheckTamGiac(points[i], points[j], points[k])
-                                        )
-                                        ListTamGiac.Add(new Tamgiac(points[i], points[j], points[k]));
-                                }
-                        foreach (Tamgiac tamgiac in ListTamGiac)
-                        {
-                            try
-                            {
-                                if (Math.Round(tamgiac.DienTich(), 7) == Math.Round(DienTichGiaoNhau(fullSolid, SolidTamGiac(tamgiac)), 7)
-                                    && CheckTrungTamGiac21(tamgiacs, tamgiac)
-
-                                    && checkGiaoTamGiac(ListLine, tamgiac.Dinh1, tamgiac.Dinh2)
-                                    && checkGiaoTamGiac(ListLine, tamgiac.Dinh1, tamgiac.Dinh3)
-                                    && checkGiaoTamGiac(ListLine, tamgiac.Dinh2, tamgiac.Dinh3)
-                                    )
-                                {
-                                    TongDienTich -= Math.Round(tamgiac.DienTich(), 7);
-                                    tamgiacs.Add(tamgiac);
-                                    Line l1 = Line.CreateBound(tamgiac.Dinh1, tamgiac.Dinh2);
-                                    Line l2 = Line.CreateBound(tamgiac.Dinh2, tamgiac.Dinh3);
-                                    Line l3 = Line.CreateBound(tamgiac.Dinh3, tamgiac.Dinh1);
-                                    ListLine.Add(l1);
-                                    ListLine.Add(l2);
-                                    ListLine.Add(l3);
-                                }
-                            }
-                            catch(Exception rx)
-                            { }
-                            if (TongDienTich == 0)
-                                break;
-                        }
+                        TimTamGiac2(points, ListLine, fullSolid, tamgiacs, TongDienTich);
                     }
                     TamGiacCompare tamgiacCompare = new TamGiacCompare();
                     tamgiacs.Sort(tamgiacCompare);
@@ -270,59 +146,11 @@ namespace toDuc26102023.Commands
                     DaiDay.Set(tamgiac.DoDaiDay());
                     ChieuCao.Set(tamgiac.DienTich() / tamgiac.DoDaiDay() * 2);
                     Sott.Set(so.ToString());
-                    //quay dung vi tri
-                    XYZ point1 = (tam.Location as LocationPoint).Point;
-                    XYZ point2 = new XYZ(point1.X, point1.Y, 10.0);
-                    Line axis = Line.CreateBound(point1, point2);
+                    
                     //tinh goc lech
-                    XYZ vector1 = new XYZ(100, 0, 0) - new XYZ(-100, 0, 0);
-                    XYZ vector2;
-                    if (tamgiac.Dinh2.X > tamgiac.Dinh3.X)
-                    {
-                        vector2 = tamgiac.Dinh2 - tamgiac.Dinh3;
-                    }
-                    else if (tamgiac.Dinh2.X == tamgiac.Dinh3.X && tamgiac.Dinh2.Y > tamgiac.Dinh3.Y)
-                    {
-                        vector2 = tamgiac.Dinh2 - tamgiac.Dinh3;
-                    }
-                    else
-                        vector2 = tamgiac.Dinh3 - tamgiac.Dinh2;
-                    double angle = vector1.AngleTo(vector2);
-                    if (tamgiac.Dinh1.Y < tamgiac.ChanDuongCao().Y)
-                    {
-                        DinhChieu.Set(Math.Sqrt(tamgiac.CanhHuyen() * tamgiac.CanhHuyen()
-                                    - (tamgiac.DienTich() / tamgiac.DoDaiDay() * 2) * (tamgiac.DienTich() / tamgiac.DoDaiDay() * 2)));
-                        if (tamgiac.Dinh1.X < tamgiac.ChanDuongCao().X)
-                            ElementTransformUtils.RotateElement(doc, tam.Id, axis, -angle);
-                        else
-                            ElementTransformUtils.RotateElement(doc, tam.Id, axis, angle);
-                    }
-                    else if (tamgiac.Dinh1.Y > tamgiac.ChanDuongCao().Y)
-                    {
-                        DinhChieu.Set(tamgiac.Dinh2.DistanceTo(tamgiac.Dinh3) - (Math.Sqrt(tamgiac.CanhHuyen() * tamgiac.CanhHuyen()
-                                    - (tamgiac.DienTich() / tamgiac.DoDaiDay() * 2) * (tamgiac.DienTich() / tamgiac.DoDaiDay() * 2))));
-                        if (tamgiac.Dinh1.X < tamgiac.ChanDuongCao().X)
-                            ElementTransformUtils.RotateElement(doc, tam.Id, axis, angle + Math.PI);
-                        else
-                            ElementTransformUtils.RotateElement(doc, tam.Id, axis, -angle + Math.PI);
-                    }
-                    else
-                    {
-                        if (tamgiac.Dinh1.X > tamgiac.ChanDuongCao().X)
-                        {
-                            DinhChieu.Set(Math.Sqrt(tamgiac.CanhHuyen() * tamgiac.CanhHuyen()
-                                    - (tamgiac.DienTich() / tamgiac.DoDaiDay() * 2) * (tamgiac.DienTich() / tamgiac.DoDaiDay() * 2)));
-                            ElementTransformUtils.RotateElement(doc, tam.Id, axis, angle);
-                        }
-                        else
-                        {
-                            DinhChieu.Set(tamgiac.Dinh2.DistanceTo(tamgiac.Dinh3) - (Math.Sqrt(tamgiac.CanhHuyen() * tamgiac.CanhHuyen()
-                                    - (tamgiac.DienTich() / tamgiac.DoDaiDay() * 2) * (tamgiac.DienTich() / tamgiac.DoDaiDay() * 2))));
-                            ElementTransformUtils.RotateElement(doc, tam.Id, axis, -angle);
-                        }
-                    }
-                    ElementTransformUtils.RotateElement(doc, tam.Id, axis, 0);
-                    ElementTransformUtils.MoveElement(doc, tam.Id, tamgiac.TrungDiemCanhDaiNhat() - (tam.Location as LocationPoint).Point);
+                    double angle = GocLech(tam, tamgiac, DinhChieu);
+                    //Quay tam giác đúng vị trí
+                    QuayTamGiac(tam, tamgiac, DinhChieu, angle, doc);
                     trans.Commit();
                 }
             }
@@ -340,6 +168,209 @@ namespace toDuc26102023.Commands
             Line line1 = Line.CreateBound(p1, p2);
             XYZ point1 = line1.Project(point).XYZPoint;
             return Math.Sqrt((point.X - point1.X) * (point.X - point1.X) + (point.Y - point1.Y) * (point.Y - point1.Y));
+        }
+        public double GocLech(FamilyInstance tam, Tamgiac tamgiac, Parameter DinhChieu)
+        {
+            //tinh goc lech
+            XYZ vector1 = new XYZ(100, 0, 0) - new XYZ(-100, 0, 0);
+            XYZ vector2;
+            if (tamgiac.Dinh2.X > tamgiac.Dinh3.X)
+            {
+                vector2 = tamgiac.Dinh2 - tamgiac.Dinh3;
+            }
+            else if (tamgiac.Dinh2.X == tamgiac.Dinh3.X && tamgiac.Dinh2.Y > tamgiac.Dinh3.Y)
+            {
+                vector2 = tamgiac.Dinh2 - tamgiac.Dinh3;
+            }
+            else
+                vector2 = tamgiac.Dinh3 - tamgiac.Dinh2;
+            return vector1.AngleTo(vector2);
+        }
+        public void QuayTamGiac(FamilyInstance tam, Tamgiac tamgiac, Parameter DinhChieu, double angle, Document doc)
+        {
+            //lấy trục quay
+            XYZ point1 = (tam.Location as LocationPoint).Point;
+            XYZ point2 = new XYZ(point1.X, point1.Y, 10.0);
+            Line axis = Line.CreateBound(point1, point2);
+            if (tamgiac.Dinh1.Y < tamgiac.ChanDuongCao().Y)
+            {
+                DinhChieu.Set(Math.Sqrt(tamgiac.CanhHuyen() * tamgiac.CanhHuyen()
+                            - (tamgiac.DienTich() / tamgiac.DoDaiDay() * 2) * (tamgiac.DienTich() / tamgiac.DoDaiDay() * 2)));
+                if (tamgiac.Dinh1.X < tamgiac.ChanDuongCao().X)
+                    ElementTransformUtils.RotateElement(doc, tam.Id, axis, -angle);
+                else
+                    ElementTransformUtils.RotateElement(doc, tam.Id, axis, angle);
+            }
+            else if (tamgiac.Dinh1.Y > tamgiac.ChanDuongCao().Y)
+            {
+                DinhChieu.Set(tamgiac.Dinh2.DistanceTo(tamgiac.Dinh3) - (Math.Sqrt(tamgiac.CanhHuyen() * tamgiac.CanhHuyen()
+                            - (tamgiac.DienTich() / tamgiac.DoDaiDay() * 2) * (tamgiac.DienTich() / tamgiac.DoDaiDay() * 2))));
+                if (tamgiac.Dinh1.X < tamgiac.ChanDuongCao().X)
+                    ElementTransformUtils.RotateElement(doc, tam.Id, axis, angle + Math.PI);
+                else
+                    ElementTransformUtils.RotateElement(doc, tam.Id, axis, -angle + Math.PI);
+            }
+            else
+            {
+                if (tamgiac.Dinh1.X > tamgiac.ChanDuongCao().X)
+                {
+                    DinhChieu.Set(Math.Sqrt(tamgiac.CanhHuyen() * tamgiac.CanhHuyen()
+                            - (tamgiac.DienTich() / tamgiac.DoDaiDay() * 2) * (tamgiac.DienTich() / tamgiac.DoDaiDay() * 2)));
+                    ElementTransformUtils.RotateElement(doc, tam.Id, axis, angle);
+                }
+                else
+                {
+                    DinhChieu.Set(tamgiac.Dinh2.DistanceTo(tamgiac.Dinh3) - (Math.Sqrt(tamgiac.CanhHuyen() * tamgiac.CanhHuyen()
+                            - (tamgiac.DienTich() / tamgiac.DoDaiDay() * 2) * (tamgiac.DienTich() / tamgiac.DoDaiDay() * 2))));
+                    ElementTransformUtils.RotateElement(doc, tam.Id, axis, -angle);
+                }
+            }
+            ElementTransformUtils.RotateElement(doc, tam.Id, axis, 0);
+            ElementTransformUtils.MoveElement(doc, tam.Id, tamgiac.TrungDiemCanhDaiNhat() - (tam.Location as LocationPoint).Point);
+        }
+        public Solid TaoSolidBao(List<Line> ListLine1)
+        {
+            CurveLoop curveLoop = new CurveLoop();
+            List<Line> defaultLine = new List<Line>();
+            Line linetg = null;
+            int d = 0;
+            //lấy ra thứ tự đúng của line để tạo thanh vòng khép kín
+            while (d != ListLine1.Count)
+            {
+                if (defaultLine.Count == 0)
+                {
+                    defaultLine.Add(ListLine1[0]);
+                    linetg = ListLine1[0];
+                }
+                else
+                {
+                    foreach (Line line in ListLine1)
+                    {
+                        if (equalPoints(linetg.GetEndPoint(1), line.GetEndPoint(0)))
+                        {
+                            linetg = line;
+                            defaultLine.Add(linetg);
+                            break;
+                        }
+                        else if (equalPoints(linetg.GetEndPoint(1), line.GetEndPoint(1))
+                                              && equalPoints(linetg.GetEndPoint(0), line.GetEndPoint(0)) == false)
+                        {
+                            linetg = Line.CreateBound(line.GetEndPoint(1), line.GetEndPoint(0));
+                            defaultLine.Add(linetg);
+                            break;
+                        }
+                    }
+                }
+                d++;
+            }
+            //Thêm line vào curveLoop
+            foreach (Line line in defaultLine)
+            {
+                try
+                {
+                    curveLoop.Append(line);
+                }
+                catch (Exception ex)
+                {
+                    curveLoop.Append(Line.CreateBound(line.GetEndPoint(1), line.GetEndPoint(0)));
+                }
+            }
+            //Trả về solid được tạo
+            return GeometryCreationUtilities.CreateExtrusionGeometry(new List<CurveLoop>() { curveLoop }, XYZ.BasisZ, 10);
+        }
+        public void TimTamGiac1(List<ModelLine> lines, List<XYZ> points, List<Line> ListLine, Solid fullSolid, List<Tamgiac> tamgiacs, double TongDienTich)
+        {
+            foreach (ModelLine line in lines)
+            {
+
+                //Lấy ra 2 điểm mút của modeline
+                XYZ p1 = line.GeometryCurve.GetEndPoint(0);
+                XYZ p2 = line.GeometryCurve.GetEndPoint(1);
+                XYZ point1 = null;
+                double maxkc = 0;
+                foreach (XYZ point in points)
+                {
+                    //Tìm điểm còn lại của tam giác phù hợp điều kiện (khoảng cách xa nhất,
+                    Tamgiac newtg = new Tamgiac(point, p1, p2);
+                    if (CheckTamGiac(newtg.Dinh1, newtg.Dinh2, newtg.Dinh3))
+                        try
+                        {
+                            if (maxkc < KC(line, point)
+                               && checkGiaoNhau(lines, p1, point)
+                               && checkGiaoNhau(lines, p2, point)
+                               && equalPoints(point, p1) == false
+                               && equalPoints(point, p2) == false
+                               && checkGiaoTamGiac(ListLine, p1, point)
+                               && checkGiaoTamGiac(ListLine, p2, point)
+                               && Math.Round(newtg.DienTich(), 7) == Math.Round(DienTichGiaoNhau(fullSolid, SolidTamGiac(newtg)), 7)
+                               )
+                            {
+                                maxkc = KC(line, point);
+                                point1 = point;
+                            }
+                        }
+                        catch (Exception x)
+                        { }
+
+                }
+                if (point1 != null)
+                {
+                    Tamgiac tg = new Tamgiac(p1, p2, point1);
+                    if (CheckTrungTG(ListLine, tg))
+                    {
+                        TongDienTich -= Math.Round(tg.DienTich(), 7);
+                        tamgiacs.Add(tg);
+                        Line l1 = Line.CreateBound(tg.Dinh1, tg.Dinh2);
+                        Line l2 = Line.CreateBound(tg.Dinh2, tg.Dinh3);
+                        Line l3 = Line.CreateBound(tg.Dinh3, tg.Dinh1);
+                        ListLine.Add(l1);
+                        ListLine.Add(l2);
+                        ListLine.Add(l3);
+                    }
+                }
+            }
+        }
+        public void TimTamGiac2(List<XYZ> points, List<Line> ListLine, Solid fullSolid, List<Tamgiac> tamgiacs, double TongDienTich)
+        {
+            List<Tamgiac> ListTamGiac = new List<Tamgiac>();
+            for (int i = 0; i < points.Count; i++)
+                for (int j = 0; j < points.Count; j++)
+                    for (int k = 0; k < points.Count; k++)
+                    {
+                        if (equalPoints(points[i], points[j]) == false
+                            && equalPoints(points[i], points[k]) == false
+                            && equalPoints(points[j], points[k]) == false
+                            && CheckTamGiac(points[i], points[j], points[k])
+                            )
+                            ListTamGiac.Add(new Tamgiac(points[i], points[j], points[k]));
+                    }
+            foreach (Tamgiac tamgiac in ListTamGiac)
+            {
+                try
+                {
+                    if (Math.Round(tamgiac.DienTich(), 7) == Math.Round(DienTichGiaoNhau(fullSolid, SolidTamGiac(tamgiac)), 7)
+                        && CheckTrungTamGiac21(tamgiacs, tamgiac)
+
+                        && checkGiaoTamGiac(ListLine, tamgiac.Dinh1, tamgiac.Dinh2)
+                        && checkGiaoTamGiac(ListLine, tamgiac.Dinh1, tamgiac.Dinh3)
+                        && checkGiaoTamGiac(ListLine, tamgiac.Dinh2, tamgiac.Dinh3)
+                        )
+                    {
+                        TongDienTich -= Math.Round(tamgiac.DienTich(), 7);
+                        tamgiacs.Add(tamgiac);
+                        Line l1 = Line.CreateBound(tamgiac.Dinh1, tamgiac.Dinh2);
+                        Line l2 = Line.CreateBound(tamgiac.Dinh2, tamgiac.Dinh3);
+                        Line l3 = Line.CreateBound(tamgiac.Dinh3, tamgiac.Dinh1);
+                        ListLine.Add(l1);
+                        ListLine.Add(l2);
+                        ListLine.Add(l3);
+                    }
+                }
+                catch (Exception rx)
+                { }
+                if (TongDienTich == 0)
+                    break;
+            }
         }
         public bool CheckTamGiac(XYZ d1, XYZ d2, XYZ d3)
         {
