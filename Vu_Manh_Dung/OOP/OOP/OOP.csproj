@@ -47,7 +47,6 @@
     <Compile Include="Models\Employee.cs" />
     <Compile Include="Models\IPerson.cs" />
     <Compile Include="Models\Person.cs" />
-    <Compile Include="Models\School.cs" />
     <Compile Include="Models\Student.cs" />
     <Compile Include="Data\TaxData.cs" />
     <Compile Include="Models\Teacher.cs" />

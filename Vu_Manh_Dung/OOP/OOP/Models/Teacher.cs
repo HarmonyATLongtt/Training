@@ -8,16 +8,16 @@ namespace OOP.Models
 {
     public class Teacher : Person
     {
-        public School School = new School();
+        public string School {get; set;}
         public Teacher() { }
-        public Teacher(string id, string name, int age, double income, string schoolname) : base(id, name, age, income)
+        public Teacher(string id, string name, int age, double income, string school) : base(id, name, age, income)
         {
-            School.Name = schoolname;
+            School = school;
         }
         public override void Init()
         {
             base.Init();
-            Console.Write("School: "); School.Name = Console.ReadLine();
+            Console.Write("School: "); School = Console.ReadLine();
         }
         public static void Title(){
             Person.Title();
@@ -26,7 +26,7 @@ namespace OOP.Models
         public override void GetInfo()
         {
             base.GetInfo();
-            Console.WriteLine($"{School.Name,10}{Math.Round(Income,2),20}{Math.Round(GetTax(),2),20}");
+            Console.WriteLine($"{School,10}{Math.Round(Income,2),20}{Math.Round(GetTax(),2),20}");
         }
     }
 }

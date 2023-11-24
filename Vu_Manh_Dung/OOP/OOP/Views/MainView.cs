@@ -9,9 +9,8 @@ namespace OOP.Views
     {
         public static void Main(string[] args)
         {
-            List<Person> list = new List<Person>();
-            PersonData.Init(list);
-            PersonData.Output(list);
+            PersonData.Init();
+            PersonData.Output();
             Console.ReadLine();
         }
     }

@@ -7,7 +7,7 @@ namespace OOP.Data
 {
     public static class PersonData
     {
-
+        private static List<Person> list = new List<Person>();
         private static void SelectTypePerson(ref Person p)
         {
             Console.WriteLine("=====Select=====");
@@ -34,13 +34,12 @@ namespace OOP.Data
             }
             
         }
-        public static void Init(List<Person> list)
+        public static void Init()
         {
             list.Add(new Student("sv01", "Student 1", 20, 0, "IT1", "HaUI"));
             list.Add(new Student("sv04", "Student 4", 20, 0, "IT2", "HaUI"));
             list.Add(new Student("sv03", "Student 3", 22, 0, "IT4", "HaUI"));
             list.Add(new Student("sv02", "Student 2", 21, 0, "IT3", "HaUI"));
-            list.Add(new Student("sv06", "Student 6", 19, 0, "IT4", "HaUI"));
             list.Add(new Student("sv05", "Student 5", 18, 0, "IT3", "HaUI"));
 
             list.Add(new Teacher("tc02", "Teacher 2", 30, 13000000, "HaUI"));
@@ -65,7 +64,7 @@ namespace OOP.Data
             }
         }
 
-        public static void Output(List<Person> list)
+        public static void Output()
         {
             List<Student> stlist = list.Where(p => p is Student).Cast<Student>().ToList();
             List<Teacher> tclist = list.Where(p => p is Teacher).Cast<Teacher>().ToList();

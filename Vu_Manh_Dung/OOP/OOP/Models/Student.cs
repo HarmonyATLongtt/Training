@@ -5,18 +5,18 @@ namespace OOP.Models
     public class Student : Person
     {
         public string Class { get; set; }
-        public School School = new School();
+        public string School { get; set; }
         public Student() { }
-        public Student(string id, string name, int age, double income, string _class, string schoolname):base(id, name, age, income)
+        public Student(string id, string name, int age, double income, string _class, string school):base(id, name, age, income)
         {
             Class = _class;
-            School.Name = schoolname;
+            School = school;
         }
         public override void Init()
         {
             base.Init();
             Console.Write("Class: "); Class = Console.ReadLine();
-            Console.Write("School: "); School.Name= Console.ReadLine();
+            Console.Write("School: "); School= Console.ReadLine();
         }
         public static void Title()
         {
@@ -26,7 +26,7 @@ namespace OOP.Models
         public override void GetInfo()
         {
             base.GetInfo();
-            Console.WriteLine($"{Class,10}{School.Name,10}");
+            Console.WriteLine($"{Class,10}{School,10}");
         }
     }
 }
