@@ -35,32 +35,45 @@ namespace test3
             {
                 filename = dialog.FileName;
             }
-            
+
             try
             {
                 var workbook = new XLWorkbook(filename);
                 var worksheet = workbook.Worksheets.First();
+                var columns = worksheet.LastColumnUsed().ColumnNumber();
 
                 dataTable = new DataTable();
-                
-                for(int i = 1; i <= worksheet.ColumnsUsed().Count(); i++)
+
+                for (int i = 1; i <= columns; i++)
                 {
                     dataTable.Columns.Add(GetExcelColumnName(i));
                 }
 
-                foreach(var row in worksheet.RowsUsed())
+                for (int i = 1; i <= worksheet.LastRowUsed().RowNumber(); i++)
                 {
+                    var row = worksheet.Row(i);
                     var dataRow = dataTable.NewRow();
-                    for (int i = 0; i < worksheet.ColumnsUsed().Count(); i++)
+                    for (int j = 0; j < columns; j++)
                     {
-                        dataRow[i] = i < row.Cells().Count() ? row.Cell(i + 1).Value.ToString() : "";
+                        dataRow[j] = row.Cell(j + 1).Value.ToString();
                     }
 
                     dataTable.Rows.Add(dataRow);
                 }
+
+                //foreach(var row in worksheet.RowsUsed())
+                //{
+                //    var dataRow = dataTable.NewRow();
+                //    for (int i = 0; i < columns; i++)
+                //    {
+                //        dataRow[i] =  row.Cell(i + 1).Value.ToString();
+                //    }
+
+                //    dataTable.Rows.Add(dataRow);
+                //}
                 gridView.ItemsSource = dataTable.DefaultView;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
@@ -76,11 +89,11 @@ namespace test3
                     {
                         var worksheet = workbook.Worksheets.Add("Sheet1");
 
-                        for (int i = 1; i < dataTable.Rows.Count; i++)
+                        for (int i = 0; i < dataTable.Rows.Count; i++)
                         {
                             for (int j = 0; j < dataTable.Columns.Count; j++)
                             {
-                                worksheet.Cell(i + 2, j + 1).Value = dataTable.Rows[i][j].ToString();
+                                worksheet.Cell(i + 1, j + 1).Value = dataTable.Rows[i][j].ToString();
                             }
                         }
 
@@ -116,8 +129,8 @@ namespace test3
 
         private void btnClear_Click(object sender, RoutedEventArgs e)
         {
-            dataTable.Clear();
-            gridView.ItemsSource = dataTable.DefaultView;
+            dataTable = null;
+            gridView.ItemsSource = null;
         }
     }
 }

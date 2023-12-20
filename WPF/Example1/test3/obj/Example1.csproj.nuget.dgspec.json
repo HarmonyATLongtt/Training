@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\vanso\\source\\repos\\test3\\test3\\Example1.csproj": {}
+    "E:\\Cty\\WPF\\Example1\\test3\\Example1.csproj": {}
   },
   "projects": {
-    "C:\\Users\\vanso\\source\\repos\\test3\\test3\\Example1.csproj": {
+    "E:\\Cty\\WPF\\Example1\\test3\\Example1.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\vanso\\source\\repos\\test3\\test3\\Example1.csproj",
+        "projectUniqueName": "E:\\Cty\\WPF\\Example1\\test3\\Example1.csproj",
         "projectName": "Example1",
-        "projectPath": "C:\\Users\\vanso\\source\\repos\\test3\\test3\\Example1.csproj",
+        "projectPath": "E:\\Cty\\WPF\\Example1\\test3\\Example1.csproj",
         "packagesPath": "C:\\Users\\vanso\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\vanso\\source\\repos\\test3\\test3\\obj\\",
+        "outputPath": "E:\\Cty\\WPF\\Example1\\test3\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\vanso\\AppData\\Roaming\\NuGet\\NuGet.Config",

@@ -1,5 +1,5 @@
 ﻿Example1
-1.0.0.0
+
 
 winexe
 C#
@@ -12,7 +12,7 @@ TRACE;DEBUG;NET;NET8_0;NETCOREAPP
 E:\Cty\WPF\Example1\test3\App.xaml
 11407045341
 
-686715078
+41082616207
 204-1215807872
 MainWindow.xaml;
 
