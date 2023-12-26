@@ -1,0 +1,15 @@
+E:\Cty\Nguyen_Van_Son_OOP\OOP\Bai_2\bin\Debug\net8.0\Bai_2.exe
+E:\Cty\Nguyen_Van_Son_OOP\OOP\Bai_2\bin\Debug\net8.0\Bai_2.deps.json
+E:\Cty\Nguyen_Van_Son_OOP\OOP\Bai_2\bin\Debug\net8.0\Bai_2.runtimeconfig.json
+E:\Cty\Nguyen_Van_Son_OOP\OOP\Bai_2\bin\Debug\net8.0\Bai_2.dll
+E:\Cty\Nguyen_Van_Son_OOP\OOP\Bai_2\bin\Debug\net8.0\Bai_2.pdb
+E:\Cty\Nguyen_Van_Son_OOP\OOP\Bai_2\obj\Debug\net8.0\Bai_2.GeneratedMSBuildEditorConfig.editorconfig
+E:\Cty\Nguyen_Van_Son_OOP\OOP\Bai_2\obj\Debug\net8.0\Bai_2.AssemblyInfoInputs.cache
+E:\Cty\Nguyen_Van_Son_OOP\OOP\Bai_2\obj\Debug\net8.0\Bai_2.AssemblyInfo.cs
+E:\Cty\Nguyen_Van_Son_OOP\OOP\Bai_2\obj\Debug\net8.0\Bai_2.csproj.CoreCompileInputs.cache
+E:\Cty\Nguyen_Van_Son_OOP\OOP\Bai_2\obj\Debug\net8.0\Bai_2.sourcelink.json
+E:\Cty\Nguyen_Van_Son_OOP\OOP\Bai_2\obj\Debug\net8.0\Bai_2.dll
+E:\Cty\Nguyen_Van_Son_OOP\OOP\Bai_2\obj\Debug\net8.0\refint\Bai_2.dll
+E:\Cty\Nguyen_Van_Son_OOP\OOP\Bai_2\obj\Debug\net8.0\Bai_2.pdb
+E:\Cty\Nguyen_Van_Son_OOP\OOP\Bai_2\obj\Debug\net8.0\Bai_2.genruntimeconfig.cache
+E:\Cty\Nguyen_Van_Son_OOP\OOP\Bai_2\obj\Debug\net8.0\ref\Bai_2.dll

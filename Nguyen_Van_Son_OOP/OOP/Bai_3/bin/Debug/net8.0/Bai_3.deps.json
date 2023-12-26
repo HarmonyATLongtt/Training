@@ -1,0 +1,47 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "Bai_3/1.0.0": {
+        "dependencies": {
+          "Bai_1": "1.0.0",
+          "Bai_2": "1.0.0"
+        },
+        "runtime": {
+          "Bai_3.dll": {}
+        }
+      },
+      "Bai_1/1.0.0": {
+        "runtime": {
+          "Bai_1.dll": {}
+        }
+      },
+      "Bai_2/1.0.0": {
+        "runtime": {
+          "Bai_2.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Bai_3/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Bai_1/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Bai_2/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

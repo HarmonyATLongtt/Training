@@ -1,0 +1,21 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Bai_2
+{
+    public class TaxData
+    {
+        public float GetTaxCoe(int Age, float Income)
+        {
+            if (Age < 18) return 0;
+            if (Income <= 9000000) return 0.05f;
+            else if (Income <= 15000000) return 0.1f;
+            else if (Income <= 20000000) return 0.15f;
+            else if (Income <= 30000000) return 0.2f;
+            else return 0.3f;
+        }
+    }
+}
