@@ -1,0 +1,14 @@
+D:\New folder\Tran_Khanh_Toan\OOP\Bai_2\bin\Debug\net6.0\Bai_2.exe
+D:\New folder\Tran_Khanh_Toan\OOP\Bai_2\bin\Debug\net6.0\Bai_2.deps.json
+D:\New folder\Tran_Khanh_Toan\OOP\Bai_2\bin\Debug\net6.0\Bai_2.runtimeconfig.json
+D:\New folder\Tran_Khanh_Toan\OOP\Bai_2\bin\Debug\net6.0\Bai_2.dll
+D:\New folder\Tran_Khanh_Toan\OOP\Bai_2\bin\Debug\net6.0\Bai_2.pdb
+D:\New folder\Tran_Khanh_Toan\OOP\Bai_2\obj\Debug\net6.0\Bai_2.GeneratedMSBuildEditorConfig.editorconfig
+D:\New folder\Tran_Khanh_Toan\OOP\Bai_2\obj\Debug\net6.0\Bai_2.AssemblyInfoInputs.cache
+D:\New folder\Tran_Khanh_Toan\OOP\Bai_2\obj\Debug\net6.0\Bai_2.AssemblyInfo.cs
+D:\New folder\Tran_Khanh_Toan\OOP\Bai_2\obj\Debug\net6.0\Bai_2.csproj.CoreCompileInputs.cache
+D:\New folder\Tran_Khanh_Toan\OOP\Bai_2\obj\Debug\net6.0\Bai_2.dll
+D:\New folder\Tran_Khanh_Toan\OOP\Bai_2\obj\Debug\net6.0\refint\Bai_2.dll
+D:\New folder\Tran_Khanh_Toan\OOP\Bai_2\obj\Debug\net6.0\Bai_2.pdb
+D:\New folder\Tran_Khanh_Toan\OOP\Bai_2\obj\Debug\net6.0\Bai_2.genruntimeconfig.cache
+D:\New folder\Tran_Khanh_Toan\OOP\Bai_2\obj\Debug\net6.0\ref\Bai_2.dll
