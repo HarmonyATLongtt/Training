@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Bai_3
 {
-    public class Person
+    public class Person : IPerson
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -26,6 +26,12 @@ namespace Bai_3
             Age = age;
             InCome = inCome;
             TaxCoe = taxData.GetTaxData(this.Age, this.InCome);
+        }
+        public Person(int id, string name, int age)
+        {
+            Id = id;
+            Name = name;
+            Age = age;
         }
 
         public Person(int id, string name, int age, double inCome, double taxCoe)
@@ -48,6 +54,11 @@ namespace Bai_3
         public double GetTax()
         {
             return (double)this.TaxCoe * (double)this.InCome;
+        }
+
+        public string GetInfo()
+        {
+            return ($"ID: {Id}, Name: {Name}, Age: {Age}, InCome: {InCome}, TaxCoe: {TaxCoe}");
         }
     }
 }

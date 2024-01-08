@@ -9,7 +9,7 @@ namespace Bai_1
     internal class Person
     {
         public int Id { get; set; }
-        public string Name { get; set; }
+        public string? Name { get; set; }
         public int Age  { get; set; }
         public double InCome { get; set; }
         public double TaxCoe { get; set; }

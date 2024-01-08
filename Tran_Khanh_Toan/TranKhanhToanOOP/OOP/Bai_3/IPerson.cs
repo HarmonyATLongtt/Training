@@ -8,6 +8,6 @@ namespace Bai_3
 {
     public interface IPerson
     {
-        public void GetInfo();
+        public string GetInfo();
     }
 }

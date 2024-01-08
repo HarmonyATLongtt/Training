@@ -1,0 +1,14 @@
+D:\New folder\Tran_Khanh_Toan\TranKhanhToanOOP\OOP\Bai_3\obj\Debug\net6.0\Bai_3.GeneratedMSBuildEditorConfig.editorconfig
+D:\New folder\Tran_Khanh_Toan\TranKhanhToanOOP\OOP\Bai_3\obj\Debug\net6.0\Bai_3.AssemblyInfoInputs.cache
+D:\New folder\Tran_Khanh_Toan\TranKhanhToanOOP\OOP\Bai_3\obj\Debug\net6.0\Bai_3.AssemblyInfo.cs
+D:\New folder\Tran_Khanh_Toan\TranKhanhToanOOP\OOP\Bai_3\obj\Debug\net6.0\Bai_3.csproj.CoreCompileInputs.cache
+D:\New folder\Tran_Khanh_Toan\TranKhanhToanOOP\OOP\Bai_3\bin\Debug\net6.0\Bai_3.exe
+D:\New folder\Tran_Khanh_Toan\TranKhanhToanOOP\OOP\Bai_3\bin\Debug\net6.0\Bai_3.deps.json
+D:\New folder\Tran_Khanh_Toan\TranKhanhToanOOP\OOP\Bai_3\bin\Debug\net6.0\Bai_3.runtimeconfig.json
+D:\New folder\Tran_Khanh_Toan\TranKhanhToanOOP\OOP\Bai_3\bin\Debug\net6.0\Bai_3.dll
+D:\New folder\Tran_Khanh_Toan\TranKhanhToanOOP\OOP\Bai_3\bin\Debug\net6.0\Bai_3.pdb
+D:\New folder\Tran_Khanh_Toan\TranKhanhToanOOP\OOP\Bai_3\obj\Debug\net6.0\Bai_3.dll
+D:\New folder\Tran_Khanh_Toan\TranKhanhToanOOP\OOP\Bai_3\obj\Debug\net6.0\refint\Bai_3.dll
+D:\New folder\Tran_Khanh_Toan\TranKhanhToanOOP\OOP\Bai_3\obj\Debug\net6.0\Bai_3.pdb
+D:\New folder\Tran_Khanh_Toan\TranKhanhToanOOP\OOP\Bai_3\obj\Debug\net6.0\Bai_3.genruntimeconfig.cache
+D:\New folder\Tran_Khanh_Toan\TranKhanhToanOOP\OOP\Bai_3\obj\Debug\net6.0\ref\Bai_3.dll

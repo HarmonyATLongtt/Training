@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\New folder\\Tran_Khanh_Toan\\OOP\\Bai_3\\Bai_3.csproj": {}
+    "D:\\New folder\\Tran_Khanh_Toan\\TranKhanhToanOOP\\OOP\\Bai_3\\Bai_3.csproj": {}
   },
   "projects": {
-    "D:\\New folder\\Tran_Khanh_Toan\\OOP\\Bai_3\\Bai_3.csproj": {
+    "D:\\New folder\\Tran_Khanh_Toan\\TranKhanhToanOOP\\OOP\\Bai_3\\Bai_3.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\New folder\\Tran_Khanh_Toan\\OOP\\Bai_3\\Bai_3.csproj",
+        "projectUniqueName": "D:\\New folder\\Tran_Khanh_Toan\\TranKhanhToanOOP\\OOP\\Bai_3\\Bai_3.csproj",
         "projectName": "Bai_3",
-        "projectPath": "D:\\New folder\\Tran_Khanh_Toan\\OOP\\Bai_3\\Bai_3.csproj",
+        "projectPath": "D:\\New folder\\Tran_Khanh_Toan\\TranKhanhToanOOP\\OOP\\Bai_3\\Bai_3.csproj",
         "packagesPath": "C:\\Users\\khanh\\.nuget\\packages\\",
-        "outputPath": "D:\\New folder\\Tran_Khanh_Toan\\OOP\\Bai_3\\obj\\",
+        "outputPath": "D:\\New folder\\Tran_Khanh_Toan\\TranKhanhToanOOP\\OOP\\Bai_3\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\khanh\\AppData\\Roaming\\NuGet\\NuGet.Config",

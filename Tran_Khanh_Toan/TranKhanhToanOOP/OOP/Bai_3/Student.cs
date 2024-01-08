@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Bai_3
 {
-    public class Student : Person, IPerson
+    public class Student : Person
     {
         public string Class { get; set; }
         public string School { get; set; }
@@ -16,20 +16,16 @@ namespace Bai_3
             
         }
 
-        public Student(int Id, string Name, int Age, double InCome, double TaxCoe, string Class, string School)
-            : base(Id, Name, Age, InCome, TaxCoe)
+        public Student(int Id, string Name, int Age, string Class, string School)
+            : base(Id, Name, Age)
         {
             this.Class = Class;
             this.School = School;
         }
-        public void GetInfo()
+        public new string GetInfo()
         {
-            Console.WriteLine("_" + this.Id + "_" + this.Name + "_" + this.Age + "_" + this.School + "_"  );
+            return ("Student: " + this.Id + "_" + this.Name + "_" + this.Age + "_" + this.School + "_"  );
         }
 
-        public double GetTax()
-        {
-
-        }
     }
 }
