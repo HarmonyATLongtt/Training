@@ -88,12 +88,10 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Commands\RelayCommand.cs" />
-    <Compile Include="Model\Employee.cs" />
-    <Compile Include="Model\Student.cs" />
-    <Compile Include="Model\Teacher.cs" />
+    <Compile Include="Model\Person.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
-    <Compile Include="View\ViewExcel.xaml.cs">
-      <DependentUpon>ViewExcel.xaml</DependentUpon>
+    <Compile Include="View\MainView.xaml.cs">
+      <DependentUpon>MainView.xaml</DependentUpon>
     </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -107,7 +105,7 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="View\ViewExcel.xaml">
+    <Page Include="View\MainView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
