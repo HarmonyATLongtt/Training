@@ -17,8 +17,9 @@ namespace WPF.ViewModel
         public ICommand ShowWindowCommand { get; set; }
 
         public MainViewModel() {
-            Students = ;
-            Excel.A
+            
+            Excel.Application exApp = new Excel.Application();
+
         }
 
     }
