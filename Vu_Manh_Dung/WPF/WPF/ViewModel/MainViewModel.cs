@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using WPF.Model;
+using Excel = Microsoft.Office.Interop.Excel;
 
 namespace WPF.ViewModel
 {
@@ -16,7 +17,8 @@ namespace WPF.ViewModel
         public ICommand ShowWindowCommand { get; set; }
 
         public MainViewModel() {
-            Students = 
+            Students = ;
+            Excel.A
         }
 
     }
