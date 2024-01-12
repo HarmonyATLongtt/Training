@@ -1,16 +1,11 @@
-﻿using System.IO;
-
+﻿//xóa các thư viện không được sử dụng
 
 bool canWin(int index, int leap, int[] game)
 {
-   if (index < 0 || game[index] == 1)
-    {
+    if (index < 0 || game[index] == 1)
         return false;
-    }
     else if (index == game.Length - 1 || index + leap >= game.Length)
-    {
         return true;
-    }
 
     game[index] = 1;
 
@@ -18,7 +13,6 @@ bool canWin(int index, int leap, int[] game)
         || canWin(index - 1, leap, game)
         || canWin(index + leap, leap, game);
 }
-
 
 void main()
 {
@@ -43,7 +37,6 @@ void main()
     }
 
     int n = int.Parse(lines[0]);
-    int[] N = new int[lines.Count / 2];
     int[] leaps = new int[lines.Count / 2];
     List<int[]> arr = new List<int[]>();
 
@@ -51,14 +44,8 @@ void main()
     {
         int[] array1 = lines[i].Split(" ").Select(int.Parse).ToArray();
         int[] array2 = lines[i + 1].Split(" ").Select(int.Parse).ToArray();
-        N[i / 2] = array1[0];
         leaps[i / 2] = array1[1];
-        int[] res = new int[N[i / 2]];
-        for (int j = 0; j < array2.Length; j++)
-        {
-            res[j] = array2[j];
-        }
-        arr.Add(res);
+        arr.Add(array2);
     }
 
     File.Delete(outputFilePath);
@@ -66,7 +53,7 @@ void main()
     {
         using (StreamWriter sw = new StreamWriter(outputFilePath, true))
         {
-            if (canWin(0,leaps[i], arr[i]))
+            if (canWin(0, leaps[i], arr[i]))
             {
                 Console.WriteLine("YES");
                 sw.WriteLine("YES");
@@ -76,7 +63,6 @@ void main()
                 Console.WriteLine("NO");
                 sw.WriteLine("NO");
             }
-            
         }
     }
     return;
