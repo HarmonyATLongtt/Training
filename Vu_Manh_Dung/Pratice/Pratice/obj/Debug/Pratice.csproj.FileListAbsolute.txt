@@ -1,0 +1,7 @@
+D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\Pratice\Pratice\obj\Debug\Pratice.csproj.AssemblyReference.cache
+D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\Pratice\Pratice\obj\Debug\Pratice.csproj.CoreCompileInputs.cache
+D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\Pratice\Pratice\bin\Debug\Pratice.exe.config
+D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\Pratice\Pratice\bin\Debug\Pratice.exe
+D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\Pratice\Pratice\bin\Debug\Pratice.pdb
+D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\Pratice\Pratice\obj\Debug\Pratice.exe
+D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\Pratice\Pratice\obj\Debug\Pratice.pdb
