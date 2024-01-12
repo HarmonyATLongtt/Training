@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\vanso\\Documents\\Nguyen_Van_Son_OOP\\OOP\\Bai_2\\Bai_2.csproj",
+      "projectUniqueName": "E:\\Cty\\Nguyen_Van_Son_OOP\\OOP\\Bai_2\\Bai_2.csproj",
       "projectName": "Bai_2",
-      "projectPath": "C:\\Users\\vanso\\Documents\\Nguyen_Van_Son_OOP\\OOP\\Bai_2\\Bai_2.csproj",
+      "projectPath": "E:\\Cty\\Nguyen_Van_Son_OOP\\OOP\\Bai_2\\Bai_2.csproj",
       "packagesPath": "C:\\Users\\vanso\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\vanso\\Documents\\Nguyen_Van_Son_OOP\\OOP\\Bai_2\\obj\\",
+      "outputPath": "E:\\Cty\\Nguyen_Van_Son_OOP\\OOP\\Bai_2\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\vanso\\AppData\\Roaming\\NuGet\\NuGet.Config",

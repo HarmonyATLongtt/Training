@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\vanso\\Documents\\Nguyen_Van_Son_OOP\\OOP\\Bai_1\\Bai_1.csproj": {}
+    "E:\\Cty\\Nguyen_Van_Son_OOP\\OOP\\Bai_1\\Bai_1.csproj": {}
   },
   "projects": {
-    "C:\\Users\\vanso\\Documents\\Nguyen_Van_Son_OOP\\OOP\\Bai_1\\Bai_1.csproj": {
+    "E:\\Cty\\Nguyen_Van_Son_OOP\\OOP\\Bai_1\\Bai_1.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\vanso\\Documents\\Nguyen_Van_Son_OOP\\OOP\\Bai_1\\Bai_1.csproj",
+        "projectUniqueName": "E:\\Cty\\Nguyen_Van_Son_OOP\\OOP\\Bai_1\\Bai_1.csproj",
         "projectName": "Bai_1",
-        "projectPath": "C:\\Users\\vanso\\Documents\\Nguyen_Van_Son_OOP\\OOP\\Bai_1\\Bai_1.csproj",
+        "projectPath": "E:\\Cty\\Nguyen_Van_Son_OOP\\OOP\\Bai_1\\Bai_1.csproj",
         "packagesPath": "C:\\Users\\vanso\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\vanso\\Documents\\Nguyen_Van_Son_OOP\\OOP\\Bai_1\\obj\\",
+        "outputPath": "E:\\Cty\\Nguyen_Van_Son_OOP\\OOP\\Bai_1\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\vanso\\AppData\\Roaming\\NuGet\\NuGet.Config",

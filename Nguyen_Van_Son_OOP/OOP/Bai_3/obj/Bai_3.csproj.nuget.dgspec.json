@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\vanso\\Documents\\Nguyen_Van_Son_OOP\\OOP\\Bai_3\\Bai_3.csproj": {}
+    "E:\\Cty\\Nguyen_Van_Son_OOP\\OOP\\Bai_3\\Bai_3.csproj": {}
   },
   "projects": {
-    "C:\\Users\\vanso\\Documents\\Nguyen_Van_Son_OOP\\OOP\\Bai_1\\Bai_1.csproj": {
+    "E:\\Cty\\Nguyen_Van_Son_OOP\\OOP\\Bai_1\\Bai_1.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\vanso\\Documents\\Nguyen_Van_Son_OOP\\OOP\\Bai_1\\Bai_1.csproj",
+        "projectUniqueName": "E:\\Cty\\Nguyen_Van_Son_OOP\\OOP\\Bai_1\\Bai_1.csproj",
         "projectName": "Bai_1",
-        "projectPath": "C:\\Users\\vanso\\Documents\\Nguyen_Van_Son_OOP\\OOP\\Bai_1\\Bai_1.csproj",
+        "projectPath": "E:\\Cty\\Nguyen_Van_Son_OOP\\OOP\\Bai_1\\Bai_1.csproj",
         "packagesPath": "C:\\Users\\vanso\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\vanso\\Documents\\Nguyen_Van_Son_OOP\\OOP\\Bai_1\\obj\\",
+        "outputPath": "E:\\Cty\\Nguyen_Van_Son_OOP\\OOP\\Bai_1\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\vanso\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -59,14 +59,14 @@
         }
       }
     },
-    "C:\\Users\\vanso\\Documents\\Nguyen_Van_Son_OOP\\OOP\\Bai_2\\Bai_2.csproj": {
+    "E:\\Cty\\Nguyen_Van_Son_OOP\\OOP\\Bai_2\\Bai_2.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\vanso\\Documents\\Nguyen_Van_Son_OOP\\OOP\\Bai_2\\Bai_2.csproj",
+        "projectUniqueName": "E:\\Cty\\Nguyen_Van_Son_OOP\\OOP\\Bai_2\\Bai_2.csproj",
         "projectName": "Bai_2",
-        "projectPath": "C:\\Users\\vanso\\Documents\\Nguyen_Van_Son_OOP\\OOP\\Bai_2\\Bai_2.csproj",
+        "projectPath": "E:\\Cty\\Nguyen_Van_Son_OOP\\OOP\\Bai_2\\Bai_2.csproj",
         "packagesPath": "C:\\Users\\vanso\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\vanso\\Documents\\Nguyen_Van_Son_OOP\\OOP\\Bai_2\\obj\\",
+        "outputPath": "E:\\Cty\\Nguyen_Van_Son_OOP\\OOP\\Bai_2\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\vanso\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -114,14 +114,14 @@
         }
       }
     },
-    "C:\\Users\\vanso\\Documents\\Nguyen_Van_Son_OOP\\OOP\\Bai_3\\Bai_3.csproj": {
+    "E:\\Cty\\Nguyen_Van_Son_OOP\\OOP\\Bai_3\\Bai_3.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\vanso\\Documents\\Nguyen_Van_Son_OOP\\OOP\\Bai_3\\Bai_3.csproj",
+        "projectUniqueName": "E:\\Cty\\Nguyen_Van_Son_OOP\\OOP\\Bai_3\\Bai_3.csproj",
         "projectName": "Bai_3",
-        "projectPath": "C:\\Users\\vanso\\Documents\\Nguyen_Van_Son_OOP\\OOP\\Bai_3\\Bai_3.csproj",
+        "projectPath": "E:\\Cty\\Nguyen_Van_Son_OOP\\OOP\\Bai_3\\Bai_3.csproj",
         "packagesPath": "C:\\Users\\vanso\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\vanso\\Documents\\Nguyen_Van_Son_OOP\\OOP\\Bai_3\\obj\\",
+        "outputPath": "E:\\Cty\\Nguyen_Van_Son_OOP\\OOP\\Bai_3\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\vanso\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -138,11 +138,11 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\vanso\\Documents\\Nguyen_Van_Son_OOP\\OOP\\Bai_1\\Bai_1.csproj": {
-                "projectPath": "C:\\Users\\vanso\\Documents\\Nguyen_Van_Son_OOP\\OOP\\Bai_1\\Bai_1.csproj"
+              "E:\\Cty\\Nguyen_Van_Son_OOP\\OOP\\Bai_1\\Bai_1.csproj": {
+                "projectPath": "E:\\Cty\\Nguyen_Van_Son_OOP\\OOP\\Bai_1\\Bai_1.csproj"
               },
-              "C:\\Users\\vanso\\Documents\\Nguyen_Van_Son_OOP\\OOP\\Bai_2\\Bai_2.csproj": {
-                "projectPath": "C:\\Users\\vanso\\Documents\\Nguyen_Van_Son_OOP\\OOP\\Bai_2\\Bai_2.csproj"
+              "E:\\Cty\\Nguyen_Van_Son_OOP\\OOP\\Bai_2\\Bai_2.csproj": {
+                "projectPath": "E:\\Cty\\Nguyen_Van_Son_OOP\\OOP\\Bai_2\\Bai_2.csproj"
               }
             }
           }

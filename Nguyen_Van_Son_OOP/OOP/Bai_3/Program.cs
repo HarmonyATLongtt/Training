@@ -6,15 +6,14 @@ List<IPerson>? li;
 
 void Init()
 {
-    TaxData taxData = new TaxData();
     li = new List<IPerson>
             {
-                new Student(1,"Nguyen Van A",18,0,taxData,"CNTT","HaUI"),
-                new Teacher(2,"Nguyen Van B",28,15000000,taxData,"HaUI"),
-                new Employee(3,"Nguyen Van C",24,20000000,taxData,"Harmony","Dev"),
-                new Student(3,"Nguyen Van D",18,0,taxData,"CNTT","HaUI"),
-                new Employee(3,"Nguyen Van E",23,18000000,taxData,"Harmony","Tester"),
-                new Student(3,"Nguyen Van F",18,0,taxData,"CNTT","HaUI"),
+                new Student(1,"Nguyen Van A",18,0,new TaxData(),"CNTT","HaUI"),
+                new Teacher(2,"Nguyen Van B",28,15000000,new TaxData(),"HaUI"),
+                new Employee(3,"Nguyen Van C",24,20000000,new TaxData(),"Harmony","Dev"),
+                new Student(3,"Nguyen Van D",19,0,new TaxData(),"CNTT","HaUI"),
+                new Employee(3,"Nguyen Van E",23,18000000,new TaxData(),"Harmony","Tester"),
+                new Student(3,"Nguyen Van F",20,0,new TaxData(),"CNTT","HaUI"),
             };
 }
 
