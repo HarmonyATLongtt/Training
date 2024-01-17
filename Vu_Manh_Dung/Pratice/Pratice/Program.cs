@@ -8,7 +8,6 @@ namespace Pratice
     {
         private static bool ValidCheck(int q, int n, int leap, int[] game)
         {
-            //có thể lược bỏ biến visited đi để code được gọn hơn
             if (!(q >= 1 && q <= 5000)) return false;
             if (!(n >= 1 && n <= 100)) return false;
             if (!(leap >= 0 && leap <= 100)) return false;
