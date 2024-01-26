@@ -9,24 +9,30 @@ namespace WPF.Commands
 {
     public class RelayCommand : ICommand
     {
-        public event EventHandler CanExecuteChanged;
+        private readonly Action<object> _execute;
+        private readonly Predicate<object> _canExecute;
+        public RelayCommand(Action<object> execute):this(execute,null) { }
 
-        private Action<object> _Excute { get; set; }
-        private Predicate<object> _CanExcute { get; set; }
-
-        public RelayCommand(Action<object> excute, Predicate<object> canExcute) {
-            _Excute = excute;
-            _CanExcute = canExcute;
+        public RelayCommand(Action<object> excute, Predicate<object> canExecute) {
+            if (excute == null)
+                throw new ArgumentNullException("excute");
+            _execute = excute;
+            _canExecute = canExecute;
         }
 
         public bool CanExecute(object parameter)
         {
-            return _CanExcute(parameter);
+            return _canExecute == null ? true : _canExecute(parameter);
         }
 
         public void Execute(object parameter)
         {
-            _Excute(parameter);
+            _execute(parameter);
+        }
+        public event EventHandler CanExecuteChanged
+        {
+            add { CommandManager.RequerySuggested += value; }
+            remove { CommandManager.RequerySuggested -= value; }
         }
     }
 }

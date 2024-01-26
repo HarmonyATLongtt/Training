@@ -8,6 +8,5 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="500" Width="800">
     <Grid>
-        <view:ViewExcel></view:ViewExcel>
     </Grid>
 </Window>

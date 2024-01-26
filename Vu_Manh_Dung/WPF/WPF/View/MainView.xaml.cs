@@ -1,65 +1,27 @@
-﻿using Microsoft.Win32;
-using OfficeOpenXml;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using WPF.Model;
-using WPF.ViewModel;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 
 namespace WPF.View
 {
     /// <summary>
-    /// Interaction logic for ViewExcel.xaml
+    /// Interaction logic for MainView.xaml
     /// </summary>
-    public partial class ViewExcel : UserControl
+    public partial class MainView : Window
     {
-        
-
-        public ViewExcel()
+        public MainView()
         {
             InitializeComponent();
-            MainViewModel mainViewModel = new MainViewModel();
-            
-            DataContext = mainViewModel;
-        }
-
-        
-
-        private void btnImport_Click(object sender, RoutedEventArgs e)
-        {
-           // dgExcel.Columns.Clear();
-            
-            //dgExcel.MaxColumnWidth = dgExcel.Width / dgExcel.Columns.Count;
-        }
-
-        private void btnExport_Click(object sender, RoutedEventArgs e)
-        {
-            string filePath = "";
-            SaveFileDialog dialog = new SaveFileDialog();
-            dialog.Filter = "Excel | *.xlsx | Excel 2003 | *.xls";
-            if(dialog.ShowDialog() == true)
-            {
-                filePath = dialog.FileName;
-            }
-            if (string.IsNullOrEmpty(filePath))
-            {
-                MessageBox.Show("Invalid path");
-                return;
-            }
-            try
-            {
-                using(ExcelPackage p = new ExcelPackage())
-                { 
-                    p.Workbook.Properties.Author = "VMD";
-                    p.Workbook.Properties.Title = "FileExport";
-                    p.Workbook.Worksheets.Add(Name);
-                    ExcelWorksheet ws = p.Workbook.Worksheets[1];
-                }
-            }catch(Exception ew)
-            {
-                MessageBox.Show(ew.ToString());
-            }
         }
     }
 }

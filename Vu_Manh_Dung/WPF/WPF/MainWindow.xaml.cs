@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using WPF.View;
 
 namespace WPF
 {
@@ -24,6 +25,8 @@ namespace WPF
         public MainWindow()
         {
             InitializeComponent();
+            Window mainView = new MainView();
+            mainView.Show();
         }
 
     }
