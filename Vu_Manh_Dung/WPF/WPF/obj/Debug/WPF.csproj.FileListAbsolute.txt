@@ -2,11 +2,9 @@ D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\WPF\WPF\bin\Debug\WP
 D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\WPF\WPF\bin\Debug\WPF.exe
 D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\WPF\WPF\bin\Debug\WPF.pdb
 D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\WPF\WPF\obj\Debug\WPF.csproj.AssemblyReference.cache
-D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\WPF\WPF\obj\Debug\MainWindow.g.cs
 D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\WPF\WPF\obj\Debug\App.g.cs
 D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\WPF\WPF\obj\Debug\WPF_MarkupCompile.cache
 D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\WPF\WPF\obj\Debug\WPF_MarkupCompile.lref
-D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\WPF\WPF\obj\Debug\MainWindow.baml
 D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\WPF\WPF\obj\Debug\WPF.g.resources
 D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\WPF\WPF\obj\Debug\WPF.Properties.Resources.resources
 D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\WPF\WPF\obj\Debug\WPF.csproj.GenerateResource.cache
@@ -14,7 +12,6 @@ D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\WPF\WPF\obj\Debug\WP
 D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\WPF\WPF\obj\Debug\WPF.exe
 D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\WPF\WPF\obj\Debug\WPF.pdb
 D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\WPF\WPF\obj\Debug\GeneratedInternalTypeHelper.g.cs
-D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\WPF\WPF\obj\Debug\View\MainView.g.cs
 D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\WPF\WPF\obj\Debug\WPF_Content.g.cs
 D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\WPF\WPF\bin\Debug\selenium-manager\linux\selenium-manager
 D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\WPF\WPF\bin\Debug\selenium-manager\macos\selenium-manager
@@ -30,5 +27,6 @@ D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\WPF\WPF\bin\Debug\EP
 D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\WPF\WPF\bin\Debug\Microsoft.IO.RecyclableMemoryStream.xml
 D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\WPF\WPF\bin\Debug\Newtonsoft.Json.xml
 D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\WPF\WPF\bin\Debug\WebDriver.xml
-D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\WPF\WPF\obj\Debug\View\MainView.baml
 D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\WPF\WPF\obj\Debug\WPF.csproj.CopyComplete
+D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\WPF\WPF\obj\Debug\MainWindow.g.cs
+D:\Visual Studio 22\Intern Harmony AT\Training\Vu_Manh_Dung\WPF\WPF\obj\Debug\MainWindow.baml

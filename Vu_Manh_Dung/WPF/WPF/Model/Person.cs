@@ -13,5 +13,10 @@ namespace WPF.Model
         public int Age { get; set; }
         public string Address { get; set; }
         public float Taxcoe { get; set; }
+
+        public override string ToString()
+        {
+            return $"Id: {Id}\nName: {Name}\nAge: {Age}\nAddress: {Address}\nTaxcoe: {Taxcoe}";
+        }
     }
 }

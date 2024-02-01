@@ -3,10 +3,63 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:view="clr-namespace:WPF.View"
+        xmlns:viewmodel="clr-namespace:WPF.ViewModel"
         xmlns:local="clr-namespace:WPF"
         mc:Ignorable="d"
-        Title="MainWindow" Height="500" Width="800">
-    <Grid>
+        Title="MainWindow" Height="500" Width="800" WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <viewmodel:MainViewModel x:Key="ViewModel"/>
+        <Style TargetType="TextBox">
+            <Setter Property="Margin" Value="10 2"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+        </Style>
+        <Style TargetType="TextBlock">
+            <Setter Property="Padding" Value="10 0 0 0"/>
+        </Style>
+    </Window.Resources>
+    <Grid DataContext="{Binding Source={StaticResource ViewModel}}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="10"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <!--<TextBlock Text="ID" />
+            <TextBox x:Name="txtID" Grid.Column="1" Width="80" Text="{Binding Person.Id, Mode=TwoWay}" IsEnabled="False"/>-->
+            <TextBlock Grid.Row="1" Text="Name" />
+            <TextBox x:Name="txtName" Grid.Row="1" Grid.Column="1" Width="180" Text="{Binding Person.Name}" />
+            <TextBlock Grid.Row="2" Text="Age"/>
+            <TextBox x:Name="txtAge" Grid.Row="2" Grid.Column="1" Width="60" Text="{Binding Person.Age}"/>
+            <TextBlock Grid.Row="3" Text="Address"/>
+            <TextBox x:Name="txtAddress" Grid.Row="3" Grid.Column="1" Width="220" Text="{Binding Person.Address}"/>
+            <TextBlock Grid.Row="4" Text="Taxcoe"/>
+            <TextBox x:Name="txtTaxcoe" Grid.Row="4" Grid.Column="1" Width="100" Text="{Binding Person.Taxcoe}"/>
+            <StackPanel Orientation="Horizontal" Grid.Row="5" Grid.Column="1">
+                <Button Grid.Row="5" Grid.Column="1" Width="50" HorizontalAlignment="Left" Margin="10 2 5 2" Content="Add" Command="{Binding AddCommand}"/>
+                <Button Grid.Row="5" Grid.Column="1" Width="50" HorizontalAlignment="Left" Margin="5 2" Content="Detail" Command="{Binding DetailCommand}"/>
+                <!--<Button Grid.Row="5" Grid.Column="1" Width="50" HorizontalAlignment="Left" Margin="5 2" Content="Update" Command="{Binding UpdateCommand}"/>-->
+                <Button Grid.Row="5" Grid.Column="1" Width="50" HorizontalAlignment="Left" Margin="5 2" Content="Delete" Command="{Binding DeleteCommand}"/>
+                <Button Grid.Row="5" Grid.Column="1" Width="50" HorizontalAlignment="Left" Margin="5 2" Content="Clear" Command="{Binding ClearCommand}"/>
+            </StackPanel>
+        </Grid>
+
+        <DataGrid x:Name="dataGrid" Grid.Row ="1" 
+                  ItemsSource="{Binding Persons, Mode=TwoWay}" 
+                  SelectedItem="{Binding Person, Mode=TwoWay}"
+                  IsReadOnly="True">
+        </DataGrid>
     </Grid>
 </Window>
