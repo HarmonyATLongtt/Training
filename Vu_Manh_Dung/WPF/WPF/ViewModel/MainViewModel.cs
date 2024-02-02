@@ -24,7 +24,6 @@ namespace WPF.ViewModel
         private float _taxcoe;
         private Person _person = new Person();
         private ObservableCollection<Person> _persons;
-
         public Person Person
         {
             get { return _person; }
@@ -34,7 +33,6 @@ namespace WPF.ViewModel
                 NotifyPropertyChanged(nameof(Person));
             }
         }
-
         public int ID
         {
             get { return _id; }
@@ -44,7 +42,6 @@ namespace WPF.ViewModel
                 NotifyPropertyChanged(nameof(ID));
             }
         }
-
         public string Name
         {
             get { return _name; }
@@ -54,7 +51,6 @@ namespace WPF.ViewModel
                 NotifyPropertyChanged(nameof(Name));
             }
         }
-
         public int Age
         {
             get { return _age; }
@@ -64,7 +60,6 @@ namespace WPF.ViewModel
                 NotifyPropertyChanged(nameof(Age));
             }
         }
-
         public string Address
         {
             get { return _address; }
@@ -74,7 +69,6 @@ namespace WPF.ViewModel
                 NotifyPropertyChanged(nameof(Address));
             }
         }
-
         public float Taxcoe
         {
             get { return _taxcoe; }
@@ -84,7 +78,6 @@ namespace WPF.ViewModel
                 NotifyPropertyChanged(nameof(Taxcoe));
             }
         }
-
         public ObservableCollection<Person> Persons
         {
             get { return _persons; }
@@ -94,7 +87,6 @@ namespace WPF.ViewModel
                 NotifyPropertyChanged(nameof(Persons));
             }
         }
-
         #endregion Properties
 
         #region Commands
@@ -166,10 +158,10 @@ namespace WPF.ViewModel
             Person = new Person();
             Persons = new ObservableCollection<Person>();
             LoadPersons();
-            Persons.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(Students_CollectionChanged);
+            Persons.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(Persons_CollectionChanged);
         }
 
-        private void Students_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        private void Persons_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             NotifyPropertyChanged(nameof(Persons));
         }
