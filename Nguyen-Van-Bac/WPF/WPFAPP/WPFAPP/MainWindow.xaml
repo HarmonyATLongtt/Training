@@ -4,9 +4,21 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WPFAPP"
+        xmlns:vm="clr-namespace:WPFAPP.ViewModel"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
+    <Window.DataContext>
+        <vm:MainViewModel></vm:MainViewModel>
+    </Window.DataContext>
+    <StackPanel>
+        <!-- Controls for importing/exporting file -->
+        <Button Content="Import" Command="{Binding ImportCommand}"/>
+        <Button Content="Export" Command="{Binding ExportCommand}"/>
 
-    </Grid>
+        <!-- Item Selector for selecting sheets -->
+        <ComboBox IsReadOnly="True"  Text="-- Select sheet --" ItemsSource="{Binding SheetNames}"  SelectedItem="{Binding SelectedSheet, Mode=TwoWay}"/>
+
+        <!-- DataGrid for displaying data -->
+        <DataGrid ItemsSource="{Binding Data}" Margin="0,60,0,-10" />
+    </StackPanel>
 </Window>
