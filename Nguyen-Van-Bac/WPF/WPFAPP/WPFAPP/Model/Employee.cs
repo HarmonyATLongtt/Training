@@ -11,6 +11,6 @@ namespace WPFAPP.Model
         public int Age { get; set; }
         public string Address { get; set; }
         public double TaxCode { get; set; }
-        public double Imcome { get; set; }
+        public double Income { get; set; }
     }
 }

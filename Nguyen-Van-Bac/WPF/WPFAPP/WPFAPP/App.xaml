@@ -4,6 +4,16 @@
              xmlns:local="clr-namespace:WPFAPP"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <Style x:Key="CellHighlightStyle" TargetType="DataGridCell">
+            <Setter Property="Background" Value="White"/>
+            <!-- Thiết lập màu nền mặc định -->
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="LightCyan"/>
+                    <!-- Thay đổi màu nền khi di chuột vào -->
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
     </Application.Resources>
 </Application>

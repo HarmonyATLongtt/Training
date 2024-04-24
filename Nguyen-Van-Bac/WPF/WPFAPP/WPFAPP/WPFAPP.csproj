@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Bai_2\**" />
+    <EmbeddedResource Remove="Bai_2\**" />
+    <None Remove="Bai_2\**" />
+    <Page Remove="Bai_2\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Views\" />
   </ItemGroup>
 

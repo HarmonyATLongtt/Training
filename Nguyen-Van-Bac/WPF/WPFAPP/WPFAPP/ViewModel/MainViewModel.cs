@@ -2,6 +2,7 @@
 using Microsoft.Win32;
 using OfficeOpenXml;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
@@ -18,8 +19,11 @@ namespace WPFAPP.ViewModel
             ImportCommand = new RelayCommand(ImportInvoke);
             SelectedSheetCommand = new RelayCommand<string>(SwitchSheet);
             ExportCommand = new RelayCommand(ExportInvoke);
+            ImportExcelCommand = new RelayCommand(ImportExcel);
         }
+
         private string _selectedSheet;
+
         public string SelectedSheet
         {
             get { return _selectedSheet; }
@@ -30,25 +34,52 @@ namespace WPFAPP.ViewModel
                     _selectedSheet = value;
                     NotifyChanged("SelectedSheet");
                     SelectedSheetCommand.Execute(null); // Gọi SelectedSheetCommand khi selected sheet thay đổi
-
-
-
-
-
                 }
             }
         }
 
-        public ObservableCollection<string> SheetNames { get; set; }
+        private ObservableCollection<string> _sheetNames;
+
+        public ObservableCollection<string> SheetNames
+        {
+            get { return _sheetNames; }
+            set { _sheetNames = value; NotifyChanged("SheetNames"); }
+        }
+
+        private string _selectedSheetName;
+
+        public string SelectedSheetName
+        {
+            get { return _selectedSheetName; }
+            set
+            {
+                _selectedSheetName = value;
+                LoadSelectedSheetData();
+            }
+        }
+
+        private ObservableCollection<ObservableCollection<string>> _selectedSheetData;
+
+        public ObservableCollection<ObservableCollection<string>> SelectedSheetData
+        {
+            get { return _selectedSheetData; }
+            set { _selectedSheetData = value; NotifyChanged("SelectedSheetData"); }
+        }
+
+        public ICommand ImportExcelCommand { get; }
         public ObservableCollection<object> Data { get; set; }
-       
+        public ObservableCollection<object> DataExportStudent { get; set; }
+        public ObservableCollection<object> DataExportTeacher { get; set; }
+        public ObservableCollection<object> DataExportEmployee { get; set; }
 
         // Command to handle the selection of a new sheet
         public ICommand SelectedSheetCommand { get; }
+
         public ICommand ImportCommand { get; }
         public ICommand ExportCommand { get; }
         public ExcelFileInfo FileInfo { get; set; }
         public string FilePath { get; set; }
+
         private void ImportInvoke(object sender)
         {
             ChooseFileInvoke();
@@ -59,10 +90,9 @@ namespace WPFAPP.ViewModel
                 ObservableCollection<string> sheetNam = new ObservableCollection<string>(FileInfo.SheetNames);
                 SheetNames = sheetNam;
                 NotifyChanged("SheetNames");
-
-
             }
         }
+
         private void ExportInvoke(object sender)
         {
             // Hiển thị hộp thoại SaveFileDialog để người dùng chọn vị trí và tên file Excel mới
@@ -76,68 +106,88 @@ namespace WPFAPP.ViewModel
                 {
                     using (var package = new ExcelPackage())
                     {
-                        // Tạo một worksheet mới
-                        ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Sheet1");
+                        ExcelWorksheet worksheetStudent = package.Workbook.Worksheets.Add("Student");
+                        ExcelWorksheet worksheetTeacher = package.Workbook.Worksheets.Add("Teacher");
+                        ExcelWorksheet worksheetEmployee = package.Workbook.Worksheets.Add("Employee");
 
-                        for (int i = 0; i < Data.Count; i++)
+                        // Khởi tạo dòng header cho mỗi sheet
+                        worksheetStudent.Cells[1, 1].Value = "ID";
+                        worksheetStudent.Cells[1, 2].Value = "Name";
+                        worksheetStudent.Cells[1, 3].Value = "Age";
+                        worksheetStudent.Cells[1, 4].Value = "Address";
+                        worksheetStudent.Cells[1, 5].Value = "TaxCode";
+                        worksheetStudent.Cells[1, 6].Value = "Income";
+                        worksheetStudent.Cells[1, 7].Value = "School";
+                        worksheetStudent.Cells[1, 8].Value = "Class";
+
+                        worksheetTeacher.Cells[1, 1].Value = "ID";
+                        worksheetTeacher.Cells[1, 2].Value = "Name";
+                        worksheetTeacher.Cells[1, 3].Value = "Age";
+                        worksheetTeacher.Cells[1, 4].Value = "Address";
+                        worksheetTeacher.Cells[1, 5].Value = "TaxCode";
+                        worksheetTeacher.Cells[1, 6].Value = "Income";
+                        worksheetTeacher.Cells[1, 7].Value = "School";
+
+                        worksheetEmployee.Cells[1, 1].Value = "ID";
+                        worksheetEmployee.Cells[1, 2].Value = "Name";
+                        worksheetEmployee.Cells[1, 3].Value = "Age";
+                        worksheetEmployee.Cells[1, 4].Value = "Address";
+                        worksheetEmployee.Cells[1, 5].Value = "TaxCode";
+                        worksheetEmployee.Cells[1, 6].Value = "Income";
+                        if (DataExportStudent != null)
                         {
-
-
-                            if (Data[i] is Student student)
+                            for (int i = 0; i < DataExportStudent.Count; i++)
                             {
-                                worksheet.Cells[1, 1].Value = "ID";
-                                worksheet.Cells[1, 2].Value = "Name";
-                                worksheet.Cells[ 1, 3].Value = "Age";
-                                worksheet.Cells[ 1, 4].Value = "Address";
-                                worksheet.Cells[ 1, 5].Value = "TaxCode";
-                                worksheet.Cells[1, 6].Value = "Imcome";
-                                worksheet.Cells[ 1, 7].Value = "School";
-                                worksheet.Cells[ 1, 8].Value = "Class";
-
-                                worksheet.Cells[i + 2, 1].Value = student.ID;
-                                worksheet.Cells[i + 2, 2].Value = student.Name;
-                                worksheet.Cells[i + 2, 3].Value = student.Age;
-                                worksheet.Cells[i + 2, 4].Value = student.Address;
-                                worksheet.Cells[i + 2, 5].Value = student.TaxCode;
-                                worksheet.Cells[i + 2, 6].Value = student.Imcome;
-                                worksheet.Cells[i + 2, 7].Value = student.School;
-                                worksheet.Cells[i + 2, 8].Value = student.Class;
+                                if (DataExportStudent[i] is Student student)
+                                {
+                                    int rowIndex = i + 2;
+                                    worksheetStudent.Cells[rowIndex, 1].Value = student.ID;
+                                    worksheetStudent.Cells[rowIndex, 2].Value = student.Name;
+                                    worksheetStudent.Cells[rowIndex, 3].Value = student.Age;
+                                    worksheetStudent.Cells[rowIndex, 4].Value = student.Address;
+                                    worksheetStudent.Cells[rowIndex, 5].Value = student.TaxCode;
+                                    worksheetStudent.Cells[rowIndex, 6].Value = student.Income;
+                                    worksheetStudent.Cells[rowIndex, 7].Value = student.School;
+                                    worksheetStudent.Cells[rowIndex, 8].Value = student.Class;
+                                }
                             }
-                            else if (Data[i] is Teacher teacher)
+                        }
+                        if (DataExportTeacher != null)
+                        {
+                            for (int i = 0; i < DataExportTeacher.Count; i++)
                             {
-                                worksheet.Cells[1, 1].Value = "ID";
-                                worksheet.Cells[1, 2].Value = "Name";
-                                worksheet.Cells[1, 3].Value = "Age";
-                                worksheet.Cells[1, 4].Value = "Address";
-                                worksheet.Cells[1, 5].Value = "TaxCode";
-                                worksheet.Cells[1, 6].Value = "Imcome";
-                                worksheet.Cells[1, 7].Value = "School";
-                                worksheet.Cells[i + 1, 1].Value = teacher.ID;
-                                worksheet.Cells[i + 1, 2].Value = teacher.Name;
-                                worksheet.Cells[i + 1, 3].Value = teacher.Age;
-                                worksheet.Cells[i + 1, 4].Value = teacher.Address;
-                                worksheet.Cells[i + 1, 5].Value = teacher.TaxCode;
-                                worksheet.Cells[i + 1, 6].Value = teacher.Imcome;
-                                worksheet.Cells[i + 1, 7].Value = teacher.School;
+                                if (DataExportTeacher[i] is Teacher teacher)
+                                {
+                                    int rowIndex = i + 2;
+                                    worksheetTeacher.Cells[rowIndex, 1].Value = teacher.ID;
+                                    worksheetTeacher.Cells[rowIndex, 2].Value = teacher.Name;
+                                    worksheetTeacher.Cells[rowIndex, 3].Value = teacher.Age;
+                                    worksheetTeacher.Cells[rowIndex, 4].Value = teacher.Address;
+                                    worksheetTeacher.Cells[rowIndex, 5].Value = teacher.TaxCode;
+                                    worksheetTeacher.Cells[rowIndex, 6].Value = teacher.Income;
+                                    worksheetTeacher.Cells[rowIndex, 7].Value = teacher.School;
+                                }
                             }
-                            else if (Data[i] is Employee employee)
+                        }
+                        if (DataExportEmployee != null)
+                        {
+                            for (int i = 0; i < DataExportEmployee.Count; i++)
                             {
-                                worksheet.Cells[1, 1].Value = "ID";
-                                worksheet.Cells[1, 2].Value = "Name";
-                                worksheet.Cells[1, 3].Value = "Age";
-                                worksheet.Cells[1, 4].Value = "Address";
-                                worksheet.Cells[1, 5].Value = "TaxCode";
-                                worksheet.Cells[1, 6].Value = "Imcome";
-                                worksheet.Cells[i + 1, 1].Value = employee.ID;
-                                worksheet.Cells[i + 1, 2].Value = employee.Name;
-                                worksheet.Cells[i + 1, 3].Value = employee.Age;
-                                worksheet.Cells[i + 1, 4].Value = employee.Address;
-                                worksheet.Cells[i + 1, 5].Value = employee.TaxCode;
-                                worksheet.Cells[i + 1, 6].Value = employee.Imcome;
+                                if (DataExportEmployee[i] is Employee employee)
+                                {
+                                    int rowIndex = i + 2;
+                                    worksheetEmployee.Cells[rowIndex, 1].Value = employee.ID;
+                                    worksheetEmployee.Cells[rowIndex, 2].Value = employee.Name;
+                                    worksheetEmployee.Cells[rowIndex, 3].Value = employee.Age;
+                                    worksheetEmployee.Cells[rowIndex, 4].Value = employee.Address;
+                                    worksheetEmployee.Cells[rowIndex, 5].Value = employee.TaxCode;
+                                    worksheetEmployee.Cells[rowIndex, 6].Value = employee.Income;
+                                }
                             }
-
                         }
 
+
+                        // Lưu file Excel
                         package.SaveAs(new FileInfo(filePath));
                     }
 
@@ -159,26 +209,61 @@ namespace WPFAPP.ViewModel
                 FilePath = openFileDialog.FileName;
             }
         }
+
         private void SwitchSheet(string selectedSheet)
         {
             switch (SelectedSheet)
             {
                 case "Student":
                     Data = ExcelReader.ReadStudents(FilePath);
+                    DataExportStudent = Data;
                     NotifyChanged("Data");
                     break;
+
                 case "Teacher":
                     Data = ExcelReader.ReadTeachers(FilePath);
+                    DataExportTeacher = Data;
                     NotifyChanged("Data");
                     break;
-                case "Employee":
+
+                case "Employees":
                     Data = ExcelReader.ReadEmployees(FilePath);
+                    DataExportEmployee = Data;
                     NotifyChanged("Data");
                     break;
+
                 default:
                     break;
             }
         }
-    }
 
+        private void LoadSelectedSheetData()
+        {
+            if (!string.IsNullOrEmpty(SelectedSheetName))
+            {
+                SelectedSheetData = ExcelReader.ReadExcel(FilePath, SelectedSheetName); // Thay thế YourExcelReader bằng lớp bạn sử dụng để đọc dữ liệu từ file Excel
+                NotifyChanged("SelectedSheetData");
+                NotifyChanged("Data");
+            }
+        }
+
+        private void ImportExcel(object parameter)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Excel Files|*.xlsx;*.xls";
+            if (openFileDialog.ShowDialog() == true)
+            {
+                FilePath = openFileDialog.FileName;
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                using (ExcelPackage package = new ExcelPackage(new System.IO.FileInfo(openFileDialog.FileName)))
+                {
+                    SheetNames = new ObservableCollection<string>();
+                    foreach (var worksheet in package.Workbook.Worksheets)
+                    {
+                        SheetNames.Add(worksheet.Name);
+                    }
+                }
+            }
+        }
+    }
 }
