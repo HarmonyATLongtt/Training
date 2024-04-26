@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Text;
 using System.Windows;
+using System.Windows.Controls;
 using WPFAPP.Model;
 
 namespace WPFAPP.Extension.Excel
@@ -22,7 +23,7 @@ namespace WPFAPP.Extension.Excel
                 {
                     students.Add(new Student
                     {
-                        ID = worksheet.Cells[row, 1].Value.ToString(),
+                        ID =  Int32.Parse(worksheet.Cells[row, 1].Value.ToString()),
                         Name = worksheet.Cells[row, 2].Value.ToString(),
                         Age = Convert.ToInt32(worksheet.Cells[row, 3].Value),
                         Address = worksheet.Cells[row, 4].Value.ToString(),
@@ -47,7 +48,7 @@ namespace WPFAPP.Extension.Excel
                 {
                     teachers.Add(new Teacher
                     {
-                        ID = worksheet.Cells[row, 1].Value.ToString(),
+                        ID = Int32.Parse(worksheet.Cells[row, 1].Value.ToString()),
                         Name = worksheet.Cells[row, 2].Value.ToString(),
                         Age = Convert.ToInt32(worksheet.Cells[row, 3].Value),
                         Address = worksheet.Cells[row, 4].Value.ToString(),
@@ -73,7 +74,7 @@ namespace WPFAPP.Extension.Excel
                 {
                     employees.Add(new Employee
                     {
-                        ID = worksheet.Cells[row, 1].Value.ToString(),
+                        ID = Int32.Parse(worksheet.Cells[row, 1].Value.ToString()),
                         Name = worksheet.Cells[row, 2].Value.ToString(),
                         Age = Convert.ToInt32(worksheet.Cells[row, 3].Value),
                         Address = worksheet.Cells[row, 4].Value.ToString(),

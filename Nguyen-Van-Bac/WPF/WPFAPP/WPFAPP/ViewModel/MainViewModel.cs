@@ -72,6 +72,9 @@ namespace WPFAPP.ViewModel
         public ObservableCollection<object> DataExportStudent { get; set; }
         public ObservableCollection<object> DataExportTeacher { get; set; }
         public ObservableCollection<object> DataExportEmployee { get; set; }
+        public ObservableCollection<object> DataImportStudent { get; set; }
+        public ObservableCollection<object> DataImportTeacher { get; set; }
+        public ObservableCollection<object> DataImportEmployee { get; set; }
         public ICommand SaveCommand { get; } 
         // Command to handle the selection of a new sheet
         public ICommand SelectedSheetCommand { get; }
@@ -97,6 +100,12 @@ namespace WPFAPP.ViewModel
         private void LoadDataImport()
         {
             SelectedSheet = SheetNames[0];
+            DataImportStudent = ExcelReader.ReadStudents(FilePath);
+            DataExportStudent = DataImportStudent;
+            DataImportTeacher = ExcelReader.ReadTeachers(FilePath);
+            DataExportTeacher = DataImportTeacher;
+            DataImportEmployee= ExcelReader.ReadEmployees(FilePath);
+            DataExportEmployee = DataImportEmployee;
             SwitchSheet("ok");
         }
         private void ExportInvoke(object sender)
@@ -122,7 +131,7 @@ namespace WPFAPP.ViewModel
                         SetHeader(worksheetStudent, studentHeaders);
                         SetHeader(worksheetTeacher, teacherHeaders);
                         SetHeader(worksheetEmployee, employeeHeaders);
-
+                       
                         ExportDataToWorksheet(DataExportStudent, worksheetStudent);
                         ExportDataToWorksheet(DataExportTeacher, worksheetTeacher);
                         ExportDataToWorksheet(DataExportEmployee, worksheetEmployee);
@@ -155,20 +164,18 @@ namespace WPFAPP.ViewModel
             switch (SelectedSheet)
             {
                 case "Student":
-                    Data = ExcelReader.ReadStudents(FilePath);
-                    DataExportStudent = Data;
+                    Data = DataImportStudent;
                     NotifyChanged("Data");
                     break;
 
                 case "Teacher":
-                    Data = ExcelReader.ReadTeachers(FilePath);
-                    DataExportTeacher = Data;
+                    
+                    Data = DataImportTeacher;
                     NotifyChanged("Data");
                     break;
 
                 case "Employees":
-                    Data = ExcelReader.ReadEmployees(FilePath);
-                    DataExportEmployee = Data;
+                    Data = DataImportEmployee;
                     NotifyChanged("Data");
                     break;
 
@@ -191,15 +198,21 @@ namespace WPFAPP.ViewModel
             switch (SelectedSheet)
             {
                 case "Student":
+                    DataImportStudent = Data;
                     DataExportStudent = Data;
+                    NotifyChanged("Data");
                     break;
 
                 case "Teacher":
+                    DataImportTeacher= Data;
                     DataExportTeacher = Data;
+                    NotifyChanged("Data");
                     break;
 
                 case "Employees":
+                    DataImportEmployee = Data;
                     DataExportEmployee = Data;
+                    NotifyChanged("Data");
                     break;
 
                 default:
