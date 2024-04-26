@@ -68,7 +68,7 @@ namespace WPFAPP.ViewModel
         }
 
         public ICommand ImportExcelCommand { get; }
-        public ObservableCollection<object> Data { get; set; }
+        public ObservableCollection<ObservableCollection<object>> Data { get; set; }
         public ObservableCollection<object> DataExportStudent { get; set; }
         public ObservableCollection<object> DataExportTeacher { get; set; }
         public ObservableCollection<object> DataExportEmployee { get; set; }
@@ -88,12 +88,24 @@ namespace WPFAPP.ViewModel
             {
                 var analyzer = new ExcelAnalyzer();
                 FileInfo = analyzer.AnalyzerFile(FilePath);
-                ObservableCollection<string> sheetNam = new ObservableCollection<string>(FileInfo.SheetNames);
-                SheetNames = sheetNam;
+                ObservableCollection<string> sheetName = new ObservableCollection<string>(FileInfo.SheetNames);
+                SheetNames = sheetName;
                 NotifyChanged("SheetNames");
+                LoadDataImport();
             }
         }
-
+        private void LoadDataImport()
+        {
+            for (int i = 0; i < Data.Count; i++)
+            {
+                for (var j = 0; j <Data[i].Count; j++)
+                {
+                    
+                }
+            }
+            SelectedSheet = SheetNames[0];
+            SwitchSheet("ok");
+        }
         private void ExportInvoke(object sender)
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
@@ -239,7 +251,7 @@ namespace WPFAPP.ViewModel
                     {
                         int rowIndex = i + 2;
                         worksheet.Cells[rowIndex, 1].Value = student.ID;    
-                        worksheet.Cells[rowIndex, 2].Value = student.Name;
+                        worksheet.Cells[rowIndex, 2].Value = student.Name;  
                         worksheet.Cells[rowIndex, 3].Value = student.Age;
                         worksheet.Cells[rowIndex, 4].Value = student.Address;
                         worksheet.Cells[rowIndex, 5].Value = student.TaxCode;

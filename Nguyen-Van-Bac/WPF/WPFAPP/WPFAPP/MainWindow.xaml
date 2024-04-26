@@ -34,7 +34,7 @@
                     <StaticResource ResourceKey="CellHighlightStyle"/>
                 </DataGrid.CellStyle>
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID" Binding="{Binding ID}" DisplayIndex="0"/>
+                    <DataGridTextColumn Binding="{Binding ID}" DisplayIndex="0"/>
                     <!-- Các cột khác -->
                 </DataGrid.Columns>
             </DataGrid>
@@ -48,7 +48,9 @@
             <Button Content="Export" Command="{Binding ExportCommand}" Width="60" Margin="5 0 0 0" Style="{StaticResource GelButton}"/>
         </StackPanel>
         <!-- DataGrid for displaying data -->
-        <DataGrid ItemsSource="{Binding SelectedSheetData}" AutoGenerateColumns="False" RowHeight="30" ColumnWidth="*" IsReadOnly="True" Margin="0 10 0 0" Height="60">
+        <DataGrid ItemsSource="{Binding SelectedSheetData}" AutoGenerateColumns="False" RowHeight="30" ColumnWidth="*" IsReadOnly="True" Margin="0 10 0 0" Height="150"
+                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                  ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <DataGrid.Columns>
                 <DataGridTemplateColumn Header="Dữ liệu ramdom">
                     <DataGridTemplateColumn.CellTemplate>
