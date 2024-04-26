@@ -68,7 +68,7 @@ namespace WPFAPP.ViewModel
         }
 
         public ICommand ImportExcelCommand { get; }
-        public ObservableCollection<ObservableCollection<object>> Data { get; set; }
+        public ObservableCollection<object> Data { get; set; }
         public ObservableCollection<object> DataExportStudent { get; set; }
         public ObservableCollection<object> DataExportTeacher { get; set; }
         public ObservableCollection<object> DataExportEmployee { get; set; }
@@ -96,13 +96,6 @@ namespace WPFAPP.ViewModel
         }
         private void LoadDataImport()
         {
-            for (int i = 0; i < Data.Count; i++)
-            {
-                for (var j = 0; j <Data[i].Count; j++)
-                {
-                    
-                }
-            }
             SelectedSheet = SheetNames[0];
             SwitchSheet("ok");
         }
