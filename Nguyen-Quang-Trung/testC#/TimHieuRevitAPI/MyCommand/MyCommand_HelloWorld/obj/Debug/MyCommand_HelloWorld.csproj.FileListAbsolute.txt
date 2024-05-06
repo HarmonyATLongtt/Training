@@ -1,0 +1,7 @@
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuRevitAPI\MyCommand\MyCommand_HelloWorld\obj\Debug\MyCommand_HelloWorld.csprojAssemblyReference.cache
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuRevitAPI\MyCommand\MyCommand_HelloWorld\obj\Debug\MyCommand_HelloWorld.csproj.CoreCompileInputs.cache
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuRevitAPI\MyCommand\MyCommand_HelloWorld\bin\Debug\MyCommand_HelloWorld.dll
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuRevitAPI\MyCommand\MyCommand_HelloWorld\bin\Debug\MyCommand_HelloWorld.pdb
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuRevitAPI\MyCommand\MyCommand_HelloWorld\obj\Debug\MyCommand_HelloWorld.dll
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuRevitAPI\MyCommand\MyCommand_HelloWorld\obj\Debug\MyCommand_HelloWorld.pdb
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\TimHieuRevitAPI\MyCommand\MyCommand_HelloWorld\bin\Debug\MyCommand_HelloWorld.addin

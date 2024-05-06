@@ -1,0 +1,6 @@
+E:\trainC#\testC_sharp\testC#\test3\ConsoleApp4\bin\Debug\ConsoleApp4.exe.config
+E:\trainC#\testC_sharp\testC#\test3\ConsoleApp4\bin\Debug\ConsoleApp4.exe
+E:\trainC#\testC_sharp\testC#\test3\ConsoleApp4\bin\Debug\ConsoleApp4.pdb
+E:\trainC#\testC_sharp\testC#\test3\ConsoleApp4\obj\Debug\ConsoleApp4.csproj.CoreCompileInputs.cache
+E:\trainC#\testC_sharp\testC#\test3\ConsoleApp4\obj\Debug\ConsoleApp4.exe
+E:\trainC#\testC_sharp\testC#\test3\ConsoleApp4\obj\Debug\ConsoleApp4.pdb

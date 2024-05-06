@@ -1,13 +1,24 @@
-/Training/Nguyen-Van-Mau/WPF_Sample/obj
-/Training/Nguyen-Van-Mau/WPF_Sample/bin
-/WPF/WPF_Sample/bin
-/WPF/WPF_Sample/obj
-/RevitAPI/RevitAPI_Sample/bin
-/RevitAPI/RevitAPI_Sample/obj
-/Nguyen-Van-Mau/RevitAPI/RevitAPI_Sample/bin
-/Nguyen-Van-Mau/RevitAPI/RevitAPI_Sample/obj
-/Nguyen-Van-Mau/WPF/WPF_Sample/bin
-/Nguyen-Van-Mau/WPF/WPF_Sample/obj
+Nguyen-Quang-Trung/btWPF/WPF/.vs/WPF/v15/.suo
+Nguyen-Quang-Trung/btWPF/WPF/.vs/WPF/v15/Server/sqlite3/db.lock
+Nguyen-Quang-Trung/btWPF/WPF/.vs/WPF/v15/Server/sqlite3/storage.ide
+Nguyen-Quang-Trung/btWPF/WPF/.vs/WPF/v15/Server/sqlite3/storage.ide-shm
+Nguyen-Quang-Trung/btWPF/WPF/.vs/WPF/v15/Server/sqlite3/storage.ide-wal
+Nguyen-Quang-Trung/btWPF/WPF/Bai_1/bin/Debug/Bai_1.exe
+Nguyen-Quang-Trung/btWPF/WPF/Bai_1/bin/Debug/Bai_1.pdb
+Nguyen-Quang-Trung/btWPF/WPF/Bai_1/obj/Debug/Bai_1.exe
+Nguyen-Quang-Trung/btWPF/WPF/Bai_1/obj/Debug/Bai_1.pdb
+Nguyen-Quang-Trung/btWPF/WPF/Bai_1/bin/Debug/Bai_1.exe
+Nguyen-Quang-Trung/btWPF/WPF/Bai_1/bin/Debug/Bai_1.pdb
+Nguyen-Quang-Trung/btWPF/WPF/Bai_1/obj/Debug/Bai_1.exe
+Nguyen-Quang-Trung/btWPF/WPF/Bai_1/obj/Debug/Bai_1.pdb
+Nguyen-Quang-Trung/btWPF/WPF/Bai_1/bin/Debug/Bai_1.exe
+Nguyen-Quang-Trung/btWPF/WPF/Bai_1/bin/Debug/Bai_1.pdb
+Nguyen-Quang-Trung/btWPF/WPF/Bai_1/obj/Debug/Bai_1.exe
+Nguyen-Quang-Trung/btWPF/WPF/Bai_1/obj/Debug/Bai_1.pdb
+*.pdb
+*.exe
+Nguyen-Quang-Trung/btWPF/WPF/Bai_1/bin/Debug/Bai_1.exe
+Nguyen-Quang-Trung/btWPF/WPF/Bai_1/obj/Debug/Bai_1.pdb
 
 
 log.txt
@@ -19,3 +30,4 @@ Debug
 *.vs/
 .vs
 *.htm
+

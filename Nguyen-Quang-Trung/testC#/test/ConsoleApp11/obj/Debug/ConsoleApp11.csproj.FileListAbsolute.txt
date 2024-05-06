@@ -1,0 +1,7 @@
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\test\ConsoleApp11\obj\Debug\ConsoleApp11.csprojAssemblyReference.cache
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\test\ConsoleApp11\obj\Debug\ConsoleApp11.csproj.CoreCompileInputs.cache
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\test\ConsoleApp11\bin\Debug\ConsoleApp11.exe.config
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\test\ConsoleApp11\bin\Debug\ConsoleApp11.exe
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\test\ConsoleApp11\bin\Debug\ConsoleApp11.pdb
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\test\ConsoleApp11\obj\Debug\ConsoleApp11.exe
+E:\trainC#\Training\Nguyen-Quang-Trung\testC#\test\ConsoleApp11\obj\Debug\ConsoleApp11.pdb
