@@ -1,0 +1,7 @@
+D:\Training\Nguyen_Truong_Giang\Project-Tim-Hieu\Vi-Du-LinQ\bin\Debug\Vi-Du-LinQ.exe.config
+D:\Training\Nguyen_Truong_Giang\Project-Tim-Hieu\Vi-Du-LinQ\bin\Debug\Vi-Du-LinQ.exe
+D:\Training\Nguyen_Truong_Giang\Project-Tim-Hieu\Vi-Du-LinQ\bin\Debug\Vi-Du-LinQ.pdb
+D:\Training\Nguyen_Truong_Giang\Project-Tim-Hieu\Vi-Du-LinQ\obj\Debug\Vi-Du-LinQ.csproj.AssemblyReference.cache
+D:\Training\Nguyen_Truong_Giang\Project-Tim-Hieu\Vi-Du-LinQ\obj\Debug\Vi-Du-LinQ.csproj.CoreCompileInputs.cache
+D:\Training\Nguyen_Truong_Giang\Project-Tim-Hieu\Vi-Du-LinQ\obj\Debug\Vi-Du-LinQ.exe
+D:\Training\Nguyen_Truong_Giang\Project-Tim-Hieu\Vi-Du-LinQ\obj\Debug\Vi-Du-LinQ.pdb

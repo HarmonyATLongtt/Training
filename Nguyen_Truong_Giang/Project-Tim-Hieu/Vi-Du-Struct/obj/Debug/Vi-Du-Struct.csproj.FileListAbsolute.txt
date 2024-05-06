@@ -1,0 +1,7 @@
+D:\Training\Vi-Du-Struct\Vi-Du-Struct\bin\Debug\Vi-Du-Struct.exe.config
+D:\Training\Vi-Du-Struct\Vi-Du-Struct\bin\Debug\Vi-Du-Struct.exe
+D:\Training\Vi-Du-Struct\Vi-Du-Struct\bin\Debug\Vi-Du-Struct.pdb
+D:\Training\Vi-Du-Struct\Vi-Du-Struct\obj\Debug\Vi-Du-Struct.csproj.AssemblyReference.cache
+D:\Training\Vi-Du-Struct\Vi-Du-Struct\obj\Debug\Vi-Du-Struct.csproj.CoreCompileInputs.cache
+D:\Training\Vi-Du-Struct\Vi-Du-Struct\obj\Debug\Vi-Du-Struct.exe
+D:\Training\Vi-Du-Struct\Vi-Du-Struct\obj\Debug\Vi-Du-Struct.pdb

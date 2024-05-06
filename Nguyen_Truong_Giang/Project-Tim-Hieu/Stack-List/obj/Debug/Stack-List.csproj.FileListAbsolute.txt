@@ -1,0 +1,14 @@
+D:\Training\C_Co_Ban\Stack-List\bin\Debug\Stack-List.exe.config
+D:\Training\C_Co_Ban\Stack-List\bin\Debug\Stack-List.exe
+D:\Training\C_Co_Ban\Stack-List\bin\Debug\Stack-List.pdb
+D:\Training\C_Co_Ban\Stack-List\obj\Debug\Stack-List.csproj.CoreCompileInputs.cache
+D:\Training\C_Co_Ban\Stack-List\obj\Debug\Stack-List.exe
+D:\Training\C_Co_Ban\Stack-List\obj\Debug\Stack-List.pdb
+D:\Training\C_Co_Ban\Stack-List\obj\Debug\Stack-List.csproj.AssemblyReference.cache
+D:\Training\Nguyen_Truong_Giang\Project-Tim-Hieu\Stack-List\bin\Debug\Stack-List.exe.config
+D:\Training\Nguyen_Truong_Giang\Project-Tim-Hieu\Stack-List\bin\Debug\Stack-List.exe
+D:\Training\Nguyen_Truong_Giang\Project-Tim-Hieu\Stack-List\bin\Debug\Stack-List.pdb
+D:\Training\Nguyen_Truong_Giang\Project-Tim-Hieu\Stack-List\obj\Debug\Stack-List.csproj.AssemblyReference.cache
+D:\Training\Nguyen_Truong_Giang\Project-Tim-Hieu\Stack-List\obj\Debug\Stack-List.csproj.CoreCompileInputs.cache
+D:\Training\Nguyen_Truong_Giang\Project-Tim-Hieu\Stack-List\obj\Debug\Stack-List.exe
+D:\Training\Nguyen_Truong_Giang\Project-Tim-Hieu\Stack-List\obj\Debug\Stack-List.pdb

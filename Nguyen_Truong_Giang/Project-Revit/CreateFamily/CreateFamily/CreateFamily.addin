@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Command">
+    <Text>Command CreateFamily</Text>
+    <Description>Some description for CreateFamily</Description>
+    <Assembly>CreateFamily.dll</Assembly>
+    <FullClassName>CreateFamily.Command</FullClassName>
+    <ClientId>d16788a6-6333-4f85-95f8-37bfb38e79ae</ClientId>
+    <VendorId>com.typepad.thebuildingcoder</VendorId>
+    <VendorDescription>The Building Coder, http://thebuildingcoder.typepad.com</VendorDescription>
+  </AddIn>
+
+</RevitAddIns>
