@@ -84,7 +84,7 @@ public class Program
         TaxData taxData = new TaxData();
 
       
-        Student student1 = new Student { Id = 11, Name = "Duc", Age = 15, School = " truong THPT CVA", Class = "lop 12A2" };
+        Student student1 = new Student { Id = 11, Name = "Duc", Age = 15, School = " THPT CVA", Class = " 12A2" };
         people.Add(student1);
 
         
@@ -107,7 +107,9 @@ public class Program
             if (person is Student)
             {
                 studentCount++;
-                Console.WriteLine(person.GetInfo());
+                Student student = (Student)person;
+                Console.WriteLine($"Student: ");
+                Console.WriteLine($"ID: {student.Id}, Name: {student.Name}, Age: {student.Age}, School: {student.School} , Class : {student.Class}");
             }
             else if (person is Teacher)
             {

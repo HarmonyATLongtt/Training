@@ -62,8 +62,6 @@ public class Person
         return Income * TaxCoe;
     }
 }
-
-
 public class Program
 {
     public static void Main(string[] args)
