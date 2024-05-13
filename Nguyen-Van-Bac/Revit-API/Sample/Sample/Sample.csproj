@@ -151,14 +151,11 @@
   <ItemGroup>
     <Compile Include="App.cs" />
     <Compile Include="Class1.cs" />
-    <Compile Include="Command.cs" />
     <Compile Include="CreateBeam.cs" />
     <Compile Include="CreateColumn.cs" />
-    <Compile Include="CreateFamily.cs" />
     <Compile Include="CreateFloor.cs" />
     <Compile Include="CreateInstance.cs" />
     <Compile Include="CreateWall.cs" />
-    <Compile Include="FamilyParameterAssigner.cs" />
     <Compile Include="Filtering.cs" />
     <Compile Include="InstanceInfoCommand.cs" />
     <Compile Include="LoadFileRevitFamily.cs" />
@@ -173,10 +170,6 @@
   <ItemGroup>
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.3.3.4\analyzers\dotnet\cs\Microsoft.CodeAnalysis.Analyzers.dll" />
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.3.3.4\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.Analyzers.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="FamilyParameter.txt" />
-    <Content Include="SharedParameter.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
