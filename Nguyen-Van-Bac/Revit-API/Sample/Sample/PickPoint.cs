@@ -23,7 +23,8 @@ namespace Sample
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
 
-            #endregion
+            #endregion Init
+
             try
             {
                 XYZ point1 = uidoc.Selection.PickPoint();
@@ -37,11 +38,11 @@ namespace Sample
                 sb.AppendLine(point4.ToString());
                 MessageBox.Show("You have selected points:\r\n" + sb.ToString());
             }
-			catch(Autodesk.Revit.Exceptions.OperationCanceledException e)
-			{
+            catch (Autodesk.Revit.Exceptions.OperationCanceledException e)
+            {
                 MessageBox.Show($"You Has Press Esc\n{e}", "Warning", MessageBoxButtons.OK);
                 return Result.Cancelled;
-			}
+            }
             return Result.Succeeded;
         }
     }

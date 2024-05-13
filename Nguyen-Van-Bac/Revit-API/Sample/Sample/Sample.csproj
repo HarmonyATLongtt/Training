@@ -159,6 +159,7 @@
     <Compile Include="Filtering.cs" />
     <Compile Include="InstanceInfoCommand.cs" />
     <Compile Include="LoadFileRevitFamily.cs" />
+    <Compile Include="ParameterFamily.cs" />
     <Compile Include="ParameterManager.cs" />
     <Compile Include="PickPoint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
