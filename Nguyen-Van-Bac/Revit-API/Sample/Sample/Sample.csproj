@@ -163,6 +163,9 @@
     <Compile Include="ParameterManager.cs" />
     <Compile Include="PickPoint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Schedule.cs" />
+    <Compile Include="Sheet.cs" />
+    <Compile Include="Views.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
