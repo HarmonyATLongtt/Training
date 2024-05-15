@@ -55,10 +55,6 @@ public class Person
     public double GetTax()
     {
 
-        if (TaxCoe == 0)
-        {
-            return 0;
-        }
         return Income * TaxCoe;
     }
 }
