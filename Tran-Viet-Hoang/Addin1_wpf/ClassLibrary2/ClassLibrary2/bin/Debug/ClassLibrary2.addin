@@ -2,12 +2,11 @@
 <RevitAddIns>
 	<AddIn Type="Command">
 		<Name>ClassLibrary2</Name>
-		<FullClassName>ClassLibrary2.Class1</FullClassName>
+		<FullClassName>ClassLibrary2.CmdEtabsToRevit</FullClassName>
 		<Assembly>ClassLibrary2.dll</Assembly>
-		<AddInId>175EFBFC-F328-44E7-9C09-F90CD0274850</AddInId>	
+		<AddInId>175EFBFC-F328-44E7-9C09-F90CD0274850</AddInId>
 		<Text>Remodel</Text>
 		<VendorId>ADSK</VendorId>
 		<VendorDescription>Autodesk, www.autodesk.com</VendorDescription>
 	</AddIn>
 </RevitAddIns>
-
