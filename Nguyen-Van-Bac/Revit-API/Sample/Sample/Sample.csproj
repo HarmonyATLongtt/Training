@@ -153,9 +153,13 @@
     <Compile Include="Class1.cs" />
     <Compile Include="CreateBeam.cs" />
     <Compile Include="CreateColumn.cs" />
+    <Compile Include="CreateFilledRegion.cs" />
     <Compile Include="CreateFloor.cs" />
+    <Compile Include="CreateGrid.cs" />
     <Compile Include="CreateInstance.cs" />
+    <Compile Include="CreateLevel.cs" />
     <Compile Include="CreateWall.cs" />
+    <Compile Include="Dimensions.cs" />
     <Compile Include="Filtering.cs" />
     <Compile Include="InstanceInfoCommand.cs" />
     <Compile Include="LoadFileRevitFamily.cs" />
@@ -165,6 +169,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Schedule.cs" />
     <Compile Include="Sheet.cs" />
+    <Compile Include="TagAndText.cs" />
     <Compile Include="Views.cs" />
   </ItemGroup>
   <ItemGroup>
