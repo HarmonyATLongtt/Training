@@ -1,6 +1,7 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using System.Linq;
 
 namespace Sample
 {
@@ -15,7 +16,6 @@ namespace Sample
             UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
-
             // Bắt đầu một giao dịch
             using (Transaction t = new Transaction(doc, "Create Sheet"))
             {
@@ -49,9 +49,22 @@ namespace Sample
                     message = "Failed to create new sheet.";
                     return Result.Failed;
                 }
+                var sheetNumbers = new FilteredElementCollector(doc)
+                    .OfClass(typeof(ViewSheet))
+                    .Cast<ViewSheet>()
+                    .Select(sheet => sheet.SheetNumber)
+                    .Where(sn => int.TryParse(sn, out _))
+                    .Select(sn => int.Parse(sn))
+                    .ToList();
 
+                // Tìm mã số lớn nhất hiện tại
+                int maxSheetNumber = sheetNumbers.Any() ? sheetNumbers.Max() : 0;
+                // Tạo mã số mới tăng dần
+                int newSheetNumber = maxSheetNumber++;
+                string newSheetNumberStr = newSheetNumber.ToString();
+                // Tạo mã số mới
                 newSheet.Name = " Sheet mới";
-                newSheet.SheetNumber = "A1010";
+                newSheet.SheetNumber = newSheetNumber.ToString();
 
                 t.Commit();
             }
