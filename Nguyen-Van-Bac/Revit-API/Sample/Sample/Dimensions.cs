@@ -371,4 +371,88 @@ namespace Sample
             return returnList;
         }
     }
+
+    [Transaction(TransactionMode.Manual)]
+    public class CreateAngularDimension : IExternalCommand
+    {
+        public Result Execute(
+          ExternalCommandData commandData,
+          ref string message,
+          ElementSet elements)
+        {
+            UIDocument uidoc = commandData.Application.ActiveUIDocument;
+            Document doc = uidoc.Document;
+            var type = new FilteredElementCollector(doc).OfClass(typeof(DimensionType)).Cast<DimensionType>().FirstOrDefault(p => p.StyleType == DimensionStyleType.Angular);
+            try
+            {
+                // Lấy hoặc tạo loại chiều Angular
+                DimensionType dimensionType = type;
+
+                // Tạo chiều Angular
+                IList<Reference> references = uidoc.Selection.PickObjects(ObjectType.Element, new WallSelectionFilter(), "Chọn hai bức tường");
+
+                if (references.Count != 2)
+                {
+                    message = "Bạn phải chọn đúng hai bức tường.";
+                    return Result.Failed;
+                }
+
+                // Lấy hai bức tường đã chọn
+                Element element1 = doc.GetElement(references[0]);
+                Element element2 = doc.GetElement(references[1]);
+                ReferenceArray referenceArray = new ReferenceArray();
+                foreach (Reference reference in references)
+                {
+                    referenceArray.Append(reference);
+                }
+                // Kiểm tra xem có lấy được bức tường không
+                if (element1 == null || element2 == null)
+                {
+                    message = "Không thể lấy được bức tường.";
+                    return Result.Failed;
+                }
+                // Bắt đầu giao dịch
+                using (Transaction trans = new Transaction(doc, "Create Angular Dimension"))
+                {
+                    trans.Start();
+                    LocationCurve locCurve1 = element1.Location as LocationCurve;
+                    LocationCurve locCurve2 = element2.Location as LocationCurve;
+                    XYZ arcMidPoint = uidoc.Selection.PickPoint();
+                    XYZ startPoint = locCurve1.Curve.GetEndPoint(0);
+                    XYZ endPoint = locCurve2.Curve.GetEndPoint(1);
+                    XYZ startPoint1 = (startPoint + arcMidPoint) / 2;
+                    XYZ endPoint2 = (endPoint + arcMidPoint) / 2;
+
+                    // Tạo cung tròn
+                    Arc arc = Arc.Create(startPoint1, endPoint2, arcMidPoint);
+                    AngularDimension dimension = AngularDimension.Create(doc, doc.ActiveView, arc, references, type);
+                    trans.Commit();
+                }
+
+                return Result.Succeeded;
+            }
+            catch (Autodesk.Revit.Exceptions.OperationCanceledException)
+            {
+                return Result.Cancelled;
+            }
+            catch (Exception ex)
+            {
+                message = ex.Message;
+                return Result.Failed;
+            }
+        }
+    }
+
+    public class WallSelectionFilter : ISelectionFilter
+    {
+        public bool AllowElement(Element elem)
+        {
+            return elem is Wall;
+        }
+
+        public bool AllowReference(Reference reference, XYZ position)
+        {
+            return true;
+        }
+    }
 }
