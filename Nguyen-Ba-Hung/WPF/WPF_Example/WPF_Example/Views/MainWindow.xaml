@@ -3,13 +3,39 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:command="http://www.galasoft.ch/mvvmLight"
         xmlns:local="clr-namespace:WPF_Example"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" KeyDown="OnKeyEscape">
+        Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <Button Content="Import Excel" HorizontalAlignment="Left" Margin="253,397,0,0" VerticalAlignment="Top" Name="btnImport"/>
-        <Button Content="Export Excel" HorizontalAlignment="Left" Margin="515,397,0,0" VerticalAlignment="Top" Name="btnExport"/>
-        <DataGrid HorizontalAlignment="Left" Height="360" Margin="167,17,0,0" VerticalAlignment="Top" Width="580" d:ItemsSource="{d:SampleData ItemCount=5}"/>
-        <ListView HorizontalAlignment="Left" Height="360" Margin="23,17,0,0" VerticalAlignment="Top" Width="130" d:ItemsSource="{d:SampleData ItemCount=5}" RenderTransformOrigin="0.5,0.5" />
+        <Button Content="Import Excel" HorizontalAlignment="Left" 
+                Margin="282,383,0,0" VerticalAlignment="Top" 
+                Name="btnImport"
+                Command="{Binding ImportFile}"/>
+        <Button Content="Export Excel" HorizontalAlignment="Left" 
+                Margin="544,383,0,0" VerticalAlignment="Top" 
+                Name="btnExport"
+                Command="{Binding ExportFile}"/>
+        <ListView Height="360" 
+                  Margin="23,17,647,0" VerticalAlignment="Top" 
+                  x:Name="sheetsList"
+                  ItemsSource="{Binding Sheets}"
+                  SelectedItem="{Binding Records, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                  DisplayMemberPath="TableName"/>
+        <DataGrid HorizontalAlignment="Left" Height="360" 
+                  Margin="173,17,0,0" VerticalAlignment="Top" Width="580"
+                  x:Name="records"
+                  ItemsSource="{Binding Records, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                  AutoGenerateColumns="True">
+            <!--<DataGrid.CellStyle>
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseHoverCell">
+                        <command:EventToCommand command:="{Binding MouseHover}"
+                                                PassEventArgsToCommand="true" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </DataGrid.CellStyle>-->
+        </DataGrid>
     </Grid>
 </Window>
