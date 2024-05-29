@@ -29,12 +29,5 @@ namespace WPF_Example
             this.DataContext = personVM;
         }
 
-/*        private void OnKeyEscape(object sender, KeyEventArgs e)
-        {
-           if(e.Key == Key.Escape)
-            {
-                Close();
-            }
-        }*/
     }
 }

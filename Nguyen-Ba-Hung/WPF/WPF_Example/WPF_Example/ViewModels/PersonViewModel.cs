@@ -15,10 +15,11 @@ using Microsoft.Win32;
 using System.IO;
 using ExcelDataReader;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace WPF_Example.ViewModels
 {
-    internal class PersonViewModel: INotifyPropertyChanged
+    public class PersonViewModel: INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged(string propertyName)
@@ -32,7 +33,6 @@ namespace WPF_Example.ViewModels
         private ObservableCollection<DataTable> sheets;
         private DataTable records;
 
-        public ObservableCollection<Person> People { get; set; }
         public ObservableCollection<DataTable> Sheets 
         {
             get
@@ -76,24 +76,13 @@ namespace WPF_Example.ViewModels
                 (expF) => true,
                 (expF) => ExportExcel()
                 );
-            MouseHover = new RelayCommand<object>(
-                (mouse) => true,
-                (mouse) => MouseHoverCommand()
-                );
-            MouseLeave = new RelayCommand<object>(
-                (mouse) => true,
-                (mouse) => MouseLeaveCommand()
-                );
-            OnKeyEscape = new RelayCommand<object>(
-                (key) => true,
-                (key) => KeyEscape()
-                );
+            OnKeyEscape = new RelayCommand<object>(KeyEscape);
         }
 
         public ICommand ImportFile { get;set;}
         public ICommand ExportFile { get;set;}
-        public ICommand MouseHover { get;set;}
-        public ICommand MouseLeave { get;set;}
+        //public ICommand MouseHover { get;set;}
+        //public ICommand MouseLeave { get;set;}
         public ICommand OnKeyEscape { get;set;}
 
         public void ImportExcel()
@@ -179,20 +168,13 @@ namespace WPF_Example.ViewModels
             
         }
 
-        public void MouseHoverCommand()
+        public void KeyEscape(object obj)
         {
-            
-            
-        }
-
-        public void MouseLeaveCommand()
-        {
-
-        }
-
-        public void KeyEscape()
-        {
-
+            var args = obj as KeyEventArgs;
+            if (args.Key == Key.Escape)
+            {
+                Application.Current.Shutdown();
+            }
         }
 
     }
