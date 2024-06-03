@@ -312,7 +312,7 @@ namespace DistributionProject
                                 Parameter parameterLength = familyInstance[countRectangles].LookupParameter("エリア・長さ");
                                 Parameter parameterIndex = familyInstance[countRectangles].LookupParameter("エリア名称");
 
-                                if (parameterWidth != null && !parameterWidth.IsReadOnly && !parameterLength.IsReadOnly && parameterIndex.IsReadOnly == false)
+                                if (parameterWidth != null && !parameterWidth.IsReadOnly && !parameterLength.IsReadOnly && !parameterIndex.IsReadOnly)
                                 {
                                     parameterLength?.Set(length);
                                     // Set giá trị cho parameter (ví dụ: giá trị double, int, string, ...)
