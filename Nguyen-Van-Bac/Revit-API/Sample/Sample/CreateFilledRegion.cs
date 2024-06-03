@@ -19,6 +19,7 @@ namespace Sample
         {
             UIApplication uiApp = commandData.Application;
             Document doc = uiApp.ActiveUIDocument.Document;
+            UIDocument uiDoc = uiApp.ActiveUIDocument;
 
             // Bắt đầu một giao dịch
             using (Transaction trans = new Transaction(doc, "Create Filled Region"))
@@ -37,10 +38,10 @@ namespace Sample
                 }
 
                 List<Curve> curves = new List<Curve>();
-                XYZ point1 = new XYZ(0, 0, 0);
-                XYZ point2 = new XYZ(10, 0, 0);
-                XYZ point3 = new XYZ(10, 10, 0);
-                XYZ point4 = new XYZ(0, 10, 0);
+                XYZ point1 = uiDoc.Selection.PickPoint();
+                XYZ point2 = uiDoc.Selection.PickPoint();
+                XYZ point3 = uiDoc.Selection.PickPoint();
+                XYZ point4 = uiDoc.Selection.PickPoint();
 
                 curves.Add(Line.CreateBound(point1, point2));
                 curves.Add(Line.CreateBound(point2, point3));
