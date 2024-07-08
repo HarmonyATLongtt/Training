@@ -42,14 +42,14 @@
             this.label5 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.dgvGoodEmp = new System.Windows.Forms.DataGridView();
-            this.colNameEmp = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colIdEmp = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colPosition = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colScore = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.btnSave = new System.Windows.Forms.Button();
             this.label6 = new System.Windows.Forms.Label();
             this.txtDescription = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
+            this.colNameEmp = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colIdEmp = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colPosition = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colScore = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvGoodEmp)).BeginInit();
             this.SuspendLayout();
             // 
@@ -197,33 +197,6 @@
             this.dgvGoodEmp.Size = new System.Drawing.Size(548, 165);
             this.dgvGoodEmp.TabIndex = 14;
             // 
-            // colNameEmp
-            // 
-            this.colNameEmp.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.colNameEmp.DataPropertyName = "name";
-            this.colNameEmp.HeaderText = "Tên nhân viên";
-            this.colNameEmp.Name = "colNameEmp";
-            // 
-            // colIdEmp
-            // 
-            this.colIdEmp.HeaderText = "ID";
-            this.colIdEmp.Name = "colIdEmp";
-            this.colIdEmp.Visible = false;
-            // 
-            // colPosition
-            // 
-            this.colPosition.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.colPosition.DataPropertyName = "position";
-            this.colPosition.HeaderText = "Chức vụ";
-            this.colPosition.Name = "colPosition";
-            // 
-            // colScore
-            // 
-            this.colScore.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.colScore.DataPropertyName = "score";
-            this.colScore.HeaderText = "Điểm";
-            this.colScore.Name = "colScore";
-            // 
             // btnSave
             // 
             this.btnSave.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -269,6 +242,36 @@
             this.label7.Size = new System.Drawing.Size(68, 18);
             this.label7.TabIndex = 32;
             this.label7.Text = "Miêu tả:";
+            // 
+            // colNameEmp
+            // 
+            this.colNameEmp.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.colNameEmp.DataPropertyName = "name";
+            this.colNameEmp.HeaderText = "Tên nhân viên";
+            this.colNameEmp.Name = "colNameEmp";
+            this.colNameEmp.ReadOnly = true;
+            // 
+            // colIdEmp
+            // 
+            this.colIdEmp.HeaderText = "ID";
+            this.colIdEmp.Name = "colIdEmp";
+            this.colIdEmp.Visible = false;
+            // 
+            // colPosition
+            // 
+            this.colPosition.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.colPosition.DataPropertyName = "position";
+            this.colPosition.HeaderText = "Chức vụ";
+            this.colPosition.Name = "colPosition";
+            this.colPosition.ReadOnly = true;
+            // 
+            // colScore
+            // 
+            this.colScore.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.colScore.DataPropertyName = "score";
+            this.colScore.HeaderText = "Điểm";
+            this.colScore.Name = "colScore";
+            this.colScore.ReadOnly = true;
             // 
             // frmSubsidiaryComInfor
             // 
@@ -319,13 +322,13 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.DataGridView dgvGoodEmp;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colNameEmp;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colIdEmp;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colPosition;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colScore;
         private System.Windows.Forms.Button btnSave;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.TextBox txtDescription;
         private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colNameEmp;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colIdEmp;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colPosition;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colScore;
     }
 }

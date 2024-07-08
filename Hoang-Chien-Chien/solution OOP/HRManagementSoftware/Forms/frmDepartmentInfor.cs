@@ -38,7 +38,7 @@ namespace HRManagementSoftware
             txtName.Text = item.Name;
             txtManagerName.Text = ManagerName;
             txtDeputyName.Text = DeputyName;          
-            txtnumberOfEmp.Text = Global.employees.Where(p => p.IdDep == item.Id).ToList().Count().ToString();
+            txtnumberOfEmp.Text = Global.employees.Where(p => p.Position != Global.ChucVu.TongGiamDoc && p.Position != Global.ChucVu.GiamDoc && p.IdDep == item.Id).ToList().Count().ToString();
         }
 
         private void FrmDepartmentInfor_Shown(object sender, EventArgs e)
