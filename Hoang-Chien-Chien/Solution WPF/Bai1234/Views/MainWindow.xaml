@@ -1,0 +1,150 @@
+﻿<Window x:Class="WPF_Solution.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:local="clr-namespace:WPF_Solution"
+        mc:Ignorable="d"
+        Title="Nhập xuất thông tin" Height="800" Width="900" WindowStartupLocation="CenterScreen"  Name="wd">
+    <Grid>
+        <StackPanel>
+            <Border Background="#607D8B" BorderBrush="Black" BorderThickness="2">
+                <Grid Margin="10 10">
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel.Resources>
+                            <Style TargetType="Button">
+                                <Setter Property="Width" Value="100"></Setter>
+                                <Setter Property="FontFamily" Value="Tahoma"></Setter>
+                                <Setter Property="FontSize" Value="12"></Setter>
+                                <Setter Property="FontWeight" Value="Bold"></Setter>
+                                <Setter Property="Background" Value="#FF5722"></Setter>
+                                <Setter Property="Foreground" Value="#fff"></Setter>
+                                <Setter Property="Padding" Value="10"></Setter>
+                            </Style>
+                        </StackPanel.Resources>
+                        <Button Command="{Binding ImportCommand}" Content="Import Excel"></Button>
+                        <Button  Content="Export Excel" Command="{Binding ExportCommand}" CommandParameter="{x:Reference Name=wd}" Margin="10 0"></Button>
+                        <Label Content="Path:" VerticalAlignment="Center" FontFamily="Tahoma" FontSize="12" FontWeight="Bold" Foreground="#fff" Margin="10 0 10 0" ></Label>
+                        <TextBox IsEnabled="False" Width="300" TextWrapping="NoWrap" Text="{Binding PathName}" Padding="0 10" FontFamily="Tahoma" FontSize="12" FontWeight="Bold"></TextBox>
+                        <Label Content="Sheet:" VerticalAlignment="Center" FontFamily="Tahoma" FontSize="12" FontWeight="Bold" Foreground="#fff" Margin="20 0 0 0"></Label>
+                        <ComboBox x:Name="cbSheet" ItemsSource="{Binding SheetName,UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding SelectedSheet}" FontFamily="Tahoma" FontSize="12" FontWeight="Bold" Width="130" Margin="10 0" HorizontalAlignment="Left" Padding="10 10 10 0"></ComboBox>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Filter:"  VerticalAlignment="Center" FontFamily="Tahoma" FontSize="12" FontWeight="Bold" Margin="10 0 0 0" ></Label>
+                <TextBox Text="{Binding KeySearch,UpdateSourceTrigger=PropertyChanged}" Width="210" FontFamily="Tahoma" FontSize="12" FontWeight="Bold" Margin="10" Padding="5"></TextBox>
+            </StackPanel>
+            <ListView x:Name="lsvData" ItemsSource="{Binding Peoples, UpdateSourceTrigger=PropertyChanged}" SelectionMode ="Single" Height="620">
+                <ListView.Resources>
+                    <Style x:Key="HeaderStyle" TargetType="GridViewColumnHeader">
+                        <Setter Property="FontSize" Value="12"/>
+                        <Setter Property="FontWeight" Value="Bold"/>
+                    </Style>
+                    <Style x:Key="CellStyle" TargetType="TextBox">
+                        <Setter Property="FontFamily" Value="Tahoma"></Setter>
+                        <Setter Property="FontSize" Value="12"></Setter>
+                        <Setter Property="TextAlignment" Value="Center"></Setter>
+                        <Setter Property="Margin" Value="0"></Setter>
+                        <Setter Property="Padding" Value="0"></Setter>
+                        <Setter Property="BorderThickness" Value="0"></Setter>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType=ListViewItem}}" Value="True">
+                                <Setter Property="Background" Value="LightCyan" />
+                                <Setter Property="IsEnabled" Value="True" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                    
+                    <Style TargetType="ListViewItem">
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="LightCyan" />
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsSelected" Value="False"></Condition>
+                                    <Condition Property="IsMouseOver" Value="True"></Condition>
+                                </MultiTrigger.Conditions>
+                                <MultiTrigger.Setters>
+                                    <Setter Property="Background" Value="White" />
+                                    <Setter Property="BorderBrush" Value="Green" />
+                                </MultiTrigger.Setters>
+                            </MultiTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListView.Resources>
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="Tên" Width="200" HeaderContainerStyle="{StaticResource HeaderStyle}">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="200" Style="{StaticResource CellStyle}">
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="GotFocus">
+                                                <i:InvokeCommandAction Command="{Binding DataContext.CellFocusCommand, RelativeSource={RelativeSource AncestorType=ListView}}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListViewItem}}}" />
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
+                                    </TextBox>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Tuổi" Width="100" HeaderContainerStyle="{StaticResource HeaderStyle}">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBox Text="{Binding Age}" Width="100" Style="{StaticResource CellStyle}">
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="GotFocus">
+                                                <i:InvokeCommandAction Command="{Binding DataContext.CellFocusCommand, RelativeSource={RelativeSource AncestorType=ListView}}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListViewItem}}}" />
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
+                                    </TextBox>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Địa chỉ" Width="250" HeaderContainerStyle="{StaticResource HeaderStyle}">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBox Text="{Binding Address}" Width="250" Style="{StaticResource CellStyle}">
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="GotFocus">
+                                                <i:InvokeCommandAction Command="{Binding DataContext.CellFocusCommand, RelativeSource={RelativeSource AncestorType=ListView}}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListViewItem}}}" />
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
+                                    </TextBox>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Thu nhập" Width="200" HeaderContainerStyle="{StaticResource HeaderStyle}">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBox Text="{Binding Income}" Width="200" Style="{StaticResource CellStyle}">
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="GotFocus">
+                                                <i:InvokeCommandAction Command="{Binding DataContext.CellFocusCommand, RelativeSource={RelativeSource AncestorType=ListView}}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListViewItem}}}" />
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
+                                    </TextBox>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Hệ số thuế" Width="100" HeaderContainerStyle="{StaticResource HeaderStyle}">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBox Text="{Binding TaxCoe}" Width="100" Style="{StaticResource CellStyle}" >
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="GotFocus">
+                                                <i:InvokeCommandAction Command="{Binding DataContext.CellFocusCommand, RelativeSource={RelativeSource AncestorType=ListView}}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListViewItem}}}" />
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
+                                    </TextBox>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </StackPanel>
+    </Grid>
+</Window>
