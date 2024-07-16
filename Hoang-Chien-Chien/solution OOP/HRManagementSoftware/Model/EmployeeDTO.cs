@@ -10,13 +10,16 @@ namespace HRManagementSoftware
     public class EmployeeDTO
     {
         private Guid id;
-        private string name;        
-        private string position;      
+        public Guid Id
+        { get { return id; } set { id = value; } }
+        private string name;
+        public string Name
+        { get { return name; } set { name = value; } }
+        private string position;
+        public string Position
+        { get { return position; } set { position = value; } }
         private double score;
-
-        public Guid Id { get { return id; } set { id = value; } }
-        public string Name { get { return name; } set { name = value; } }      
-        public double Score { get { return score; } set { score = value; } }
-        public string Position { get { return position; } set { position = value; } }
+        public double Score
+        { get { return score; } set { score = value; } }
     }
 }

@@ -11,12 +11,12 @@ namespace HRManagementSoftware
     {
         
         private Guid id;
-
+        public Guid Id { get { return id; } set { id = value; } }
         private List<int> idGoodEmp;
         public SubsidiaryCom()
         {
             this.Id = Guid.NewGuid();
         }
-        public Guid Id { get { return id; } set { id = value; } }  
+        
     }
 }

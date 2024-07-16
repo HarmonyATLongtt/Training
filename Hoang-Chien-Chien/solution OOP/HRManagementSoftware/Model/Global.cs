@@ -16,9 +16,6 @@ namespace HRManagementSoftware
         public static List<SubsidiaryCom> subsidiaryComs = new List<SubsidiaryCom>();
         public static List<Department> departments = new List<Department>();
         public static List<Employee> employees = new List<Employee>();
-        public static int _idEmpCounter = 1;
-        public static int _idDepCounter = 1;
-        public static int _idSubCounter = 1;
 
 
         
