@@ -1,30 +1,80 @@
 ﻿using Microsoft.Win32;
 using System.Collections.Generic;
-using System.Data;
+using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using OfficeOpenXml;
-using OfficeOpenXml.Style;
-using System.IO;
 using System;
-using System.ComponentModel;
+using System.Collections.ObjectModel;
 
 namespace WpfApp
 {
     public partial class MainWindow : Window
     {
         private ExcelPackage package;
-        private Dictionary<string, List<People>> sheetData;
+        private Dictionary<string, ObservableCollection<People>> sheetData;
+        public ObservableCollection<People> PeopleList { get; set; }
 
         public class People : INotifyPropertyChanged
         {
-            public string Name { get; set; }
-            public int Age { get; set; }
-            public int ID { get; set; }
-            public string Adr { get; set; }
-            public double TaxCoe { get; set; }
+            private string name;
+            private int age;
+            private int id;
+            private string adr;
+            private double taxCoe;
+
+            public string Name
+            {
+                get { return name; }
+                set
+                {
+                    name = value;
+                    OnPropertyChanged(nameof(Name));
+                }
+            }
+
+            public int Age
+            {
+                get { return age; }
+                set
+                {
+                    age = value;
+                    OnPropertyChanged(nameof(Age));
+                }
+            }
+
+            public int ID
+            {
+                get { return id; }
+                set
+                {
+                    id = value;
+                    OnPropertyChanged(nameof(ID));
+                }
+            }
+
+            public string Adr
+            {
+                get { return adr; }
+                set
+                {
+                    adr = value;
+                    OnPropertyChanged(nameof(Adr));
+                }
+            }
+
+            public double TaxCoe
+            {
+                get { return taxCoe; }
+                set
+                {
+                    taxCoe = value;
+                    OnPropertyChanged(nameof(TaxCoe));
+                }
+            }
 
             public event PropertyChangedEventHandler PropertyChanged;
 
@@ -37,7 +87,8 @@ namespace WpfApp
         public MainWindow()
         {
             InitializeComponent();
-            sheetData = new Dictionary<string, List<People>>();
+            sheetData = new Dictionary<string, ObservableCollection<People>>();
+            DataContext = this;
         }
 
         private void btn_Import_Click(object sender, RoutedEventArgs e)
@@ -86,147 +137,89 @@ namespace WpfApp
                 return;
 
             var selectedSheetName = cbSheetNames.SelectedItem.ToString();
-            var sheet = package.Workbook.Worksheets[selectedSheetName];
-            List<People> peopleList = new List<People>();
-
-            for (var rowNumber = 2; rowNumber <= sheet.Dimension.End.Row; rowNumber++)
+            if (sheetData.ContainsKey(selectedSheetName))
             {
-                var people = new People();
-                people.Name = sheet.Cells[rowNumber, 1].Text;
-
-                int age;
-                if (int.TryParse(sheet.Cells[rowNumber, 2].Text, out age))
-                {
-                    people.Age = age;
-                }
-
-                int id;
-                if (int.TryParse(sheet.Cells[rowNumber, 3].Text, out id))
-                {
-                    people.ID = id;
-                }
-
-                people.Adr = sheet.Cells[rowNumber, 4].Text;
-
-                double taxCoe;
-                if (double.TryParse(sheet.Cells[rowNumber, 5].Text, out taxCoe))
-                {
-                    people.TaxCoe = taxCoe;
-                }
-
-                peopleList.Add(people);
+                PeopleList = sheetData[selectedSheetName];
             }
+            else
+            {
+                var sheet = package.Workbook.Worksheets[selectedSheetName];
+                ObservableCollection<People> peopleList = new ObservableCollection<People>();
 
-            sheetData[selectedSheetName] = peopleList;
-            dataGrid.ItemsSource = peopleList;
+                for (var rowNumber = 2; rowNumber <= sheet.Dimension.End.Row; rowNumber++)
+                {
+                    var people = new People
+                    {
+                        Name = sheet.Cells[rowNumber, 1].Text,
+                        Age = int.TryParse(sheet.Cells[rowNumber, 2].Text, out int age) ? age : 0,
+                        ID = int.TryParse(sheet.Cells[rowNumber, 3].Text, out int id) ? id : 0,
+                        Adr = sheet.Cells[rowNumber, 4].Text,
+                        TaxCoe = double.TryParse(sheet.Cells[rowNumber, 5].Text, out double taxCoe) ? taxCoe : 0.0
+                    };
+
+                    peopleList.Add(people);
+                }
+
+                sheetData[selectedSheetName] = peopleList;
+                PeopleList = peopleList;
+            }
+            dataGrid.ItemsSource = PeopleList;
         }
 
         private void btn_Export_Click(object sender, RoutedEventArgs e)
         {
-            string filePath = "";
-            SaveFileDialog dialog = new SaveFileDialog();
-            dialog.Filter = "Excel | *.xlsx | Excel 2003 | *.xls";
-
-            if (dialog.ShowDialog() == true)
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "Excel files(*.xlsx)| *.xlsx";
+            if (sfd.ShowDialog() == true)
             {
-                filePath = dialog.FileName;
+                try
+                {
+                    string filepath = sfd.FileName;
+                    ExportDataSheet(filepath);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error exporting file: " + ex.Message);
+                }
             }
+        }
 
-            if (string.IsNullOrEmpty(filePath))
-            {
-                MessageBox.Show("Đường dẫn báo cáo không hợp lệ");
-                return;
-            }
-
+        private void ExportDataSheet(string filename)
+        {
             try
             {
-                using (ExcelPackage p = new ExcelPackage())
+                OfficeOpenXml.ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+                using (var package = new ExcelPackage())
                 {
-                    p.Workbook.Properties.Author = "Bai tap wpf";
-                    p.Workbook.Properties.Title = "Báo cáo bài tập";
                     foreach (var sheetName in sheetData.Keys)
                     {
-                        p.Workbook.Worksheets.Add(sheetName);
-                        ExcelWorksheet ws = p.Workbook.Worksheets[sheetName];
+                        var worksheet = package.Workbook.Worksheets.Add(sheetName);
+                        var peopleList = sheetData[sheetName];
+                        worksheet.Cells[1, 1].Value = "Name";
+                        worksheet.Cells[1, 2].Value = "Age";
+                        worksheet.Cells[1, 3].Value = "ID";
+                        worksheet.Cells[1, 4].Value = "Adr";
+                        worksheet.Cells[1, 5].Value = "TaxCoe";
 
-                        ws.Name = sheetName;
-                        ws.Cells.Style.Font.Size = 11;
-                        ws.Cells.Style.Font.Name = "Calibri";
-
-                        string[] arrColumnHeader = { "Họ tên", "Tuổi", "ID", "Địa chỉ", "Hệ số thuế" };
-                        var countColHeader = arrColumnHeader.Length;
-
-                        ws.Cells[1, 1].Value = "Thống kê thông tin";
-                        ws.Cells[1, 1, 1, countColHeader].Merge = true;
-                        ws.Cells[1, 1, 1, countColHeader].Style.Font.Bold = true;
-                        ws.Cells[1, 1, 1, countColHeader].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-
-                        int colIndex = 1;
-                        int rowIndex = 2;
-
-                        foreach (var item in arrColumnHeader)
+                        for (int i = 0; i < peopleList.Count; i++)
                         {
-                            var cell = ws.Cells[rowIndex, colIndex];
-                            var fill = cell.Style.Fill;
-                            fill.PatternType = ExcelFillStyle.Solid;
-                            fill.BackgroundColor.SetColor(System.Drawing.Color.LightBlue);
-
-                            var border = cell.Style.Border;
-                            border.Bottom.Style =
-                                border.Top.Style =
-                                border.Left.Style =
-                                border.Right.Style = ExcelBorderStyle.Thin;
-
-                            cell.Value = item;
-                            colIndex++;
+                            worksheet.Cells[i + 2, 1].Value = peopleList[i].Name;
+                            worksheet.Cells[i + 2, 2].Value = peopleList[i].Age;
+                            worksheet.Cells[i + 2, 3].Value = peopleList[i].ID;
+                            worksheet.Cells[i + 2, 4].Value = peopleList[i].Adr;
+                            worksheet.Cells[i + 2, 5].Value = peopleList[i].TaxCoe;
                         }
 
-                        List<People> peopleList = sheetData[sheetName];
-
-                        foreach (var person in peopleList)
-                        {
-                            colIndex = 1;
-                            rowIndex++;
-                            ws.Cells[rowIndex, colIndex++].Value = person.Name;
-                            ws.Cells[rowIndex, colIndex++].Value = person.Age;
-                            ws.Cells[rowIndex, colIndex++].Value = person.ID;
-                            ws.Cells[rowIndex, colIndex++].Value = person.Adr;
-                            ws.Cells[rowIndex, colIndex++].Value = person.TaxCoe;
-                        }
+                        worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
                     }
 
-                    Byte[] bin = p.GetAsByteArray();
-                    File.WriteAllBytes(filePath, bin);
+                    package.SaveAs(new FileInfo(filename));
+                    MessageBox.Show("Export successful!");
                 }
-                MessageBox.Show("Xuất excel thành công!");
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Có lỗi khi lưu file!");
-            }
-        }
-
-        private void MainWindow_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Escape)
-            {
-                Close();
-            }
-        }
-
-        private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            if (package != null)
-            {
-                var saveDialog = new SaveFileDialog
-                {
-                    Filter = "Excel files(*.xlsx)| *.xlsx"
-                };
-
-                if (saveDialog.ShowDialog() == true)
-                {
-                    package.SaveAs(new FileInfo(saveDialog.FileName));
-                }
+                MessageBox.Show("Error exporting data sheet: " + ex.Message);
             }
         }
 
@@ -234,34 +227,20 @@ namespace WpfApp
         {
             if (e.EditAction == DataGridEditAction.Commit)
             {
-                People editedPerson = e.Row.Item as People;
-
-                if (editedPerson != null && cbSheetNames.SelectedItem != null)
+                var cell = e.EditingElement as TextBox;
+                if (cell != null)
                 {
-                    try
-                    {
-                        var selectedSheetName = cbSheetNames.SelectedItem.ToString();
-                        var sheet = package.Workbook.Worksheets[selectedSheetName];
-
-                        for (var rowNumber = 2; rowNumber <= sheet.Dimension.End.Row; rowNumber++)
-                        {
-                            if (sheet.Cells[rowNumber, 3].Text == editedPerson.ID.ToString())
-                            {
-                                sheet.Cells[rowNumber, 1].Value = editedPerson.Name;
-                                sheet.Cells[rowNumber, 2].Value = editedPerson.Age;
-                                sheet.Cells[rowNumber, 3].Value = editedPerson.ID;
-                                sheet.Cells[rowNumber, 4].Value = editedPerson.Adr;
-                                sheet.Cells[rowNumber, 5].Value = editedPerson.TaxCoe;
-                                break;
-                            }
-                        }
-                        package.Save();
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("Error editing data: " + ex.Message);
-                    }
+                    var binding = cell.GetBindingExpression(TextBox.TextProperty);
+                    binding.UpdateSource();
                 }
+            }
+        }
+
+        private void MainWindow_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                this.Close();
             }
         }
     }

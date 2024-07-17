@@ -14,7 +14,8 @@
         <DataGrid Height="200" Width="490" HorizontalAlignment="Left" Margin="300,21,0,0" Name="dataGrid" VerticalAlignment="Top"
                   RowHeight="30" ColumnWidth="100" GridLinesVisibility="Vertical" HeadersVisibility="All"
                   Background="LightGray" RowBackground="LightYellow" AlternatingRowBackground="LightBlue" AutoGenerateColumns="True"
-                  IsReadOnly="False" CellEditEnding="DataGrid_CellEditEnding">
+                  IsReadOnly="False" CellEditEnding="DataGrid_CellEditEnding"
+                  ItemsSource="{Binding PeopleList, UpdateSourceTrigger=PropertyChanged}">
             <DataGrid.Resources>
                 <Style TargetType="DataGridCell">
                     <Style.Triggers>
