@@ -1,0 +1,112 @@
+﻿<Window x:Class="SolutionRevitAPI.WPF.Views.CreatFilterForView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+            Width="550" Height="500" Name="wd" Title="Creat filter by caterogy" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- List Category for Fillter -->
+        <DataGrid Grid.Row="0" x:Name="DataGrid" AutoGenerateColumns="False" CanUserAddRows="False" ItemsSource="{Binding LstCategory}">
+            <DataGrid.Columns>
+                <!-- Checkbox Column -->
+                <DataGridTemplateColumn Header="Select" Width="Auto">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" VerticalContentAlignment="Center" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <!-- Group Name Column -->
+                <DataGridTextColumn Header="Category Name" Width="*" Binding="{Binding Cat.Name}" IsReadOnly="True" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Set Filter Name -->
+        <Grid Grid.Row="1" Margin="15 10 15 0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="Filter Name:" Margin="5" VerticalAlignment="Center"></TextBlock>
+            <TextBox Grid.Column="1" Margin="5" VerticalAlignment="Center" Text="{Binding FilterName, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+        </Grid>
+        <!--Set Properties-->
+        <Grid Margin="10 0 10 20" Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- First Column -->
+            <StackPanel Grid.Column="0" Margin="5">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Visibility:" Margin="5" VerticalAlignment="Center"></TextBlock>
+                    <CheckBox Grid.Column="1" Margin="5" VerticalAlignment="Center" IsChecked="{Binding IsVisibleChecked, UpdateSourceTrigger=PropertyChanged}" />
+                </Grid>
+
+                <TextBlock Margin="5" VerticalAlignment="Center">Color Line:</TextBlock>
+                <ComboBox Margin="5" VerticalAlignment="Center"
+                      SelectedValuePath="Name"
+                      ItemsSource="{Binding ColorList}"
+                      SelectedValue="{Binding ColorLine}"
+                      MaxDropDownHeight="140">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Rectangle Fill="{Binding Name}" Margin="0.2,0.2,5,0.2" Width="16" Height="16" />
+                                <TextBlock Text="{Binding Name}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <TextBlock Margin="5" VerticalAlignment="Center">Line Weight:</TextBlock>
+                <TextBox Margin="5" VerticalAlignment="Center" Text="{Binding LineWeight}" />
+            </StackPanel>
+
+            <!-- Second Column -->
+            <StackPanel Grid.Column="1" Margin="5">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Halftone:" Margin="5" VerticalAlignment="Center"></TextBlock>
+                    <CheckBox Grid.Column="1" Margin="5" VerticalAlignment="Center" IsChecked="{Binding Halftone}" />
+                </Grid>
+                <TextBlock Margin="5" VerticalAlignment="Center">Pattern Color:</TextBlock>
+                <ComboBox Margin="5" VerticalAlignment="Center"
+                      SelectedValuePath="Name"
+                      ItemsSource="{Binding ColorList}"
+                      SelectedValue="{Binding PatternColor}"
+                      MaxDropDownHeight="140">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Rectangle Fill="{Binding Name}" Margin="0.2,0.2,5,0.2" Width="16" Height="16" />
+                                <TextBlock Text="{Binding Name}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <TextBlock Margin="5" Text="Transparency" VerticalAlignment="Center"></TextBlock>
+                <TextBox Margin="5" VerticalAlignment="Center" Text="{Binding Transparency}" />
+            </StackPanel>
+        </Grid>
+
+        <Button Grid.Row="3" Content="Save" Padding="16" Command="{Binding SaveCommand}" CommandParameter="{x:Reference Name=wd}"></Button>
+    </Grid>
+</Window>

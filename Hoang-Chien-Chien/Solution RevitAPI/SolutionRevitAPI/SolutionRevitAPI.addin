@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<RevitAddIns>
+	<AddIn Type="Application">
+		<Name>SolutionRevitAPI</Name>
+		<FullClassName>SolutionRevitAPI.MyApp</FullClassName>
+		<VisibilityMode>AlwaysVisible</VisibilityMode>
+		<Assembly>SolutionRevitAPI.dll</Assembly>
+		<AddInId>05a29cc9-7d37-40b3-9fc7-823131caf88b</AddInId>
+		<VendorId>ADSK</VendorId>
+		<VendorDescription>Autodesk, Inc, www.autodesk.com</VendorDescription>
+	</AddIn>
+</RevitAddIns>
