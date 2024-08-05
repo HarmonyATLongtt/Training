@@ -11,20 +11,8 @@ using System.Windows.Input;
 
 namespace SolutionRevitAPI.WPF.ViewModels
 {
-    [Transaction(TransactionMode.Manual)]
     public class EditFilterForViewVM : INotifyPropertyChanged
     {
-        private bool isSelected;
-
-        public bool IsSelected
-        {
-            get => isSelected;
-            set
-            {
-                isSelected = value;
-                OnPropertyChanged(nameof(IsSelected));
-            }
-        }
 
         private ObservableCollection<View> lstView;
 
@@ -183,10 +171,6 @@ namespace SolutionRevitAPI.WPF.ViewModels
                     // Tạo một đối tượng để lưu trữ FillPatternElement kiểu Solid
                     FillPatternElement solidFillPattern = new FilteredElementCollector(Doc).OfClass(typeof(FillPatternElement)).ToElements().Cast<FillPatternElement>()
                                                             .Where(p => p.GetFillPattern().IsSolidFill).FirstOrDefault();
-                    // Tạo một đối tượng để lưu trữ FillLineElement kiểu Solid
-                    FilteredElementCollector collector = new FilteredElementCollector(Doc);
-                    collector.OfClass(typeof(LinePatternElement));
-
                     // Duyệt qua tất cả các LinePatternElement và tìm phần tử với tên "Solid"
                     LinePatternElement solidLinePattern = new FilteredElementCollector(Doc).OfClass(typeof(LinePatternElement)).ToElements().Cast<LinePatternElement>().ToList()
                                                             .Where(p => p.GetLinePattern().Name.Contains("Center")).FirstOrDefault();

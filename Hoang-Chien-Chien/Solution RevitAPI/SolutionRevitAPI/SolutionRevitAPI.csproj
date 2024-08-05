@@ -60,12 +60,16 @@
   <ItemGroup>
     <Compile Include="Commands\CreatFilterForView.cs" />
     <Compile Include="Commands\CreatNewInstance.cs" />
+    <Compile Include="Commands\CreatNewSchema.cs" />
     <Compile Include="Commands\CreatTag.cs" />
     <Compile Include="Commands\CreatViewPlan.cs" />
     <Compile Include="Commands\DeleteElement.cs" />
     <Compile Include="Commands\DistanceBetweenGrids.cs" />
     <Compile Include="Commands\EditParameter.cs" />
+    <Compile Include="Commands\EditSheetCommand.cs" />
+    <Compile Include="Commands\ExternalEventHandler\EditSheetEEH.cs" />
     <Compile Include="Commands\GetParameter.cs" />
+    <Compile Include="Commands\GetSchemaFromElement.cs" />
     <Compile Include="Commands\SelectionFilter\GridSelectionFilter.cs" />
     <Compile Include="Commands\RotateElement.cs" />
     <Compile Include="MyApp.cs" />
@@ -84,6 +88,7 @@
     <Compile Include="WPF\ViewModels\EditFilterForViewVM.cs" />
     <Compile Include="WPF\ViewModels\EditParemeterVM.cs" />
     <Compile Include="WPF\ViewModels\CreatFilterForView_VM.cs" />
+    <Compile Include="WPF\ViewModels\EditSheetVM.cs" />
     <Compile Include="WPF\ViewModels\RelayCommand.cs" />
     <Compile Include="WPF\ViewModels\TagAllVM.cs" />
     <Compile Include="WPF\ViewModels\TagModeVM.cs" />
@@ -101,6 +106,9 @@
     </Compile>
     <Compile Include="WPF\Views\CreatFilterForView.xaml.cs">
       <DependentUpon>CreatFilterForView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WPF\Views\EditSheet.xaml.cs">
+      <DependentUpon>EditSheet.xaml</DependentUpon>
     </Compile>
     <Compile Include="WPF\Views\TagAll.xaml.cs">
       <DependentUpon>TagAll.xaml</DependentUpon>
@@ -132,6 +140,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="WPF\Views\CreatFilterForView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WPF\Views\EditSheet.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

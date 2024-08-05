@@ -1,22 +1,47 @@
-﻿<Window x:Class="SolutionRevitAPI.WPF.Views.EditParameter"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:local="clr-namespace:SolutionRevitAPI.WPF.Views"
-        mc:Ignorable="d"
-        Width="400" Height="300" Name="wd" Title="Change Parameter Values" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+﻿<Window
+    x:Class="SolutionRevitAPI.WPF.Views.EditParameter"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:SolutionRevitAPI.WPF.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Name="wd"
+    Title="Change Parameter Values"
+    Width="400"
+    Height="300"
+    ResizeMode="NoResize"
+    WindowStartupLocation="CenterScreen"
+    mc:Ignorable="d">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <DataGrid Grid.Row="0" CanUserAddRows="False" x:Name="dtgPara" ItemsSource="{Binding  ParameterElements}" AutoGenerateColumns="False" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <DataGrid
+            x:Name="dtgPara"
+            Grid.Row="0"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            AutoGenerateColumns="False"
+            CanUserAddRows="False"
+            ItemsSource="{Binding ParameterElements}">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Parameter" Binding="{Binding Name}" IsReadOnly="True" Width="*" />
-                <DataGridTextColumn Header="Value" Binding="{Binding ValuePara}" Width="*" />
+                <DataGridTextColumn
+                    Width="*"
+                    Binding="{Binding Name}"
+                    Header="Parameter"
+                    IsReadOnly="True" />
+                <DataGridTextColumn
+                    Width="*"
+                    Binding="{Binding ValuePara}"
+                    Header="Value" />
             </DataGrid.Columns>
         </DataGrid>
-        <Button Grid.Row="1" Content="Save" Padding="8" Command="{Binding SaveCommand}" CommandParameter="{x:Reference Name=wd}"></Button>
+        <Button
+            Grid.Row="1"
+            Padding="8"
+            Command="{Binding SaveCommand}"
+            CommandParameter="{x:Reference Name=wd}"
+            Content="Save" />
     </Grid>
 </Window>

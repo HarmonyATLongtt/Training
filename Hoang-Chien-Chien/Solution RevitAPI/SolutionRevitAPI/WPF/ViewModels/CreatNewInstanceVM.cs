@@ -1,5 +1,6 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -65,9 +66,9 @@ namespace SolutionRevitAPI.WPF.ViewModels
             }
         }
 
-        private FamilySymbol selectedFamilySymbol;
+        private Object selectedFamilySymbol;
 
-        public FamilySymbol SelectedFamilySymbol
+        public Object SelectedFamilySymbol
         {
             get => selectedFamilySymbol;
             set
@@ -77,9 +78,9 @@ namespace SolutionRevitAPI.WPF.ViewModels
             }
         }
 
-        private ObservableCollection<FamilySymbol> lstFamilySymbol;
+        private ObservableCollection<Object> lstFamilySymbol;
 
-        public ObservableCollection<FamilySymbol> LstFamilySymbol
+        public ObservableCollection<Object> LstFamilySymbol
         {
             get => lstFamilySymbol;
             set
@@ -97,7 +98,7 @@ namespace SolutionRevitAPI.WPF.ViewModels
         public CreatNewInstanceVM()
         {
             IsSave = false;
-            lstFamilySymbol = new ObservableCollection<FamilySymbol>();
+            lstFamilySymbol = new ObservableCollection<Object>();
             CreatCommand = new RelayCommand(Creat, CanCreat);
         }
 
@@ -109,7 +110,41 @@ namespace SolutionRevitAPI.WPF.ViewModels
                 return;
             }
             FilteredElementCollector colector = new FilteredElementCollector(doc);
-            LstFamilySymbol = new ObservableCollection<FamilySymbol>(colector.OfCategory(category.BuiltInCategory).OfClass(typeof(FamilySymbol)).WhereElementIsElementType().ToElements().Cast<FamilySymbol>().ToList());
+            if (category.BuiltInCategory == BuiltInCategory.OST_Walls)
+            {
+                LstFamilySymbol = new ObservableCollection<object>(
+                                colector.OfCategory(category.BuiltInCategory)
+                                .OfClass(typeof(WallType))
+                                .WhereElementIsElementType()
+                                .Cast<object>()
+                                .ToList());
+            } else if (category.BuiltInCategory == BuiltInCategory.OST_Roofs)
+            {
+                LstFamilySymbol = new ObservableCollection<object>(
+                                colector.OfCategory(category.BuiltInCategory)
+                                .OfClass(typeof(RoofType))
+                                .WhereElementIsElementType()
+                                .Cast<object>()
+                                .ToList());
+            } else if (category.BuiltInCategory == BuiltInCategory.OST_Floors)
+            {
+                LstFamilySymbol = new ObservableCollection<object>(
+                                colector.OfCategory(category.BuiltInCategory)
+                                .OfClass(typeof(FloorType))
+                                .WhereElementIsElementType()
+                                .Cast<object>()
+                                .ToList());
+            }
+            else
+            {
+                LstFamilySymbol = new ObservableCollection<object>(
+                                colector.OfCategory(category.BuiltInCategory)
+                                .OfClass(typeof(FamilySymbol))
+                                .WhereElementIsElementType()
+                                .Cast<object>()
+                                .ToList());
+            }
+            
         }
 
         private bool CanCreat(object obj)

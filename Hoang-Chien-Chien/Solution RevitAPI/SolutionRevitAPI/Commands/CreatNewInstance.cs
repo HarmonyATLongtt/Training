@@ -33,7 +33,8 @@ namespace SolutionRevitAPI.Commands
                 ObservableCollection<Category> lstCategory = new ObservableCollection<Category>();
                 foreach (Category category in doc.Settings.Categories)
                 {
-                    if (category.BuiltInCategory == BuiltInCategory.OST_StructuralColumns || category.BuiltInCategory == BuiltInCategory.OST_Walls)
+                    if (category.BuiltInCategory == BuiltInCategory.OST_StructuralColumns || category.BuiltInCategory == BuiltInCategory.OST_Walls
+                        || category.BuiltInCategory == BuiltInCategory.OST_StructuralFraming || category.BuiltInCategory == BuiltInCategory.OST_Floors || category.BuiltInCategory == BuiltInCategory.OST_Roofs)
                     {
                         lstCategory.Add(category);
                     }
@@ -44,17 +45,48 @@ namespace SolutionRevitAPI.Commands
                 window.ShowDialog();
                 if (viewModel.IsSave)
                 {
-                    using (Transaction trans = new Transaction(doc, "SetValue"))
+                    using (Transaction trans = new Transaction(doc, "Creat New Instance"))
                     {
                         trans.Start();
-                        if (!viewModel.SelectedFamilySymbol.IsActive)
+                        Category category = viewModel.SelectedCategory;
+                        if (category.BuiltInCategory == BuiltInCategory.OST_Walls)
                         {
-                            viewModel.SelectedFamilySymbol.Activate();
+                            // Xác định các điểm để tạo tường
+                            XYZ startPoint = new XYZ(0, 0, 0); // Điểm bắt đầu
+                            XYZ endPoint = new XYZ(10, 0, 0);   // Điểm kết thúc
+
+                            // Tạo một Line từ điểm bắt đầu và kết thúc
+                            Line wallLine = Line.CreateBound(startPoint, endPoint);
+
+                            // Tạo tường mới
+                            if (viewModel.SelectedFamilySymbol is WallType wallType)
+                            {
+                                Wall newWall = Wall.Create(doc, wallLine, wallType.Id, viewModel.SelectedLevel.Id, UnitUtils.ConvertToInternalUnits(4.0, UnitTypeId.Meters), 0.0, false, false);
+                            }
                         }
-                        doc.Create.NewFamilyInstance(clickedPoint, viewModel.SelectedFamilySymbol, viewModel.SelectedLevel, Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
+                        else if (category.BuiltInCategory == BuiltInCategory.OST_Roofs)
+                        {
+                        }
+                        else if (category.BuiltInCategory == BuiltInCategory.OST_Floors)
+                        {
+                        }
+                        else
+                        {
+                            var familySymbol = viewModel.SelectedFamilySymbol as FamilySymbol;
+                            if (!familySymbol.IsActive)
+                            {
+                                familySymbol.Activate();
+                            }
+                            doc.Create.NewFamilyInstance(clickedPoint, familySymbol, viewModel.SelectedLevel, Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
+                        }
                         trans.Commit();
                     }
                 }
+            }
+            catch (Autodesk.Revit.Exceptions.OperationCanceledException)
+            {
+                // Người dùng hủy bỏ việc chọn đối tượng
+                return Result.Cancelled; ;
             }
             catch (Exception ex)
             {
