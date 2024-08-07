@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32811.315
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Baitap-1", "Baitap-1\Baitap-1.csproj", "{27314008-17AB-4D81-BF7C-CC7A7EDE0003}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Baitap-2", "Baitap-2\Baitap-2.csproj", "{226571E6-2123-4F2A-8C7F-6882F7F79E60}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Baitap-3", "Baitap-3\Baitap-3.csproj", "{4867F70A-EA34-4085-B142-DE3FFF2D9AE3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{27314008-17AB-4D81-BF7C-CC7A7EDE0003}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27314008-17AB-4D81-BF7C-CC7A7EDE0003}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27314008-17AB-4D81-BF7C-CC7A7EDE0003}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27314008-17AB-4D81-BF7C-CC7A7EDE0003}.Release|Any CPU.Build.0 = Release|Any CPU
+		{226571E6-2123-4F2A-8C7F-6882F7F79E60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{226571E6-2123-4F2A-8C7F-6882F7F79E60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{226571E6-2123-4F2A-8C7F-6882F7F79E60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{226571E6-2123-4F2A-8C7F-6882F7F79E60}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4867F70A-EA34-4085-B142-DE3FFF2D9AE3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4867F70A-EA34-4085-B142-DE3FFF2D9AE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4867F70A-EA34-4085-B142-DE3FFF2D9AE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4867F70A-EA34-4085-B142-DE3FFF2D9AE3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A3765DED-3D13-4513-831F-4528B006569D}
+	EndGlobalSection
+EndGlobal
