@@ -49,7 +49,7 @@ namespace SolutionRevitAPI
             EditFilterForViewBtn.LargeImage = EditFilterForViewBtn.Image = ConvertToBitmapSource(Properties.Resources.filter, 32, 32);
             EditFilterForViewBtn.ToolTip = "Thêm xóa Filter cho các View";
             panel.AddItem(EditFilterForViewBtn);
-            
+
             return Result.Succeeded;
         }
 

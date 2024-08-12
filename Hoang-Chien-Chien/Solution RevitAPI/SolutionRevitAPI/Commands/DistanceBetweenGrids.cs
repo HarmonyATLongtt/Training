@@ -18,7 +18,7 @@ namespace SolutionRevitAPI.Commands
 
             try
             {
-                GridSelectionFilter gridSelection = new GridSelectionFilter(BuiltInCategory.OST_Grids);
+                SelectionFilter gridSelection = new SelectionFilter(BuiltInCategory.OST_Grids);
                 Reference reference1 = uidoc.Selection.PickObject(Autodesk.Revit.UI.Selection.ObjectType.Element, gridSelection, "Chọn grid thứ nhất");
                 bool checkSelect = true;
                 Reference reference2 = null;

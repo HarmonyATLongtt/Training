@@ -13,8 +13,8 @@ namespace SolutionRevitAPI.WPF.Model
             get => isSelected;
             set
             {
-                isSelected = value;                 
-                OnPropertyChanged(nameof(IsSelected));              
+                isSelected = value;
+                OnPropertyChanged(nameof(IsSelected));
             }
         }
 

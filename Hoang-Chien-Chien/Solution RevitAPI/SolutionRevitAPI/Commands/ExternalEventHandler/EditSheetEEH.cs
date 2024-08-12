@@ -17,7 +17,6 @@ namespace SolutionRevitAPI.Commands.ExternalEvents
 
         public void Execute(UIApplication app)
         {
-            // Thực hiện các hành động trong Revit
             UIDocument uidoc = app.ActiveUIDocument;
             Document doc = uidoc.Document;
 

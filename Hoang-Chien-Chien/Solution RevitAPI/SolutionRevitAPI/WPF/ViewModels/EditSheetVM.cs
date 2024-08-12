@@ -11,10 +11,9 @@ namespace SolutionRevitAPI.WPF.ViewModels
 {
     public class EditSheetVM : INotifyPropertyChanged
     {
-        public ExternalEvent ExternalEvent { get; set; }
-        public EditSheetEEH Handler {  get; set; }
-        public FamilySymbol TitleBlock {  get; set; }
+       
         private ObservableCollection<View> lstView;
+
         public ObservableCollection<View> LstView
         {
             get => lstView;
@@ -24,6 +23,7 @@ namespace SolutionRevitAPI.WPF.ViewModels
                 OnPropertyChanged(nameof(LstView));
             }
         }
+
         private ObservableCollection<ViewSheet> lstSheet;
 
         public ObservableCollection<ViewSheet> LstSheet
@@ -47,7 +47,9 @@ namespace SolutionRevitAPI.WPF.ViewModels
                 OnPropertyChanged(nameof(SheetName));
             }
         }
+
         private string sheetNumber;
+
         public string SheetNumber
         {
             get => sheetNumber;
@@ -69,6 +71,7 @@ namespace SolutionRevitAPI.WPF.ViewModels
                 OnPropertyChanged(nameof(SelectedSheet));
             }
         }
+
         private View selectedViewPlan;
 
         public View SelectedViewPlan
@@ -80,7 +83,9 @@ namespace SolutionRevitAPI.WPF.ViewModels
                 OnPropertyChanged(nameof(SelectedViewPlan));
             }
         }
-
+        public ExternalEvent ExternalEvent { get; set; }
+        public EditSheetEEH Handler { get; set; }
+        public FamilySymbol TitleBlock { get; set; }
         public Document Doc { get; set; }
         public ICommand CreatCommand { get; set; }
         public ICommand ApplyCommand { get; set; }
@@ -91,9 +96,9 @@ namespace SolutionRevitAPI.WPF.ViewModels
         {
             LstSheet = new ObservableCollection<ViewSheet>();
             LstView = new ObservableCollection<View>();
-           
+
             CreatCommand = new RelayCommand(Creat, CanCreat);
-          
+
             ApplyCommand = new RelayCommand(Apply, CanApply);
         }
 
@@ -113,7 +118,7 @@ namespace SolutionRevitAPI.WPF.ViewModels
         {
             var viewSheet = new FilteredElementCollector(Doc).OfCategory(BuiltInCategory.OST_Sheets).WhereElementIsNotElementType()
                                 .ToElements().Cast<ViewSheet>().ToList()
-                                .Where(p=>p.SheetNumber == SheetNumber).FirstOrDefault();
+                                .Where(p => p.SheetNumber == SheetNumber).FirstOrDefault();
             if (viewSheet != null)
             {
                 MessageBox.Show("Sheet Number này đã tồn tại, vui lòng chọn Sheet Number khác!", "Warning");
@@ -143,14 +148,13 @@ namespace SolutionRevitAPI.WPF.ViewModels
 
         private void Apply(object obj)
         {
-           
             Handler.SelectedSheet = SelectedSheet;
             Handler.SelectedViewPlan = SelectedViewPlan;
             Handler.Mode = 2;
             ExternalEvent.Raise();
             SelectedViewPlan = null;
-
         }
+
         protected virtual void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

@@ -1,5 +1,4 @@
-﻿using Autodesk.Revit.Attributes;
-using Autodesk.Revit.DB;
+﻿using Autodesk.Revit.DB;
 using SolutionRevitAPI.WPF.Model;
 using SolutionRevitAPI.WPF.Views;
 using System.Collections.Generic;
@@ -13,7 +12,6 @@ namespace SolutionRevitAPI.WPF.ViewModels
 {
     public class EditFilterForViewVM : INotifyPropertyChanged
     {
-
         private ObservableCollection<View> lstView;
 
         public ObservableCollection<View> LstView
