@@ -9,6 +9,11 @@
     
     <Grid>
         <Grid.Resources>
+            <Style TargetType="CheckBox">
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="Foreground" Value="Black"></Setter>
+            </Style>
             <Style TargetType="Button">
                 <Setter Property="Width" Value="100"></Setter>
                 <Setter Property="FontFamily" Value="Tahoma"></Setter>
@@ -35,7 +40,8 @@
             </Style>
         </Grid.Resources>
         <StackPanel>
-            <ListView x:Name="lsvSheetName" ItemsSource="{Binding SheetName}" Height="248">
+            <CheckBox Content="Select All" Command="{Binding SelectAllCommand}" CommandParameter="{Binding ElementName=lsvSheetName}" IsChecked="{Binding ChekboxState, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+            <ListView x:Name="lsvSheetName" ItemsSource="{Binding SheetName}" Height="230" SelectedItem="{Binding SelectedItem}" >
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Width="370" Header="Danh sách Sheet" HeaderContainerStyle="{StaticResource HeaderStyle}"></GridViewColumn>

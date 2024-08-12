@@ -5,12 +5,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows;
-using System.Windows.Documents;
 
 namespace Bai1.ViewModels
 {
@@ -19,11 +16,50 @@ namespace Bai1.ViewModels
         #region Fields and Properties
 
         public Window window;
+        public ListView LsvSheetName { get; set; }
+
+
         private List<string> selectedSheet;
+
         public List<string> SheetName { get; set; }
+        public List<string> SelectedSheet { get => selectedSheet; set => selectedSheet = value; }
+
+
+        private bool chekboxState;
+
+        public bool ChekboxState
+        { 
+            get => chekboxState;
+            set 
+            { 
+                chekboxState = value; OnPropertyChanged(nameof(ChekboxState));
+            }
+        }
+
+        private string selectedItem;
+
+        public string SelectedItem
+        {
+            get
+            {
+                return selectedItem;
+            }
+            set
+            {
+                selectedItem = value;
+                OnPropertyChanged(nameof(SelectedItem));
+                if (LsvSheetName.SelectedItems.Count == SheetName.Count())
+                {
+                    ChekboxState = false;
+                }
+            }
+        }
+
         public Dictionary<string, ObservableCollection<People>> Data { get; set; }
 
-        public ICommand ExportDataCommand { get; set; }
+        public ICommand ExportDataCommand { get; set; } // Command thực hiện xuất dữ liệu từ Sheet đã chọn ra file excel
+        public ICommand SelectAllCommand { get; set; } // Command thực hiện thao tác chọn hoặc hủy chọn tất cả các Sheet
+        
 
         #endregion Fields and Properties
 
@@ -31,14 +67,37 @@ namespace Bai1.ViewModels
 
         public ExportViewModel()
         {
-            selectedSheet = new List<string>();
+            SelectedSheet = new List<string>();
             Data = new Dictionary<string, ObservableCollection<People>>();
             ExportDataCommand = new RelayCommand(ExportData, CanExportData);
+            SelectAllCommand = new RelayCommand(SelectAll, CanSelectAll);
         }
 
         #endregion Constructor
 
-        #region Command
+        #region Command: Execute and CanExecute
+
+        private bool CanSelectAll(object obj)
+        {
+            return SheetName.Count() > 0;
+        }
+
+        private void SelectAll(object obj)
+        {
+            ListView listView = obj as ListView;
+            LsvSheetName = listView;
+            foreach (object item in listView.Items)
+            {
+                if (ChekboxState)
+                {
+                    listView.SelectedItems.Add(item);
+                }
+                else
+                {
+                    listView.SelectedItems.Remove(item);
+                }
+            }
+        }
 
         private bool CanExportData(object obj)
         {
@@ -53,10 +112,10 @@ namespace Bai1.ViewModels
                 MessageBox.Show("VUi lòng chọn sheet muốn xuất dữ liệu", "Thông báo");
                 return;
             }
-            selectedSheet.Clear();
+            SelectedSheet.Clear();
             foreach (object selectedItem in listView.SelectedItems)
             {
-                selectedSheet.Add(selectedItem.ToString());
+                SelectedSheet.Add(selectedItem.ToString());
             }
             SaveFileDialog saveFileDialog = new SaveFileDialog
             {
@@ -69,10 +128,9 @@ namespace Bai1.ViewModels
                 string filePath = saveFileDialog.FileName;
                 Dictionary<string, List<Object>> export = new Dictionary<string, List<Object>>();
 
-                foreach (string sheet in selectedSheet)
+                foreach (string sheet in SelectedSheet)
                 {
-                    List<People> peoples = new List<People>();
-                    peoples = new List<People>(Data[sheet]);
+                    List<People> peoples = new List<People>(Data[sheet]);
                     export.Add(sheet, peoples.Cast<object>().ToList());
                 }
 
@@ -90,7 +148,7 @@ namespace Bai1.ViewModels
 
         #endregion Command
 
-        #region Other
+        #region Others
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -99,6 +157,6 @@ namespace Bai1.ViewModels
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        #endregion Other
+        #endregion Others
     }
 }

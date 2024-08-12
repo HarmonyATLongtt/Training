@@ -39,8 +39,8 @@
             <ListView x:Name="lsvData" ItemsSource="{Binding Peoples, UpdateSourceTrigger=PropertyChanged}" SelectionMode ="Single" Height="620">
                 <ListView.Resources>
                     <Style x:Key="HeaderStyle" TargetType="GridViewColumnHeader">
-                        <Setter Property="FontSize" Value="12"/>
-                        <Setter Property="FontWeight" Value="Bold"/>
+                        <Setter Property="FontSize" Value="12" />
+                        <Setter Property="FontWeight" Value="Bold" />
                     </Style>
                     <Style x:Key="CellStyle" TargetType="TextBox">
                         <Setter Property="FontFamily" Value="Tahoma"></Setter>
@@ -56,7 +56,7 @@
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                    
+
                     <Style TargetType="ListViewItem">
                         <Style.Triggers>
                             <Trigger Property="IsSelected" Value="True">
@@ -83,7 +83,7 @@
                                     <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="200" Style="{StaticResource CellStyle}">
                                         <i:Interaction.Triggers>
                                             <i:EventTrigger EventName="GotFocus">
-                                                <i:InvokeCommandAction Command="{Binding DataContext.CellFocusCommand, RelativeSource={RelativeSource AncestorType=ListView}}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListViewItem}}}" />
+                                                <i:InvokeCommandAction Command="{Binding DataContext.CellFocusCommand, ElementName= wd}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListViewItem}}}" />
                                             </i:EventTrigger>
                                         </i:Interaction.Triggers>
                                     </TextBox>
@@ -96,7 +96,7 @@
                                     <TextBox Text="{Binding Age}" Width="100" Style="{StaticResource CellStyle}">
                                         <i:Interaction.Triggers>
                                             <i:EventTrigger EventName="GotFocus">
-                                                <i:InvokeCommandAction Command="{Binding DataContext.CellFocusCommand, RelativeSource={RelativeSource AncestorType=ListView}}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListViewItem}}}" />
+                                                <i:InvokeCommandAction Command="{Binding DataContext.CellFocusCommand, ElementName= wd}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListViewItem}}}" />
                                             </i:EventTrigger>
                                         </i:Interaction.Triggers>
                                     </TextBox>
@@ -109,7 +109,7 @@
                                     <TextBox Text="{Binding Address}" Width="250" Style="{StaticResource CellStyle}">
                                         <i:Interaction.Triggers>
                                             <i:EventTrigger EventName="GotFocus">
-                                                <i:InvokeCommandAction Command="{Binding DataContext.CellFocusCommand, RelativeSource={RelativeSource AncestorType=ListView}}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListViewItem}}}" />
+                                                <i:InvokeCommandAction Command="{Binding DataContext.CellFocusCommand, ElementName= wd}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListViewItem}}}" />
                                             </i:EventTrigger>
                                         </i:Interaction.Triggers>
                                     </TextBox>
@@ -122,7 +122,7 @@
                                     <TextBox Text="{Binding Income}" Width="200" Style="{StaticResource CellStyle}">
                                         <i:Interaction.Triggers>
                                             <i:EventTrigger EventName="GotFocus">
-                                                <i:InvokeCommandAction Command="{Binding DataContext.CellFocusCommand, RelativeSource={RelativeSource AncestorType=ListView}}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListViewItem}}}" />
+                                                <i:InvokeCommandAction Command="{Binding DataContext.CellFocusCommand, ElementName= wd}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListViewItem}}}" />
                                             </i:EventTrigger>
                                         </i:Interaction.Triggers>
                                     </TextBox>
@@ -132,10 +132,10 @@
                         <GridViewColumn Header="Hệ số thuế" Width="100" HeaderContainerStyle="{StaticResource HeaderStyle}">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBox Text="{Binding TaxCoe}" Width="100" Style="{StaticResource CellStyle}" >
+                                    <TextBox Text="{Binding TaxCoe}" Width="100" Style="{StaticResource CellStyle}">
                                         <i:Interaction.Triggers>
                                             <i:EventTrigger EventName="GotFocus">
-                                                <i:InvokeCommandAction Command="{Binding DataContext.CellFocusCommand, RelativeSource={RelativeSource AncestorType=ListView}}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListViewItem}}}" />
+                                                <i:InvokeCommandAction Command="{Binding DataContext.CellFocusCommand, ElementName= wd}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListViewItem}}}" />
                                             </i:EventTrigger>
                                         </i:Interaction.Triggers>
                                     </TextBox>

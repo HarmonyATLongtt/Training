@@ -2,18 +2,12 @@
 using Bai1.Views;
 using Microsoft.Win32;
 using SharedLibrary;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Xml;
 using WPF_Solution;
 
 namespace Bai1
@@ -125,7 +119,7 @@ namespace Bai1
 
         #endregion Load and filter data
 
-        #region Command
+        #region Command: Execute and CanExecute
 
         private bool CanFocusRow(object obj)
         {
@@ -150,10 +144,12 @@ namespace Bai1
             var mainWindow = obj as MainWindow;
             window.Owner = mainWindow;
             window.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner;
-            ExportViewModel viewModel = new ExportViewModel();
-            viewModel.window = window;
-            viewModel.SheetName = new List<string>(sheetName);
-            viewModel.Data = Data;
+            ExportViewModel viewModel = new ExportViewModel
+            {
+                window = window,
+                SheetName = new List<string>(sheetName),
+                Data = Data
+            };
             window.DataContext = viewModel;
             window.ShowDialog();
         }
@@ -165,10 +161,12 @@ namespace Bai1
 
         private void ImportData(object obj)
         {
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "Excel Files|*.xls;*.xlsx;*.xlsm|All files|*.*";
-            ofd.FilterIndex = 1;
-            ofd.RestoreDirectory = true;
+            OpenFileDialog ofd = new OpenFileDialog
+            {
+                Filter = "Excel Files|*.xls;*.xlsx;*.xlsm|All files|*.*",
+                FilterIndex = 1,
+                RestoreDirectory = true
+            };
             if (ofd.ShowDialog() == true)
             {
                 PathName = ofd.FileName.ToString();
@@ -176,8 +174,7 @@ namespace Bai1
                 sheetName.Clear();
                 foreach (string sheet in ExcelHelper.GetSheetsName(PathName))
                 {
-                    ObservableCollection<People> peoples = new ObservableCollection<People>();
-                    peoples = new ObservableCollection<People>(ExcelHelper.GetData<People>(PathName, sheet));
+                    ObservableCollection<People>  peoples = new ObservableCollection<People>(ExcelHelper.GetData<People>(PathName, sheet));
                     Data.Add(sheet, peoples);
                     sheetName.Add(sheet);
                 }
@@ -190,7 +187,7 @@ namespace Bai1
 
         #endregion Command
 
-        #region Other
+        #region Others
 
         protected virtual void OnPropertyChanged(string propertyName)
         {

@@ -5,23 +5,23 @@ namespace Bai1
 {
     public class RelayCommand : ICommand
     {
-        public Action<object> _Execute { get; set; }
-        public Predicate<object> _CanExecute { get; set; }
+        public Action<object> ExecuteMethod { get; set; }
+        public Predicate<object> CanExecuteMethod { get; set; }
 
         public RelayCommand(Action<object> ExecuteMethod, Predicate<object> CanExecuteMethod)
         {
-            _Execute = ExecuteMethod;
-            _CanExecute = CanExecuteMethod;
+            this.ExecuteMethod = ExecuteMethod;
+            this.CanExecuteMethod = CanExecuteMethod;
         }
 
         public bool CanExecute(object parameter)
         {
-            return _CanExecute(parameter);
+            return CanExecuteMethod(parameter);
         }
 
         public void Execute(object parameter)
         {
-            _Execute(parameter);
+            ExecuteMethod(parameter);
         }
 
         public event EventHandler CanExecuteChanged
