@@ -1,0 +1,131 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+	<AddIn Type="Command">
+		<Name>BaiTap_Revit</Name>
+		<Text>Create Column</Text>
+		<Assembly>C:\Users\Admin\source\repos\BaiTap_Revit\BaiTap_Revit\bin\Debug\BaiTap_Revit.dll</Assembly>
+		<AddInId>74AB188C-7B2A-44D9-8D0D-AB2834F5417E</AddInId>
+		<FullClassName>BaiTap_Revit.CreateColumn</FullClassName>
+		<VendorId>SomeVendor</VendorId>
+		<VendorDescription>Some Description about Vendor</VendorDescription>
+	</AddIn>
+	<AddIn Type="Command">
+		<Name>BaiTap_Revit</Name>
+		<Text>Create Wall</Text>
+		<Assembly>C:\Users\Admin\source\repos\BaiTap_Revit\BaiTap_Revit\bin\Debug\BaiTap_Revit.dll</Assembly>
+		<AddInId>FA020F58-872C-4B34-A863-A68C70584F96</AddInId>
+		<FullClassName>BaiTap_Revit.CreateWall</FullClassName>
+		<VendorId>SomeVendor</VendorId>
+		<VendorDescription>Some Description about Vendor</VendorDescription>
+	</AddIn>
+	<AddIn Type="Command">
+		<Name>BaiTap_Revit</Name>
+		<Text>Delete Element</Text>
+		<Assembly>C:\Users\Admin\source\repos\BaiTap_Revit\BaiTap_Revit\bin\Debug\BaiTap_Revit.dll</Assembly>
+		<AddInId>CD66594B-3C42-4193-A45C-92EE4920CFE7</AddInId>
+		<FullClassName>BaiTap_Revit.P1.DeleteElement</FullClassName>
+		<VendorId>SomeVendor</VendorId>
+		<VendorDescription>Some Description about Vendor</VendorDescription>
+	</AddIn>
+	<AddIn Type="Command">
+		<Name>BaiTap_Revit</Name>
+		<Text>Create Beam</Text>
+		<Assembly>C:\Users\Admin\source\repos\BaiTap_Revit\BaiTap_Revit\bin\Debug\BaiTap_Revit.dll</Assembly>
+		<AddInId>9C10CDED-B0CA-4A9B-9AA3-5952EC94A58E</AddInId>
+		<FullClassName>BaiTap_Revit.CreateBeam</FullClassName>
+		<VendorId>SomeVendor</VendorId>
+		<VendorDescription>Some Description about Vendor</VendorDescription>
+	</AddIn>
+	<AddIn Type="Command">
+		<Name>BaiTap_Revit</Name>
+		<Text>Create Floor</Text>
+		<Assembly>C:\Users\Admin\source\repos\BaiTap_Revit\BaiTap_Revit\bin\Debug\BaiTap_Revit.dll</Assembly>
+		<AddInId>FFDCD7EF-426D-45B4-88B2-35663FF2FF09</AddInId>
+		<FullClassName>BaiTap_Revit.CreateFloor</FullClassName>
+		<VendorId>SomeVendor</VendorId>
+		<VendorDescription>Some Description about Vendor</VendorDescription>
+	</AddIn>
+	<AddIn Type="Command">
+		<Name>BaiTap_Revit</Name>
+		<Text>PrintParameter</Text>
+		<Assembly>C:\Users\Admin\source\repos\BaiTap_Revit\BaiTap_Revit\bin\Debug\BaiTap_Revit.dll</Assembly>
+		<AddInId>FCB8FBC1-3EA5-4FD0-A8C8-1311F21E7AE0</AddInId>
+		<FullClassName>BaiTap_Revit.P1.PrintParameter</FullClassName>
+		<VendorId>SomeVendor</VendorId>
+		<VendorDescription>Some Description about Vendor</VendorDescription>
+	</AddIn>
+	<AddIn Type="Command">
+		<Name>BaiTap_Revit</Name>
+		<Text>Set Parameter</Text>
+		<Assembly>C:\Users\Admin\source\repos\BaiTap_Revit\BaiTap_Revit\bin\Debug\BaiTap_Revit.dll</Assembly>
+		<AddInId>98725BCB-1C6E-43B4-AF11-771B20F38F07</AddInId>
+		<FullClassName>BaiTap_Revit.P1.SetParameter</FullClassName>
+		<VendorId>SomeVendor</VendorId>
+		<VendorDescription>Some Description about Vendor</VendorDescription>
+	</AddIn>
+	<AddIn Type="Command">
+		<Name>BaiTap_Revit</Name>
+		<Text>Gan Entity</Text>
+		<Assembly>C:\Users\Admin\source\repos\BaiTap_Revit\BaiTap_Revit\bin\Debug\BaiTap_Revit.dll</Assembly>
+		<AddInId>7CFF4F7E-2AF5-4808-AB7F-19A9869A3610</AddInId>
+		<FullClassName>BaiTap_Revit.P3.GanEntity</FullClassName>
+		<VendorId>SomeVendor</VendorId>
+		<VendorDescription>Some Description about Vendor</VendorDescription>
+	</AddIn>
+
+	<AddIn Type="Command">
+		<Name>BaiTap_Revit</Name>
+		<Text>Dimension</Text>
+		<Assembly>C:\Users\Admin\source\repos\BaiTap_Revit\BaiTap_Revit\bin\Debug\BaiTap_Revit.dll</Assembly>
+		<AddInId>50885D22-9CA2-4D01-BA0F-E55A2F8A948C</AddInId>
+		<FullClassName>BaiTap_Revit.P5.Dimension</FullClassName>
+		<VendorId>SomeVendor</VendorId>
+		<VendorDescription>Some Description about Vendor</VendorDescription>
+	</AddIn>
+	<AddIn Type="Command">
+		<Name>BaiTap_Revit</Name>
+		<Text>Text</Text>
+		<Assembly>C:\Users\Admin\source\repos\BaiTap_Revit\BaiTap_Revit\bin\Debug\BaiTap_Revit.dll</Assembly>
+		<AddInId>B52468F6-041D-4290-901C-63CE41E07182</AddInId>
+		<FullClassName>BaiTap_Revit.P5.Text</FullClassName>
+		<VendorId>SomeVendor</VendorId>
+		<VendorDescription>Some Description about Vendor</VendorDescription>
+	</AddIn>
+	<AddIn Type="Command">
+		<Name>BaiTap_Revit</Name>
+		<Text>Tag</Text>
+		<Assembly>C:\Users\Admin\source\repos\BaiTap_Revit\BaiTap_Revit\bin\Debug\BaiTap_Revit.dll</Assembly>
+		<AddInId>D54DCF31-21FD-48B5-899E-A7F3523547D4</AddInId>
+		<FullClassName>BaiTap_Revit.P5.Tag</FullClassName>
+		<VendorId>SomeVendor</VendorId>
+		<VendorDescription>Some Description about Vendor</VendorDescription>
+	</AddIn>
+	<AddIn Type="Command">
+		<Name>BaiTap_Revit</Name>
+		<Text>Tinhkhoangcach2grid</Text>
+		<Assembly>C:\Users\Admin\source\repos\BaiTap_Revit\BaiTap_Revit\bin\Debug\BaiTap_Revit.dll</Assembly>
+		<AddInId>A2E05EA1-1D21-414D-A077-0A2E4A0F3D13</AddInId>
+		<FullClassName>BaiTap_Revit.P6.Tinhkhoangcach2grid</FullClassName>
+		<VendorId>SomeVendor</VendorId>
+		<VendorDescription>Some Description about Vendor</VendorDescription>
+	</AddIn>
+	<AddIn Type="Command">
+		<Name>BaiTap_Revit</Name>
+		<Text>CreateFilter_Wall</Text>
+		<Assembly>C:\Users\Admin\source\repos\BaiTap_Revit\BaiTap_Revit\bin\Debug\BaiTap_Revit.dll</Assembly>
+		<AddInId>4566E25C-7825-40C0-87CD-9EA3DD8918AC</AddInId>
+		<FullClassName>BaiTap_Revit.P4.CreateFilter</FullClassName>
+		<VendorId>SomeVendor</VendorId>
+		<VendorDescription>Some Description about Vendor</VendorDescription>
+	</AddIn>
+
+	<AddIn Type="Application">
+		<Name>BaiTap_Revit</Name>
+		<Text>My Plugin</Text>
+		<Assembly>C:\Users\Admin\source\repos\BaiTap_Revit\BaiTap_Revit\bin\Debug\BaiTap_Revit.dll</Assembly>
+		<AddInId>FC8D2EA5-E737-4484-B6D4-C1FB6E1C99F9</AddInId>
+		<FullClassName>BaiTap_Revit.P7.Application</FullClassName>
+		<VendorId>Phuocdzz</VendorId>
+		<VendorDescription>Some Description about Vendor</VendorDescription>
+	</AddIn>
+</RevitAddIns>
