@@ -11,7 +11,8 @@ namespace Bai1_OOP
         static List<Person> peopleList = new List<Person>();
         static void Init(string id, string name, int age, double income, double taxcoe)
         {
-            peopleList.Add(new Person { ID = id, Name = name, Age = age, Income = income, TaxCoe = taxcoe });
+            peopleList.Add(new Person(id, name, age, income, taxcoe));
+
         }
         static void Output()
         {
@@ -22,10 +23,13 @@ namespace Bai1_OOP
         }
         static void Main(string[] args)
         {
-            while (true)
+            Console.OutputEncoding = Encoding.UTF8;
+            Console.Write("Nhập số lượng người: ");
+            int a=int.Parse(Console.ReadLine());
+            Console.WriteLine();
+            for(int i=0;i<a;i++)
             {
                 string id = Console.ReadLine();
-                if (string.IsNullOrEmpty(id)) break;
                 string name = Console.ReadLine();
                 int age = int.Parse(Console.ReadLine());
                 double income = double.Parse(Console.ReadLine());

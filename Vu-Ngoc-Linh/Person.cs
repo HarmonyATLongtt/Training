@@ -10,37 +10,21 @@ namespace Bai1_OOP
 {
     public class Person
     {
-        private string Id;
-        private string name;
-        private int age;
-        private double income;
-        private double taxCoe;
+        private string _id;
+        public string ID { get; set; }
 
-        public string ID
-        {
-            get { return Id; }
-            set { Id = value; }
-        }
-        public string Name
-        {
-            set { name = value; }
-            get { return name; }
-        }
-        public int Age
-        {
-            get { return Age; }
-            set { age = value; }
-        }
-        public double Income
-        {
-            set { income = value; }
-            get{ return income;}
-        }
-        public double TaxCoe
-        {
-            set{ taxCoe = value; }
-            get { return taxCoe; }
-        }
+        private string _name;
+        public string Name{ get; set;}
+
+        private int _age;
+        public int Age { get; set; }
+
+        private double _income;
+        public double Income { get; set; }
+
+        private double _taxCoe;
+        public double TaxCoe {  get; set; }
+
         public bool Equals(Person a)
         {
             return ID == a.ID && Name == a.Name && Age == a.Age && Income == a.Income && TaxCoe == a.TaxCoe;
@@ -48,6 +32,14 @@ namespace Bai1_OOP
         public double GetTax()
         {
             return Income * TaxCoe;
+        }
+        public Person(string id, string name, int age, double income, double taxcoe)
+        {
+            ID = id;
+            Name = name;
+            Age = age;
+            Income = income;
+            TaxCoe = taxcoe;
         }
     }
 }
