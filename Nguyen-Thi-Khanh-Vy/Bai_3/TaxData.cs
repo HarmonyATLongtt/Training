@@ -1,13 +1,11 @@
 ﻿using Bai_3;
 using System;
-
+using OOP.Bai_3;
 namespace OOP.Bai_3
 {
-    public class TaxData
+    public class TaxData : Person1
     {
-        public int Age { get; set; }
-        public double Income { get; set; }
-
+        
         public double GetTaxCoe(int age, double income)
         {
             if (age < 18)

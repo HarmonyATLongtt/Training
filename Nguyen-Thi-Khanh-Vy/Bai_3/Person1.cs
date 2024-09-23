@@ -3,9 +3,9 @@ using System.Security.Claims;
 using Bai_3;
 using OOP.Bai_3;
 
-namespace Bai_3
+namespace OOP.Bai_3
 {
-    public class Person1 : IPerson
+    public class Person1 
     {
         protected string _id;
         protected string _name;
@@ -36,12 +36,12 @@ namespace Bai_3
             return input;
         }
 
-        public void Nhap()
+        public virtual void Nhap()
         {
             _id = GetInput("Nhap ID:");
             _name = GetInput("Nhap Ho ten: ");
 
-            while (true)
+            do
             {
                 string ageInput = GetInput("Nhap tuoi: ");
                 if (int.TryParse(ageInput, out int age) && age > 0)
@@ -50,10 +50,10 @@ namespace Bai_3
                     break;
                 }
                 Console.WriteLine("Tuoi khong hop le vui lpng nhap lai");
-            }
+            }while(true);
 
         }
-        public string GetInfo()
+        public virtual string GetInfo()
         {
             return $"ID: {_id}, Name: {_name}, Age: {_age} ";
         }

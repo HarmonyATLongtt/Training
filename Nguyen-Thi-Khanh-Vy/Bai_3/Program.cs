@@ -1,13 +1,14 @@
 ﻿using Bai_3;
+using OOP.Bai_3;
 
 
 namespace OOP.Bai_3
 {
-    class Program
+    public class Program : Person1
     {
-        static List<IPerson> Init(TaxData taxData)
+        public static List<Person1> Init(TaxData taxData)
         {
-            var p = new List<IPerson>();
+            var p = new List<Person1>();
 
             Console.WriteLine("Enter number of students, teachers, and employees:");
 
@@ -48,7 +49,7 @@ namespace OOP.Bai_3
         }
 
 
-        static void Output(List<IPerson> p)
+        public static void Output(List<Person1> p)
         {
             int studentCount = 0;
             int teacherCount = 0;
@@ -88,10 +89,10 @@ namespace OOP.Bai_3
             Console.WriteLine($"Tong nhan vien: {employeeCount}");
         }
 
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             TaxData taxData = new TaxData();
-            List<IPerson> p = Init(taxData);
+            List<Person1> p = Init(taxData);
             Output(p);
         }
     }
