@@ -10,8 +10,8 @@ namespace Bai_3
 {
     public class Student : Person1
     {
-        public string _class {  get; set; }
-        public string _school {  get; set; }
+        public string Class {  get; set; }
+        public string School {  get; set; }
 
         public Student(): base() { }
 
@@ -23,19 +23,19 @@ namespace Bai_3
             _id = id;
             _name = name;
             _age = age;
-            _school = school;
-            _class = @class;
+           School = school;
+            Class = @class;
         }
         public override void Nhap()
         {
             base.Nhap();
-            _school = GetInput("Nhap truong: ");
-            _class = GetInput("Nhap lop: ");
+           School = GetInput("Nhap truong: ");
+            Class = GetInput("Nhap lop: ");
         }
         public override string GetInfo()
         {
             var baseInfo = base.GetInfo();
-            return $"{baseInfo}, School: {_school}, Class: {_class}";
+            return $"{baseInfo}, School: {School}, Class: {Class}";
         }
     }
 }

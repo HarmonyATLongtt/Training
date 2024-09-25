@@ -40,17 +40,17 @@ namespace OOP.Bai_3
         {
             _id = GetInput("Nhap ID:");
             _name = GetInput("Nhap Ho ten: ");
-
+            bool isSuccess = false;
             do
             {
                 string ageInput = GetInput("Nhap tuoi: ");
-                if (int.TryParse(ageInput, out int age) && age > 0)
+                if (isSuccess = int.TryParse(ageInput, out int age) && age > 0)
                 {
                     _age = age;
                     break;
                 }
                 Console.WriteLine("Tuoi khong hop le vui lpng nhap lai");
-            }while(true);
+            }while(!isSuccess);
 
         }
         public virtual string GetInfo()

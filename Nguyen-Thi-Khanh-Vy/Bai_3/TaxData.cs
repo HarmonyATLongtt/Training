@@ -31,9 +31,8 @@ namespace OOP.Bai_3
                     return 0.2;
                 }
             }
-
-            // Đảm bảo phương thức luôn trả về giá trị
-            throw new ArgumentException("Invalid age or income value");
+            return 0.25;
+            
         }
     }
 }

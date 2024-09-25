@@ -11,9 +11,9 @@ namespace Bai_3
 {
     public class Teacher : Person1
     {
-        public double _income { get; set; }
-        public double _taxCoe {  get; set; }
-        public string _school {  get; set; }
+        public double Income { get; set; }
+        public double TaxCoe {  get; set; }
+        public string School {  get; set; }
         private TaxData taxData;
 
         public Teacher (string id, string name, int age): base(id, name, age)
@@ -25,35 +25,36 @@ namespace Bai_3
             _id = id;
             _name = name;
             _age = age;
-            _school = school;
-            _income = income;
+            School = school;
+            Income = income;
             this.taxData = taxData;
-            _taxCoe = taxData.GetTaxCoe(age, income);
+            TaxCoe = taxData.GetTaxCoe(age, income);
         }
         public double GetTax()
         {
-            return _income * _taxCoe;
+            return Income *TaxCoe;
         }
         public override string GetInfo()
         {
             var baseInfo = base.GetInfo();
-            return $"{baseInfo}, School: {_school}, Income: {_income:C}, Tax: {GetTax():C}";
+            return $"{baseInfo}, School: {School}, Income: {Income:C}, Tax: {GetTax():C}";
         }
         public override void Nhap()
         {
             base.Nhap();
-            _school = GetInput("Nhap truong: ");
+            School = GetInput("Nhap truong: ");
+            bool isCheck = false; 
             do
             {
                 string incomeInput = GetInput("Nhap Income: ");
-                if (double.TryParse(incomeInput, out double income) && income >= 0)
+                if (isCheck = double.TryParse(incomeInput, out double income) && income >= 0)
                 {
-                    _income = income;
+                    Income = income;
                     break;
                 }
                 Console.WriteLine("Income khong hop le vui long nhap lai!");
-            }while (true);
-            _taxCoe = taxData.GetTaxCoe(_age, _income);
+            }while (!isCheck);
+            TaxCoe = taxData.GetTaxCoe(_age, Income);
 
         }
     }
