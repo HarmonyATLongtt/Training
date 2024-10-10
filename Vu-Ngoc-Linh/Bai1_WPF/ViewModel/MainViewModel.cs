@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -21,6 +22,26 @@ namespace Bai1_WPF.ViewModel
 
         public event PropertyChangedEventHandler PropertyChanged;
         public ICommand ImportData {  get; set; }
+        private DataTable _data;
+        private string _filePath;
+        public string FilePath
+        {
+            get { return _filePath; }
+            set
+            {
+                _filePath = value;
+                OnPropertyChanged();
+            }
+        }
+        public DataTable Data
+        {
+            get { return _data; }
+            set
+            {
+                _data = value;
+                OnPropertyChanged();
+            }
+        }
         public MainViewModel()
         {
             ImportData = new RelayCommand(ImportFile, CanImportFile);
@@ -34,40 +55,36 @@ namespace Bai1_WPF.ViewModel
         {
             string filePath = "";
             OpenFileDialog dialog = new OpenFileDialog();
-            dialog.Filter = "Excel | *.xlsx | Excel 2003 | *.xls";
+
+            dialog.Filter = "Excel files (*.xlsx)|*.xlsx|Text files (*.txt)|*.txt|All files (*.*)|*.*";
             if (dialog.ShowDialog() == true)
             {
                 filePath = dialog.FileName;
             }
             if (string.IsNullOrEmpty(filePath))
             {
-                MessageBox.Show("Invalid!");
+                MessageBox.Show("Invalid file.");
+                return;
             }
-            var package = new ExcelPackage(new FileInfo(filePath));
-            foreach(var workSheet in package.Workbook.Worksheets)
+            FilePath = filePath;
+            DataTable dt = new DataTable();
+            FileInfo fileInfo = new FileInfo(filePath);
+            using (ExcelPackage package = new ExcelPackage(fileInfo))
             {
-                DataTable dt = new DataTable();
-                bool hasHeader = true;
-                int startRow = hasHeader ? 2 : 1;
+                ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial; 
 
-                foreach (var cell in workSheet.Cells[1, 1, 1, workSheet.Dimension.End.Column])
-                {
-                    dt.Columns.Add(hasHeader ? cell.Text : $"Column {cell.Start.Column}");
-                }
+                ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
+                dt = worksheet.Cells[worksheet.Dimension.Start.Row, worksheet.Dimension.Start.Column,
+                                    worksheet.Dimension.End.Row, worksheet.Dimension.End.Column].ToDataTable();
 
-                for (int rowNum = startRow; rowNum <= workSheet.Dimension.End.Row; rowNum++)
-                {
-                    var row = dt.NewRow();
-                    int colIndex = 0;
-                    foreach (var cell in workSheet.Cells[rowNum, 1, rowNum, workSheet.Dimension.End.Column])
-                    {
-                        row[colIndex++] = cell.Text;
-                    }
-                    dt.Rows.Add(row);
-                }
             }
+            Data = dt;
         }
         public ICommand ExportData { get; set; }
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
 
     }
 }
