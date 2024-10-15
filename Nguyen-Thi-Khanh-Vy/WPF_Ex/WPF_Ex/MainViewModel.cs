@@ -6,7 +6,7 @@ using System.IO;
 using Microsoft.Win32;
 using OfficeOpenXml;
 using System.Windows.Input;
-using WPF_Ex;
+
 using LicenseContext = OfficeOpenXml.LicenseContext;
 using System.Windows;
 
@@ -19,6 +19,16 @@ namespace WPF_Ex
         private List<string> _sheetNames;
         private string _selectedSheet;
         private Dictionary<string, DataTable> _sheetData;
+        private string _fileName;
+        public string FileName
+        {
+            get { return _fileName; }
+            set
+            {
+                _fileName = value;
+                OnPropertyChanged(nameof(FileName));
+            }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -78,14 +88,17 @@ namespace WPF_Ex
 
         private void LoadExcelFile(object parameter)
         {
+
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
                 Filter = "Excel Files|*.xlsx;*.xls"
+
             };
 
             if (openFileDialog.ShowDialog() == true)
             {
                 _excelFilePath = openFileDialog.FileName;
+                FileName = openFileDialog.FileName;
                 _sheetData.Clear();
 
                 using (var package = new ExcelPackage(new FileInfo(_excelFilePath)))

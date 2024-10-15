@@ -21,8 +21,13 @@ namespace WPF_Ex
             this.DataContext = new MainViewModel();
             InitializeComponent();
         }
-        
 
-
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape) // Kiểm tra nếu phím ESC được nhấn
+            {
+                this.Close(); // Đóng cửa sổ
+            }
+        }
     }
 }
