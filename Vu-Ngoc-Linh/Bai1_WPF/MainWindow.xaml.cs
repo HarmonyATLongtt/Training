@@ -25,8 +25,26 @@ namespace Bai1_WPF
             InitializeComponent();
             MainViewModel mainViewModel = new MainViewModel();
             this.DataContext = mainViewModel;
+
         }
         private void btnImport_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                Close();
+            }
+
+            else if (e.Key == Key.F5)
+            {
+
+            }
+        }
+
+        private void dtgData_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
 

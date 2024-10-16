@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:Bai1_WPF"
         mc:Ignorable="d"
         Title="Bài 1" Height="450" Width="650"
+        PreviewKeyDown="Window_PreviewKeyDown"
         WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>
@@ -25,7 +26,8 @@
             <Label x:Name="lblType"  Content="Select type" HorizontalAlignment="Left" 
                Margin="30,10,0,0" VerticalAlignment="Center" 
                BorderBrush="LightGray" Foreground="Black" FontSize="13"/>
-            <ComboBox Width="200" Height="25" Margin="120,10,311,0" SelectedIndex="0">
+            <ComboBox ItemsSource="{Binding SheetNames}" SelectedItem="{Binding SelectedSheet}"
+                      Name="cbxSelect" Width="200" Height="25" Margin="120,10,311,0" SelectedIndex="0">
                 <ComboBoxItem Content="Student"/>
                 <ComboBoxItem Content="Teacher"/>
                 <ComboBoxItem Content="Employee"/>
@@ -36,7 +38,7 @@
             <Button Content="Import" Command="{Binding ImportData}" Height="25" Width="70" Margin="510,10,0,5"/>
         </Grid>
         <Grid Grid.Row="2" >
-            <DataGrid Margin="25,10,25,10" Height="280" AutoGenerateColumns="True" ItemsSource="{Binding Data}">
+            <DataGrid Name="dtgData" Margin="25,10,25,10" Height="280" AutoGenerateColumns="True"  ItemsSource="{Binding Data}" SelectionChanged="dtgData_SelectionChanged">
                 <!--DataGrid.ColumnHeaderStyle>
                     <Style TargetType="DataGridColumnHeader">
                         <Setter Property="HorizontalContentAlignment" Value="Center"/>
@@ -53,7 +55,8 @@
             </DataGrid>
         </Grid>
         <Grid Grid.Row="3">
-            <Button Content="Export" Height="25" Width="70" Margin="510,0,0,5"/>
+            <Button Name="btnExport" Command="{Binding ExportData}" Content="Export" Height="25" Width="70" Margin="510,0,0,5"/>
+            <Button Name="btnEdit" Content="Edit" Height="25" Width="70" Margin="30,0,550,5"/>
         </Grid>
 
     </Grid>
