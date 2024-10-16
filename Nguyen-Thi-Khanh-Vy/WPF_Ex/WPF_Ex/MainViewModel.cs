@@ -6,9 +6,9 @@ using System.IO;
 using Microsoft.Win32;
 using OfficeOpenXml;
 using System.Windows.Input;
-
 using LicenseContext = OfficeOpenXml.LicenseContext;
 using System.Windows;
+using System.Collections.ObjectModel;
 
 namespace WPF_Ex
 {
@@ -16,9 +16,9 @@ namespace WPF_Ex
     {
         private string _excelFilePath;
         private DataTable _displayedData;
-        private List<string> _sheetNames;
-        private string _selectedSheet;
-        private Dictionary<string, DataTable> _sheetData;
+        
+        //private string _selectedSheet;
+        private Dictionary<string, DataTable> _sheetData; //lưu trữ dữ liệu từ các sheet
         private string _fileName;
         public string FileName
         {
@@ -34,7 +34,7 @@ namespace WPF_Ex
 
         public MainViewModel()
         {
-            _sheetNames = new List<string>();
+            _sheetNames = new ObservableCollection<string>();
             _sheetData = new Dictionary<string, DataTable>();
             LoadCommand = new RelayCommand(LoadExcelFile);
             ExportCommand = new RelayCommand(ExportToExcel);
@@ -43,7 +43,8 @@ namespace WPF_Ex
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
         }
 
-        public List<string> SheetNames
+        private ObservableCollection<string> _sheetNames;
+        public ObservableCollection<string> SheetNames
         {
             get { return _sheetNames; }
             set
@@ -52,7 +53,7 @@ namespace WPF_Ex
                 OnPropertyChanged(nameof(SheetNames));
             }
         }
-
+        private string _selectedSheet;
         public string SelectedSheet
         {
             get { return _selectedSheet; }
@@ -63,10 +64,11 @@ namespace WPF_Ex
                     SaveCurrentSheetData();
                     _selectedSheet = value;
                     OnPropertyChanged(nameof(SelectedSheet));
-                    LoadSheetData(_selectedSheet);
+                    LoadSheetData(_selectedSheet);  // Load dữ liệu của sheet đã chọn
                 }
             }
         }
+
 
         public DataTable DisplayedData
         {
@@ -103,7 +105,7 @@ namespace WPF_Ex
 
                 using (var package = new ExcelPackage(new FileInfo(_excelFilePath)))
                 {
-                    SheetNames = new List<string>();
+                    SheetNames = new ObservableCollection<string>();
                     foreach (var worksheet in package.Workbook.Worksheets)
                     {
                         SheetNames.Add(worksheet.Name);
@@ -122,27 +124,51 @@ namespace WPF_Ex
         private DataTable LoadWorksheetToDataTable(ExcelWorksheet worksheet)
         {
             var dataTable = new DataTable();
-            bool hasHeader = true;
-            int startRow = hasHeader ? 2 : 1;
+            bool hasHeader = true;  // Giả định là có header
 
-            foreach (var cell in worksheet.Cells[1, 1, 1, worksheet.Dimension.End.Column])
+            try
             {
-                dataTable.Columns.Add(hasHeader ? cell.Text : $"Column {cell.Start.Column}");
-            }
+                // Lấy số lượng hàng và cột từ sheet
+                int totalRows = worksheet.Dimension.End.Row;
+                int totalCols = worksheet.Dimension.End.Column;
 
-            for (int rowNum = startRow; rowNum <= worksheet.Dimension.End.Row; rowNum++)
-            {
-                var row = dataTable.NewRow();
-                int colIndex = 0;
-                foreach (var cell in worksheet.Cells[rowNum, 1, rowNum, worksheet.Dimension.End.Column])
+                // Thêm các cột vào DataTable dựa trên hàng đầu tiên (header)
+                for (int col = 1; col <= totalCols; col++)
                 {
-                    row[colIndex++] = cell.Text;
+                    var columnName = hasHeader ? worksheet.Cells[1, col].Text : $"Column {col}";
+                    if (string.IsNullOrWhiteSpace(columnName))
+                    {
+                        columnName = $"Column {col}";
+                    }
+                    dataTable.Columns.Add(columnName);
                 }
-                dataTable.Rows.Add(row);
+
+               
+                int startRow = hasHeader ? 2 : 1;
+
+                // Lấy toàn bộ bảng dữ liệu từ sheet và thêm vào DataTable
+                var dataRange = worksheet.Cells[startRow, 1, totalRows, totalCols];
+
+                
+                for (int rowNum = startRow; rowNum <= totalRows; rowNum++)
+                {
+                    var newRow = dataTable.NewRow();
+                    for (int col = 0; col < totalCols; col++)
+                    {
+                        newRow[col] = worksheet.Cells[rowNum, col + 1].Text;  
+                    }
+                    dataTable.Rows.Add(newRow);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error reading Excel data: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
             return dataTable;
         }
+
 
         private void LoadSheetData(string sheetName)
         {
