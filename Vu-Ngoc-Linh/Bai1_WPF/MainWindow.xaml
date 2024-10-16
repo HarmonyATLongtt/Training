@@ -26,11 +26,9 @@
             <Label x:Name="lblType"  Content="Select type" HorizontalAlignment="Left" 
                Margin="30,10,0,0" VerticalAlignment="Center" 
                BorderBrush="LightGray" Foreground="Black" FontSize="13"/>
-            <ComboBox ItemsSource="{Binding SheetNames}" SelectedItem="{Binding SelectedSheet}"
-                      Name="cbxSelect" Width="200" Height="25" Margin="120,10,311,0" SelectedIndex="0">
-                <ComboBoxItem Content="Student"/>
-                <ComboBoxItem Content="Teacher"/>
-                <ComboBoxItem Content="Employee"/>
+            <ComboBox Name="cbxSelect" Width="200" Height="25" Margin="120,10,311,0" SelectedIndex="0"
+                      ItemsSource="{Binding SheetNames}" SelectedItem="{Binding SelectedSheet}">
+
             </ComboBox>
         </Grid>
         <Grid Grid.Row="1" >

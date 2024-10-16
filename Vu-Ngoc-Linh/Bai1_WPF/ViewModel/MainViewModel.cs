@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
 using System.IO;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using Bai1_WPF.Command;
+using Bai1_WPF.Model;
 using Microsoft.Win32;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
@@ -20,10 +22,75 @@ namespace Bai1_WPF.ViewModel
 {
     public class MainViewModel : INotifyPropertyChanged
     {
+        public ICommand ImportData { get; set; }
+        public ICommand ExportData { get; set; }
+
+        private ObservableCollection<string> _sheetNames;
+        public ObservableCollection<string> SheetNames
+        {
+            get { return _sheetNames; }
+            set
+            {
+                _sheetNames = value;
+                OnPropertyChanged(nameof(SheetNames));
+            }
+        }
+        private string _selectedSheet;
+        public string SelectedSheet
+        {
+            get { return _selectedSheet; }
+            set
+            {
+                if (_selectedSheet != value)
+                {
+                    //if (Data != null) Data.Clear();
+                    _selectedSheet = value;
+                    OnPropertyChanged(nameof(SelectedSheet));
+                    Upload(_selectedSheet);
+                }
+            }
+        }
+
+        private void Upload(string selectedSheet)
+        {
+            if (selectedSheet == "Student")
+            {
+                Data = Student;
+            }
+            else if (selectedSheet == "Teacher")
+            {
+                Data = Teacher;
+            }
+            else if (selectedSheet == "Employee")
+            {
+                Data = Employee;
+            }
+            else
+            {
+                Data = new DataTable(); 
+            }
+        }
+
+
+        public MainViewModel()
+        {
+            _sheetNames = new ObservableCollection<string>();
+            ImportData = new RelayCommand(ImportFile, CanImportFile);
+            ExportData = new RelayCommand(ExportFile, CanExportFile);
+
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
-        public ICommand ImportData { get; set; }
         private DataTable _data;
+        public DataTable Data
+        {
+            get { return _data; }
+            set
+            {
+                _data = value;
+                OnPropertyChanged();
+            }
+        }
         private string _filePath;
         public string FilePath
         {
@@ -34,22 +101,59 @@ namespace Bai1_WPF.ViewModel
                 OnPropertyChanged();
             }
         }
-        public DataTable Data
+
+        private bool CanImportFile(object obj)
         {
-            get { return _data; }
-            set
+            return true;
+        }
+        public DataTable Student, Teacher, Employee;
+        private void ImportFile(object obj)
+        {
+            string filePath = "";
+            OpenFileDialog dialog = new OpenFileDialog();
+
+            dialog.Filter = "Excel files (*.xlsx)|*.xlsx|Text files (*.txt)|*.txt|All files (*.*)|*.*";
+            if (dialog.ShowDialog() == true)
             {
-                _data = value;
-                OnPropertyChanged();
+                filePath = dialog.FileName;
+            }
+            if (string.IsNullOrEmpty(filePath))
+            {
+                MessageBox.Show("Invalid file.");
+                return;
+            }
+            FilePath = filePath;
+            DataTable dt = new DataTable();
+            FileInfo fileInfo = new FileInfo(filePath);
+            using (ExcelPackage package = new ExcelPackage(fileInfo))
+            {
+                ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+                SheetNames.Clear();
+                foreach ( ExcelWorksheet worksheet in package.Workbook.Worksheets)
+                {
+                    SheetNames.Add(worksheet.Name);
+                    dt = worksheet.Cells[worksheet.Dimension.Start.Row, worksheet.Dimension.Start.Column,
+                                    worksheet.Dimension.End.Row, worksheet.Dimension.End.Column].ToDataTable();
+                    if(worksheet.Name == "Student")
+                    {
+                        Student = dt;
+                    }
+                    else if(worksheet.Name == "Teacher")
+                    {
+                        Teacher = dt;
+                    }
+                    else
+                    {
+                        Employee = dt;
+                    }
+                }
+                if (SheetNames.Any())
+                {
+                    SelectedSheet = SheetNames.First();
+                }
+
             }
         }
-        public MainViewModel()
-        {
-            ImportData = new RelayCommand(ImportFile, CanImportFile);
-            ExportData = new RelayCommand(ExportFile, CanExportFile);
-
-        }
-
         private void ExportFile(object obj)
         {
             string filePath = "";
@@ -96,41 +200,6 @@ namespace Bai1_WPF.ViewModel
             //return Data != null;
             return true;
         }
-
-        private bool CanImportFile(object obj)
-        {
-            return true;
-        }
-        private void ImportFile(object obj)
-        {
-            string filePath = "";
-            OpenFileDialog dialog = new OpenFileDialog();
-
-            dialog.Filter = "Excel files (*.xlsx)|*.xlsx|Text files (*.txt)|*.txt|All files (*.*)|*.*";
-            if (dialog.ShowDialog() == true)
-            {
-                filePath = dialog.FileName;
-            }
-            if (string.IsNullOrEmpty(filePath))
-            {
-                MessageBox.Show("Invalid file.");
-                return;
-            }
-            FilePath = filePath;
-            DataTable dt = new DataTable();
-            FileInfo fileInfo = new FileInfo(filePath);
-            using (ExcelPackage package = new ExcelPackage(fileInfo))
-            {
-                ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
-
-                ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
-                dt = worksheet.Cells[worksheet.Dimension.Start.Row, worksheet.Dimension.Start.Column,
-                                    worksheet.Dimension.End.Row, worksheet.Dimension.End.Column].ToDataTable();
-
-            }
-            Data = dt;
-        }
-        public ICommand ExportData { get; set; }
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
