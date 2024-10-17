@@ -41,7 +41,7 @@ namespace Bai1_WPF.ViewModel
             get { return _selectedSheet; }
             set
             {
-                if (_selectedSheet != value)
+                //if (_selectedSheet != value)
                 {
                     //if (Data != null) Data.Clear();
                     _selectedSheet = value;
@@ -50,24 +50,15 @@ namespace Bai1_WPF.ViewModel
                 }
             }
         }
-
+        public Dictionary<string, DataTable> tables = new Dictionary<string, DataTable>();
         private void Upload(string selectedSheet)
         {
-            if (selectedSheet == "Student")
+            foreach(string sheetname in tables.Keys)
             {
-                Data = Student;
-            }
-            else if (selectedSheet == "Teacher")
-            {
-                Data = Teacher;
-            }
-            else if (selectedSheet == "Employee")
-            {
-                Data = Employee;
-            }
-            else
-            {
-                Data = new DataTable(); 
+                if(sheetname == selectedSheet)
+                {
+                    Data = tables.GetValueOrDefault(sheetname);
+                }
             }
         }
 
@@ -134,18 +125,7 @@ namespace Bai1_WPF.ViewModel
                     SheetNames.Add(worksheet.Name);
                     dt = worksheet.Cells[worksheet.Dimension.Start.Row, worksheet.Dimension.Start.Column,
                                     worksheet.Dimension.End.Row, worksheet.Dimension.End.Column].ToDataTable();
-                    if(worksheet.Name == "Student")
-                    {
-                        Student = dt;
-                    }
-                    else if(worksheet.Name == "Teacher")
-                    {
-                        Teacher = dt;
-                    }
-                    else
-                    {
-                        Employee = dt;
-                    }
+                    tables.Add(worksheet.Name, dt);
                 }
                 if (SheetNames.Any())
                 {
@@ -156,7 +136,6 @@ namespace Bai1_WPF.ViewModel
         }
         private void ExportFile(object obj)
         {
-            string filePath = "";
             SaveFileDialog saveDialog = new SaveFileDialog();
             saveDialog.Filter = "Excel files (*.xlsx)|*.xlsx|Text files (*.txt)|*.txt|All files (*.*)|*.*";
             saveDialog.FileName = "";
@@ -197,8 +176,8 @@ namespace Bai1_WPF.ViewModel
 
         private bool CanExportFile(object obj)
         {
-            //return Data != null;
             return true;
+            //return SheetNames.Any();
         }
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {

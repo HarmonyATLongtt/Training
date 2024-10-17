@@ -32,11 +32,12 @@
             </ComboBox>
         </Grid>
         <Grid Grid.Row="1" >
-            <TextBlock Height="25" Width="450" Margin="30,10,170,5" Background="LightGray" Text="{Binding FilePath}"/>
+            <TextBlock Height="25" Width="450" Margin="30,10,170,5" Background="LightGray" Text="{Binding FilePath}" />
             <Button Content="Import" Command="{Binding ImportData}" Height="25" Width="70" Margin="510,10,0,5"/>
         </Grid>
         <Grid Grid.Row="2" >
-            <DataGrid Name="dtgData" Margin="25,10,25,10" Height="280" AutoGenerateColumns="True"  ItemsSource="{Binding Data}" SelectionChanged="dtgData_SelectionChanged">
+            <DataGrid Name="dtgData" Margin="25,10,25,10" Height="280" AutoGenerateColumns="True"  ItemsSource="{Binding Data}" 
+                      SelectionChanged="dtgData_SelectionChanged" >
                 <!--DataGrid.ColumnHeaderStyle>
                     <Style TargetType="DataGridColumnHeader">
                         <Setter Property="HorizontalContentAlignment" Value="Center"/>
@@ -53,7 +54,7 @@
             </DataGrid>
         </Grid>
         <Grid Grid.Row="3">
-            <Button Name="btnExport" Command="{Binding ExportData}" Content="Export" Height="25" Width="70" Margin="510,0,0,5"/>
+            <Button Name="btnExport" Command="{Binding ExportData}"  Content="Export" Height="25" Width="70" Margin="510,0,0,5"/>
             <Button Name="btnEdit" Content="Edit" Height="25" Width="70" Margin="30,0,550,5"/>
         </Grid>
 
