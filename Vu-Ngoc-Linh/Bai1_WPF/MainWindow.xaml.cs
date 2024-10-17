@@ -37,11 +37,6 @@ namespace Bai1_WPF
             {
                 Close();
             }
-
-            else if (e.Key == Key.F5)
-            {
-
-            }
         }
 
         private void dtgData_SelectionChanged(object sender, SelectionChangedEventArgs e)
