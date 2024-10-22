@@ -10,6 +10,7 @@
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <Style TargetType="Button">
+<<<<<<< HEAD
             <Setter Property="Width" Value="95"/>
             <Setter Property="Height" Value="25"/>
             <Setter Property="Margin" Value="10,5"/>
@@ -63,13 +64,59 @@
 
         </Button>
 
+=======
+            <Setter Property="Width" Value="80" />
+            <Setter Property="Height" Value="25" />
+            <Setter Property="Margin" Value="5" />
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="35" />
+            <RowDefinition Height="35" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="35" />
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="120" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="100" />
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Row="0" Grid.Column="0" x:Name="lblType"  Content="Select type" HorizontalAlignment="Left"
+               Margin="30,10,0,0" VerticalAlignment="Center"
+               BorderBrush="LightGray" Foreground="Black" FontSize="13" />
+        <ComboBox Grid.Row="0" Grid.Column="1" Name="cbxSelect" Height="25" Width="200" Margin="5"
+                  SelectedIndex="0" HorizontalAlignment="Left"
+                      ItemsSource="{Binding SheetNames}" SelectedItem="{Binding SelectedSheet}">
+        </ComboBox>
+
+        <Label Grid.Row="1" Grid.Column="0" Content="File path" />
+        <TextBlock Grid.Row="1" Grid.Column="1" Height="25" Width="450" Margin="5" Background="LightGray" Text="{Binding FilePath}" />
+        <Button Grid.Row="1" Grid.Column="2" Content="Import" Command="{Binding ImportData}" />
+
+        <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3">
+            <DataGrid Name="dtgData" Margin="5" Height="280" AutoGenerateColumns="True"  ItemsSource="{Binding Data}"
+                      SelectionChanged="dtgData_SelectionChanged">
+                <!--DataGrid.ColumnHeaderStyle>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                    </Style>
+                </DataGrid.ColumnHeaderStyle>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ID" Width="50" />
+                    <DataGridTextColumn Header="Name" Width="150" />
+                    <DataGridTextColumn Header="Age" Width="50" />
+                    <DataGridTextColumn Header="Address" Width="150" />
+                    <DataGridTextColumn Header="Income" Width="100" />
+                    <DataGridTextColumn Header="Tax Coe" Width="100" />
+                </DataGrid.Columns-->
+            </DataGrid>
+        </Grid>
+        <Button Grid.Row="3" Grid.Column="2" Name="btnExport" Command="{Binding ExportData}"  Content="Export" />
+        <Button Grid.Row="3" Grid.Column="0" Name="btnEdit" Content="Edit" />
+>>>>>>> e5d2876c7c9a761b7ce1717befce8c2a9bf03d93
     </Grid>
 </Window>
-
-
-
-
-
-
-
-

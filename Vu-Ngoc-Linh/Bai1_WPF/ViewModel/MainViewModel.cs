@@ -21,16 +21,78 @@ namespace Bai1_WPF.ViewModel
 {
     public class MainViewModel : INotifyPropertyChanged
     {
+<<<<<<< HEAD
         public event PropertyChangedEventHandler PropertyChanged;
+=======
+        public MainModel Model { get; private set; }
+
+        public string FilePath_2
+        {
+            get => Model.FilePath;
+            set
+            {
+                Model.FilePath = value;
+                OnPropertyChanged();
+            }
+        }
+
+>>>>>>> e5d2876c7c9a761b7ce1717befce8c2a9bf03d93
         public ICommand ImportData { get; set; }
         public ICommand ExportData { get; set; }
 
         private DataTable _data;
         private string _filePath;
         private ObservableCollection<string> _sheetNames;
+<<<<<<< HEAD
         private string _selectedSheet;
         private ObservableCollection<DataTable> Tables { get; set; }
         public MainModel Model { get; private set; }
+=======
+
+        public ObservableCollection<string> SheetNames
+        {
+            get { return _sheetNames; }
+            set
+            {
+                _sheetNames = value;
+                OnPropertyChanged(nameof(SheetNames));
+            }
+        }
+
+        private string _selectedSheet;
+
+        public string SelectedSheet
+        {
+            get { return _selectedSheet; }
+            set
+            {
+                //if (_selectedSheet != value)
+                {
+                    //if (Data != null) Data.Clear();
+                    _selectedSheet = value;
+                    OnPropertyChanged(nameof(SelectedSheet));
+                    Upload(_selectedSheet);
+                }
+            }
+        }
+
+        public ObservableCollection<DataTable> Tables { get; set; }
+        public DataTable SelectedTable { get; set; }
+
+        public Dictionary<string, DataTable> tables = new Dictionary<string, DataTable>();
+
+        private void Upload(string selectedSheet)
+        {
+            foreach (string sheetname in tables.Keys)
+            {
+                if (sheetname == selectedSheet)
+                {
+                    Data = tables.GetValueOrDefault(sheetname);
+                }
+            }
+        }
+
+>>>>>>> e5d2876c7c9a761b7ce1717befce8c2a9bf03d93
         public MainViewModel()
         {
             _sheetNames = new ObservableCollection<string>();
@@ -39,10 +101,16 @@ namespace Bai1_WPF.ViewModel
             ExportData = new RelayCommand(ExportFile, CanExportFile);
         }
 
+<<<<<<< HEAD
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+=======
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private DataTable _data;
+>>>>>>> e5d2876c7c9a761b7ce1717befce8c2a9bf03d93
 
         public DataTable Data
         {
@@ -54,6 +122,11 @@ namespace Bai1_WPF.ViewModel
             }
         }
 
+<<<<<<< HEAD
+=======
+        private string _filePath;
+
+>>>>>>> e5d2876c7c9a761b7ce1717befce8c2a9bf03d93
         public string FilePath
         {
             get { return _filePath; }
@@ -102,6 +175,11 @@ namespace Bai1_WPF.ViewModel
             return true;
         }
 
+<<<<<<< HEAD
+=======
+        //public DataTable Student, Teacher, Employee;
+
+>>>>>>> e5d2876c7c9a761b7ce1717befce8c2a9bf03d93
         private void ImportFile(object obj)
         {
             string filePath = "";
@@ -123,7 +201,10 @@ namespace Bai1_WPF.ViewModel
             {
                 ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
                 SheetNames.Clear();
+<<<<<<< HEAD
                 Tables.Clear(); 
+=======
+>>>>>>> e5d2876c7c9a761b7ce1717befce8c2a9bf03d93
                 foreach (ExcelWorksheet worksheet in package.Workbook.Worksheets)
                 {
                     DataTable dt = new DataTable();
@@ -135,6 +216,10 @@ namespace Bai1_WPF.ViewModel
                     SheetNames.Add(dt.TableName);
                 }
                 SelectedSheet = SheetNames.FirstOrDefault();
+<<<<<<< HEAD
+=======
+
+>>>>>>> e5d2876c7c9a761b7ce1717befce8c2a9bf03d93
             }
         }
 
@@ -164,5 +249,13 @@ namespace Bai1_WPF.ViewModel
         {
             return true;
         }
+<<<<<<< HEAD
+=======
+
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+>>>>>>> e5d2876c7c9a761b7ce1717befce8c2a9bf03d93
     }
 }
