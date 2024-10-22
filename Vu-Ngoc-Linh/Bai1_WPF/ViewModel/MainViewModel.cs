@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -22,57 +21,29 @@ namespace Bai1_WPF.ViewModel
 {
     public class MainViewModel : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
         public ICommand ImportData { get; set; }
         public ICommand ExportData { get; set; }
 
+        private DataTable _data;
+        private string _filePath;
         private ObservableCollection<string> _sheetNames;
-        public ObservableCollection<string> SheetNames
-        {
-            get { return _sheetNames; }
-            set
-            {
-                _sheetNames = value;
-                OnPropertyChanged(nameof(SheetNames));
-            }
-        }
         private string _selectedSheet;
-        public string SelectedSheet
-        {
-            get { return _selectedSheet; }
-            set
-            {
-                //if (_selectedSheet != value)
-                {
-                    //if (Data != null) Data.Clear();
-                    _selectedSheet = value;
-                    OnPropertyChanged(nameof(SelectedSheet));
-                    Upload(_selectedSheet);
-                }
-            }
-        }
-        public Dictionary<string, DataTable> tables = new Dictionary<string, DataTable>();
-        private void Upload(string selectedSheet)
-        {
-            foreach(string sheetname in tables.Keys)
-            {
-                if(sheetname == selectedSheet)
-                {
-                    Data = tables.GetValueOrDefault(sheetname);
-                }
-            }
-        }
-
-
+        private ObservableCollection<DataTable> Tables { get; set; }
+        public MainModel Model { get; private set; }
         public MainViewModel()
         {
             _sheetNames = new ObservableCollection<string>();
+            Tables = new ObservableCollection<DataTable>();
             ImportData = new RelayCommand(ImportFile, CanImportFile);
             ExportData = new RelayCommand(ExportFile, CanExportFile);
-
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        private DataTable _data;
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
         public DataTable Data
         {
             get { return _data; }
@@ -82,7 +53,7 @@ namespace Bai1_WPF.ViewModel
                 OnPropertyChanged();
             }
         }
-        private string _filePath;
+
         public string FilePath
         {
             get { return _filePath; }
@@ -93,11 +64,44 @@ namespace Bai1_WPF.ViewModel
             }
         }
 
+        public ObservableCollection<string> SheetNames
+        {
+            get { return _sheetNames; }
+            set
+            {
+                _sheetNames = value;
+                OnPropertyChanged(nameof(SheetNames));
+            }
+        }
+
+        public string SelectedSheet
+        {
+            get { return _selectedSheet; }
+            set
+            {
+                _selectedSheet = value;
+                OnPropertyChanged(nameof(SelectedSheet));
+                Upload(_selectedSheet);
+            }
+        }
+
+        private void Upload(string selectedSheet)
+        {
+            foreach (DataTable dt in Tables)
+            {
+                if (dt.TableName == selectedSheet)
+                {
+                    Data = dt;
+                    break;
+                }
+            }
+        }
+
         private bool CanImportFile(object obj)
         {
             return true;
         }
-        public DataTable Student, Teacher, Employee;
+
         private void ImportFile(object obj)
         {
             string filePath = "";
@@ -114,26 +118,26 @@ namespace Bai1_WPF.ViewModel
                 return;
             }
             FilePath = filePath;
-            DataTable dt = new DataTable();
             FileInfo fileInfo = new FileInfo(filePath);
             using (ExcelPackage package = new ExcelPackage(fileInfo))
             {
                 ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
                 SheetNames.Clear();
-                foreach ( ExcelWorksheet worksheet in package.Workbook.Worksheets)
+                Tables.Clear(); 
+                foreach (ExcelWorksheet worksheet in package.Workbook.Worksheets)
                 {
-                    SheetNames.Add(worksheet.Name);
+                    DataTable dt = new DataTable();
+                    //dt.TableName = worksheet.Name; ??
                     dt = worksheet.Cells[worksheet.Dimension.Start.Row, worksheet.Dimension.Start.Column,
                                     worksheet.Dimension.End.Row, worksheet.Dimension.End.Column].ToDataTable();
-                    tables.Add(worksheet.Name, dt);
+                    dt.TableName = worksheet.Name;
+                    Tables.Add(dt);
+                    SheetNames.Add(dt.TableName);
                 }
-                if (SheetNames.Any())
-                {
-                    SelectedSheet = SheetNames.First();
-                }
-
+                SelectedSheet = SheetNames.FirstOrDefault();
             }
         }
+
         private void ExportFile(object obj)
         {
             SaveFileDialog saveDialog = new SaveFileDialog();
@@ -142,47 +146,23 @@ namespace Bai1_WPF.ViewModel
             if (saveDialog.ShowDialog() == true)
             {
                 FileInfo fileInfo = new FileInfo(saveDialog.FileName);
-
-                using (ExcelPackage package = new ExcelPackage(fileInfo))
+                using (ExcelPackage pkg = new ExcelPackage(fileInfo))
                 {
-                    ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
-
-                    ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("ExportData");
-
-                    int startRow = 1;
-                    int startCol = 1;
-
-                    for (int col = 0; col < Data.Columns.Count; col++)
+                    foreach (DataTable dt in Tables)
                     {
-                        worksheet.Cells[startRow, startCol + col].Value = Data.Columns[col].ColumnName;
+                        ExcelWorksheet ws = pkg.Workbook.Worksheets.Add(dt.TableName);
+                        ws.Cells["A1"].LoadFromDataTable(dt, true);
                     }
-
-                    for (int row = 0; row < Data.Rows.Count; row++)
-                    {
-                        for (int col = 0; col < Data.Columns.Count; col++)
-                        {
-                            worksheet.Cells[startRow + row + 1, startCol + col].Value = Data.Rows[row][col];
-                        }
-                    }
-
-                    package.Save();
-                    MessageBox.Show("Export successfully.");
+                    pkg.Save();
+                    MessageBox.Show("Export successfully!");
                     return;
                 }
-
             }
-
         }
 
         private bool CanExportFile(object obj)
         {
             return true;
-            //return SheetNames.Any();
         }
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
     }
 }
