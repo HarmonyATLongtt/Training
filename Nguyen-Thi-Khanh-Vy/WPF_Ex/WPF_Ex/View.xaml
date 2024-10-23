@@ -28,7 +28,7 @@
                    VerticalContentAlignment="Center"
                    Margin="20,0,0,0" />
 
-            <TextBox Grid.Column="1" Height="40" Margin="50,0,350,0"
+            <TextBox Grid.Column="1" Height="40" Margin="50,0,20,0"
                      Text="{Binding FileName}"
                      IsReadOnly="True"
                      FontSize="14" Padding="5"

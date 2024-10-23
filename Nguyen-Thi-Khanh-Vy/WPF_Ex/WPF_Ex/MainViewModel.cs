@@ -9,33 +9,19 @@ using System.Windows.Input;
 using LicenseContext = OfficeOpenXml.LicenseContext;
 using System.Windows;
 using System.Collections.ObjectModel;
+using WPF_Ex.Model;
 
 namespace WPF_Ex
 {
     public class MainViewModel : INotifyPropertyChanged
     {
-        private string _excelFilePath;
-        private DataTable _displayedData;
-        
-        //private string _selectedSheet;
-        private Dictionary<string, DataTable> _sheetData; //lưu trữ dữ liệu từ các sheet
-        private string _fileName;
-        public string FileName
-        {
-            get { return _fileName; }
-            set
-            {
-                _fileName = value;
-                OnPropertyChanged(nameof(FileName));
-            }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
+        private MainModel _mainModel;  // Model quản lý dữ liệu
+        private string _selectedSheet; // Sheet hiện tại đang được chọn
+        private DataTable _displayedData;  // Dữ liệu được hiển thị lên UI (DataGrid)
 
         public MainViewModel()
         {
-            _sheetNames = new ObservableCollection<string>();
-            _sheetData = new Dictionary<string, DataTable>();
+            _mainModel = new MainModel();
             LoadCommand = new RelayCommand(LoadExcelFile);
             ExportCommand = new RelayCommand(ExportToExcel);
 
@@ -43,17 +29,26 @@ namespace WPF_Ex
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
         }
 
-        private ObservableCollection<string> _sheetNames;
-        public ObservableCollection<string> SheetNames
+        public string FileName
         {
-            get { return _sheetNames; }
+            get { return _mainModel.FilePath; }
             set
             {
-                _sheetNames = value;
+                _mainModel.FilePath = value;
+                OnPropertyChanged(nameof(FileName));
+            }
+        }
+
+        public ObservableCollection<string> SheetNames
+        {
+            get { return _mainModel.SheetNames; }
+            set
+            {
+                _mainModel.SheetNames = value;
                 OnPropertyChanged(nameof(SheetNames));
             }
         }
-        private string _selectedSheet;
+
         public string SelectedSheet
         {
             get { return _selectedSheet; }
@@ -69,7 +64,6 @@ namespace WPF_Ex
             }
         }
 
-
         public DataTable DisplayedData
         {
             get { return _displayedData; }
@@ -83,112 +77,55 @@ namespace WPF_Ex
         public ICommand LoadCommand { get; set; }
         public ICommand ExportCommand { get; set; }
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
         private void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        // Mở file Excel và load dữ liệu vào Model
         private void LoadExcelFile(object parameter)
         {
-
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
                 Filter = "Excel Files|*.xlsx;*.xls"
-
             };
 
             if (openFileDialog.ShowDialog() == true)
             {
-                _excelFilePath = openFileDialog.FileName;
+                _mainModel.ClearData();
                 FileName = openFileDialog.FileName;
-                _sheetData.Clear();
 
-                using (var package = new ExcelPackage(new FileInfo(_excelFilePath)))
+                using (var package = new ExcelPackage(new FileInfo(FileName)))
                 {
-                    SheetNames = new ObservableCollection<string>();
                     foreach (var worksheet in package.Workbook.Worksheets)
                     {
-                        SheetNames.Add(worksheet.Name);
                         var dataTable = LoadWorksheetToDataTable(worksheet);
-                        _sheetData[worksheet.Name] = dataTable;
+                        _mainModel.SaveSheetData(worksheet.Name, dataTable);
+                        _mainModel.SheetNames.Add(worksheet.Name);
                     }
-
-                    if (SheetNames.Count > 0)
-                    {
-                        SelectedSheet = SheetNames[0];
-                    }
+                    SelectedSheet = _mainModel.SheetNames.FirstOrDefault();  // Chọn sheet đầu tiên
                 }
             }
         }
 
-        private DataTable LoadWorksheetToDataTable(ExcelWorksheet worksheet)
-        {
-            var dataTable = new DataTable();
-            bool hasHeader = true;  // Giả định là có header
-
-            try
-            {
-                // Lấy số lượng hàng và cột từ sheet
-                int totalRows = worksheet.Dimension.End.Row;
-                int totalCols = worksheet.Dimension.End.Column;
-
-                // Thêm các cột vào DataTable dựa trên hàng đầu tiên (header)
-                for (int col = 1; col <= totalCols; col++)
-                {
-                    var columnName = hasHeader ? worksheet.Cells[1, col].Text : $"Column {col}";
-                    if (string.IsNullOrWhiteSpace(columnName))
-                    {
-                        columnName = $"Column {col}";
-                    }
-                    dataTable.Columns.Add(columnName);
-                }
-
-               
-                int startRow = hasHeader ? 2 : 1;
-
-                // Lấy toàn bộ bảng dữ liệu từ sheet và thêm vào DataTable
-                var dataRange = worksheet.Cells[startRow, 1, totalRows, totalCols];
-
-                
-                for (int rowNum = startRow; rowNum <= totalRows; rowNum++)
-                {
-                    var newRow = dataTable.NewRow();
-                    for (int col = 0; col < totalCols; col++)
-                    {
-                        newRow[col] = worksheet.Cells[rowNum, col + 1].Text;  
-                    }
-                    dataTable.Rows.Add(newRow);
-                }
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error reading Excel data: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-
-            return dataTable;
-        }
-
-
-        private void LoadSheetData(string sheetName)
-        {
-            if (_sheetData.TryGetValue(sheetName, out DataTable? value))
-            {
-                DisplayedData = value;
-                return;
-
-            }
-            DisplayedData.Clear();
-        }
-
+        // Lưu sheet hiện tại vào Model trước khi chuyển sheet mới
         private void SaveCurrentSheetData()
         {
-            if (!string.IsNullOrEmpty(_selectedSheet) && DisplayedData != null)
+            if (!string.IsNullOrEmpty(SelectedSheet) && DisplayedData != null)
             {
-                _sheetData[_selectedSheet] = DisplayedData;
+                _mainModel.SaveSheetData(SelectedSheet, DisplayedData);
             }
         }
 
+        // Load dữ liệu của sheet đã chọn
+        private void LoadSheetData(string sheetName)
+        {
+            DisplayedData = _mainModel.GetSheetData(sheetName);
+        }
+
+        // Xuất dữ liệu ra file Excel
         private void ExportToExcel(object parameter)
         {
             SaveCurrentSheetData();
@@ -202,10 +139,10 @@ namespace WPF_Ex
             {
                 using (var package = new ExcelPackage())
                 {
-                    foreach (var sheetName in _sheetNames)
+                    foreach (var sheetName in _mainModel.SheetNames)
                     {
                         var worksheet = package.Workbook.Worksheets.Add(sheetName);
-                        var dataTable = _sheetData[sheetName];
+                        var dataTable = _mainModel.GetSheetData(sheetName);
 
                         for (int col = 0; col < dataTable.Columns.Count; col++)
                         {
@@ -227,5 +164,35 @@ namespace WPF_Ex
                 MessageBox.Show("Data exported successfully.", "Export", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
+
+        // Chuyển worksheet thành DataTable
+        private DataTable LoadWorksheetToDataTable(ExcelWorksheet worksheet)
+        {
+            var dataTable = new DataTable();
+            bool hasHeader = true;
+
+            int totalRows = worksheet.Dimension.End.Row;
+            int totalCols = worksheet.Dimension.End.Column;
+
+            for (int col = 1; col <= totalCols; col++)
+            {
+                var columnName = hasHeader ? worksheet.Cells[1, col].Text : $"Column {col}";
+                dataTable.Columns.Add(columnName);
+            }
+
+            int startRow = hasHeader ? 2 : 1;
+            for (int row = startRow; row <= totalRows; row++)
+            {
+                var newRow = dataTable.NewRow();
+                for (int col = 1; col <= totalCols; col++)
+                {
+                    newRow[col - 1] = worksheet.Cells[row, col].Text;
+                }
+                dataTable.Rows.Add(newRow);
+            }
+
+            return dataTable;
+        }
     }
+
 }
