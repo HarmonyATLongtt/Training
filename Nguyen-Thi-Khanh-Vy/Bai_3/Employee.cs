@@ -10,10 +10,10 @@ namespace OOP.Bai_3
 {
     public class Employee : Person1
     {
-        public double _income { get; set; }
-        public double _taxCoe {  get; set; }
-        public string _company {  get; set; }
-        public string _jobTitle { get; set; }
+        public double Income { get; set; }
+        public double TaxCoe {  get; set; }
+        public string Company {  get; set; }
+        public string JobTitle { get; set; }
         private TaxData taxData;
 
         public Employee(): base() { }
@@ -27,44 +27,44 @@ namespace OOP.Bai_3
             _id = iD;
             _name = name;
             _age = age;
-            _company = company;
-            _jobTitle = jobTitle;
-            _income = income;
+            Company = company;
+            JobTitle = jobTitle;
+            Income = income;
             this.taxData = taxData;
-            _taxCoe = taxData.GetTaxCoe(age, income);
+            TaxCoe = taxData.GetTaxCoe(age, income);
 
         }
         
         public double GetTax()
         {
-            return _income * _taxCoe;
+            return Income * TaxCoe;
         }
         public override string GetInfo()
         {
             var baseInfo = base.GetInfo();
-            return $"{baseInfo}, Company: {_company}, JobTitle: {_jobTitle}, Income: {_income:C}, Tax: {GetTax():C}";
+            return $"{baseInfo}, Company: {Company}, JobTitle: {JobTitle}, Income: {Income:C}, Tax: {GetTax():C}";
         }
         public override void Nhap()
         {
             base.Nhap();
 
-            _company = GetInput("Nhap cty:");
-            _jobTitle = GetInput("Nhập cong viec:");
+            Company = GetInput("Nhap cty:");
+            JobTitle = GetInput("Nhập cong viec:");
 
-            
+            bool isCheck = false;
             do
             {
-                string incomeInput = GetInput("Nhập Income:");
-                if (double.TryParse(incomeInput, out double income) && income >= 0)
+                string incomeInput = GetInput("Nhap Income: ");
+                if (isCheck = double.TryParse(incomeInput, out double income) && income >= 0)
                 {
-                    _income = income;
+                    Income = income;
                     break;
                 }
-                Console.WriteLine("Income không hợp lệ. Vui lòng nhập lại:");
-            }while (true);
+                Console.WriteLine("Income khong hop le vui long nhap lai!");
+            } while (!isCheck);
 
             // Tính toán hệ số thuế
-            _taxCoe = taxData.GetTaxCoe(_age, _income);
+            TaxCoe = taxData.GetTaxCoe(_age, Income);
         }
     }
 }
