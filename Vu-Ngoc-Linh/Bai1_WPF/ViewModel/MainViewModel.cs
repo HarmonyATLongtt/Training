@@ -150,8 +150,8 @@ namespace Bai1_WPF.ViewModel
                 {
                     foreach (DataTable dt in Tables)
                     {
-                        ExcelWorksheet ws = pkg.Workbook.Worksheets.Add(dt.TableName);
-                        ws.Cells["A1"].LoadFromDataTable(dt, true);
+                        ExcelWorksheet ws = pkg.Workbook.Worksheets.Add(dt.TableName); //them sheet
+                        ws.Cells["A1"].LoadFromDataTable(dt, true); //load data tu dt vao sheet tu o A1, true la load ca header
                     }
                     pkg.Save();
                     MessageBox.Show("Export successfully!");
