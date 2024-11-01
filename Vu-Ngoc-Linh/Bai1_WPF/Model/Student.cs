@@ -14,10 +14,10 @@ namespace Bai1_WPF.Model
 
         public Student(string id, string name, int age, string lop, string school) : base(id, name, age)
         {
-            _id = id;
-            _name = name;
-            _age = age;
-            _class = lop;
+            this._id = id;
+            this._name = name;
+            this._age = age;
+            this._class = lop;
             this._school = school;
         }
 

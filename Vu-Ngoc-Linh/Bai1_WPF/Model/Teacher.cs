@@ -21,11 +21,11 @@ namespace Bai1_WPF.Model
             _age = age;
             this._school = school;
             this._income = income;
-            //this._taxCoe = TaxData.GetTaxCoe(age, income);
+            this._taxCoe = TaxData.GetTaxCoe(age, income);
         }
-        //public double GetTax()
-        //{
-        //    return this._income * this._taxCoe;
-        //}
+        public double GetTax()
+        {
+            return this._income * this._taxCoe;
+        }
     }
 }

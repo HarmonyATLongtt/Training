@@ -40,32 +40,33 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="150"/>
         </Grid.ColumnDefinitions>
-        <Label x:Name="lblPath"  Content="File path" HorizontalAlignment="Left" 
+        <Label x:Name="lblPath"  Content="File path" HorizontalAlignment="Left"
                VerticalAlignment="Center" Margin="30,5" Grid.Row="0" Grid.Column="0"
                BorderBrush="LightGray" Foreground="Black" FontSize="15">
         </Label>
-        <TextBlock Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Height="25" Width="450" 
-                   Margin="5" HorizontalAlignment="Left" Background="LightGray" 
-                   Text="{Binding FilePath}"/>
+        <TextBlock Grid.Column="1" Grid.ColumnSpan="2" Height="25" Width="350" TextBlock.FontSize="15" Padding="5 2.5"
+                   Margin="5,0,0,0" HorizontalAlignment="Left"  VerticalAlignment="Center"
+                   Background="LightGray" Text="{Binding FilePath}"/>
 
         <Label x:Name="lblSelect" Content="Select sheet" HorizontalAlignment="Left"
                VerticalAlignment="Center" Margin="30,5" Grid.Row="1" Grid.Column="0"
                BorderBrush="LightGray" Foreground="Black" FontSize="15">
         </Label>
-        <ComboBox Grid.Row="1" Grid.Column="1" Width="200" Height="25" HorizontalAlignment="Left" 
+        <ComboBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Width="450" Height="25" HorizontalAlignment="Left" 
                   Margin="5" ItemsSource="{Binding Datas}" 
                   SelectedItem="{Binding SelectedData}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=Content, Converter={StaticResource DataTableNameConverter},
- UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                    <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=Content, 
+                        Converter={StaticResource DataTableNameConverter},
+                        UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" TextBlock.FontSize="15"/>
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
-        <Button Content="Import" Command="{Binding ImportData}"
-                Grid.Column="3" Grid.Row="1" HorizontalAlignment="Center">
+        <Button Content="Import" Command="{Binding ImportData}" 
+                Grid.Column="3" Grid.Row="0" HorizontalAlignment="Center">
         </Button>
-        <DataGrid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Margin="30,5" Height="300"
+        <DataGrid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Margin="30,5" Height="300" TextBlock.FontSize="15"
                   VerticalAlignment="Top" ItemsSource="{Binding SelectedData}" AutoGenerateColumns="True">
         </DataGrid>
         <Button Content="Export" Grid.Column="2" Grid.Row="3" Command="{Binding ExportData}"

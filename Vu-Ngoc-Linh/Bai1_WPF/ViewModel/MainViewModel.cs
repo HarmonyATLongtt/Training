@@ -22,7 +22,9 @@ namespace Bai1_WPF.ViewModel
     public class MainViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
-
+        //public ObservableCollection<Student> Students;
+        //public ObservableCollection<Teacher> Teachers;
+        //public ObservableCollection<Employee> Employees;
         public MainModel Model { get; private set; }
 
         public string FilePath
@@ -102,12 +104,57 @@ namespace Bai1_WPF.ViewModel
                     dt = worksheet.Cells[worksheet.Dimension.Start.Row, worksheet.Dimension.Start.Column,
                                     worksheet.Dimension.End.Row, worksheet.Dimension.End.Column].ToDataTable();
                     dt.TableName = worksheet.Name;
+                    //LoadData(dt);
                     Datas.Add(dt);
                 }
                 SelectedData = Datas.FirstOrDefault();
             }
         }
-
+        //private void LoadData(DataTable dt)
+        //{
+        //    string name = dt.TableName;
+        //    if (name == "Student")
+        //    {
+        //        foreach(DataRow row in dt.Rows)
+        //        {
+        //            Student st = new Student(
+        //                row[0].ToString(),
+        //                row[1].ToString(),
+        //                int.Parse(row[2].ToString()),
+        //                row[3].ToString(),
+        //                row[4].ToString()
+        //            );
+        //            Students.Add(st);
+        //        }
+        //    }else if(name == "Teacher")
+        //    {
+        //        foreach(DataRow row in dt.Rows)
+        //        {
+        //            Teacher tc = new Teacher(
+        //                row[0].ToString(),
+        //                row[1].ToString(),
+        //                int.Parse(row[2].ToString()),
+        //                row[3].ToString(),
+        //                int.Parse(row[4].ToString())
+        //            );
+        //            Teachers.Add(tc);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        foreach(DataRow row in dt.Rows)
+        //        {
+        //            Employee emp = new Employee(
+        //                row[0].ToString(),
+        //                row[1].ToString(),
+        //                int.Parse(row[2].ToString()),
+        //                row[3].ToString(),
+        //                int.Parse(row[4].ToString())
+        //            );
+        //            Employees.Add(emp);
+        //        }
+        //    }
+        //}
         private void ExportFile(object obj)
         {
             SaveFileDialog saveDialog = new SaveFileDialog();

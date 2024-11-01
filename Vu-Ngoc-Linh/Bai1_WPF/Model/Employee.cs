@@ -9,25 +9,23 @@ namespace Bai1_WPF.Model
 {
     public class Employee : Person
     {
-        public string _company { get; set; }
         public string _jobTitle { get; set; }
         public int _income { get; set; }
         public double _taxCoe { get; set; }
         public Employee() : base() { }
 
-        public Employee(string id, string name, int age, string company, string jobtitle, int income) : base(id, name, age)
+        public Employee(string id, string name, int age, string jobtitle, int income) : base(id, name, age)
         {
             _id = id;
             _name = name;
             _age = age;
-            _company = company;
             _jobTitle = jobtitle;
             this._income = income;
-            //this._taxCoe = TaxData.GetTaxCoe(age, income);
+            this._taxCoe = TaxData.GetTaxCoe(age, income);
         }
-        //public double GetTax()
-        //{
-        //    return this._income * this._taxCoe;
-        //}
+        public double GetTax()
+        {
+            return this._income * this._taxCoe;
+        }
     }
 }
