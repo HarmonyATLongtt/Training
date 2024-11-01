@@ -10,6 +10,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Bai1_WPF.Model;
 using Bai1_WPF.ViewModel;
 using Microsoft.Win32;
 using OfficeOpenXml;
@@ -23,7 +24,8 @@ namespace Bai1_WPF
         public MainWindow()
         {
             InitializeComponent();
-            MainViewModel mainViewModel = new MainViewModel();
+            MainModel model = new MainModel();
+            MainViewModel mainViewModel = new MainViewModel(model);
             this.DataContext = mainViewModel;
 
         }

@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Bai1_WPF"
+        xmlns:converter="clr-namespace:Bai1_WPF.Converter"
         mc:Ignorable="d"
         Title="Bài 1" Height="450" Width="650"
         PreviewKeyDown="Window_PreviewKeyDown"
@@ -23,6 +24,8 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
+        <converter:DataTableNameConverter x:Key="DataTableNameConverter"/>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -49,14 +52,21 @@
                VerticalAlignment="Center" Margin="30,5" Grid.Row="1" Grid.Column="0"
                BorderBrush="LightGray" Foreground="Black" FontSize="15">
         </Label>
-        <ComboBox Grid.Row="1" Grid.Column="1" Width="200" Height="25" HorizontalAlignment="Left" SelectedIndex="0"
-                  Margin="5" ItemsSource="{Binding SheetNames}" SelectedItem="{Binding SelectedSheet}">
+        <ComboBox Grid.Row="1" Grid.Column="1" Width="200" Height="25" HorizontalAlignment="Left" 
+                  Margin="5" ItemsSource="{Binding Datas}" 
+                  SelectedItem="{Binding SelectedData}">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=Content, Converter={StaticResource DataTableNameConverter},
+ UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
         </ComboBox>
         <Button Content="Import" Command="{Binding ImportData}"
                 Grid.Column="3" Grid.Row="1" HorizontalAlignment="Center">
         </Button>
         <DataGrid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Margin="30,5" Height="300"
-                  VerticalAlignment="Top" ItemsSource="{Binding Data}" AutoGenerateColumns="True">
+                  VerticalAlignment="Top" ItemsSource="{Binding SelectedData}" AutoGenerateColumns="True">
         </DataGrid>
         <Button Content="Export" Grid.Column="2" Grid.Row="3" Command="{Binding ExportData}"
                 VerticalAlignment="Top">

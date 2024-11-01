@@ -22,19 +22,45 @@ namespace Bai1_WPF.ViewModel
     public class MainViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
+
+        public MainModel Model { get; private set; }
+
+        public string FilePath
+        {
+            get => Model.FilePath;
+            set
+            {
+                Model.FilePath = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public DataTable SelectedData
+        {
+            get => Model.SelectedData;
+            set
+            {
+                Model.SelectedData = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public ObservableCollection<DataTable> Datas
+        {
+            get => Model.Datas;
+            set
+            {
+                Model.Datas = value;
+                OnPropertyChanged();
+            }
+        }
+
         public ICommand ImportData { get; set; }
         public ICommand ExportData { get; set; }
 
-        private DataTable _data;
-        private string _filePath;
-        private ObservableCollection<string> _sheetNames;
-        private string _selectedSheet;
-        private ObservableCollection<DataTable> Tables { get; set; }
-        public MainModel Model { get; private set; }
-        public MainViewModel()
+        public MainViewModel(MainModel model)
         {
-            _sheetNames = new ObservableCollection<string>();
-            Tables = new ObservableCollection<DataTable>();
+            Model = model;
             ImportData = new RelayCommand(ImportFile, CanImportFile);
             ExportData = new RelayCommand(ExportFile, CanExportFile);
         }
@@ -42,59 +68,6 @@ namespace Bai1_WPF.ViewModel
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        public DataTable Data
-        {
-            get { return _data; }
-            set
-            {
-                _data = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public string FilePath
-        {
-            get { return _filePath; }
-            set
-            {
-                _filePath = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public ObservableCollection<string> SheetNames
-        {
-            get { return _sheetNames; }
-            set
-            {
-                _sheetNames = value;
-                OnPropertyChanged(nameof(SheetNames));
-            }
-        }
-
-        public string SelectedSheet
-        {
-            get { return _selectedSheet; }
-            set
-            {
-                _selectedSheet = value;
-                OnPropertyChanged(nameof(SelectedSheet));
-                Upload(_selectedSheet);
-            }
-        }
-
-        private void Upload(string selectedSheet)
-        {
-            foreach (DataTable dt in Tables)
-            {
-                if (dt.TableName == selectedSheet)
-                {
-                    Data = dt;
-                    break;
-                }
-            }
         }
 
         private bool CanImportFile(object obj)
@@ -122,19 +95,16 @@ namespace Bai1_WPF.ViewModel
             using (ExcelPackage package = new ExcelPackage(fileInfo))
             {
                 ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
-                SheetNames.Clear();
-                Tables.Clear(); 
+                Datas.Clear();
                 foreach (ExcelWorksheet worksheet in package.Workbook.Worksheets)
                 {
                     DataTable dt = new DataTable();
-                    //dt.TableName = worksheet.Name; ??
                     dt = worksheet.Cells[worksheet.Dimension.Start.Row, worksheet.Dimension.Start.Column,
                                     worksheet.Dimension.End.Row, worksheet.Dimension.End.Column].ToDataTable();
                     dt.TableName = worksheet.Name;
-                    Tables.Add(dt);
-                    SheetNames.Add(dt.TableName);
+                    Datas.Add(dt);
                 }
-                SelectedSheet = SheetNames.FirstOrDefault();
+                SelectedData = Datas.FirstOrDefault();
             }
         }
 
@@ -148,7 +118,7 @@ namespace Bai1_WPF.ViewModel
                 FileInfo fileInfo = new FileInfo(saveDialog.FileName);
                 using (ExcelPackage pkg = new ExcelPackage(fileInfo))
                 {
-                    foreach (DataTable dt in Tables)
+                    foreach (DataTable dt in Datas)
                     {
                         ExcelWorksheet ws = pkg.Workbook.Worksheets.Add(dt.TableName); //them sheet
                         ws.Cells["A1"].LoadFromDataTable(dt, true); //load data tu dt vao sheet tu o A1, true la load ca header
