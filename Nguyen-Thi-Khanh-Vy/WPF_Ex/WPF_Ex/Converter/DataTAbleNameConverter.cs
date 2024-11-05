@@ -10,7 +10,7 @@ using DocumentFormat.OpenXml.Office2010.Excel;
 
 namespace WPF_Ex.Converter
 {
-    public class DataTAbleNameConverter : IValueConverter
+    public class DataTableNameConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

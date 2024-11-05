@@ -8,26 +8,17 @@ namespace WPF_Ex
 {
     public class Person
     {
+        public string ID { get; set; }
         public string Name { get; set; }
         public int Age { get; set; }
-        public string ID { get; set; }
-        public string Address { get; set; }
-        public double TaxCoe { get; set; }
+        public Person()
+        {
+        }
+        public Person(string id, string name, int age)
+        {
+            ID = id;
+            Name = name;
+            Age = age;
+        }
     }
-
-    public class Student : Person
-    {
-        
-    }
-
-    public class Teacher : Person
-    {
-        
-    }
-
-    public class Employee : Person
-    {
-       
-    }
-
 }
