@@ -27,5 +27,6 @@ namespace Bai1_WPF.Model
         {
             return this._income * this._taxCoe;
         }
+        //
     }
 }
