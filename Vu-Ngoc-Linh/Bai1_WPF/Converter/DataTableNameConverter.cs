@@ -14,8 +14,8 @@ namespace Bai1_WPF.Converter
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value != null)
-                //&& value.GetType().Equals(typeof(DataTable))
-                //&& targetType.Equals(typeof(string)))
+            //&& value.GetType().Equals(typeof(DataTable))
+            //&& targetType.Equals(typeof(string)))
             {
                 DataTable dt = (DataTable)value;
                 return dt.TableName;

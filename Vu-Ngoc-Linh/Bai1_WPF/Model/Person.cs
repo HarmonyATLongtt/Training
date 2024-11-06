@@ -8,14 +8,14 @@ namespace Bai1_WPF.Model
 {
     public class Person 
     {
-        public string _id {  get; set; }
-        public string _name {  get; set; }
-        public int _age { get; set; }
+        public string ID {  get; set; }
+        public string Name {  get; set; }
+        public int Age { get; set; }
         public Person(string id, string name, int age)
         {
-            _id = id;
-            _name = name;
-            _age = age;
+            ID = id;
+            Name = name;
+            Age = age;
         }
         public Person() { }
     }

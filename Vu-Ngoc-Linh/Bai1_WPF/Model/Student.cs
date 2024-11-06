@@ -8,17 +8,20 @@ namespace Bai1_WPF.Model
 {
     public class Student : Person
     {
-        public string _class { get; set; }
-        public string _school { get; set; }
+        public string ID { get; set; }
+        public string Name { get; set; }
+        public int Age { get; set; }
+        public string Class { get; set; }
+        public string School { get; set; }
         public Student() : base() { }
 
         public Student(string id, string name, int age, string lop, string school) : base(id, name, age)
         {
-            this._id = id;
-            this._name = name;
-            this._age = age;
-            this._class = lop;
-            this._school = school;
+            this.ID = id;
+            this.Name = name;
+            this.Age = age;
+            this.Class = lop;
+            this.School = school;
         }
 
     }
