@@ -8,35 +8,27 @@ namespace WPF_Ex.Model
 {
     public class Employee : Person
     {
+        public string ID { get; set; }
+        public string Name { get; set; }
+        public int Age { get; set; }
         public double Income { get; set; }
         public double TaxCoe { get; set; }
-        public string Company { get; set; }
         public string JobTitle { get; set; }
-        private TaxData taxData;
-
+        public string Company { get; set; }
         public Employee() : base() { }
 
-        public Employee(string iD, string name, int age, string company, string jobTitle, double income) : base(iD, name, age)
+        public Employee(string iD, string name, int age, double income, double taxcoe, string jobTitle, string company) : base(iD, name, age)
         {
-
-        }
-        public Employee(string iD, string name, int age, string company, string jobTitle, double income, TaxData taxData)
-        {
-            ID = iD;
-            Name = name;
-            Age = age;
+            Income = income;
+            TaxCoe = taxcoe;
             Company = company;
             JobTitle = jobTitle;
-            Income = income;
-            this.taxData = taxData;
-            TaxCoe = taxData.GetTaxCoe(age, income);
 
         }
-
         public double GetTax()
         {
             return Income * TaxCoe;
         }
-        
+
     }
 }

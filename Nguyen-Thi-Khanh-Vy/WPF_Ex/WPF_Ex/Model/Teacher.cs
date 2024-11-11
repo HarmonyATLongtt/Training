@@ -4,20 +4,20 @@ namespace WPF_Ex.Model
 {
     public class Teacher : Person
     {
+        public string ID { get; set; }
+        public string Name { get; set; }
+        public int Age { get; set; }
+        public string School { get; set; } // Trường
         public double Income { get; set; } // Thu nhập
         public double TaxCoe { get; set; } // Hệ số thuế
-        public string School { get; set; } // Trường
-        private TaxData taxData;
-
         public Teacher() { }
 
-        public Teacher(string id, string name, int age, string school, double income, TaxData taxData)
+        public Teacher(string id, string name, int age, string school, double income, double taxcoe)
             : base(id, name, age)
         {
             School = school;
             Income = income;
-            this.taxData = taxData;
-            TaxCoe = taxData.GetTaxCoe(age, income);
+            TaxCoe = taxcoe;
         }
 
         public double GetTax()

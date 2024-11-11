@@ -1,23 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
+using System.IO;
 
 namespace WPF_Ex.Model
 {
     public class MainModel
     {
-        public string FilePath { get; set; }  // Đường dẫn file Excel
-        public ObservableCollection<DataTable> SheetDatas { get; set; } // Dữ liệu của các sheet
-        public DataTable SelectedSheetData { get; set; } // Dữ liệu của các sheet
+        public string FilePath { get; set; }
+        public ObservableCollection<object> People { get; set; } 
+        public object SelectedPerson { get; set; }
 
         public MainModel()
         {
-            SheetDatas = new ObservableCollection<DataTable>();
-            SelectedSheetData = SheetDatas.FirstOrDefault();
+            People = new ObservableCollection<object>();
+            SelectedPerson = People.FirstOrDefault();
+
         }
     }
 }
