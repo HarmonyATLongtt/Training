@@ -14,10 +14,10 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="StyleResource.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-            <!--<converter:DataTableNameConverter x:Key="DataTableNameConverter"/>-->
+            <converter:DataTableNameConverter x:Key="DataTableNameConverter"/>
+            <converter:DataTableNameConverter x:Key="SheetNameConverter"/>
         </ResourceDictionary>
     </Window.Resources>
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -32,31 +32,21 @@
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <!-- File input section -->
         <Label Grid.Row="0" Grid.Column="0" 
                Content="Local File: " 
                Style="{StaticResource LabelStyle}"/>
         <TextBox Grid.Row="0" Grid.Column="1" 
-                 Text="{Binding FileName, UpdateSourceTrigger=PropertyChanged}" 
+                 Text="{Binding FileName, Mode=TwoWay}" 
                  Style="{StaticResource TextBoxStyle}"/>
 
-        <!-- Sheet selection section -->
         <Label Grid.Row="1" Grid.Column="0" 
                Content="Sheet Name: " 
                Style="{StaticResource LabelStyle}"/>
         <ComboBox Grid.Column="1" Grid.Row="1"
-                  
-                  SelectedItem="{Binding SelectedPerson}"
-                  Style="{StaticResource ComboBoxStyle}">
-            <!--<ComboBox.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=Content, 
-                Converter={StaticResource DataTableNameConverter}}"/>
-                </DataTemplate>
-            </ComboBox.ItemTemplate>-->
-        </ComboBox>
+                  ItemsSource="{Binding SheetNames, UpdateSourceTrigger=PropertyChanged}" 
+                  SelectedItem="{Binding SelectedSheetData, Mode=TwoWay}"
+                  Style="{StaticResource ComboBoxStyle}"/>
 
-        <!-- Load and Export buttons -->
         <Button Content="Load" Grid.Column="2" Grid.Row="0" Height="30" Width="75"
                 VerticalAlignment="Center"
                 VerticalContentAlignment="Center"
@@ -69,18 +59,17 @@
                 Command="{Binding ExportCommand}"
                 Style="{StaticResource ButtonStyle}"/>
 
-        <!-- DataGrid for displaying people -->
         <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4"
                 CornerRadius="10" BorderBrush="#007ACC" BorderThickness="2"
                 Margin="10">
             <DataGrid AutoGenerateColumns="True"
-                      AlternatingRowBackground="LightGray"
+                      AlternatingRowBackground="LightGray" 
                       HeadersVisibility="Column"
                       HorizontalScrollBarVisibility="Auto"
                       VerticalScrollBarVisibility="Auto"
                       GridLinesVisibility="Horizontal"
                       IsReadOnly="False"
-                      ItemsSource="{Binding People, UpdateSourceTrigger=PropertyChanged}">
+                      ItemsSource="{Binding SheetDatas, UpdateSourceTrigger=PropertyChanged}">
                 <DataGrid.Effect>
                     <DropShadowEffect Color="Black" BlurRadius="10" ShadowDepth="5"/>
                 </DataGrid.Effect>

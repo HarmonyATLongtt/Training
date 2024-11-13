@@ -8,7 +8,7 @@ namespace WPF_Ex
         public View()
         {
             InitializeComponent();
-            this.DataContext = new MainViewModel(); 
+            DataContext = new MainViewModel();
         }
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {

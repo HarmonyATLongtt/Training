@@ -17,18 +17,18 @@ namespace WPF_Ex.Model
         public string Company { get; set; }
         public Employee() : base() { }
 
-        public Employee(string iD, string name, int age, double income, double taxcoe, string jobTitle, string company) : base(iD, name, age)
+        public Employee(string iD, string name, int age, double income, double taxcoe,  string jobTitle, string company) : base(iD, name, age)
         {
             Income = income;
             TaxCoe = taxcoe;
             Company = company;
             JobTitle = jobTitle;
-
+           
         }
         public double GetTax()
         {
             return Income * TaxCoe;
         }
-
+        
     }
 }
