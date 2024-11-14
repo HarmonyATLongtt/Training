@@ -118,28 +118,38 @@ namespace WPF_Ex
                 Teachers.Clear();
                 Employees.Clear();
 
+                // Duyệt qua tất cả các worksheet và xử lý trực tiếp
                 foreach (var worksheet in package.Workbook.Worksheets)
                 {
                     string sheetName = worksheet.Name;
                     SheetNames.Add(sheetName);
 
-                    if (sheetName == "Student")
+                    
+                    switch (sheetName)
                     {
-                        LoadStudentsFromSheet(worksheet);
-                    }
-                    else if (sheetName == "Teacher")
-                    {
-                        LoadTeachersFromSheet(worksheet);
-                    }
-                    else if (sheetName == "Employee")
-                    {
-                        LoadEmployeesFromSheet(worksheet);
+                        case "Student":
+                            LoadStudentsFromSheet(worksheet);
+                            break;
+
+                        case "Teacher":
+                            LoadTeachersFromSheet(worksheet);
+                            break;
+
+                        case "Employee":
+                            LoadEmployeesFromSheet(worksheet);
+                            break;
+
+                        
+                        default:
+                            break;
                     }
                 }
 
                 SelectedSheetData = SheetNames.FirstOrDefault();
             }
         }
+
+
 
         private void LoadStudentsFromSheet(ExcelWorksheet worksheet)
         {
