@@ -13,6 +13,9 @@ namespace WPF_Ex.Model
         public ObservableCollection<Student> Students { get; set; }
         public ObservableCollection<Teacher> Teachers { get; set; }
         public ObservableCollection<Employee> Employees { get; set; }
+
+        public ObservableCollection<ItemModel> Items { get; set; }
+        public ItemModel SelectedItem { get; set; }
         public MainModel()
         {
             Students = new ObservableCollection<Student>();

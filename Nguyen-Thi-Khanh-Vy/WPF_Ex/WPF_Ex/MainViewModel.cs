@@ -11,6 +11,7 @@ using System.ComponentModel;
 using System.Linq;
 using LicenseContext = OfficeOpenXml.LicenseContext;
 using System.Runtime.CompilerServices;
+using WPF_Ex.ViewModels;
 
 namespace WPF_Ex
 {
@@ -18,6 +19,9 @@ namespace WPF_Ex
     {
         public event PropertyChangedEventHandler PropertyChanged;
         public MainModel Model { get; private set; }
+
+        public ObservableCollection<ItemViewModel> Items { get; set; }
+        public ItemViewModel SelectedItem { get; set; }
 
         public string FileName
         {
