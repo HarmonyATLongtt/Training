@@ -168,10 +168,7 @@ namespace Bai2_WPF.ViewModel
                 if (row.Table.Columns.Contains(property.Name) && property.CanWrite)
                 {
                     var value = row[property.Name];
-                    if (value != DBNull.Value)
-                    {
-                        property.SetValue(obj, Convert.ChangeType(value, property.PropertyType));
-                    }
+                    property.SetValue(obj, Convert.ChangeType(value, property.PropertyType));
                 }
             }
             return obj;
@@ -212,7 +209,7 @@ namespace Bai2_WPF.ViewModel
             DataTable dt = new DataTable(tableName);
             foreach (var property in typeof(T).GetProperties())
             {
-                dt.Columns.Add(property.Name, Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType);
+                dt.Columns.Add(property.Name, property.PropertyType);
             }
             foreach (var item in data)
             {
@@ -248,6 +245,7 @@ namespace Bai2_WPF.ViewModel
 
         private void ExportFile(object obj)
         {
+            importDataTables();
             SaveFileDialog saveDialog = new SaveFileDialog();
             saveDialog.Filter = "Excel files (*.xlsx)|*.xlsx|Text files (*.txt)|*.txt|All files (*.*)|*.*";
             saveDialog.FileName = "";
