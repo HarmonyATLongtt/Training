@@ -33,6 +33,21 @@ namespace Bai2_WPF.ViewModel
                 OnPropertyChanged();
             }
         }
+
+        private ItemViewModel _selectedItem;
+        public ItemViewModel SelectedItem
+        {
+            get => _selectedItem;
+            set
+            {
+                _selectedItem = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private ObservableCollection<ItemViewModel> _items;
+
+
         public string SelectedSheet
         {
             get => Model.SelectedSheet;
