@@ -1,6 +1,0 @@
-E:\trainC#\testC_sharp\testC#\test3\ConsoleApp3\bin\Debug\ConsoleApp3.exe.config
-E:\trainC#\testC_sharp\testC#\test3\ConsoleApp3\bin\Debug\ConsoleApp3.exe
-E:\trainC#\testC_sharp\testC#\test3\ConsoleApp3\bin\Debug\ConsoleApp3.pdb
-E:\trainC#\testC_sharp\testC#\test3\ConsoleApp3\obj\Debug\ConsoleApp3.csproj.CoreCompileInputs.cache
-E:\trainC#\testC_sharp\testC#\test3\ConsoleApp3\obj\Debug\ConsoleApp3.exe
-E:\trainC#\testC_sharp\testC#\test3\ConsoleApp3\obj\Debug\ConsoleApp3.pdb

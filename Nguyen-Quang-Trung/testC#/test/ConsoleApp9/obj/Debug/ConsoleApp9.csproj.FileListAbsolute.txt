@@ -1,7 +1,0 @@
-E:\trainC#\testC_sharp\testC#\test\ConsoleApp9\bin\Debug\ConsoleApp9.exe.config
-E:\trainC#\testC_sharp\testC#\test\ConsoleApp9\bin\Debug\ConsoleApp9.exe
-E:\trainC#\testC_sharp\testC#\test\ConsoleApp9\bin\Debug\ConsoleApp9.pdb
-E:\trainC#\testC_sharp\testC#\test\ConsoleApp9\obj\Debug\ConsoleApp9.csprojAssemblyReference.cache
-E:\trainC#\testC_sharp\testC#\test\ConsoleApp9\obj\Debug\ConsoleApp9.csproj.CoreCompileInputs.cache
-E:\trainC#\testC_sharp\testC#\test\ConsoleApp9\obj\Debug\ConsoleApp9.exe
-E:\trainC#\testC_sharp\testC#\test\ConsoleApp9\obj\Debug\ConsoleApp9.pdb

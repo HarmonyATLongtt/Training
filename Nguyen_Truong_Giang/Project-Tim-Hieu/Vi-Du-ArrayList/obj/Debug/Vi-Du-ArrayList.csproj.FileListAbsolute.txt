@@ -1,7 +1,0 @@
-D:\Training\Vi-Du-ArrayList\Vi-Du-ArrayList\bin\Debug\Vi-Du-ArrayList.exe.config
-D:\Training\Vi-Du-ArrayList\Vi-Du-ArrayList\bin\Debug\Vi-Du-ArrayList.exe
-D:\Training\Vi-Du-ArrayList\Vi-Du-ArrayList\bin\Debug\Vi-Du-ArrayList.pdb
-D:\Training\Vi-Du-ArrayList\Vi-Du-ArrayList\obj\Debug\Vi-Du-ArrayList.csproj.AssemblyReference.cache
-D:\Training\Vi-Du-ArrayList\Vi-Du-ArrayList\obj\Debug\Vi-Du-ArrayList.csproj.CoreCompileInputs.cache
-D:\Training\Vi-Du-ArrayList\Vi-Du-ArrayList\obj\Debug\Vi-Du-ArrayList.exe
-D:\Training\Vi-Du-ArrayList\Vi-Du-ArrayList\obj\Debug\Vi-Du-ArrayList.pdb
