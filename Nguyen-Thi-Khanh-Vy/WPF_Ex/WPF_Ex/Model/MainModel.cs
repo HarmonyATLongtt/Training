@@ -1,29 +1,21 @@
 ﻿using DocumentFormat.OpenXml.Spreadsheet;
+using OfficeOpenXml;
 using System.Collections.ObjectModel;
-using System.Linq;  // To use FirstOrDefault()
+using System.IO;
+using System.Linq;
 
 namespace WPF_Ex.Model
 {
     public class MainModel
-    {
-        public string FileName { get; set; }  // Đường dẫn file Excel
-        public ObservableCollection<string> SheetNames { get; set; } //SheetNames
-        public ObservableCollection<object> SheetDatas { get; set; } // Dữ liệu của các sheet CurrentObject
-        public string SelectedSheetData { get; set; } // Dữ liệu của sheet đã chọn SelectedSheet
-        public ObservableCollection<Student> Students { get; set; }
-        public ObservableCollection<Teacher> Teachers { get; set; }
-        public ObservableCollection<Employee> Employees { get; set; }
-
-        public ObservableCollection<ItemModel> Items { get; set; }
-        public ItemModel SelectedItem { get; set; }
-        public MainModel()
         {
-            Students = new ObservableCollection<Student>();
-            Teachers = new ObservableCollection<Teacher>();
-            Employees = new ObservableCollection<Employee>();
-            SheetDatas = new ObservableCollection<object>();
-            SheetNames = new ObservableCollection<string>();
-            SelectedSheetData = SheetNames.FirstOrDefault();
+            public string FileName { get; set; }
+            public ItemModel SelectedItem { get; set; }
+            public ObservableCollection<ItemModel> Items { get; set; }
+
+            public MainModel()
+            {
+                FileName = string.Empty;
+                
+            }
         }
     }
-}

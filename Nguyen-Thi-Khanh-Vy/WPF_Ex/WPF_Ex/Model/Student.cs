@@ -2,9 +2,9 @@
 {
     public class Student : Person
     {
-        public string ID { get; set; }
-        public string Name { get; set; }
-        public int Age { get; set; }
+        //public string ID { get; set; }
+        //public string Name { get; set; }
+        //public int Age { get; set; }
         public string Class { get; set; } // Lớp
         public string School { get; set; } // Trường
 

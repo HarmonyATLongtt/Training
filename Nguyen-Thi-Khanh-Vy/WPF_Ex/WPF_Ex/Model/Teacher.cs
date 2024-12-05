@@ -4,9 +4,9 @@ namespace WPF_Ex.Model
 {
     public class Teacher : Person
     {
-        public string ID { get; set; }
-        public string Name { get; set; }
-        public int Age { get; set; }
+        //public string ID { get; set; }
+        //public string Name { get; set; }
+        //public int Age { get; set; }
         public string School { get; set; } // Trường
         public double Income { get; set; } // Thu nhập
         public double TaxCoe { get; set; } // Hệ số thuế

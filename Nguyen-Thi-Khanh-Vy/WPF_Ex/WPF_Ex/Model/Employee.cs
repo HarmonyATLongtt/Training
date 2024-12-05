@@ -8,9 +8,7 @@ namespace WPF_Ex.Model
 {
     public class Employee : Person
     {
-        public string ID { get; set; }
-        public string Name { get; set; }
-        public int Age { get; set; }
+        
         public double Income { get; set; }
         public double TaxCoe { get; set; }
         public string JobTitle { get; set; }
