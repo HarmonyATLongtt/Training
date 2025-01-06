@@ -1,7 +1,0 @@
-D:\Training\Nguyen_Truong_Giang\Project-Tim-Hieu\Vi-Du-Nap-Chong-Toan-Tu\Vi-Du-Nap-Chong-Toan-Tu\bin\Debug\Vi-Du-Nap-Chong-Toan-Tu.exe.config
-D:\Training\Nguyen_Truong_Giang\Project-Tim-Hieu\Vi-Du-Nap-Chong-Toan-Tu\Vi-Du-Nap-Chong-Toan-Tu\bin\Debug\Vi-Du-Nap-Chong-Toan-Tu.exe
-D:\Training\Nguyen_Truong_Giang\Project-Tim-Hieu\Vi-Du-Nap-Chong-Toan-Tu\Vi-Du-Nap-Chong-Toan-Tu\bin\Debug\Vi-Du-Nap-Chong-Toan-Tu.pdb
-D:\Training\Nguyen_Truong_Giang\Project-Tim-Hieu\Vi-Du-Nap-Chong-Toan-Tu\Vi-Du-Nap-Chong-Toan-Tu\obj\Debug\Vi-Du-Nap-Chong-Toan-Tu.csproj.AssemblyReference.cache
-D:\Training\Nguyen_Truong_Giang\Project-Tim-Hieu\Vi-Du-Nap-Chong-Toan-Tu\Vi-Du-Nap-Chong-Toan-Tu\obj\Debug\Vi-Du-Nap-Chong-Toan-Tu.csproj.CoreCompileInputs.cache
-D:\Training\Nguyen_Truong_Giang\Project-Tim-Hieu\Vi-Du-Nap-Chong-Toan-Tu\Vi-Du-Nap-Chong-Toan-Tu\obj\Debug\Vi-Du-Nap-Chong-Toan-Tu.exe
-D:\Training\Nguyen_Truong_Giang\Project-Tim-Hieu\Vi-Du-Nap-Chong-Toan-Tu\Vi-Du-Nap-Chong-Toan-Tu\obj\Debug\Vi-Du-Nap-Chong-Toan-Tu.pdb

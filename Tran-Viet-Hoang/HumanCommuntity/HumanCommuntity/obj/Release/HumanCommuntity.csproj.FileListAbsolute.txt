@@ -1,8 +1,0 @@
-G:\01Thuctap\2023_12_1\HumanCommuntity\HumanCommuntity\bin\Release\HumanCommuntity.exe.config
-G:\01Thuctap\2023_12_1\HumanCommuntity\HumanCommuntity\bin\Release\HumanCommuntity.exe
-G:\01Thuctap\2023_12_1\HumanCommuntity\HumanCommuntity\bin\Release\HumanCommuntity.pdb
-G:\01Thuctap\2023_12_1\HumanCommuntity\HumanCommuntity\obj\Release\HumanCommuntity.csproj.AssemblyReference.cache
-G:\01Thuctap\2023_12_1\HumanCommuntity\HumanCommuntity\obj\Release\HumanCommuntity.csproj.SuggestedBindingRedirects.cache
-G:\01Thuctap\2023_12_1\HumanCommuntity\HumanCommuntity\obj\Release\HumanCommuntity.csproj.CoreCompileInputs.cache
-G:\01Thuctap\2023_12_1\HumanCommuntity\HumanCommuntity\obj\Release\HumanCommuntity.exe
-G:\01Thuctap\2023_12_1\HumanCommuntity\HumanCommuntity\obj\Release\HumanCommuntity.pdb

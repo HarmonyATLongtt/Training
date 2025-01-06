@@ -1,7 +1,0 @@
-E:\trainC#\Training\Nguyen-Quang-Trung\testC#\test\ConsoleApp13\bin\Debug\ConsoleApp13.exe.config
-E:\trainC#\Training\Nguyen-Quang-Trung\testC#\test\ConsoleApp13\bin\Debug\ConsoleApp13.exe
-E:\trainC#\Training\Nguyen-Quang-Trung\testC#\test\ConsoleApp13\bin\Debug\ConsoleApp13.pdb
-E:\trainC#\Training\Nguyen-Quang-Trung\testC#\test\ConsoleApp13\obj\Debug\ConsoleApp13.csprojAssemblyReference.cache
-E:\trainC#\Training\Nguyen-Quang-Trung\testC#\test\ConsoleApp13\obj\Debug\ConsoleApp13.csproj.CoreCompileInputs.cache
-E:\trainC#\Training\Nguyen-Quang-Trung\testC#\test\ConsoleApp13\obj\Debug\ConsoleApp13.exe
-E:\trainC#\Training\Nguyen-Quang-Trung\testC#\test\ConsoleApp13\obj\Debug\ConsoleApp13.pdb

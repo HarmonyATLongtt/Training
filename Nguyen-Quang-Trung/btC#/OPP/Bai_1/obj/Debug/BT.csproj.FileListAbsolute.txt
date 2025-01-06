@@ -1,7 +1,0 @@
-E:\trainC#\Training\Nguyen-Quang-Trung\btC#\OPP\BT\bin\Debug\Bai_1.exe.config
-E:\trainC#\Training\Nguyen-Quang-Trung\btC#\OPP\BT\bin\Debug\Bai_1.exe
-E:\trainC#\Training\Nguyen-Quang-Trung\btC#\OPP\BT\bin\Debug\Bai_1.pdb
-E:\trainC#\Training\Nguyen-Quang-Trung\btC#\OPP\BT\obj\Debug\BT.csprojAssemblyReference.cache
-E:\trainC#\Training\Nguyen-Quang-Trung\btC#\OPP\BT\obj\Debug\BT.csproj.CoreCompileInputs.cache
-E:\trainC#\Training\Nguyen-Quang-Trung\btC#\OPP\BT\obj\Debug\Bai_1.exe
-E:\trainC#\Training\Nguyen-Quang-Trung\btC#\OPP\BT\obj\Debug\Bai_1.pdb
