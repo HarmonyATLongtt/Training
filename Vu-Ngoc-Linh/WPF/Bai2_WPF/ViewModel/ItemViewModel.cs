@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -27,7 +28,18 @@ namespace Bai2_WPF.ViewModel
                 OnPropertyChanged(nameof(SheetName));
             }
         }
-
-
+        public ObservableCollection<object> People
+        {
+            get => Model.People;
+            set
+            {
+                Model.People = value;
+                OnPropertyChanged(nameof(SheetName));
+            }
+        }
+        public ItemViewModel(ItemModel model)
+        {
+            Model = model;
+        }
     }
 }

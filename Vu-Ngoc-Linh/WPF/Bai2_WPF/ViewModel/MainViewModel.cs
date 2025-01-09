@@ -6,22 +6,19 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using Bai2_WPF.Command;
 using Bai2_WPF.Model;
 using Microsoft.Win32;
 using OfficeOpenXml;
-using OfficeOpenXml.Style;
-using OfficeOpenXml.Table;
 
 namespace Bai2_WPF.ViewModel
 {
     public class MainViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
+
         public MainModel Model { get; private set; }
 
         public string FilePath
@@ -46,51 +43,12 @@ namespace Bai2_WPF.ViewModel
         }
 
         private ObservableCollection<ItemViewModel> _items;
-
-
-        public string SelectedSheet
+        public ObservableCollection<ItemViewModel> Items
         {
-            get => Model.SelectedSheet;
+            get => _items;
             set
             {
-                Model.SelectedSheet = value;
-                OnPropertyChanged();
-                Display();
-            }
-        }
-        public ObservableCollection<string> SheetNames
-        {
-            get => Model.SheetNames;
-            set
-            {
-                Model.SheetNames = value;
-                OnPropertyChanged();
-            }
-        }
-        public ObservableCollection<Student> Students
-        {
-            get => Model.Students;
-            set
-            {
-                Model.Students = value;
-                OnPropertyChanged();
-            }
-        }
-        public ObservableCollection<Teacher> Teachers
-        {
-            get => Model.Teachers;
-            set
-            {
-                Model.Teachers = value;
-                OnPropertyChanged();
-            }
-        }
-        public ObservableCollection<Employee> Employees
-        {
-            get => Model.Employees;
-            set
-            {
-                Model.Employees = value;
+                _items = value;
                 OnPropertyChanged();
             }
         }
@@ -101,6 +59,7 @@ namespace Bai2_WPF.ViewModel
         public MainViewModel(MainModel model)
         {
             Model = model;
+            Items = new ObservableCollection<ItemViewModel>();
             ImportData = new RelayCommand(ImportFile, CanImportFile);
             ExportData = new RelayCommand(ExportFile, CanExportFile);
         }
@@ -118,63 +77,41 @@ namespace Bai2_WPF.ViewModel
         private void ImportFile(object obj)
         {
             string filePath = "";
-            OpenFileDialog dialog = new OpenFileDialog();
+            OpenFileDialog dialog = new OpenFileDialog
+            {
+                Filter = "Excel files (*.xlsx)|*.xlsx|Text files (*.txt)|*.txt|All files (*.*)|*.*"
+            };
 
-            dialog.Filter = "Excel files (*.xlsx)|*.xlsx|Text files (*.txt)|*.txt|All files (*.*)|*.*";
             if (dialog.ShowDialog() == true)
             {
                 filePath = dialog.FileName;
             }
+
             if (string.IsNullOrEmpty(filePath))
             {
                 MessageBox.Show("Invalid file.");
                 return;
             }
+
             FilePath = filePath;
             FileInfo fileInfo = new FileInfo(filePath);
             using (ExcelPackage package = new ExcelPackage(fileInfo))
             {
                 ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
-                SheetNames.Clear();
-                Students.Clear();
-                Teachers.Clear();
-                Employees.Clear();
+
                 foreach (ExcelWorksheet worksheet in package.Workbook.Worksheets)
                 {
-                    DataTable dt = new DataTable();
-                    dt = worksheet.Cells[worksheet.Dimension.Start.Row, worksheet.Dimension.Start.Column,
-                                    worksheet.Dimension.End.Row, worksheet.Dimension.End.Column].ToDataTable();
+                    DataTable dt = worksheet.Cells[worksheet.Dimension.Start.Row, worksheet.Dimension.Start.Column,
+                                                    worksheet.Dimension.End.Row, worksheet.Dimension.End.Column].ToDataTable();
                     dt.TableName = worksheet.Name;
-                    LoadData(dt);
-                    SheetNames.Add(dt.TableName);
+                    var itemModel = LoadData(dt);
+                    Items.Add(new ItemViewModel(itemModel));
+
                 }
-                SelectedSheet = SheetNames.FirstOrDefault();
+                SelectedItem = Items.FirstOrDefault();
             }
         }
-        public ObservableCollection<object> CurrentObject
-        {
-            get => Model.CurrentObject;
-            set
-            {
-                Model.CurrentObject = value;
-                OnPropertyChanged();
-            }
-        }
-        public void Display()
-        {
-            if (SelectedSheet == "Student")
-            {
-                CurrentObject = new ObservableCollection<object>(Students.Cast<object>());
-            }
-            else if (SelectedSheet == "Teacher")
-            {
-                CurrentObject = new ObservableCollection<object>(Teachers.Cast<object>());
-            }
-            else
-            {
-                CurrentObject = new ObservableCollection<object>(Employees.Cast<object>());
-            }
-        }
+
         private T MapDataRowToObject<T>(DataRow row) where T : new()
         {
             T obj = new T();
@@ -188,14 +125,18 @@ namespace Bai2_WPF.ViewModel
             }
             return obj;
         }
-        private void LoadData(DataTable dt)
+
+        private ItemModel LoadData(DataTable dt)
         {
             string name = dt.TableName;
+            var list = new List<object>(); 
+
             if (name == "Student")
             {
                 foreach (DataRow row in dt.Rows)
                 {
-                    Students.Add(MapDataRowToObject<Student>(row));
+                    var student = MapDataRowToObject<Student>(row);
+                    list.Add(student);
                 }
             }
             else if (name == "Teacher")
@@ -205,7 +146,7 @@ namespace Bai2_WPF.ViewModel
                     var teacher = MapDataRowToObject<Teacher>(row);
                     teacher.TaxCoe = TaxData.GetTaxCoe(teacher.Age, teacher.Income);
                     teacher.Tax = teacher.GetTax();
-                    Teachers.Add(teacher);
+                    list.Add(teacher);
                 }
             }
             else if (name == "Employee")
@@ -215,75 +156,72 @@ namespace Bai2_WPF.ViewModel
                     var employee = MapDataRowToObject<Employee>(row);
                     employee.TaxCoe = TaxData.GetTaxCoe(employee.Age, employee.Income);
                     employee.Tax = employee.GetTax();
-                    Employees.Add(employee);
+                    list.Add(employee);
                 }
             }
+
+            return new ItemModel(name, list);  
         }
-        private DataTable ConvertToDataTable<T>(IEnumerable<T> data, string tableName)
+        private bool CanExportFile(object obj)
         {
-            DataTable dt = new DataTable(tableName);
-            foreach (var property in typeof(T).GetProperties())
-            {
-                dt.Columns.Add(property.Name, property.PropertyType);
-            }
-            foreach (var item in data)
-            {
-                DataRow row = dt.NewRow();
-                foreach (var property in typeof(T).GetProperties())
-                {
-                    row[property.Name] = property.GetValue(item);
-                }
-                dt.Rows.Add(row);
-            }
-            return dt;
-        }
-        private List<DataTable> dataTables = new List<DataTable>();
-        private void importDataTables()
-        {
-            dataTables.Clear();
-
-            if (Students.Any())
-            {
-                dataTables.Add(ConvertToDataTable(Students, "Student"));
-            }
-
-            if (Teachers.Any())
-            {
-                dataTables.Add(ConvertToDataTable(Teachers, "Teacher"));
-            }
-
-            if (Employees.Any())
-            {
-                dataTables.Add(ConvertToDataTable(Employees, "Employee"));
-            }
+            return true;
         }
 
         private void ExportFile(object obj)
         {
-            importDataTables();
-            SaveFileDialog saveDialog = new SaveFileDialog();
-            saveDialog.Filter = "Excel files (*.xlsx)|*.xlsx|Text files (*.txt)|*.txt|All files (*.*)|*.*";
-            saveDialog.FileName = "";
-            if (saveDialog.ShowDialog() == true)
+            if (!Items.Any())
             {
-                FileInfo fileInfo = new FileInfo(saveDialog.FileName);
-                using (ExcelPackage pkg = new ExcelPackage(fileInfo))
+                MessageBox.Show("No data to export!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Filter = "Excel files (*.xlsx)|*.xlsx|All files (*.*)|*.*",
+            };
+
+            if (saveFileDialog.ShowDialog() != true) return;
+
+            try
+            {
+                using var package = new ExcelPackage(new FileInfo(saveFileDialog.FileName));
+
+                foreach (var item in Items)
                 {
-                    foreach (DataTable dt in dataTables)
-                    {
-                        ExcelWorksheet ws = pkg.Workbook.Worksheets.Add(dt.TableName); //them sheet
-                        ws.Cells["A1"].LoadFromDataTable(dt, true); //load data tu dt vao sheet tu o A1, true la load ca header
-                    }
-                    pkg.Save();
-                    MessageBox.Show("Export successfully!");
-                    return;
+                    var dataTable = ConvertToDataTable(item.Model.People, item.SheetName);
+                    var worksheet = package.Workbook.Worksheets.Add(item.SheetName);
+                    worksheet.Cells["A1"].LoadFromDataTable(dataTable, true);
                 }
+
+                package.Save();
+                MessageBox.Show("Data exported successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error during export: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private bool CanExportFile(object obj)
+        private DataTable ConvertToDataTable<T>(IEnumerable<T> data, string tableName)
         {
-            return true;
+            DataTable dt = new DataTable();
+
+            foreach (var property in typeof(T).GetProperties())
+            {
+                dt.Columns.Add(property.Name, Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType);
+            }
+
+            foreach (var item in data)
+            {
+                var row = dt.NewRow();
+                foreach (var property in typeof(T).GetProperties())
+                {
+                    row[property.Name] = property.GetValue(item) ?? DBNull.Value;
+                }
+                dt.Rows.Add(row);
+            }
+            dt.TableName = tableName;
+            return dt;
         }
     }
 }
