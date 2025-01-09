@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -106,12 +107,11 @@ namespace Bai2_WPF.ViewModel
                     dt.TableName = worksheet.Name;
                     var itemModel = LoadData(dt);
                     Items.Add(new ItemViewModel(itemModel));
-
                 }
                 SelectedItem = Items.FirstOrDefault();
             }
         }
-
+        
         private T MapDataRowToObject<T>(DataRow row) where T : new()
         {
             T obj = new T();
@@ -188,33 +188,39 @@ namespace Bai2_WPF.ViewModel
 
                 foreach (var item in Items)
                 {
-                    var dataTable = ConvertToDataTable(item.Model.People, item.SheetName);
+                    Debug.WriteLine($"Sheet: {item.SheetName}, People count: {item.Model.People.Count}");
+                    
+                    var dataTable = ConvertToDataTable(item.People, item.SheetName);
                     var worksheet = package.Workbook.Worksheets.Add(item.SheetName);
                     worksheet.Cells["A1"].LoadFromDataTable(dataTable, true);
                 }
-
                 package.Save();
                 MessageBox.Show("Data exported successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error during export: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(ex.Message+"\n"+ex.StackTrace, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         private DataTable ConvertToDataTable<T>(IEnumerable<T> data, string tableName)
         {
             DataTable dt = new DataTable();
+            var getType = data.First().GetType();
 
-            foreach (var property in typeof(T).GetProperties())
+            var declaring = getType.DeclaringType;
+            var baseType = getType.BaseType;
+            var reflected = getType.ReflectedType;
+            var undelying = getType.UnderlyingSystemType;
+
+            foreach (var property in undelying.GetProperties())
             {
                 dt.Columns.Add(property.Name, Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType);
             }
-
             foreach (var item in data)
             {
                 var row = dt.NewRow();
-                foreach (var property in typeof(T).GetProperties())
+                foreach (var property in undelying.GetProperties())
                 {
                     row[property.Name] = property.GetValue(item) ?? DBNull.Value;
                 }
