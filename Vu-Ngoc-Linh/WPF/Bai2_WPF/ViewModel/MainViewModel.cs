@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -13,6 +14,7 @@ using Bai2_WPF.Command;
 using Bai2_WPF.Model;
 using Microsoft.Win32;
 using OfficeOpenXml;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Bai2_WPF.ViewModel
 {
@@ -96,6 +98,7 @@ namespace Bai2_WPF.ViewModel
 
             FilePath = filePath;
             FileInfo fileInfo = new FileInfo(filePath);
+            Items.Clear();
             using (ExcelPackage package = new ExcelPackage(fileInfo))
             {
                 ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
@@ -111,21 +114,86 @@ namespace Bai2_WPF.ViewModel
                 SelectedItem = Items.FirstOrDefault();
             }
         }
-        
-        private T MapDataRowToObject<T>(DataRow row) where T : new()
+
+        private T MapDataRowToObject<T>(DataRow row, Dictionary<string, string> columnMapping) where T : new()
         {
             T obj = new T();
             foreach (var property in typeof(T).GetProperties())
             {
-                if (row.Table.Columns.Contains(property.Name) && property.CanWrite)
+                if (!property.CanWrite) continue;
+
+                // Lấy tên cột từ ánh xạ
+                string columnName = columnMapping.ContainsKey(property.Name)
+                    ? columnMapping[property.Name]
+                    : property.Name;
+
+                if (row.Table.Columns.Contains(columnName))
                 {
-                    var value = row[property.Name];
-                    property.SetValue(obj, Convert.ChangeType(value, property.PropertyType));
+                    var value = row[columnName];
+                    if (value == DBNull.Value) continue;
+                    try
+                    {
+                        if (property.PropertyType == typeof(int))
+                        {
+                            property.SetValue(obj, int.TryParse(value.ToString(), out int intValue) ? intValue : 0);
+                        }
+                        else if (property.PropertyType == typeof(double))
+                        {
+                            property.SetValue(obj, double.TryParse(value.ToString(), out double doubleValue) ? doubleValue : 0.0);
+                        }
+                        else if(property.Name == "DOB")
+                        {
+                            if(value is DateTime dateValue)
+                            {
+                                property.SetValue(obj, dateValue.ToString("dd/MM/yyyy"));
+                            }
+                            else property.SetValue(obj, value.ToString());
+                        }
+                        else if (property.PropertyType == typeof(string))
+                        {
+                            property.SetValue(obj, value.ToString());
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                    }
                 }
             }
             return obj;
         }
-
+        private Dictionary<string, string> studentmapping = new Dictionary<string, string>
+        {
+            {"STT", "STT" },
+            { "Name", "Tên" },
+            { "Age", "Tuổi" },
+            {"ID", "ID" },
+            {"DOB", "Ngày sinh" },
+            { "School", "Trường" },
+            {"Class", "Lớp" }
+        };
+        private Dictionary<string, string> teachermapping = new Dictionary<string, string>
+        {
+            {"STT", "STT" },
+            { "Name", "Tên" },
+            { "Age", "Tuổi" },
+            {"ID", "ID" },
+            {"DOB", "Ngày sinh" },
+            { "School", "Trường" },
+            {"Class", "Lớp" },
+            {"Income", "Thu nhập" }
+        };
+        private Dictionary<string, string> employeemapping = new Dictionary<string, string>
+        {
+            {"STT", "STT" },
+            { "Name", "Tên" },
+            { "Age", "Tuổi" },
+            {"ID", "ID" },
+            {"DOB", "Ngày sinh" },
+            { "Company", "Công ty" },
+            {"Team", "Phòng ban" },
+            {"Role", "Chức vụ" },
+            {"Income", "Thu nhập" }
+        };
         private ItemModel LoadData(DataTable dt)
         {
             string name = dt.TableName;
@@ -135,15 +203,15 @@ namespace Bai2_WPF.ViewModel
             {
                 foreach (DataRow row in dt.Rows)
                 {
-                    var student = MapDataRowToObject<Student>(row);
-                    list.Add(student);
+                    var obj = MapDataRowToObject<Student>(row, studentmapping);
+                    list.Add(obj);
                 }
             }
             else if (name == "Teacher")
             {
                 foreach (DataRow row in dt.Rows)
                 {
-                    var teacher = MapDataRowToObject<Teacher>(row);
+                    var teacher = MapDataRowToObject<Teacher>(row, teachermapping);
                     teacher.TaxCoe = TaxData.GetTaxCoe(teacher.Age, teacher.Income);
                     teacher.Tax = teacher.GetTax();
                     list.Add(teacher);
@@ -153,7 +221,7 @@ namespace Bai2_WPF.ViewModel
             {
                 foreach (DataRow row in dt.Rows)
                 {
-                    var employee = MapDataRowToObject<Employee>(row);
+                    var employee = MapDataRowToObject<Employee>(row, employeemapping);
                     employee.TaxCoe = TaxData.GetTaxCoe(employee.Age, employee.Income);
                     employee.Tax = employee.GetTax();
                     list.Add(employee);
@@ -213,21 +281,40 @@ namespace Bai2_WPF.ViewModel
             var reflected = getType.ReflectedType;
             var undelying = getType.UnderlyingSystemType;
 
+            Dictionary<string, string> columnMapping = GetColumnMapping(getType);
             foreach (var property in undelying.GetProperties())
             {
-                dt.Columns.Add(property.Name, Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType);
+                string columnName = property.Name;
+                if (columnMapping.ContainsKey(columnName))
+                {
+                    columnName = columnMapping[columnName];
+                }
+                dt.Columns.Add(columnName, Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType);
             }
+
             foreach (var item in data)
             {
                 var row = dt.NewRow();
-                foreach (var property in undelying.GetProperties())
+                foreach (var property in getType.GetProperties())
                 {
-                    row[property.Name] = property.GetValue(item) ?? DBNull.Value;
+                    string columnName = property.Name;
+                    if (columnMapping.ContainsKey(columnName))
+                    {
+                        columnName = columnMapping[columnName]; // Lấy tên cột đã được dịch
+                    }
+                    row[columnName] = property.GetValue(item) ?? DBNull.Value;
                 }
                 dt.Rows.Add(row);
             }
             dt.TableName = tableName;
             return dt;
+        }
+
+        private Dictionary<string, string> GetColumnMapping(Type objectType)
+        {
+            if (objectType == typeof(Student)) return studentmapping;
+            if (objectType == typeof(Teacher)) return teachermapping;
+                return employeemapping;
         }
     }
 }

@@ -57,7 +57,8 @@
         <Button Content="Import" Command="{Binding ImportData}" 
                 Grid.Column="3" Grid.Row="0" HorizontalAlignment="Center">
         </Button>
-        <DataGrid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Margin="30,5" TextBlock.FontSize="15"
+        <DataGrid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" 
+                  Margin="30,5" TextBlock.FontSize="15"
                   VerticalAlignment="Stretch" ItemsSource="{Binding SelectedItem.People, UpdateSourceTrigger=PropertyChanged}"
                   AutoGenerateColumns="True">
         </DataGrid>

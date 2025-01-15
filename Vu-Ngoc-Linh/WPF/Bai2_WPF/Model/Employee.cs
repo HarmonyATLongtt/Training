@@ -10,21 +10,24 @@ namespace Bai2_WPF.Model
 {
     public class Employee : Person
     {
-        public string ID { get; set; }
+        public int STT { get; set; }
         public string Name { get; set; }
         public int Age { get; set; }
-        public string Job { get; set; }
+        public string ID { get; set; }
+        public string DOB { get; set; }
+        public string Company { get; set; }
+        public string Team { get; set; }
+        public string Role { get; set; }
         public int Income { get; set; }
         public double TaxCoe { get; set; }
         public double Tax { get; set; }
         public Employee() : base() { }
 
-        public Employee(string id, string name, int age, string jobtitle, int income) : base(id, name, age)
+        public Employee(int stt, string name, int age, string id, string dob, string company, string team,  string jobtitle, int income) : base(stt, name, age, id, dob)
         {
-            ID = id;
-            Name = name;
-            Age = age;
-            Job = jobtitle;
+            Company = company;
+            Team = team;
+            Role = jobtitle;
             this.Income = income;
             this.TaxCoe = TaxData.GetTaxCoe(age, income);
             this.Tax = GetTax();
