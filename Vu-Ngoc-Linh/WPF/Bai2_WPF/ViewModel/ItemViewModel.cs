@@ -28,7 +28,7 @@ namespace Bai2_WPF.ViewModel
                 OnPropertyChanged(nameof(SheetName));
             }
         }
-        public ObservableCollection<object> People
+        public ObservableCollection<Person> People
         {
             get => Model.People;
             set

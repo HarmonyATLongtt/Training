@@ -7,8 +7,10 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Input;
 using Bai2_WPF.Command;
 using Bai2_WPF.Model;
@@ -108,58 +110,15 @@ namespace Bai2_WPF.ViewModel
                     DataTable dt = worksheet.Cells[worksheet.Dimension.Start.Row, worksheet.Dimension.Start.Column,
                                                     worksheet.Dimension.End.Row, worksheet.Dimension.End.Column].ToDataTable();
                     dt.TableName = worksheet.Name;
-                    var itemModel = LoadData(dt);
+                    ItemModel itemModel;
+                    if (dt.TableName == "Student") itemModel = LoadData<Student>(dt, studentmapping);
+                    else if(dt.TableName == "Teacher") itemModel = LoadData<Teacher> (dt, teachermapping);
+                    else itemModel = LoadData<Employee>(dt, employeemapping);
+
                     Items.Add(new ItemViewModel(itemModel));
                 }
                 SelectedItem = Items.FirstOrDefault();
             }
-        }
-
-        private T MapDataRowToObject<T>(DataRow row, Dictionary<string, string> columnMapping) where T : new()
-        {
-            T obj = new T();
-            foreach (var property in typeof(T).GetProperties())
-            {
-                if (!property.CanWrite) continue;
-
-                // Lấy tên cột từ ánh xạ
-                string columnName = columnMapping.ContainsKey(property.Name)
-                    ? columnMapping[property.Name]
-                    : property.Name;
-
-                if (row.Table.Columns.Contains(columnName))
-                {
-                    var value = row[columnName];
-                    if (value == DBNull.Value) continue;
-                    try
-                    {
-                        if (property.PropertyType == typeof(int))
-                        {
-                            property.SetValue(obj, int.TryParse(value.ToString(), out int intValue) ? intValue : 0);
-                        }
-                        else if (property.PropertyType == typeof(double))
-                        {
-                            property.SetValue(obj, double.TryParse(value.ToString(), out double doubleValue) ? doubleValue : 0.0);
-                        }
-                        else if(property.Name == "DOB")
-                        {
-                            if(value is DateTime dateValue)
-                            {
-                                property.SetValue(obj, dateValue.ToString("dd/MM/yyyy"));
-                            }
-                            else property.SetValue(obj, value.ToString());
-                        }
-                        else if (property.PropertyType == typeof(string))
-                        {
-                            property.SetValue(obj, value.ToString());
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                    }
-                }
-            }
-            return obj;
         }
         private Dictionary<string, string> studentmapping = new Dictionary<string, string>
         {
@@ -194,41 +153,64 @@ namespace Bai2_WPF.ViewModel
             {"Role", "Chức vụ" },
             {"Income", "Thu nhập" }
         };
-        private ItemModel LoadData(DataTable dt)
+        private ItemModel LoadData<T>(DataTable dt, Dictionary<string, string> columnMapping) where T : Person, new()
         {
-            string name = dt.TableName;
-            var list = new List<object>(); 
+            var list = new List<T>();
 
-            if (name == "Student")
+            foreach (DataRow row in dt.Rows)
             {
-                foreach (DataRow row in dt.Rows)
+                var obj = new T();
+                foreach (var property in typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
                 {
-                    var obj = MapDataRowToObject<Student>(row, studentmapping);
-                    list.Add(obj);
-                }
-            }
-            else if (name == "Teacher")
-            {
-                foreach (DataRow row in dt.Rows)
-                {
-                    var teacher = MapDataRowToObject<Teacher>(row, teachermapping);
-                    teacher.TaxCoe = TaxData.GetTaxCoe(teacher.Age, teacher.Income);
-                    teacher.Tax = teacher.GetTax();
-                    list.Add(teacher);
-                }
-            }
-            else if (name == "Employee")
-            {
-                foreach (DataRow row in dt.Rows)
-                {
-                    var employee = MapDataRowToObject<Employee>(row, employeemapping);
-                    employee.TaxCoe = TaxData.GetTaxCoe(employee.Age, employee.Income);
-                    employee.Tax = employee.GetTax();
-                    list.Add(employee);
-                }
-            }
+                    if (!property.CanWrite) continue;
 
-            return new ItemModel(name, list);  
+                    // Lấy tên cột từ ánh xạ
+                    // xử lý nếu tên cột là tiếng việt hoặc tiếng anh
+                    string columnName, columnName2 = "";
+                    if (columnMapping.ContainsKey(property.Name))
+                    {
+                        columnName = columnMapping[property.Name];
+                        columnName2 = property.Name;
+                    }
+                    else
+                    {
+                        columnName = property.Name;
+                    }
+
+                    if (row.Table.Columns.Contains(columnName) || row.Table.Columns.Contains(columnName2))
+                    {
+                        var value = row.Table.Columns.Contains(columnName)
+                            ? row[columnName]
+                            : row[columnName2];
+                        if (value == DBNull.Value) continue;
+                        try
+                        {
+                            if (property.PropertyType == typeof(int))
+                            {
+                                property.SetValue(obj, int.TryParse(value.ToString(), out int intValue) ? intValue : 0);
+                            }
+                            else if (property.PropertyType == typeof(double))
+                            {
+                                property.SetValue(obj, double.TryParse(value.ToString(), out double doubleValue) ? doubleValue : 0.0);
+                            }
+                            else if (property.PropertyType == typeof(string))
+                            {
+                                if (value is DateTime dateValue) //xử lý cho thuộc tính DOB
+                                {
+                                    property.SetValue(obj, dateValue.ToString("dd/MM/yyyy"));
+                                }
+                                else
+                                    property.SetValue(obj, value.ToString());
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                        }
+                    }
+                }
+                list.Add(obj);
+            }
+            return new ItemModel(typeof(T).Name, list.Cast<Person>());
         }
         private bool CanExportFile(object obj)
         {
@@ -285,10 +267,6 @@ namespace Bai2_WPF.ViewModel
             foreach (var property in undelying.GetProperties())
             {
                 string columnName = property.Name;
-                if (columnMapping.ContainsKey(columnName))
-                {
-                    columnName = columnMapping[columnName];
-                }
                 dt.Columns.Add(columnName, Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType);
             }
 
@@ -298,10 +276,6 @@ namespace Bai2_WPF.ViewModel
                 foreach (var property in getType.GetProperties())
                 {
                     string columnName = property.Name;
-                    if (columnMapping.ContainsKey(columnName))
-                    {
-                        columnName = columnMapping[columnName]; // Lấy tên cột đã được dịch
-                    }
                     row[columnName] = property.GetValue(item) ?? DBNull.Value;
                 }
                 dt.Rows.Add(row);

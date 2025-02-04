@@ -10,11 +10,11 @@ namespace Bai2_WPF.Model
     public class ItemModel
     {
         public string SheetName { get; set; }
-        public ObservableCollection<object> People { get; set; }
-        public ItemModel(string sheetName, IEnumerable<object> people)
+        public ObservableCollection<Person> People { get; set; }
+        public ItemModel(string sheetName, IEnumerable<Person> people)
         {
             SheetName = sheetName;
-            People = new ObservableCollection<object>(people);
+            People = new ObservableCollection<Person>(people);
         }
     }
 }
