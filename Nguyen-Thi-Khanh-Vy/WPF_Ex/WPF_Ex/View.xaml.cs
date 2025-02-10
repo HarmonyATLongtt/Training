@@ -3,6 +3,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using WPF_Ex.Model;
+using WPF_Ex.ViewModels;
 
 namespace WPF_Ex
 {
@@ -45,6 +47,10 @@ namespace WPF_Ex
                         {
                             Header = prop.Name,
                             Binding = new Binding(prop.Name)
+                            {
+                                Mode = BindingMode.TwoWay,
+                                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+                            }
                         };
                         dataGrid.Columns.Add(col);
                     }
@@ -65,7 +71,31 @@ namespace WPF_Ex
 
             return propertyList;
         }
+        private void DataGrid_AddingNewItem(object sender, AddingNewItemEventArgs e)
+        {
+            var viewModel = DataContext as MainViewModel;
 
-
+            // Kiểm tra nếu viewModel.SelectedItem là một đối tượng ItemModel
+            if (viewModel != null && viewModel.SelectedItem != null)
+            {
+                // So sánh dựa trên thuộc tính SheetName (hoặc thuộc tính khác)
+                if (viewModel.SelectedItem.SheetName == "Student")
+                {
+                    e.NewItem = new Student(); // Tạo đối tượng Student mới
+                }
+                else if (viewModel.SelectedItem.SheetName == "Teacher")
+                {
+                    e.NewItem = new Teacher(); // Tạo đối tượng Teacher mới
+                }
+                else if (viewModel.SelectedItem.SheetName == "Employee")
+                {
+                    e.NewItem = new Employee(); // Tạo đối tượng Employee mới
+                }
+                else
+                {
+                    e.NewItem = new Person(); // Mặc định tạo đối tượng Person
+                }
+            }
+        }
     }
 }
