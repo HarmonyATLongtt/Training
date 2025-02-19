@@ -1,0 +1,108 @@
+﻿<Window x:Class="BaiTapThem.View.CongTyConView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BaiTapThem.View"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
+        Title="Danh Sach Cong Ty Con" Height="600" Width="800">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="\resources\mainresources.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="150"></RowDefinition>
+            <RowDefinition Height="40"></RowDefinition>
+            <RowDefinition></RowDefinition>
+            <RowDefinition Height="40"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" Margin="10, 10, 10, 20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="600"></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Grid Grid.Column="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120"></ColumnDefinition>
+                            <ColumnDefinition ></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition></RowDefinition>
+                            <RowDefinition></RowDefinition>
+                            <RowDefinition></RowDefinition>
+                            <RowDefinition></RowDefinition>
+                        </Grid.RowDefinitions>
+
+                        <Label VerticalAlignment="Center" Grid.Column="0" Grid.Row="0" Content="Ten Cong Ty :"></Label>
+                        <Label VerticalAlignment="Center" Grid.Column="0" Grid.Row="1" Content="Dia Chi :"></Label>
+                        <Label VerticalAlignment="Center" Grid.Column="0" Grid.Row="2" Content="Tong Giam Doc :"></Label>
+                        <Label VerticalAlignment="Center" Grid.Column="0" Grid.Row="3" Content="Ngay Thanh Lap :"></Label>
+
+                        <TextBox VerticalAlignment="Center" Margin="0,3,10,3" Grid.Column="1" Grid.Row="0" Text="{Binding EditableItem.Ten}"></TextBox>
+                        <TextBox VerticalAlignment="Center" Margin="0,3,10,3" Grid.Column="1" Grid.Row="1" Text="{Binding EditableItem.Diachi}" ></TextBox>
+                        <TextBox VerticalAlignment="Center" Margin="0,3,10,3" Grid.Column="1" Grid.Row="2" Text="{Binding EditableItem.TongGiamDoc}" ></TextBox>
+                        <TextBlock VerticalAlignment="Center" Margin="0,3,10,3" Grid.Column="1" Grid.Row="3" Text="{Binding EditableItem.NgayThanhLap, StringFormat=dd/MM/yyyy}"></TextBlock>
+                    </Grid>
+                    <Grid Grid.Column="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120"></ColumnDefinition>
+                            <ColumnDefinition></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition></RowDefinition>
+                            <RowDefinition></RowDefinition>
+                            <RowDefinition></RowDefinition>
+                            <RowDefinition></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Label VerticalAlignment="Center" Grid.Column="0" Grid.Row="0" Content="So Giay Phep KD :"></Label>
+                        <Label VerticalAlignment="Center" Grid.Column="0" Grid.Row="1" Content="Mieu Ta :"></Label>
+                        <Label VerticalAlignment="Center" Grid.Column="0" Grid.Row="2" Content="Tong So Nhan Vien :"></Label>
+                        <TextBox VerticalAlignment="Center" Margin="0,3,10,3" Grid.Column="1" Grid.Row="0" Text="{Binding EditableItem.SoGiayPhepKinhDoanh }" ></TextBox>
+                        <TextBox VerticalAlignment="Center" Margin="0,3,10,3" Grid.Column="1" Grid.Row="1" Text="{Binding EditableItem.MieuTa }" ></TextBox>
+                        <TextBlock VerticalAlignment="Center" Margin="0,3,10,3" Grid.Column="1" Grid.Row="2" Text="{Binding EditableItem.TongSoNhanVien }" ></TextBlock>
+                    </Grid>
+                </Grid>
+            </Grid>
+            <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Center" Margin="0,10,10,0">
+                <Button Content="Add" Command="{Binding themCongTyCommand}" Style="{StaticResource BaseButtonStyle}" />
+                <Button Content="Update" Command="{Binding suaCongTyCommand}" Style="{StaticResource BaseButtonStyle}" />
+                <Button Content="Delete" Command="{Binding xoaCongTyCommand}" Style="{StaticResource BaseButtonStyle}" />
+            </StackPanel>
+        </Grid>
+        <Grid Grid.Row="1">
+            <Button Style="{StaticResource BaseButtonStyle}" Content="Xem Danh Sach Phong Ban" Command="{Binding xemDsPhongBanCommand}" Width="150" Height="30" Margin="10,0,0,0" HorizontalAlignment="Left" />
+        </Grid>
+        <Grid Grid.Row="2">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto">
+                <ListView ItemsSource="{Binding DsCongTyCon}" SelectedItem="{Binding SelectedItem}">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Ten Cong Ty" DisplayMemberBinding ="{Binding Ten}" Width="150"></GridViewColumn>
+                            <GridViewColumn Header="Dia Chi" DisplayMemberBinding ="{Binding Diachi}" Width="150"></GridViewColumn>
+                            <GridViewColumn Header="Tong Giam Doc" DisplayMemberBinding ="{Binding TongGiamDoc}" Width="150"></GridViewColumn>
+                            <GridViewColumn Header="Ngay Thanh Lap" DisplayMemberBinding ="{Binding NgayThanhLap, StringFormat=dd/MM/yyyy}" Width="150"></GridViewColumn>
+                            <GridViewColumn Header="So Giay Phep Kinh Doanh" DisplayMemberBinding ="{Binding SoGiayPhepKinhDoanh}" Width="150"></GridViewColumn>
+                            <GridViewColumn Header="Mieu Ta" DisplayMemberBinding ="{Binding MieuTa}" Width="150"></GridViewColumn>
+                            <GridViewColumn Header="Tong So Nhan Vien" DisplayMemberBinding ="{Binding TongSoNhanVien}" Width="150"></GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </ScrollViewer>
+        </Grid>
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Command="{Binding OkCommand}" Content="OK" Style="{StaticResource btnOk}" ></Button>
+            <Button Command="{Binding CancelCommand}" Content="Cancel" Style="{StaticResource btnCancel}"></Button>
+        </StackPanel>
+    </Grid>
+</Window>
