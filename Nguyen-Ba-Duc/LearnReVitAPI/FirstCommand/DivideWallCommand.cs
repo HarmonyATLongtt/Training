@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Xaml;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Structure;
@@ -17,6 +19,9 @@ namespace FirstCommand
     [TransactionAttribute(TransactionMode.Manual)]
     public class DivideWallCommand : IExternalCommand
     {
+        // Note: sử lý trường hợp cột không đồng phẳng, lấy ra face ở mặt ngoài cùng
+        // Sử lý trường hợp tường basic giao với stacked wall
+        // Sử lý trường hợp curtain wall
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UIApplication uiapp = commandData.Application;
@@ -39,29 +44,11 @@ namespace FirstCommand
 
                         if (wallType != null)
                         {
-                            switch (wallType.Kind)
-                            {
-                                case WallKind.Basic:
-                                    listLines = CutBasicWall(doc, selectedWall);
-                                    break;
-
-                                case WallKind.Stacked:
-                                    listLines = CutBasicWall(doc, selectedWall);
-                                    break;
-
-                                case WallKind.Curtain:
-                                    listLines = CutBasicWall(doc, selectedWall);
-                                    break;
-
-                                default:
-                                    TaskDialog.Show("Notif", "Unknown wall");
-                                    break;
-                            }
+                            listLines = CutWall(doc, selectedWall);
 
                             using (Transaction trans = new Transaction(doc, "Divide a wall"))
                             {
                                 trans.Start();
-                                //doc.Delete(new ElementId(393306));
                                 foreach (Element ele in GetElementIds(doc, selectedWall))
                                 {
                                     doc.Delete(ele.Id);
@@ -106,40 +93,129 @@ namespace FirstCommand
 
         private IList<Element> GetElementIds(Document doc, Wall selectedWall)
         {
-            ElementIntersectsElementFilter filter = new ElementIntersectsElementFilter(selectedWall);
-            FilteredElementCollector collector = new FilteredElementCollector(doc);
-            IList<Element> intersectElements = collector.WherePasses(filter).ToElements();
+            IList<Element> intersectElements = new List<Element>();
+            try
+            {
+                intersectElements = listIntersectElements(doc, selectedWall);
+            }
+            catch
+            {
+                IList<ElementId> stackedWallIds = selectedWall.GetStackedWallMemberIds();
+
+                if (stackedWallIds != null)
+                {
+                    foreach (ElementId wallId in stackedWallIds)
+                    {
+                        Element wall = doc.GetElement(wallId);
+                        intersectElements = listIntersectElements(doc, wall);
+                        break;
+                    }
+                }
+            }
 
             return intersectElements;
         }
 
-        private List<Line> CutBasicWall(Document doc, Wall selectedWall)
+        private IList<Element> listIntersectElements(Document doc, Element wall)
         {
-            ElementIntersectsElementFilter filter = new ElementIntersectsElementFilter(selectedWall);
             FilteredElementCollector collector = new FilteredElementCollector(doc);
-            IList<Element> intersectElements = collector.WherePasses(filter).ToElements();
+            ElementIntersectsElementFilter filter = new ElementIntersectsElementFilter(wall);
+            return collector.WherePasses(filter).ToElements();
+        }
+
+        private List<object> GetContraintAndOffSet(Element element, Document doc)
+        {
+            List<object> listObjects = new List<object>();
+            if (element is Wall wall)
+            {
+                ElementId baseConstraintId = wall.get_Parameter(BuiltInParameter.WALL_BASE_CONSTRAINT).AsElementId();
+                Level baseLevel = doc.GetElement(baseConstraintId) as Level;
+                ElementId topConstraintId = wall.get_Parameter(BuiltInParameter.WALL_HEIGHT_TYPE).AsElementId();
+                Level topLevel = doc.GetElement(topConstraintId) as Level;
+                double baseOffset = wall.get_Parameter(BuiltInParameter.WALL_BASE_OFFSET).AsDouble();
+                double topOffset = wall.get_Parameter(BuiltInParameter.WALL_TOP_OFFSET).AsDouble();
+                listObjects.Add(baseLevel.Id);
+                listObjects.Add(topLevel.Id);
+                listObjects.Add(baseOffset);
+                listObjects.Add(topOffset);
+            }
+            else if (element is FamilyInstance column
+                      && (column.Category.Id.IntegerValue == (int)BuiltInCategory.OST_Columns
+                      || column.Category.Id.IntegerValue == (int)BuiltInCategory.OST_StructuralColumns))
+            {
+                ElementId baseConstraintId = column.get_Parameter(BuiltInParameter.FAMILY_BASE_LEVEL_PARAM).AsElementId();
+                Level baseLevel = doc.GetElement(baseConstraintId) as Level;
+                ElementId topConstraintId = column.get_Parameter(BuiltInParameter.FAMILY_TOP_LEVEL_PARAM).AsElementId();
+                Level topLevel = doc.GetElement(topConstraintId) as Level;
+                double baseOffset = column.get_Parameter(BuiltInParameter.FAMILY_BASE_LEVEL_OFFSET_PARAM).AsDouble();
+                double topOffset = column.get_Parameter(BuiltInParameter.FAMILY_TOP_LEVEL_OFFSET_PARAM).AsDouble();
+                listObjects.Add(baseLevel.Id);
+                listObjects.Add(topLevel.Id);
+                listObjects.Add(baseOffset);
+                listObjects.Add(topOffset);
+            }
+
+            return listObjects;
+        }
+
+        private List<Line> CutWall(Document doc, Wall selectedWall)
+        {
+            IList<Element> intersectElements = new List<Element>();
+
+            switch (selectedWall.WallType.Kind)
+            {
+                case WallKind.Basic:
+                    intersectElements = listIntersectElements(doc, selectedWall);
+                    break;
+
+                case WallKind.Stacked:
+                    IList<ElementId> stackedWallIds = selectedWall.GetStackedWallMemberIds();
+
+                    if (stackedWallIds != null)
+                    {
+                        foreach (ElementId wallId in stackedWallIds)
+                        {
+                            Element wall = doc.GetElement(wallId);
+                            intersectElements = listIntersectElements(doc, wall);
+
+                            break;
+                        }
+                    }
+                    break;
+
+                case WallKind.Curtain:
+                    break;
+
+                default:
+                    TaskDialog.Show("Notice", "Unknown wall");
+                    break;
+            }
+
             intersectElements.Remove(selectedWall);
 
             LocationCurve originalWallLocationCurve = selectedWall.Location as LocationCurve;
             Curve originalCurve = originalWallLocationCurve.Curve;
 
+            BoundingBoxXYZ bboxOrigin = selectedWall.get_BoundingBox(null);
+
             List<Line> listLines = new List<Line>();
 
             foreach (Element intersectElement in intersectElements)
             {
-                listLines.Add(GetIntersectPoints(originalCurve, intersectElement));
+                //List<object> listParaOrigins = GetContraintAndOffSet(selectedWall, doc);
+                //List<object> listParaIntersects = GetContraintAndOffSet(intersectElement, doc);
 
-                //if (intersectElement is Wall cuttingWall)
+                //if (listParaOrigins.SequenceEqual(listParaIntersects))
                 //{
-                //    listLines.Add(GetIntersectPoints(originalCurve, cuttingWall));
+                //    if (GetIntersectPoints(originalCurve, intersectElement) != null)
+                //    {
+                //        listLines.Add(GetIntersectPoints(originalCurve, intersectElement));
+                //    }
                 //}
-                //if (intersectElement is FamilyInstance cuttingColumn
-                //    && (cuttingColumn.Category.Id.IntegerValue == (int)BuiltInCategory.OST_Columns
-                //    || cuttingColumn.Category.Id.IntegerValue == (int)BuiltInCategory.OST_StructuralColumns))
-
-                //{
-                //    listLines.Add(GetIntersectPoints(originalCurve, cuttingColumn));
-                //}
+                if (GetIntersectPoints(originalCurve, intersectElement) != null)
+                {
+                    listLines.Add(GetIntersectPoints(originalCurve, intersectElement));
+                }
             }
 
             if (listLines.Count() <= 1)
@@ -256,7 +332,7 @@ namespace FirstCommand
             }
             if (intersectPoints.Count != 2)
             {
-                TaskDialog.Show("Error", "Cutting wall does not intersect the original wall at two points.");
+                //TaskDialog.Show("Error", "Cutting wall does not intersect the original wall at two points.");
                 return null;
             }
             Line line = Line.CreateBound(intersectPoints[0], intersectPoints[1]);
