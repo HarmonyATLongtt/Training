@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Xaml;
+using System.Xml.Linq;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Structure;
@@ -19,9 +22,6 @@ namespace FirstCommand
     [TransactionAttribute(TransactionMode.Manual)]
     public class DivideWallCommand : IExternalCommand
     {
-        // Note: sử lý trường hợp cột không đồng phẳng, lấy ra face ở mặt ngoài cùng
-        // Sử lý trường hợp tường basic giao với stacked wall
-        // Sử lý trường hợp curtain wall
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UIApplication uiapp = commandData.Application;
@@ -48,14 +48,14 @@ namespace FirstCommand
 
                             using (Transaction trans = new Transaction(doc, "Divide a wall"))
                             {
-                                trans.Start();
-                                foreach (Element ele in GetElementIds(doc, selectedWall))
-                                {
-                                    doc.Delete(ele.Id);
-                                }
-                                trans.Commit();
+                                //trans.Start();
+                                //foreach (Element ele in GetElementIds(doc, selectedWall))
+                                //{
+                                //    doc.Delete(ele.Id);
+                                //}
+                                //trans.Commit();
 
-                                trans.Start();
+                                //trans.Start();
 
                                 if (listLines == null)
                                 {
@@ -63,12 +63,21 @@ namespace FirstCommand
                                 }
                                 foreach (Line line in listLines)
                                 {
-                                    CreateWall(doc, line, wallTypeId, selectedWall);
+                                    trans.Start();
+                                    Wall newWall = CreateWall(doc, line, wallTypeId, selectedWall);
+                                    trans.Commit();
+
+                                    if (selectedWall.WallType.Kind == WallKind.Curtain)
+                                    {
+                                        CopyCurtainGrid(line, selectedWall, newWall);
+                                        CopyMullions(selectedWall, newWall);
+                                    }
                                 }
-
+                                trans.Start();
                                 doc.Delete(selectedWall.Id);
-
                                 trans.Commit();
+
+                                //trans.Commit();
                             }
 
                             return Result.Succeeded;
@@ -83,11 +92,17 @@ namespace FirstCommand
             return Result.Failed;
         }
 
+        //______________
+        //Start--CutWall
         private Wall CreateWall(Document doc, Line line, ElementId wallTypeId, Wall selectedWall)
         {
             Wall wall = Wall.Create(doc, line, wallTypeId, selectedWall.LevelId
                                    , selectedWall.get_Parameter(BuiltInParameter.WALL_USER_HEIGHT_PARAM).AsDouble()
                                    , selectedWall.get_Parameter(BuiltInParameter.WALL_BASE_OFFSET).AsDouble(), false, false);
+
+            WallUtils.DisallowWallJoinAtEnd(wall, 0); // Điểm đầu
+            WallUtils.DisallowWallJoinAtEnd(wall, 1); // Điểm cuối
+
             return wall;
         }
 
@@ -96,7 +111,7 @@ namespace FirstCommand
             IList<Element> intersectElements = new List<Element>();
             try
             {
-                intersectElements = listIntersectElements(doc, selectedWall);
+                intersectElements = ListIntersectElements(doc, selectedWall);
             }
             catch
             {
@@ -107,7 +122,7 @@ namespace FirstCommand
                     foreach (ElementId wallId in stackedWallIds)
                     {
                         Element wall = doc.GetElement(wallId);
-                        intersectElements = listIntersectElements(doc, wall);
+                        intersectElements = ListIntersectElements(doc, wall);
                         break;
                     }
                 }
@@ -116,7 +131,7 @@ namespace FirstCommand
             return intersectElements;
         }
 
-        private IList<Element> listIntersectElements(Document doc, Element wall)
+        private IList<Element> ListIntersectElements(Document doc, Element wall)
         {
             FilteredElementCollector collector = new FilteredElementCollector(doc);
             ElementIntersectsElementFilter filter = new ElementIntersectsElementFilter(wall);
@@ -165,7 +180,7 @@ namespace FirstCommand
             switch (selectedWall.WallType.Kind)
             {
                 case WallKind.Basic:
-                    intersectElements = listIntersectElements(doc, selectedWall);
+                    intersectElements = ListIntersectElements(doc, selectedWall);
                     break;
 
                 case WallKind.Stacked:
@@ -176,7 +191,7 @@ namespace FirstCommand
                         foreach (ElementId wallId in stackedWallIds)
                         {
                             Element wall = doc.GetElement(wallId);
-                            intersectElements = listIntersectElements(doc, wall);
+                            intersectElements = ListIntersectElements(doc, wall);
 
                             break;
                         }
@@ -184,6 +199,8 @@ namespace FirstCommand
                     break;
 
                 case WallKind.Curtain:
+
+                    intersectElements = ListIntersectElements(doc, selectedWall);
                     break;
 
                 default:
@@ -196,25 +213,19 @@ namespace FirstCommand
             LocationCurve originalWallLocationCurve = selectedWall.Location as LocationCurve;
             Curve originalCurve = originalWallLocationCurve.Curve;
 
-            BoundingBoxXYZ bboxOrigin = selectedWall.get_BoundingBox(null);
-
             List<Line> listLines = new List<Line>();
 
             foreach (Element intersectElement in intersectElements)
             {
-                //List<object> listParaOrigins = GetContraintAndOffSet(selectedWall, doc);
-                //List<object> listParaIntersects = GetContraintAndOffSet(intersectElement, doc);
+                List<object> listParaOrigins = GetContraintAndOffSet(selectedWall, doc);
+                List<object> listParaIntersects = GetContraintAndOffSet(intersectElement, doc);
 
-                //if (listParaOrigins.SequenceEqual(listParaIntersects))
-                //{
-                //    if (GetIntersectPoints(originalCurve, intersectElement) != null)
-                //    {
-                //        listLines.Add(GetIntersectPoints(originalCurve, intersectElement));
-                //    }
-                //}
-                if (GetIntersectPoints(originalCurve, intersectElement) != null)
+                if (listParaOrigins.SequenceEqual(listParaIntersects))
                 {
-                    listLines.Add(GetIntersectPoints(originalCurve, intersectElement));
+                    if (GetIntersectPoints(originalCurve, intersectElement) != null)
+                    {
+                        listLines.Add(GetIntersectPoints(originalCurve, intersectElement));
+                    }
                 }
             }
 
@@ -223,6 +234,11 @@ namespace FirstCommand
                 return CreateLineByPoints(listLines, originalCurve);
             }
 
+            return CreateLineByPoints(ListMergeLines(listLines), originalCurve);
+        }
+
+        private List<Line> ListMergeLines(List<Line> listLines)
+        {
             List<Line> mergedLines = new List<Line>();
             Line mergedLine = null;
 
@@ -253,7 +269,7 @@ namespace FirstCommand
             {
                 mergedLines.Add(mergedLine);
             }
-            return CreateLineByPoints(mergedLines, originalCurve);
+            return mergedLines;
         }
 
         private List<Line> CreateLineByPoints(List<Line> listLines, Curve originalCurve)
@@ -285,6 +301,43 @@ namespace FirstCommand
             return lines;
         }
 
+        private Solid CreateSolidFromBoundingBox(BoundingBoxXYZ bbox)
+        {
+            // Lấy min và max từ BoundingBox
+            XYZ min = bbox.Min;
+            XYZ max = bbox.Max;
+
+            double height = max.Z - min.Z;
+
+            // Tạo đáy là một hình chữ nhật theo mặt phẳng XY
+            CurveLoop baseLoop = CreateRectangleLoop(
+                new XYZ(min.X, min.Y, min.Z),
+                new XYZ(max.X, min.Y, min.Z),
+                new XYZ(max.X, max.Y, min.Z),
+                new XYZ(min.X, max.Y, min.Z)
+            );
+
+            // Kiểm tra tính hợp lệ của CurveLoop trước khi tạo Solid
+            if (!baseLoop.HasPlane())
+            {
+                TaskDialog.Show("Warning", "CurveLoop is not coplanar. Cannot create solid.");
+            }
+
+            Solid solid = GeometryCreationUtilities.CreateExtrusionGeometry(new List<CurveLoop> { baseLoop }, XYZ.BasisZ, height);
+
+            return solid;
+        }
+
+        private CurveLoop CreateRectangleLoop(XYZ p1, XYZ p2, XYZ p3, XYZ p4)
+        {
+            CurveLoop loop = new CurveLoop();
+            loop.Append(Line.CreateBound(p1, p2));
+            loop.Append(Line.CreateBound(p2, p3));
+            loop.Append(Line.CreateBound(p3, p4));
+            loop.Append(Line.CreateBound(p4, p1));
+            return loop;
+        }
+
         private Line GetIntersectPoints(Curve curve, Element element)
         {
             Options options = new Options();
@@ -292,44 +345,61 @@ namespace FirstCommand
             GeometryElement elementGeometry = element.get_Geometry(options);
             List<XYZ> intersectPoints = new List<XYZ>();
 
-            foreach (GeometryObject geometryObject in elementGeometry)
+            BoundingBoxXYZ boundingBox = element.get_BoundingBox(null);
+            Solid bboxSolid = CreateSolidFromBoundingBox(boundingBox);
+
+            foreach (Face face in bboxSolid.Faces)
             {
-                if (geometryObject is Solid solid)
+                IntersectionResultArray results;
+                SetComparisonResult comparisonResult = face.Intersect(curve, out results);
+
+                if (comparisonResult == SetComparisonResult.Overlap && results != null)
                 {
-                    //SolidCurveIntersectionOptions intersectOptions = new SolidCurveIntersectionOptions();
-
-                    //SolidCurveIntersection intersection = solid.IntersectWithCurve(curve, intersectOptions);
-
-                    //if (intersection != null && intersection.SegmentCount == 0)
-                    //{
-                    //    TaskDialog.Show("Error", "Không tìm thấy điểm giao cắt!");
-                    //    return null;
-                    //}
-
-                    //for (int i = 0; i < intersection.SegmentCount; i++)
-                    //{
-                    //    Curve intersectCurve = intersection.GetCurveSegment(i);
-                    //    XYZ firstCutPoint = intersectCurve.GetEndPoint(0);
-                    //    XYZ lastCutPoint = intersectCurve.GetEndPoint(1);
-                    //    intersectPoints.Add(firstCutPoint);
-                    //    intersectPoints.Add(lastCutPoint);
-                    //}
-
-                    foreach (Face face in solid.Faces)
+                    foreach (IntersectionResult result in results)
                     {
-                        IntersectionResultArray results;
-                        SetComparisonResult comparisonResult = face.Intersect(curve, out results);
-
-                        if (comparisonResult == SetComparisonResult.Overlap && results != null)
-                        {
-                            foreach (IntersectionResult result in results)
-                            {
-                                intersectPoints.Add(result.XYZPoint);
-                            }
-                        }
+                        intersectPoints.Add(result.XYZPoint);
                     }
                 }
             }
+
+            //foreach (GeometryObject geometryObject in elementGeometry)
+            //{
+            //    if (geometryObject is Solid solid)
+            //    {
+            //        //SolidCurveIntersectionOptions intersectOptions = new SolidCurveIntersectionOptions();
+
+            //        //SolidCurveIntersection intersection = solid.IntersectWithCurve(curve, intersectOptions);
+
+            //        //if (intersection != null && intersection.SegmentCount == 0)
+            //        //{
+            //        //    TaskDialog.Show("Error", "Không tìm thấy điểm giao cắt!");
+            //        //    return null;
+            //        //}
+
+            //        //for (int i = 0; i < intersection.SegmentCount; i++)
+            //        //{
+            //        //    Curve intersectCurve = intersection.GetCurveSegment(i);
+            //        //    XYZ firstCutPoint = intersectCurve.GetEndPoint(0);
+            //        //    XYZ lastCutPoint = intersectCurve.GetEndPoint(1);
+            //        //    intersectPoints.Add(firstCutPoint);
+            //        //    intersectPoints.Add(lastCutPoint);
+            //        //}
+
+            //        foreach (Face face in solid.Faces)
+            //        {
+            //            IntersectionResultArray results;
+            //            SetComparisonResult comparisonResult = face.Intersect(curve, out results);
+
+            //            if (comparisonResult == SetComparisonResult.Overlap && results != null)
+            //            {
+            //                foreach (IntersectionResult result in results)
+            //                {
+            //                    intersectPoints.Add(result.XYZPoint);
+            //                }
+            //            }
+            //        }
+            //    }
+            //}
             if (intersectPoints.Count != 2)
             {
                 //TaskDialog.Show("Error", "Cutting wall does not intersect the original wall at two points.");
@@ -369,6 +439,235 @@ namespace FirstCommand
                 return Line.CreateBound(startPoint2, endPoint2);
             }
 
+            return null;
+        }
+
+        // End_____________________
+
+        //_________________________
+        // Start--Add CurtainGridLine
+        private void CopyCurtainGrid(Line line, Wall originWall, Wall newWall)
+        {
+            CurtainGrid originalGrid = originWall.CurtainGrid;
+
+            Document doc = originWall.Document;
+
+            ICollection<ElementId> uGridLines = originalGrid.GetUGridLineIds();
+            ICollection<ElementId> vGridLines = originalGrid.GetVGridLineIds();
+
+            bool isUGridLine;
+            // Sao chép lưới dọc (V direction)
+            foreach (ElementId vGridLineId in vGridLines)
+            {
+                isUGridLine = false;
+                AddGridLines(line, isUGridLine, vGridLineId, newWall, doc);
+            }
+            // Sao chép lưới ngang (U direction)
+            foreach (ElementId uGridLineId in uGridLines)
+            {
+                isUGridLine = true;
+                AddGridLines(line, isUGridLine, uGridLineId, newWall, doc);
+            }
+        }
+
+        private void AddGridLines(Line line, bool isUGridLine, ElementId elementId, Wall newWall, Document doc)
+        {
+            CurtainGridLine gridLine = doc.GetElement(elementId) as CurtainGridLine;
+            if (gridLine != null)
+            {
+                Curve curve = gridLine.FullCurve;
+
+                XYZ position = curve.Project(line.GetEndPoint(0)).XYZPoint;
+
+                //XYZ position = curve.Evaluate(0.1, true);
+
+                using (Transaction trans = new Transaction(doc, "Add Grid Line"))
+                {
+                    trans.Start();
+                    try
+                    {
+                        newWall.CurtainGrid.AddGridLine(isUGridLine, position, false);
+                    }
+                    catch (Exception)
+                    {
+                        //TaskDialog.Show("Error", "Lỗi khi thêm Grid Line: " + ex.Message);
+                    }
+                    trans.Commit();
+                }
+            }
+        }
+
+        // End________________
+
+        //______________
+        //Start--Add Mullions
+
+        private List<MullionInfo> ListMullionInfos(Document doc, CurtainGrid cutainGrid)
+        {
+            List<MullionInfo> listMullionInfos = new List<MullionInfo>();
+            foreach (ElementId mullionId in cutainGrid.GetMullionIds())
+            {
+                Mullion originMullion = doc.GetElement(mullionId) as Mullion;
+
+                if (originMullion != null)
+                {
+                    XYZ mullionLocation = (originMullion.Location as LocationPoint).Point;
+                    MullionInfo mullionInfo = new MullionInfo();
+                    mullionInfo.LocationCurve = originMullion.LocationCurve;
+                    mullionInfo.Type = originMullion.MullionType;
+                    listMullionInfos.Add(mullionInfo);
+                }
+            }
+
+            return listMullionInfos;
+        }
+
+        private void CopyMullions(Wall originWall, Wall newWall)
+        {
+            CurtainGrid originalGrid = originWall.CurtainGrid;
+            Document doc = originWall.Document;
+
+            List<MullionInfo> listMullionInfos = ListMullionInfos(doc, originalGrid);
+
+            List<List<LineInfo>> listIntersecPoints = IntersecPoints(doc, newWall);
+
+            foreach (MullionInfo mullionInfo in listMullionInfos)
+            {
+                foreach (List<LineInfo> listLineInfos in listIntersecPoints)
+                {
+                    foreach (LineInfo lineInfo in listLineInfos)
+                    {
+                        if (mullionInfo.InCurve(lineInfo.GetPoint()))
+                        {
+                            lineInfo.Type = mullionInfo.Type;
+                        }
+                    }
+                }
+            }
+            foreach (List<LineInfo> listLineInfos in listIntersecPoints)
+            {
+                CurtainGridLine gridLine = doc.GetElement(listLineInfos.FirstOrDefault().GridLineId) as CurtainGridLine;
+
+                foreach (LineInfo lineInfo in listLineInfos)
+                {
+                    using (Transaction trans = new Transaction(doc, "Add Mullion"))
+                    {
+                        trans.Start();
+
+                        try
+                        {
+                            gridLine.AddMullions(lineInfo.Curve, lineInfo.Type, true);
+                        }
+                        catch (Exception)
+                        {
+                            //TaskDialog.Show("Error", "Lỗi khi thêm Grid Line: " + ex.Message);
+                        }
+                        trans.Commit();
+                    }
+                }
+            }
+        }
+
+        private List<List<LineInfo>> IntersecPoints(Document doc, Wall wall)
+        {
+            ICollection<ElementId> uGridLines = wall.CurtainGrid.GetUGridLineIds();
+            ICollection<ElementId> vGridLines = wall.CurtainGrid.GetVGridLineIds();
+
+            List<XYZ> intersectPoints = new List<XYZ>();
+            foreach (ElementId uId in uGridLines)
+            {
+                CurtainGridLine uGridLine = doc.GetElement(uId) as CurtainGridLine;
+
+                foreach (ElementId vId in vGridLines)
+                {
+                    CurtainGridLine vGridLine = doc.GetElement(vId) as CurtainGridLine;
+
+                    IntersectionResultArray results;
+                    SetComparisonResult comparisonResult = uGridLine.FullCurve.Intersect(vGridLine.FullCurve, out results);
+                    if (comparisonResult == SetComparisonResult.Overlap && results != null)
+                    {
+                        foreach (IntersectionResult result in results)
+                        {
+                            intersectPoints.Add(result.XYZPoint);
+                        }
+                    }
+                }
+            }
+
+            List<List<LineInfo>> listLineInfos = new List<List<LineInfo>>();
+
+            listLineInfos = ListLineInfos(doc, vGridLines, intersectPoints);
+            listLineInfos.AddRange(ListLineInfos(doc, uGridLines, intersectPoints));
+
+            return listLineInfos;
+        }
+
+        private List<List<LineInfo>> ListLineInfos(Document doc, ICollection<ElementId> GridLines, List<XYZ> intersectPoints)
+        {
+            List<List<LineInfo>> listLineInfos = new List<List<LineInfo>>();
+            foreach (ElementId id in GridLines)
+            {
+                CurtainGridLine gridLine = doc.GetElement(id) as CurtainGridLine;
+                Curve curve = gridLine.FullCurve as Curve;
+                List<XYZ> listPoints = new List<XYZ>();
+                listPoints.Add(curve.GetEndPoint(0));
+                listPoints.Add(curve.GetEndPoint(1));
+                foreach (XYZ intersect in intersectPoints)
+                {
+                    if (curve.Distance(intersect) <= 0.01)
+                    {
+                        listPoints.Add(intersect);
+                    }
+                }
+                List<LineInfo> lineInfos = new List<LineInfo>();
+                listPoints.Sort((p1, p2) => curve.GetEndPoint(0).DistanceTo(p1).CompareTo(curve.GetEndPoint(0).DistanceTo(p2)));
+
+                for (int i = 0; i < listPoints.Count() - 1; i++)
+                {
+                    LineInfo lineInfo = new LineInfo();
+                    lineInfo.SetCurve(listPoints[i], listPoints[i + 1]);
+                    lineInfo.GridLineId = id;
+                    lineInfos.Add(lineInfo);
+                }
+                listLineInfos.Add(lineInfos);
+            }
+            return listLineInfos;
+        }
+
+        //End____________
+    }
+
+    public class MullionInfo
+    {
+        public MullionType Type { get; set; }
+        public Curve LocationCurve { get; set; }
+
+        public bool InCurve(XYZ point)
+        {
+            return LocationCurve.Distance(point) <= 0.0001;
+        }
+    }
+
+    public class LineInfo
+    {
+        public MullionType Type { get; set; }
+        public Curve Curve { get; set; }
+
+        public ElementId GridLineId { get; set; }
+
+        public void SetCurve(XYZ start, XYZ end)
+        {
+            Line line = Line.CreateBound(start, end);
+
+            Curve = line as Curve;
+        }
+
+        public XYZ GetPoint()
+        {
+            if (Curve != null)
+            {
+                return Curve.Evaluate(0.5, true);
+            }
             return null;
         }
     }
