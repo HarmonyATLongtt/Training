@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -40,23 +41,17 @@ namespace FirstCommand
                     List<Line> listLines = new List<Line>();
                     if (selectedWall != null)
                     {
+                        List<FamilyInfo> listInfos = GetInstanceOnWall(doc, selectedWall);
+                        ////GetDimOnWall(doc, selectedWall);
+
                         WallType wallType = selectedWall.WallType;
 
                         if (wallType != null)
                         {
                             listLines = CutWall(doc, selectedWall);
-
+                            //List<Wall> listNewWalls = new List<Wall>();
                             using (Transaction trans = new Transaction(doc, "Divide a wall"))
                             {
-                                //trans.Start();
-                                //foreach (Element ele in GetElementIds(doc, selectedWall))
-                                //{
-                                //    doc.Delete(ele.Id);
-                                //}
-                                //trans.Commit();
-
-                                //trans.Start();
-
                                 if (listLines == null)
                                 {
                                     return Result.Failed;
@@ -65,6 +60,9 @@ namespace FirstCommand
                                 {
                                     trans.Start();
                                     Wall newWall = CreateWall(doc, line, wallTypeId, selectedWall);
+                                    ListInfosOnNewWall(line, listInfos);
+                                    //PlaceFamilyOnWall(doc, newWall, listInfos);
+                                    PlaceFamilyOnWall(doc, newWall, ListInfosOnNewWall(line, listInfos));
                                     trans.Commit();
 
                                     if (selectedWall.WallType.Kind == WallKind.Curtain)
@@ -76,8 +74,6 @@ namespace FirstCommand
                                 trans.Start();
                                 doc.Delete(selectedWall.Id);
                                 trans.Commit();
-
-                                //trans.Commit();
                             }
 
                             return Result.Succeeded;
@@ -93,6 +89,119 @@ namespace FirstCommand
         }
 
         //______________
+        //Start--Get Familes On Wall
+
+        private List<FamilyInfo> GetInstanceOnWall(Document doc, Wall wall)
+        {
+            ElementCategoryFilter windowFilter = new ElementCategoryFilter(BuiltInCategory.OST_Windows);
+            ElementCategoryFilter doorFilter = new ElementCategoryFilter(BuiltInCategory.OST_Doors);
+            LogicalOrFilter orFilter = new LogicalOrFilter(windowFilter, doorFilter);
+
+            FilteredElementCollector collector = new FilteredElementCollector(doc)
+                .WherePasses(orFilter)
+                .OfClass(typeof(FamilyInstance));
+
+            ElementId wallId = wall.Id;
+            IList<ElementId> listWallIds = new List<ElementId>();
+            if (wall.WallType.Kind == WallKind.Stacked)
+            {
+                listWallIds = wall.GetStackedWallMemberIds();
+            }
+
+            List<FamilyInfo> listInfos = new List<FamilyInfo>();
+            foreach (FamilyInstance instance in collector)
+            {
+                if (instance.Host != null && (instance.Host.Id == wall.Id || listWallIds.Contains(instance.Host.Id)))
+                {
+                    FamilyInfo info = new FamilyInfo();
+
+                    info.familyInstance = instance;
+                    info.location = ((LocationPoint)instance.Location).Point; ;
+                    info.handFlipped = instance.HandFlipped;
+                    info.facingFlipped = instance.FacingFlipped;
+                    info.facingOrientation = instance.FacingOrientation;
+
+                    listInfos.Add(info);
+                }
+            }
+            return listInfos;
+        }
+
+        private List<FamilyInfo> ListInfosOnNewWall(Line line, List<FamilyInfo> listInfos)
+        {
+            List<FamilyInfo> list = new List<FamilyInfo>();
+            XYZ start = line.GetEndPoint(0);
+            XYZ end = line.GetEndPoint(1);
+            foreach (FamilyInfo info in listInfos)
+            {
+                if (info.location.X >= start.X && info.location.X <= end.X)
+                {
+                    list.Add(info);
+                }
+            }
+            return list;
+        }
+
+        private void PlaceFamilyOnWall(Document doc, Wall newWall, List<FamilyInfo> listInfos)
+        {
+            Level level = doc.GetElement(newWall.LevelId) as Level;
+            //using (Transaction t = new Transaction(doc))
+            //{
+            //    t.Start("Create new family instance");
+
+            foreach (FamilyInfo info in listInfos)
+            {
+                FamilySymbol symbol = info.familyInstance.Symbol;
+
+                FamilyInstance newFamilyInstance = doc.Create.NewFamilyInstance(info.location, symbol, newWall, level, StructuralType.NonStructural);
+
+                newFamilyInstance.get_Parameter(BuiltInParameter.INSTANCE_SILL_HEIGHT_PARAM)
+                    .Set(info.familyInstance.get_Parameter(BuiltInParameter.INSTANCE_SILL_HEIGHT_PARAM).AsDouble());
+
+                if (info.handFlipped != newFamilyInstance.HandFlipped)
+                {
+                    newFamilyInstance.flipHand();
+                }
+                if (info.facingFlipped != newFamilyInstance.FacingFlipped)
+                {
+                    newFamilyInstance.flipFacing();
+                }
+
+                //if (!newWindow.FacingOrientation.IsAlmostEqualTo(info.facingOrientation))
+                //{
+                //    newWindow.flipFacing();
+                //}
+            }
+            //    t.Commit();
+            //}
+        }
+
+        private List<Dimension> GetDimOnWall(Document doc, Wall oldWall)
+        {
+            List<Dimension> dimensions = new FilteredElementCollector(doc)
+                .OfClass(typeof(Dimension))
+                .Cast<Dimension>()
+                .Where(d => d.References.Cast<Reference>().Any(r => r.ElementId == oldWall.Id))
+                .ToList();
+            foreach (Dimension dim in dimensions)
+            {
+                ReferenceArray references = dim.References;
+                List<ElementId> elementIds = new List<ElementId>();
+
+                foreach (Reference reference in references)
+                {
+                    ElementId id = reference.ElementId;
+                    if (id != ElementId.InvalidElementId)
+                    {
+                        elementIds.Add(id);
+                    }
+                }
+            }
+
+            return dimensions;
+        }
+
+        //______________
         //Start--CutWall
         private Wall CreateWall(Document doc, Line line, ElementId wallTypeId, Wall selectedWall)
         {
@@ -104,31 +213,6 @@ namespace FirstCommand
             WallUtils.DisallowWallJoinAtEnd(wall, 1); // Điểm cuối
 
             return wall;
-        }
-
-        private IList<Element> GetElementIds(Document doc, Wall selectedWall)
-        {
-            IList<Element> intersectElements = new List<Element>();
-            try
-            {
-                intersectElements = ListIntersectElements(doc, selectedWall);
-            }
-            catch
-            {
-                IList<ElementId> stackedWallIds = selectedWall.GetStackedWallMemberIds();
-
-                if (stackedWallIds != null)
-                {
-                    foreach (ElementId wallId in stackedWallIds)
-                    {
-                        Element wall = doc.GetElement(wallId);
-                        intersectElements = ListIntersectElements(doc, wall);
-                        break;
-                    }
-                }
-            }
-
-            return intersectElements;
         }
 
         private IList<Element> ListIntersectElements(Document doc, Element wall)
@@ -184,18 +268,20 @@ namespace FirstCommand
                     break;
 
                 case WallKind.Stacked:
-                    IList<ElementId> stackedWallIds = selectedWall.GetStackedWallMemberIds();
+                    intersectElements = ListIntersectElements(doc, selectedWall);
 
-                    if (stackedWallIds != null)
-                    {
-                        foreach (ElementId wallId in stackedWallIds)
-                        {
-                            Element wall = doc.GetElement(wallId);
-                            intersectElements = ListIntersectElements(doc, wall);
+                    //IList<ElementId> stackedWallIds = selectedWall.GetStackedWallMemberIds();
 
-                            break;
-                        }
-                    }
+                    //if (stackedWallIds != null)
+                    //{
+                    //    foreach (ElementId wallId in stackedWallIds)
+                    //    {
+                    //        Element wall = doc.GetElement(wallId);
+                    //        intersectElements = ListIntersectElements(doc, wall);
+
+                    //        break;
+                    //    }
+                    //}
                     break;
 
                 case WallKind.Curtain:
@@ -385,24 +471,10 @@ namespace FirstCommand
             //        //    intersectPoints.Add(lastCutPoint);
             //        //}
 
-            //        foreach (Face face in solid.Faces)
-            //        {
-            //            IntersectionResultArray results;
-            //            SetComparisonResult comparisonResult = face.Intersect(curve, out results);
-
-            //            if (comparisonResult == SetComparisonResult.Overlap && results != null)
-            //            {
-            //                foreach (IntersectionResult result in results)
-            //                {
-            //                    intersectPoints.Add(result.XYZPoint);
-            //                }
-            //            }
-            //        }
             //    }
             //}
             if (intersectPoints.Count != 2)
             {
-                //TaskDialog.Show("Error", "Cutting wall does not intersect the original wall at two points.");
                 return null;
             }
             Line line = Line.CreateBound(intersectPoints[0], intersectPoints[1]);
@@ -544,15 +616,18 @@ namespace FirstCommand
                     }
                 }
             }
-            foreach (List<LineInfo> listLineInfos in listIntersecPoints)
+            using (Transaction trans = new Transaction(doc, "Add Mullion"))
             {
-                CurtainGridLine gridLine = doc.GetElement(listLineInfos.FirstOrDefault().GridLineId) as CurtainGridLine;
-
-                foreach (LineInfo lineInfo in listLineInfos)
+                trans.Start();
+                foreach (List<LineInfo> listLineInfos in listIntersecPoints)
                 {
-                    using (Transaction trans = new Transaction(doc, "Add Mullion"))
+                    CurtainGridLine gridLine = doc.GetElement(listLineInfos.FirstOrDefault().GridLineId) as CurtainGridLine;
+
+                    foreach (LineInfo lineInfo in listLineInfos)
                     {
-                        trans.Start();
+                        //using (Transaction trans = new Transaction(doc, "Add Mullion"))
+                        //{
+                        //    trans.Start();
 
                         try
                         {
@@ -562,9 +637,11 @@ namespace FirstCommand
                         {
                             //TaskDialog.Show("Error", "Lỗi khi thêm Grid Line: " + ex.Message);
                         }
-                        trans.Commit();
+                        //    trans.Commit();
+                        //}
                     }
                 }
+                trans.Commit();
             }
         }
 
@@ -670,5 +747,18 @@ namespace FirstCommand
             }
             return null;
         }
+    }
+
+    public class FamilyInfo
+    {
+        public FamilyInstance familyInstance { get; set; }
+
+        public XYZ location { get; set; }
+
+        public bool handFlipped { get; set; }
+
+        public bool facingFlipped { get; set; }
+
+        public XYZ facingOrientation { get; set; }
     }
 }
