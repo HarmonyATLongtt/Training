@@ -8,15 +8,12 @@ using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Xaml;
-using System.Xml.Linq;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Structure;
 using Autodesk.Revit.UI;
 using FirstCommand.View;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace FirstCommand
 {
@@ -29,7 +26,7 @@ namespace FirstCommand
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
 
-            Reference pickedRef = uidoc.Selection.PickObject(Autodesk.Revit.UI.Selection.ObjectType.Element, "Chọn một bức tường");
+            Reference pickedRef = uidoc.Selection.PickObject(Autodesk.Revit.UI.Selection.ObjectType.Element, "Pick a wall");
 
             if (pickedRef != null)
             {
@@ -49,32 +46,35 @@ namespace FirstCommand
                         if (wallType != null)
                         {
                             listLines = CutWall(doc, selectedWall);
-                            //List<Wall> listNewWalls = new List<Wall>();
-                            using (Transaction trans = new Transaction(doc, "Divide a wall"))
-                            {
-                                if (listLines == null)
-                                {
-                                    return Result.Failed;
-                                }
-                                foreach (Line line in listLines)
-                                {
-                                    trans.Start();
-                                    Wall newWall = CreateWall(doc, line, wallTypeId, selectedWall);
-                                    ListInfosOnNewWall(line, listInfos);
-                                    //PlaceFamilyOnWall(doc, newWall, listInfos);
-                                    PlaceFamilyOnWall(doc, newWall, ListInfosOnNewWall(line, listInfos));
-                                    trans.Commit();
 
-                                    if (selectedWall.WallType.Kind == WallKind.Curtain)
-                                    {
-                                        CopyCurtainGrid(line, selectedWall, newWall);
-                                        CopyMullions(selectedWall, newWall);
-                                    }
-                                }
-                                trans.Start();
-                                doc.Delete(selectedWall.Id);
-                                trans.Commit();
+                            if (listLines == null)
+                            {
+                                return Result.Failed;
                             }
+                            foreach (Line line in listLines)
+                            {
+                                ElementId newWallId = null;
+                                RunTransaction(doc, "Divide a wall", (Transaction t) =>
+                                {
+                                    Wall newWall = CreateWall(doc, line, wallTypeId, selectedWall);
+                                    newWallId = newWall.Id;
+                                    ListInfosOnNewWall(line, listInfos);
+                                    PlaceFamilyOnWall(doc, newWall, ListInfosOnNewWall(line, listInfos));
+                                });
+                                if (selectedWall.WallType.Kind == WallKind.Curtain)
+                                {
+                                    Wall newWall = doc.GetElement(newWallId) as Wall;
+
+                                    CopyCurtainGrid(line, selectedWall, newWall);
+                                    CopyMullions(selectedWall, newWall);
+                                    CopyPanel(selectedWall, newWall);
+                                }
+                            }
+
+                            RunTransaction(doc, "Delete a wall", (Transaction t) =>
+                            {
+                                doc.Delete(selectedWall.Id);
+                            });
 
                             return Result.Succeeded;
                         }
@@ -86,6 +86,23 @@ namespace FirstCommand
                 return Result.Failed;
             }
             return Result.Failed;
+        }
+
+        //Hàm thực hiện transaction
+        public void RunTransaction(Document doc, string transactionName, Action<Transaction> action)
+        {
+            using (Transaction trans = new Transaction(doc, transactionName))
+            {
+                trans.Start();
+
+                FailureHandlingOptions options = trans.GetFailureHandlingOptions();
+                options.SetFailuresPreprocessor(new WarningSuppressor());
+                trans.SetFailureHandlingOptions(options);
+
+                action(trans); // Thực thi hành động trong Transaction
+
+                trans.Commit();
+            }
         }
 
         //______________
@@ -217,9 +234,17 @@ namespace FirstCommand
 
         private IList<Element> ListIntersectElements(Document doc, Element wall)
         {
-            FilteredElementCollector collector = new FilteredElementCollector(doc);
+            ElementCategoryFilter wallFilter = new ElementCategoryFilter(BuiltInCategory.OST_Walls);
+            ElementCategoryFilter columnFilter = new ElementCategoryFilter(BuiltInCategory.OST_Columns);
+            LogicalOrFilter orFilter = new LogicalOrFilter(wallFilter, columnFilter);
             ElementIntersectsElementFilter filter = new ElementIntersectsElementFilter(wall);
-            return collector.WherePasses(filter).ToElements();
+
+            IList<Element> listElements = new FilteredElementCollector(doc)
+                .WherePasses(orFilter)
+                .WherePasses(filter)
+                .ToElements();
+
+            return listElements;
         }
 
         private List<object> GetContraintAndOffSet(Element element, Document doc)
@@ -268,20 +293,19 @@ namespace FirstCommand
                     break;
 
                 case WallKind.Stacked:
-                    intersectElements = ListIntersectElements(doc, selectedWall);
 
-                    //IList<ElementId> stackedWallIds = selectedWall.GetStackedWallMemberIds();
+                    IList<ElementId> stackedWallIds = selectedWall.GetStackedWallMemberIds();
 
-                    //if (stackedWallIds != null)
-                    //{
-                    //    foreach (ElementId wallId in stackedWallIds)
-                    //    {
-                    //        Element wall = doc.GetElement(wallId);
-                    //        intersectElements = ListIntersectElements(doc, wall);
+                    if (stackedWallIds != null)
+                    {
+                        foreach (ElementId wallId in stackedWallIds)
+                        {
+                            Element wall = doc.GetElement(wallId);
+                            intersectElements = ListIntersectElements(doc, wall);
 
-                    //        break;
-                    //    }
-                    //}
+                            break;
+                        }
+                    }
                     break;
 
                 case WallKind.Curtain:
@@ -297,16 +321,24 @@ namespace FirstCommand
             intersectElements.Remove(selectedWall);
 
             LocationCurve originalWallLocationCurve = selectedWall.Location as LocationCurve;
+
             Curve originalCurve = originalWallLocationCurve.Curve;
 
             List<Line> listLines = new List<Line>();
 
             foreach (Element intersectElement in intersectElements)
             {
-                List<object> listParaOrigins = GetContraintAndOffSet(selectedWall, doc);
-                List<object> listParaIntersects = GetContraintAndOffSet(intersectElement, doc);
+                //List<object> listParaOrigins = GetContraintAndOffSet(selectedWall, doc);
+                //List<object> listParaIntersects = GetContraintAndOffSet(intersectElement, doc);
 
-                if (listParaOrigins.SequenceEqual(listParaIntersects))
+                //if (listParaOrigins.SequenceEqual(listParaIntersects))
+                //{
+                //    if (GetIntersectPoints(originalCurve, intersectElement) != null)
+                //    {
+                //        listLines.Add(GetIntersectPoints(originalCurve, intersectElement));
+                //    }
+                //}
+                if (IsInterect(intersectElement, selectedWall))
                 {
                     if (GetIntersectPoints(originalCurve, intersectElement) != null)
                     {
@@ -321,6 +353,20 @@ namespace FirstCommand
             }
 
             return CreateLineByPoints(ListMergeLines(listLines), originalCurve);
+        }
+
+        // Xem có giao với đầu trên và dưới hay không
+        private bool IsInterect(Element element, Wall wall)
+
+        {
+            BoundingBoxXYZ bboxWall = wall.get_BoundingBox(null);
+            BoundingBoxXYZ bboxElement = element.get_BoundingBox(null);
+
+            if (bboxElement.Min.Z <= bboxWall.Min.Z && bboxElement.Max.Z >= bboxWall.Max.Z)
+            {
+                return true;
+            }
+            return false;
         }
 
         private List<Line> ListMergeLines(List<Line> listLines)
@@ -431,48 +477,60 @@ namespace FirstCommand
             GeometryElement elementGeometry = element.get_Geometry(options);
             List<XYZ> intersectPoints = new List<XYZ>();
 
-            BoundingBoxXYZ boundingBox = element.get_BoundingBox(null);
-            Solid bboxSolid = CreateSolidFromBoundingBox(boundingBox);
+            //BoundingBoxXYZ boundingBox = element.get_BoundingBox(null);
+            //Solid bboxSolid = CreateSolidFromBoundingBox(boundingBox);
 
-            foreach (Face face in bboxSolid.Faces)
+            //foreach (Face face in bboxSolid.Faces)
+            //{
+            //    IntersectionResultArray results;
+            //    SetComparisonResult comparisonResult = face.Intersect(curve, out results);
+
+            //    if (comparisonResult == SetComparisonResult.Overlap && results != null)
+            //    {
+            //        foreach (IntersectionResult result in results)
+            //        {
+            //            intersectPoints.Add(result.XYZPoint);
+            //        }
+            //    }
+            //}
+
+            foreach (GeometryObject geometryObject in elementGeometry)
             {
-                IntersectionResultArray results;
-                SetComparisonResult comparisonResult = face.Intersect(curve, out results);
-
-                if (comparisonResult == SetComparisonResult.Overlap && results != null)
+                if (geometryObject is Solid solid)
                 {
-                    foreach (IntersectionResult result in results)
+                    //SolidCurveIntersectionOptions intersectOptions = new SolidCurveIntersectionOptions();
+
+                    //SolidCurveIntersection intersection = solid.IntersectWithCurve(curve, intersectOptions);
+
+                    //if (intersection != null && intersection.SegmentCount == 0)
+                    //{
+                    //    TaskDialog.Show("Error", "Không tìm thấy điểm giao cắt!");
+                    //    return null;
+                    //}
+
+                    //for (int i = 0; i < intersection.SegmentCount; i++)
+                    //{
+                    //    Curve intersectCurve = intersection.GetCurveSegment(i);
+                    //    XYZ firstCutPoint = intersectCurve.GetEndPoint(0);
+                    //    XYZ lastCutPoint = intersectCurve.GetEndPoint(1);
+                    //    intersectPoints.Add(firstCutPoint);
+                    //    intersectPoints.Add(lastCutPoint);
+                    //}
+                    foreach (Face face in solid.Faces)
                     {
-                        intersectPoints.Add(result.XYZPoint);
+                        IntersectionResultArray results;
+                        SetComparisonResult comparisonResult = face.Intersect(curve, out results);
+
+                        if (comparisonResult == SetComparisonResult.Overlap && results != null)
+                        {
+                            foreach (IntersectionResult result in results)
+                            {
+                                intersectPoints.Add(result.XYZPoint);
+                            }
+                        }
                     }
                 }
             }
-
-            //foreach (GeometryObject geometryObject in elementGeometry)
-            //{
-            //    if (geometryObject is Solid solid)
-            //    {
-            //        //SolidCurveIntersectionOptions intersectOptions = new SolidCurveIntersectionOptions();
-
-            //        //SolidCurveIntersection intersection = solid.IntersectWithCurve(curve, intersectOptions);
-
-            //        //if (intersection != null && intersection.SegmentCount == 0)
-            //        //{
-            //        //    TaskDialog.Show("Error", "Không tìm thấy điểm giao cắt!");
-            //        //    return null;
-            //        //}
-
-            //        //for (int i = 0; i < intersection.SegmentCount; i++)
-            //        //{
-            //        //    Curve intersectCurve = intersection.GetCurveSegment(i);
-            //        //    XYZ firstCutPoint = intersectCurve.GetEndPoint(0);
-            //        //    XYZ lastCutPoint = intersectCurve.GetEndPoint(1);
-            //        //    intersectPoints.Add(firstCutPoint);
-            //        //    intersectPoints.Add(lastCutPoint);
-            //        //}
-
-            //    }
-            //}
             if (intersectPoints.Count != 2)
             {
                 return null;
@@ -553,9 +611,8 @@ namespace FirstCommand
 
                 //XYZ position = curve.Evaluate(0.1, true);
 
-                using (Transaction trans = new Transaction(doc, "Add Grid Line"))
+                RunTransaction(doc, "Add Grid Line", (Transaction t) =>
                 {
-                    trans.Start();
                     try
                     {
                         newWall.CurtainGrid.AddGridLine(isUGridLine, position, false);
@@ -564,8 +621,21 @@ namespace FirstCommand
                     {
                         //TaskDialog.Show("Error", "Lỗi khi thêm Grid Line: " + ex.Message);
                     }
-                    trans.Commit();
-                }
+                });
+
+                //using (Transaction trans = new Transaction(doc, "Add Grid Line"))
+                //{
+                //    trans.Start();
+                //    try
+                //    {
+                //        newWall.CurtainGrid.AddGridLine(isUGridLine, position, false);
+                //    }
+                //    catch (Exception)
+                //    {
+                //        //TaskDialog.Show("Error", "Lỗi khi thêm Grid Line: " + ex.Message);
+                //    }
+                //    trans.Commit();
+                //}
             }
         }
 
@@ -616,19 +686,15 @@ namespace FirstCommand
                     }
                 }
             }
-            using (Transaction trans = new Transaction(doc, "Add Mullion"))
+
+            RunTransaction(doc, "Add Mullion", (Transaction t) =>
             {
-                trans.Start();
                 foreach (List<LineInfo> listLineInfos in listIntersecPoints)
                 {
                     CurtainGridLine gridLine = doc.GetElement(listLineInfos.FirstOrDefault().GridLineId) as CurtainGridLine;
 
                     foreach (LineInfo lineInfo in listLineInfos)
                     {
-                        //using (Transaction trans = new Transaction(doc, "Add Mullion"))
-                        //{
-                        //    trans.Start();
-
                         try
                         {
                             gridLine.AddMullions(lineInfo.Curve, lineInfo.Type, true);
@@ -637,12 +703,37 @@ namespace FirstCommand
                         {
                             //TaskDialog.Show("Error", "Lỗi khi thêm Grid Line: " + ex.Message);
                         }
-                        //    trans.Commit();
-                        //}
                     }
                 }
-                trans.Commit();
-            }
+            });
+
+            //using (Transaction trans = new Transaction(doc, "Add Mullion"))
+            //{
+            //    trans.Start();
+            //    foreach (List<LineInfo> listLineInfos in listIntersecPoints)
+            //    {
+            //        CurtainGridLine gridLine = doc.GetElement(listLineInfos.FirstOrDefault().GridLineId) as CurtainGridLine;
+
+            //        foreach (LineInfo lineInfo in listLineInfos)
+            //        {
+            //            //using (Transaction trans = new Transaction(doc, "Add Mullion"))
+            //            //{
+            //            //    trans.Start();
+
+            //            try
+            //            {
+            //                gridLine.AddMullions(lineInfo.Curve, lineInfo.Type, true);
+            //            }
+            //            catch (Exception)
+            //            {
+            //                //TaskDialog.Show("Error", "Lỗi khi thêm Grid Line: " + ex.Message);
+            //            }
+            //            //    trans.Commit();
+            //            //}
+            //        }
+            //    }
+            //    trans.Commit();
+            //}
         }
 
         private List<List<LineInfo>> IntersecPoints(Document doc, Wall wall)
@@ -712,6 +803,59 @@ namespace FirstCommand
         }
 
         //End____________
+
+        //________________
+        //Start-- Add Panel
+        private void CopyPanel(Wall oldWall, Wall newWall)
+        {
+            Document doc = oldWall.Document;
+
+            List<Panel> listOldPanels = new List<Panel>();
+            foreach (ElementId panelId in oldWall.CurtainGrid.GetPanelIds())
+            {
+                Panel oldPanel = doc.GetElement(panelId) as Panel;
+
+                listOldPanels.Add(oldPanel);
+            }
+
+            RunTransaction(doc, "Add Panel", (Transaction t) =>
+            {
+                foreach (ElementId elementId in newWall.CurtainGrid.GetPanelIds())
+                {
+                    Panel newPanel = doc.GetElement(elementId) as Panel;
+
+                    foreach (Panel oldPanel in listOldPanels)
+                    {
+                        if (IsBoundingBoxInside(oldPanel, newPanel))
+                        {
+                            newPanel.PanelType = oldPanel.PanelType;
+                        }
+                    }
+                }
+            });
+        }
+
+        private bool IsBoundingBoxInside(Panel oldPanel, Panel newPanel)
+        {
+            BoundingBoxXYZ oldBox = oldPanel.get_BoundingBox(null);
+            BoundingBoxXYZ newBox = newPanel.get_BoundingBox(null);
+
+            if (oldBox == null || newBox == null)
+            {
+                return false;
+            }
+            XYZ oldMin = oldBox.Min;
+            XYZ oldMax = oldBox.Max;
+            XYZ newMin = newBox.Min;
+            XYZ newMax = newBox.Max;
+
+            bool inside = (newMin.X >= oldMin.X && newMax.X <= oldMax.X) &&
+                          (newMin.Y >= oldMin.Y && newMax.Y <= oldMax.Y) &&
+                          (newMin.Z >= oldMin.Z && newMax.Z <= oldMax.Z);
+            return inside;
+        }
+
+        //End_____________
     }
 
     public class MullionInfo
@@ -760,5 +904,23 @@ namespace FirstCommand
         public bool facingFlipped { get; set; }
 
         public XYZ facingOrientation { get; set; }
+    }
+
+    public class WarningSuppressor : IFailuresPreprocessor
+    {
+        public FailureProcessingResult PreprocessFailures(FailuresAccessor failuresAccessor)
+        {
+            IList<FailureMessageAccessor> failureMessages = failuresAccessor.GetFailureMessages();
+
+            foreach (FailureMessageAccessor failure in failureMessages)
+            {
+                if (failure.GetSeverity() == FailureSeverity.Warning)
+                {
+                    failuresAccessor.DeleteWarning(failure); // Xóa cảnh báo
+                }
+            }
+
+            return FailureProcessingResult.Continue;
+        }
     }
 }
