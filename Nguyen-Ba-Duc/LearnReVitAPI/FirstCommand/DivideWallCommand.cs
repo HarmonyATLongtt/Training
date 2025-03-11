@@ -20,6 +20,8 @@ namespace FirstCommand
     [TransactionAttribute(TransactionMode.Manual)]
     public class DivideWallCommand : IExternalCommand
     {
+        private double tolerance = 1e-9;
+
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UIApplication uiapp = commandData.Application;
@@ -34,12 +36,37 @@ namespace FirstCommand
                 if (element is Wall wall)
                 {
                     Wall selectedWall = wall as Wall;
+
+                    //Options options = new Options();
+                    //options.DetailLevel = ViewDetailLevel.Fine;
+                    //GeometryElement elementGeometry = selectedWall.get_Geometry(options);
+
+                    //LocationCurve originalWallLocationCurve = selectedWall.Location as LocationCurve;
+
+                    //Curve originalCurve = originalWallLocationCurve.Curve;
+                    //Line line1 = originalCurve as Line;
+                    //int kq = 0;
+                    //foreach (GeometryObject geometryObject in elementGeometry)
+                    //{
+                    //    if (geometryObject is Solid solid)
+                    //    {
+                    //        foreach (Face face in solid.Faces)
+                    //        {
+                    //            if (IsFaceNormalWithLine(face, line1))
+                    //            {
+                    //                kq++;
+                    //            }
+                    //        }
+                    //    }
+                    //}
+                    //TaskDialog.Show("dfd", kq.ToString());
+                    //return Result.Succeeded;
+
                     ElementId wallTypeId = selectedWall.GetTypeId();
                     List<Line> listLines = new List<Line>();
                     if (selectedWall != null)
                     {
                         List<FamilyInfo> listInfos = GetInstanceOnWall(doc, selectedWall);
-                        ////GetDimOnWall(doc, selectedWall);
 
                         WallType wallType = selectedWall.WallType;
 
@@ -51,30 +78,36 @@ namespace FirstCommand
                             {
                                 return Result.Failed;
                             }
-                            foreach (Line line in listLines)
-                            {
-                                ElementId newWallId = null;
-                                RunTransaction(doc, "Divide a wall", (Transaction t) =>
-                                {
-                                    Wall newWall = CreateWall(doc, line, wallTypeId, selectedWall);
-                                    newWallId = newWall.Id;
-                                    ListInfosOnNewWall(line, listInfos);
-                                    PlaceFamilyOnWall(doc, newWall, ListInfosOnNewWall(line, listInfos));
-                                });
-                                if (selectedWall.WallType.Kind == WallKind.Curtain)
-                                {
-                                    Wall newWall = doc.GetElement(newWallId) as Wall;
+                            List<ElementId> listElementIds = new List<ElementId>();
+                            listElementIds.Add(selectedWall.Id);
 
-                                    CopyCurtainGrid(line, selectedWall, newWall);
-                                    CopyMullions(selectedWall, newWall);
-                                    CopyPanel(selectedWall, newWall);
-                                }
-                            }
+                            //foreach (Line line in listLines)
+                            //{
+                            //    ElementId newWallId = null;
+                            //    RunTransaction(doc, "Divide a wall", (Transaction t) =>
+                            //    {
+                            //        Wall newWall = CreateWall(doc, line, wallTypeId, selectedWall);
+                            //        newWallId = newWall.Id;
+                            //        listElementIds.Add(newWallId);
+                            //        ListInfosOnNewWall(line, listInfos);
+                            //        PlaceFamilyOnWall(doc, newWall, ListInfosOnNewWall(line, listInfos));
+                            //    });
+                            //    if (selectedWall.WallType.Kind == WallKind.Curtain)
+                            //    {
+                            //        Wall newWall = doc.GetElement(newWallId) as Wall;
 
-                            RunTransaction(doc, "Delete a wall", (Transaction t) =>
-                            {
-                                doc.Delete(selectedWall.Id);
-                            });
+                            //        CopyCurtainGrid(line, selectedWall, newWall);
+                            //        CopyMullions(selectedWall, newWall);
+                            //        CopyPanel(selectedWall, newWall);
+                            //    }
+                            //}
+
+                            XYZ wallOrientation = selectedWall.Orientation;
+                            //RunTransaction(doc, "Delete a wall", (Transaction t) =>
+                            //{
+                            //    doc.Delete(selectedWall.Id);
+                            //});
+                            CreateDim(doc, listElementIds, wallOrientation);
 
                             return Result.Succeeded;
                         }
@@ -191,31 +224,6 @@ namespace FirstCommand
             }
             //    t.Commit();
             //}
-        }
-
-        private List<Dimension> GetDimOnWall(Document doc, Wall oldWall)
-        {
-            List<Dimension> dimensions = new FilteredElementCollector(doc)
-                .OfClass(typeof(Dimension))
-                .Cast<Dimension>()
-                .Where(d => d.References.Cast<Reference>().Any(r => r.ElementId == oldWall.Id))
-                .ToList();
-            foreach (Dimension dim in dimensions)
-            {
-                ReferenceArray references = dim.References;
-                List<ElementId> elementIds = new List<ElementId>();
-
-                foreach (Reference reference in references)
-                {
-                    ElementId id = reference.ElementId;
-                    if (id != ElementId.InvalidElementId)
-                    {
-                        elementIds.Add(id);
-                    }
-                }
-            }
-
-            return dimensions;
         }
 
         //______________
@@ -859,6 +867,134 @@ namespace FirstCommand
         }
 
         //End_____________
+
+        //________________
+        //Start-- Add Dimmention
+
+        private void CreateDim(Document doc, List<ElementId> listElementIds, XYZ wallOrientation)
+        {
+            List<Edge> listEdges = new List<Edge>();
+
+            ReferenceArray referenceArray = new ReferenceArray();
+
+            foreach (ElementId elementId in listElementIds)
+            {
+                Wall newWall = doc.GetElement(elementId) as Wall;
+
+                Options options = new Options();
+                options.DetailLevel = ViewDetailLevel.Fine;
+                GeometryElement elementGeometry = newWall.get_Geometry(options);
+
+                foreach (GeometryObject geometryObject in elementGeometry)
+                {
+                    if (geometryObject is Solid solid)
+                    {
+                        foreach (Face face in solid.Faces)
+                        {
+                            if (IsFaceNormal(face, newWall.Orientation))
+                            {
+                                listEdges.AddRange(GetEdges(face, newWall));
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            RunTransaction(doc, "Create Dimension", (Transaction t) =>
+            {
+                double height = 20;
+                for (int i = 0; i < listEdges.Count() - 1; i++)
+                {
+                    Reference r1 = null, r2 = null;
+
+                    XYZ offset1 = GetPointOnZAxis(listEdges[i], height);
+                    XYZ offset2 = GetPointOnZAxis(listEdges[i + 1], height);
+
+                    r1 = listEdges[i].Reference;
+                    r2 = listEdges[i + 1].Reference;
+
+                    referenceArray.Append(r1);
+                    referenceArray.Append(r2);
+
+                    Line dimLine = Line.CreateBound(offset1, offset2);
+
+                    Dimension newDim = doc.Create.NewDimension(doc.ActiveView, dimLine, referenceArray);
+                }
+            });
+        }
+
+        private List<Edge> GetEdges(Face face, Wall wall)
+        {
+            LocationCurve wallLoc = wall.Location as LocationCurve;
+            Line wallLine = wallLoc.Curve as Line;
+            XYZ start = wallLine.GetEndPoint(0);
+            XYZ startOnZAxis = new XYZ(start.X, start.Y, 0);
+
+            List<Edge> edgeList = new List<Edge>();
+
+            EdgeArrayArray edgeArrays = face.EdgeLoops;
+
+            foreach (EdgeArray edges in edgeArrays)
+            {
+                foreach (Edge edge in edges)
+                {
+                    Line line = edge.AsCurve() as Line;
+
+                    if (IsLineVertical(line))
+                    {
+                        edgeList.Add(edge);
+                    }
+                }
+            }
+            edgeList.Sort((p1, p2) => startOnZAxis.DistanceTo((GetPointOnZAxis(p1, 0))).CompareTo(startOnZAxis.DistanceTo((GetPointOnZAxis(p2, 0)))));
+            // sap xep cac canh
+            return edgeList;
+        }
+
+        private XYZ GetPointOnZAxis(Edge edge, double height)
+        {
+            Line line = edge.AsCurve() as Line;
+            XYZ start = line.GetEndPoint(0);
+            XYZ newPointOnZAxis = new XYZ(start.X, start.Y, height);
+            return newPointOnZAxis;
+        }
+
+        private bool IsFaceNormal(Face face, XYZ orientaion)
+        {
+            if (face is PlanarFace)
+            {
+                PlanarFace pf = face as PlanarFace;
+                if (pf.FaceNormal.Normalize().IsAlmostEqualTo(orientaion, tolerance))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool IsFaceNormalWithLine(Face face, Line line)
+        {
+            XYZ lineDirection = line.Direction;
+            if (face is PlanarFace)
+            {
+                PlanarFace pf = face as PlanarFace;
+                return pf.FaceNormal.Normalize().IsAlmostEqualTo(lineDirection.Normalize(), tolerance) ||
+                    pf.FaceNormal.Normalize().IsAlmostEqualTo(-lineDirection.Normalize(), tolerance);
+            }
+
+            return false;
+        }
+
+        private bool IsLineVertical(Line line)
+        {
+            if (line.Direction.IsAlmostEqualTo(XYZ.BasisZ) || line.Direction.IsAlmostEqualTo(-XYZ.BasisZ))
+                return true;
+            else
+                return false;
+        }
+
+        //End________________
     }
 
     public class MullionInfo
