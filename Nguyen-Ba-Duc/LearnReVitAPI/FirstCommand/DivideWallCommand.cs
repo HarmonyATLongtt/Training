@@ -814,12 +814,15 @@ namespace FirstCommand
             foreach (ElementId panelId in oldWall.CurtainGrid.GetPanelIds())
             {
                 Panel oldPanel = doc.GetElement(panelId) as Panel;
-
-                listOldPanels.Add(oldPanel);
+                if (oldPanel.Name != "Glazed")
+                {
+                    listOldPanels.Add(oldPanel);
+                }
             }
 
             RunTransaction(doc, "Add Panel", (Transaction t) =>
             {
+                ICollection<ElementId> listPanelIds = newWall.CurtainGrid.GetPanelIds();
                 foreach (ElementId elementId in newWall.CurtainGrid.GetPanelIds())
                 {
                     Panel newPanel = doc.GetElement(elementId) as Panel;
@@ -844,14 +847,14 @@ namespace FirstCommand
             {
                 return false;
             }
+            XYZ midNew = (newBox.Min + newBox.Max) / 2;
             XYZ oldMin = oldBox.Min;
             XYZ oldMax = oldBox.Max;
-            XYZ newMin = newBox.Min;
-            XYZ newMax = newBox.Max;
 
-            bool inside = (newMin.X >= oldMin.X && newMax.X <= oldMax.X) &&
-                          (newMin.Y >= oldMin.Y && newMax.Y <= oldMax.Y) &&
-                          (newMin.Z >= oldMin.Z && newMax.Z <= oldMax.Z);
+            bool inside = midNew.X >= oldMin.X && midNew.X <= oldMax.X &&
+                            midNew.Y >= oldMin.Y && midNew.Y <= oldMax.Y &&
+                            midNew.Z >= oldMin.Z && midNew.Z <= oldMax.Z;
+
             return inside;
         }
 
