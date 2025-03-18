@@ -25,27 +25,38 @@ namespace FirstCommand.View
         public Autodesk.Revit.DB.View SelectedView { get; set; }
         private Document doc { get; set; }
 
+        public double Offset { get; set; }
+        public double SectionDepth { get; set; }
+
         public ViewComboboxWindow(Document doc)
         {
             this.doc = doc;
             InitializeComponent();
-            LoadViews();
+            //LoadViews();
         }
 
-        private void LoadViews()
-        {
-            var views = new FilteredElementCollector(doc)
-               .OfClass(typeof(Autodesk.Revit.DB.View))
-               .OfType<Autodesk.Revit.DB.View>()
-               .Where(v => !v.IsTemplate)
-               .ToList();
-            comboBoxViews.ItemsSource = views;
-            comboBoxViews.DisplayMemberPath = "Name";
-        }
+        //private void LoadViews()
+        //{
+        //    var views = new FilteredElementCollector(doc)
+        //       .OfClass(typeof(Autodesk.Revit.DB.View))
+        //       .OfType<Autodesk.Revit.DB.View>()
+        //       .Where(v => !v.IsTemplate)
+        //       .ToList();
+        //    comboBoxViews.ItemsSource = views;
+        //    comboBoxViews.DisplayMemberPath = "Name";
+        //}
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            SelectedView = comboBoxViews.SelectedItem as Autodesk.Revit.DB.View;
+            //SelectedView = comboBoxViews.SelectedItem as Autodesk.Revit.DB.View;
+            if (double.TryParse((tbNameOffset.Text), out double offset))
+            {
+                Offset = offset;
+            }
+            if (double.TryParse((tbNameDepth.Text), out double sectionDepth))
+            {
+                SectionDepth = sectionDepth;
+            }
             this.DialogResult = true;
             this.Close();
         }

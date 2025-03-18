@@ -3,20 +3,24 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Media.Media3D;
+using System.Xml.Linq;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Mechanical;
 using Autodesk.Revit.DB.Structure;
 using Autodesk.Revit.UI;
 using FirstCommand.View;
 using Microsoft.SqlServer.Server;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace FirstCommand
 {
@@ -35,6 +39,7 @@ namespace FirstCommand
             if (viewWindow.ShowDialog() == true)
             {
                 double offset = viewWindow.Offset;
+                double sectionDepth = viewWindow.SectionDepth;
 
                 Reference pickedRef = uidoc.Selection.PickObject(Autodesk.Revit.UI.Selection.ObjectType.Element, "Pick a wall");
 
@@ -45,11 +50,26 @@ namespace FirstCommand
                     {
                         Wall selectedWall = selectedElem as Wall;
 
-                        ElementId wallTypeId = selectedWall.GetTypeId();
+                        List<FamilyInstance> familyInstances = GetInstanceOnWall(doc, selectedWall);
+                        CreateSectionView(doc, familyInstances, selectedWall, sectionDepth);
 
-                        XYZ wallOrientation = selectedWall.Orientation;
-
-                        PrepareForDimmension(doc, selectedWall.Id, wallOrientation, offset);
+                        var views = new FilteredElementCollector(doc)
+                              .OfClass(typeof(Autodesk.Revit.DB.View))
+                              .OfType<Autodesk.Revit.DB.View>()
+                              .Where(v => !v.IsTemplate)
+                              .ToList();
+                        foreach (var view in views)
+                        {
+                            if (view.ViewType == ViewType.Section)
+                            {
+                                FamilyInstance intance = GetInstanceOnSection(doc, view.Id, selectedWall);
+                                PrepareDimForSectionView(intance, selectedWall, doc, view, offset);
+                            }
+                            else
+                            {
+                                PrepareForDimmension(doc, selectedWall.Id, selectedWall.Orientation, offset, view);
+                            }
+                        }
 
                         return Result.Succeeded;
                     }
@@ -81,118 +101,193 @@ namespace FirstCommand
         //________________
         //Start-- Add Dimmention
 
-        private void PrepareForDimmension(Document doc, ElementId elementId, XYZ wallOrientation, double offset)
+        private void PrepareDimForSectionView(FamilyInstance instance, Wall selectedWall, Document doc, Autodesk.Revit.DB.View view, double offset)
         {
-            List<Edge> listEdges = new List<Edge>();
+            BoundingBoxXYZ instanceBbox = instance.get_BoundingBox(null);
+            XYZ midPoint = (instanceBbox.Min + instanceBbox.Max) / 2;
+
+            List<Face> listFaces = new List<Face>();
+            List<Face> listFacesToChoose = new List<Face>();
+
+            foreach (Face face in GetFacesOnGeometry(selectedWall))
+            {
+                if (IsFaceNormalEqualToZ(face))
+                {
+                    listFaces.Add(face);
+                }
+            }
+
+            listFaces.Sort((a, b) => GetMidPointOfFace(a).Z.CompareTo(GetMidPointOfFace(b).Z));
+            listFacesToChoose.Add(listFaces.First());
+            listFacesToChoose.Add(listFaces.Last());
+            foreach (Face face in listFaces)
+            {
+                if (IsInBoundingBox(GetMidPointOfFace(face), instanceBbox))
+                {
+                    listFacesToChoose.Add(face);
+                }
+            }
+            listFacesToChoose.Sort((a, b) => GetMidPointOfFace(a).Z.CompareTo(GetMidPointOfFace(b).Z));
+
+            RunTransToCreateDim(doc, listFacesToChoose, view, offset, midPoint, view.UpDirection, view.RightDirection);
+        }
+
+        private void RunTransToCreateDim(Document doc, List<Face> listFaces, Autodesk.Revit.DB.View view, double offset, XYZ point, XYZ vector, XYZ direction)
+        {
+            RunTransaction(doc, "Create Dimension", (Transaction t) =>
+            {
+                ReferenceArray referenceArray = new ReferenceArray();
+                for (int i = 0; i < listFaces.Count() - 1; i++)
+                {
+                    CreateDim(GetOffset(point, direction, offset), doc, vector, referenceArray, listFaces[i], listFaces[i + 1], view);
+                    referenceArray.Clear();
+                }
+                CreateDim(GetOffset(point, direction, offset + 5), doc, vector, referenceArray, listFaces[0], listFaces[listFaces.Count() - 1], view);
+            });
+        }
+
+        private void CreateDim(XYZ point, Document doc, XYZ vector, ReferenceArray referenceArray, Face face1, Face face2, Autodesk.Revit.DB.View view)
+        {
+            Reference r1 = null;
+            Reference r2 = null;
+
+            r1 = face1.Reference;
+            r2 = face2.Reference;
+
+            referenceArray.Append(r1);
+            referenceArray.Append(r2);
+
+            Line dimLine = Line.CreateUnbound(point, vector);
+
+            Dimension newDim = doc.Create.NewDimension(view, dimLine, referenceArray);
+        }
+
+        private XYZ GetMidPointOfFace(Face face)
+        {
+            BoundingBoxUV bbox = face.GetBoundingBox();
+            UV midUV = new UV((bbox.Min.U + bbox.Max.U) / 2, (bbox.Min.V + bbox.Max.V) / 2);
+            return face.Evaluate(midUV);
+        }
+
+        private bool IsInBoundingBox(XYZ point, BoundingBoxXYZ bbox)
+        {
+            XYZ bboxMin = bbox.Min;
+            XYZ bboxMax = bbox.Max;
+            bool result = false;
+
+            if (point.X >= bboxMin.X && point.X <= bboxMax.X &&
+                point.Y >= bboxMin.Y && point.Y <= bboxMax.Y &&
+                point.Z >= bboxMin.Z && point.Z <= bboxMax.Z)
+            {
+                result = true;
+            }
+
+            return result;
+        }
+
+        private bool IsFaceNormalEqualToZ(Face face)
+        {
+            if (face is PlanarFace)
+            {
+                PlanarFace pf = face as PlanarFace;
+
+                if (pf.FaceNormal.IsAlmostEqualTo(XYZ.BasisZ, tolerance) || pf.FaceNormal.IsAlmostEqualTo(-XYZ.BasisZ, tolerance))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private FamilyInstance GetInstanceOnSection(Document doc, ElementId viewId, Wall selectedWall)
+        {
+            List<FamilyInstance> familyInstances = new FilteredElementCollector(doc, viewId)
+                    .OfClass(typeof(FamilyInstance))
+                    .Cast<FamilyInstance>()
+                    .ToList();
+            FamilyInstance familyInstance = null;
+            foreach (FamilyInstance instance in familyInstances)
+            {
+                if (instance.Host != null && instance.Host.Id == selectedWall.Id)
+                {
+                    familyInstance = instance;
+                    break;
+                }
+            }
+            return familyInstance;
+        }
+
+        private void CreateSectionView(Document doc, List<FamilyInstance> familyInstances, Wall wall, double sectionDepth)
+        {
+            foreach (FamilyInstance familyInstance in familyInstances)
+            {
+                BoundingBoxXYZ boundingBox = familyInstance.get_BoundingBox(null);
+
+                XYZ familyCenter = (boundingBox.Max + boundingBox.Min) / 2;
+                XYZ wallOrientation = wall.Orientation;
+
+                Transform sectionTransform = Transform.Identity;
+                sectionTransform.Origin = familyCenter;
+                sectionTransform.BasisX = wallOrientation;
+                sectionTransform.BasisY = XYZ.BasisZ;
+                sectionTransform.BasisZ = wallOrientation.CrossProduct(XYZ.BasisZ);
+
+                // Kích thước mặt cắt
+                double sectionWidth = 25;   // Chiều rộng
+                //double sectionDepth = 6; // Độ sâu
+                double sectionHeight = 35;  // Chiều cao
+
+                BoundingBoxXYZ sectionBox = new BoundingBoxXYZ();
+                sectionBox.Transform = sectionTransform;
+                sectionBox.Min = new XYZ(-sectionWidth / 2, -sectionHeight / 2, 0);
+                sectionBox.Max = new XYZ(sectionWidth / 2, sectionHeight / 2, sectionDepth / 2);
+
+                ViewFamilyType sectionType = new FilteredElementCollector(doc)
+                    .OfClass(typeof(ViewFamilyType))
+                    .Cast<ViewFamilyType>()
+                    .FirstOrDefault(x => x.ViewFamily == ViewFamily.Section);
+                if (sectionType == null)
+                {
+                    TaskDialog.Show("Lỗi", "Không tìm thấy ViewFamilyType cho Section.");
+                }
+                RunTransaction(doc, "Create ViewSection", (Transaction t) =>
+                {
+                    ViewSection sectionView = ViewSection.CreateSection(doc, sectionType.Id, sectionBox);
+                });
+            }
+        }
+
+        private void PrepareForDimmension(Document doc, ElementId elementId, XYZ wallOrientation, double offset, Autodesk.Revit.DB.View view)
+        {
             List<Face> listFaces = new List<Face>();
 
             Wall wall = doc.GetElement(elementId) as Wall;
             LocationCurve wallLoc = wall.Location as LocationCurve;
             Line wallLine = wallLoc.Curve as Line;
             XYZ start = wallLine.GetEndPoint(0);
-            XYZ end = wallLine.GetEndPoint(1);
-            XYZ startOnZAxis = new XYZ(start.X, start.Y, 0);
-            Face faceToRef = null;
 
             IList<Element> intersectElements = ListIntersectElements(doc, wall);
             listFaces = GetListFaces(intersectElements, wallLine);
 
-            Options options = new Options();
-            options.DetailLevel = ViewDetailLevel.Fine;
-            options.ComputeReferences = true;
-            GeometryElement elementGeometry = wall.get_Geometry(options);
-
-            foreach (GeometryObject geometryObject in elementGeometry)
+            foreach (Face face in GetFacesOnGeometry(wall))
             {
-                if (geometryObject is Solid solid)
+                if (IsFaceNormalWithLine(face, wallLine))
                 {
-                    foreach (Face face in solid.Faces)
-                    {
-                        if (IsFaceNormal(face, wall.Orientation))
-                        {
-                            listEdges.AddRange(GetEdges(face));
-                            faceToRef = face;
-                            break;
-                        }
-                    }
+                    listFaces.Add(face);
                 }
             }
 
-            List<Edge> listEdgeToRef = GetListEdgeToRef(faceToRef, start, end);
+            listFaces.Sort((a, b) => GetMidPointOfFace(a).X.CompareTo(GetMidPointOfFace(b).X));
 
-            List<ReferenceInfo> listReferenceInfos = GetListReferenInfos(listEdgeToRef, listFaces, listEdges);
-
-            listReferenceInfos.Sort((p1, p2) => startOnZAxis.DistanceTo(p1.Point).CompareTo(startOnZAxis.DistanceTo(p2.Point)));
-
-            RunTransaction(doc, "Create Dimension", (Transaction t) =>
+            if (view.ViewType == ViewType.FloorPlan)
             {
-                ReferenceArray referenceArray = new ReferenceArray();
-                for (int i = 0; i < listReferenceInfos.Count() - 1; i++)
-                {
-                    CreateNewDim(doc, wallOrientation, referenceArray, listReferenceInfos[i], listReferenceInfos[i + 1], offset);
-                    referenceArray.Clear();
-                }
-                CreateNewDim(doc, wallOrientation, referenceArray, listReferenceInfos[0], listReferenceInfos[listReferenceInfos.Count() - 1], offset + 5);
-            });
-        }
-
-        private List<ReferenceInfo> GetListReferenInfos(List<Edge> listEdgeToRef, List<Face> listFaces, List<Edge> listEdges)
-        {
-            List<ReferenceInfo> listReferenceInfos = new List<ReferenceInfo>();
-            foreach (Edge edge in listEdgeToRef)
-            {
-                foreach (Face face in listFaces)
-                {
-                    IntersectionResultArray results;
-                    SetComparisonResult comparisonResult = face.Intersect(edge.AsCurve(), out results);
-
-                    if (comparisonResult == SetComparisonResult.Overlap && results != null)
-                    {
-                        foreach (IntersectionResult result in results)
-                        {
-                            ReferenceInfo referenceInfo = new ReferenceInfo();
-                            referenceInfo.Point = result.XYZPoint;
-                            referenceInfo.Face = face;
-                            listReferenceInfos.Add(referenceInfo);
-                        }
-                    }
-                }
+                RunTransToCreateDim(doc, listFaces, view, offset, start, wallLine.Direction.Normalize(), wallOrientation);
             }
+            else if (view.ViewType == ViewType.Elevation)
 
-            for (int i = 0; i < listEdges.Count(); i++)
             {
-                ReferenceInfo referenceInfo = new ReferenceInfo();
-
-                referenceInfo.Point = GetPointOnZAxis(listEdges[i], 0);
-
-                referenceInfo.Edge = listEdges[i];
-
-                listReferenceInfos.Add(referenceInfo);
+                RunTransToCreateDim(doc, listFaces, view, offset, start, view.RightDirection, -XYZ.BasisZ);
             }
-            return listReferenceInfos;
-        }
-
-        private List<Edge> GetListEdgeToRef(Face faceToRef, XYZ start, XYZ end)
-        {
-            List<Edge> listEdgeToRef = new List<Edge>();
-            EdgeArrayArray edgeArrays = faceToRef.EdgeLoops;
-
-            foreach (EdgeArray edges in edgeArrays)
-            {
-                foreach (Edge edge in edges)
-                {
-                    Line line = edge.AsCurve() as Line;
-
-                    XYZ start1 = line.GetEndPoint(0);
-                    XYZ end1 = line.GetEndPoint(1);
-
-                    if (start1.Z == start.Z && end1.Z == end.Z)
-                    {
-                        listEdgeToRef.Add(edge);
-                    }
-                }
-            }
-            return listEdgeToRef;
         }
 
         private List<Face> GetListFaces(IList<Element> intersectElements, Line wallLine)
@@ -200,21 +295,34 @@ namespace FirstCommand
             List<Face> listFaces = new List<Face>();
             foreach (Element element in intersectElements)
             {
-                Options optionsEle = new Options();
-                optionsEle.DetailLevel = ViewDetailLevel.Fine;
-                optionsEle.ComputeReferences = true;
-                GeometryElement elementGeo = element.get_Geometry(optionsEle);
-
-                foreach (GeometryObject geometryObj in elementGeo)
+                foreach (Face face in GetFacesOnGeometry(element))
                 {
-                    if (geometryObj is Solid solid)
+                    if (IsFaceNormalWithLine(face, wallLine))
                     {
-                        foreach (Face face in solid.Faces)
+                        listFaces.Add(face);
+                    }
+                }
+            }
+            return listFaces;
+        }
+
+        private List<Face> GetFacesOnGeometry(Element element)
+        {
+            List<Face> listFaces = new List<Face>();
+            Options options = new Options();
+            options.DetailLevel = ViewDetailLevel.Fine;
+            options.ComputeReferences = true;
+            GeometryElement elementGeo = element.get_Geometry(options);
+
+            foreach (GeometryObject geometryObj in elementGeo)
+            {
+                if (geometryObj is Solid solid)
+                {
+                    foreach (Face face in solid.Faces)
+                    {
+                        if (face is PlanarFace)
                         {
-                            if (IsFaceNormalWithLine(face, wallLine))
-                            {
-                                listFaces.Add(face);
-                            }
+                            listFaces.Add(face);
                         }
                     }
                 }
@@ -237,100 +345,12 @@ namespace FirstCommand
             return listElements;
         }
 
-        private void CreateNewDim(Document doc, XYZ wallOrientation, ReferenceArray referenceArray, ReferenceInfo referenceInfo1, ReferenceInfo referenceInfo2, double offset)
-        {
-            XYZ point1 = new XYZ(0, 0, 0);
-            XYZ point2 = new XYZ(0, 0, 0);
-            XYZ vectorZ = new XYZ(0, 0, -1);
-            Reference r1 = null;
-            Reference r2 = null;
-
-            if (doc.ActiveView.Name == "Level 1")
-            {
-                point1 = GetOffsetByWallOrientation(referenceInfo1.Point, wallOrientation, offset);
-                point2 = GetOffsetByWallOrientation(referenceInfo2.Point, wallOrientation, offset);
-            }
-            else if (doc.ActiveView.Name == "North")
-            {
-                point1 = GetOffsetByWallOrientation(referenceInfo1.Point, vectorZ, offset);
-                point2 = GetOffsetByWallOrientation(referenceInfo2.Point, vectorZ, offset);
-            }
-
-            if (referenceInfo1.Face != null)
-            {
-                r1 = referenceInfo1.Face.Reference;
-            }
-            else if (referenceInfo1.Edge != null)
-            {
-                r1 = referenceInfo1.Edge.Reference;
-            }
-
-            if (referenceInfo2.Face != null)
-            {
-                r2 = referenceInfo2.Face.Reference;
-            }
-            else if (referenceInfo2.Edge != null)
-            {
-                r2 = referenceInfo2.Edge.Reference;
-            }
-
-            referenceArray.Append(r1);
-            referenceArray.Append(r2);
-
-            Line dimLine = Line.CreateBound(point1, point2);
-
-            Dimension newDim = doc.Create.NewDimension(doc.ActiveView, dimLine, referenceArray);
-        }
-
-        private XYZ GetOffsetByWallOrientation(XYZ point, XYZ orientation, double value)
+        private XYZ GetOffset(XYZ point, XYZ orientation, double value)
         {
             XYZ newVector = orientation.Multiply(value);
             XYZ returnPoint = point.Add(newVector);
 
             return returnPoint;
-        }
-
-        private List<Edge> GetEdges(Face face)
-        {
-            List<Edge> edgeList = new List<Edge>();
-
-            EdgeArrayArray edgeArrays = face.EdgeLoops;
-
-            foreach (EdgeArray edges in edgeArrays)
-            {
-                foreach (Edge edge in edges)
-                {
-                    Line line = edge.AsCurve() as Line;
-
-                    if (IsLineVertical(line))
-                    {
-                        edgeList.Add(edge);
-                    }
-                }
-            }
-            return edgeList;
-        }
-
-        private XYZ GetPointOnZAxis(Edge edge, double height)
-        {
-            Line line = edge.AsCurve() as Line;
-            XYZ start = line.GetEndPoint(0);
-            XYZ newPointOnZAxis = new XYZ(start.X, start.Y, height);
-            return newPointOnZAxis;
-        }
-
-        private bool IsFaceNormal(Face face, XYZ orientaion)
-        {
-            if (face is PlanarFace)
-            {
-                PlanarFace pf = face as PlanarFace;
-                if (pf.FaceNormal.Normalize().IsAlmostEqualTo(orientaion, tolerance))
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         private bool IsFaceNormalWithLine(Face face, Line line)
@@ -346,21 +366,27 @@ namespace FirstCommand
             return false;
         }
 
-        private bool IsLineVertical(Line line)
+        private List<FamilyInstance> GetInstanceOnWall(Document doc, Wall wall)
         {
-            if (line.Direction.IsAlmostEqualTo(XYZ.BasisZ) || line.Direction.IsAlmostEqualTo(-XYZ.BasisZ))
-                return true;
-            else
-                return false;
+            ElementCategoryFilter windowFilter = new ElementCategoryFilter(BuiltInCategory.OST_Windows);
+            ElementCategoryFilter doorFilter = new ElementCategoryFilter(BuiltInCategory.OST_Doors);
+            LogicalOrFilter orFilter = new LogicalOrFilter(windowFilter, doorFilter);
+
+            FilteredElementCollector collector = new FilteredElementCollector(doc)
+                .WherePasses(orFilter)
+                .OfClass(typeof(FamilyInstance));
+
+            List<FamilyInstance> listFamilies = new List<FamilyInstance>();
+            foreach (FamilyInstance instance in collector)
+            {
+                if (instance.Host != null && instance.Host.Id == wall.Id)
+                {
+                    listFamilies.Add(instance);
+                }
+            }
+            return listFamilies;
         }
 
         //End________________
-    }
-
-    public class ReferenceInfo
-    {
-        public XYZ Point { get; set; }
-        public Edge Edge { get; set; }
-        public Face Face { get; set; }
     }
 }
