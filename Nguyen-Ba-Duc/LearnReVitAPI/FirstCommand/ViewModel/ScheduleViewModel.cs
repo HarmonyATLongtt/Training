@@ -19,10 +19,16 @@ namespace FirstCommand.ViewModel
         private Document _doc;
         public ViewSchedule _schedule;
         public List<int> RowIndexes { get; set; }
-        public List<string> DoubleColumns { get; } = new List<string> { "W", "L", "H", "Unconnected Height" };
-        private List<string> _listFieldCombinedOrCaculated;
 
-        public List<string> ListFieldCombinedOrCaculated
+        private List<RowInfo> RowInfoList { get; set; }
+        public List<(int, int)> cellIsReadOnlys { get; set; }
+
+        //public List<string> DoubleColumns { get; } = new List<string> { "W", "L", "H", "Unconnected Height" };
+        public List<string> DoubleColumns { get; set; }
+
+        private List<(string Name, int Col)> _listFieldCombinedOrCaculated;
+
+        public List<(string Name, int Col)> ListFieldCombinedOrCaculated
         {
             get { return _listFieldCombinedOrCaculated; }
             set
@@ -48,14 +54,19 @@ namespace FirstCommand.ViewModel
 
         //public ObservableCollection<ScheduleRowModel> ScheduleRows { get; set; }
         //public RelayCommand UpdateCommand { get; }
+        public List<CellIsReadOnly> listCellIsReadOnly { get; set; }
 
-        public ScheduleViewModel(Document doc, ViewSchedule schedule)
+        public ScheduleViewModel(Document doc, ViewSchedule schedule, List<CellIsReadOnly> CellIsReadOnlys, List<RowInfo> rowInfoList)
         {
             _doc = doc;
+            listCellIsReadOnly = CellIsReadOnlys;
             _schedule = schedule;
+            DoubleColumns = new List<string>();
             dataTable = new DataTable();
             RowIndexes = new List<int>();
-            ListFieldCombinedOrCaculated = new List<string>();
+            RowInfoList = rowInfoList;
+            cellIsReadOnlys = new List<(int, int)>();
+            ListFieldCombinedOrCaculated = new List<(string, int)>();
             //ListListCellInfos = new List<List<CellInfo>>();
             //UpdateCommand = new RelayCommand(Update);
             CellInfos = GetDataFromSchedule(schedule, dataTable);
@@ -100,21 +111,60 @@ namespace FirstCommand.ViewModel
                     ScheduleField field = schedule.Definition.GetField(keyPairValue.Key);
                     if (field.IsCombinedParameterField == true || field.IsCalculatedField == true)
                     {
-                        ListFieldCombinedOrCaculated.Add(field.GetName());
+                        ListFieldCombinedOrCaculated.Add((field.GetName(), keyPairValue.Key));
                     }
 
                     CellInfo cellInfo = new CellInfo();
                     cellInfo.rowCellSchedule = info.Row;
                     cellInfo.colCellSchedule = keyPairValue.Key;
                     cellInfo.colCellTable = keyPairValue.Key;
+                    cellInfo.value = keyPairValue.Value;
                     cellInfo.rowCellTable = dataTable.Rows.Count + 1;
                     cellInfo.paramId = field.ParameterId;
+
                     cellInfos.Add(cellInfo);
                     newRow[keyPairValue.Key] = keyPairValue.Value;
                 }
                 dataTable.Rows.Add(newRow);
             }
+
+            foreach (CellIsReadOnly cell in listCellIsReadOnly)
+            {
+                foreach (CellInfo info in cellInfos)
+                {
+                    if (info.rowCellSchedule == cell.Row && info.colCellSchedule == cell.Column)
+                    {
+                        cellIsReadOnlys.Add((info.rowCellTable, info.colCellTable));
+                    }
+                }
+            }
+            RowInfo newRowInfo = RowInfoList[2];
+            HashSet<int> setDoubles = new HashSet<int>();
+            foreach (Parameter param in newRowInfo.ListParams)
+            {
+                foreach (CellInfo info in cellInfos)
+                {
+                    {
+                        if (param.Id == info.paramId && param.StorageType == StorageType.Double)
+                        {
+                            setDoubles.Add(info.colCellTable);
+                        }
+                    }
+                }
+            }
+            foreach (int col in setDoubles)
+            {
+                ScheduleField field = schedule.Definition.GetField(col);
+                DoubleColumns.Add(field.GetName());
+            }
             RowIndexes = GetRowIndexs(dataTable, colCount);
+            //foreach (int row in RowIndexes)
+            //{
+            //    for (int i = 0; i < colCount; i++)
+            //    {
+            //        cellIsReadOnlys.Add((row + 1, i));
+            //    }
+            //}
             return cellInfos;
         }
 
@@ -152,20 +202,6 @@ namespace FirstCommand.ViewModel
                 }
             }
             return hasValue;
-
-            //int num = 0;
-            //foreach (string value in colValues.Values)
-            //{
-            //    if (value != "")
-            //    {
-            //        num++;
-            //    }
-            //}
-            //if (num > 1)
-            //{
-            //    return true;
-            //}
-            //return false;
         }
     }
 
@@ -178,6 +214,7 @@ namespace FirstCommand.ViewModel
         public string value { get; set; }
 
         public bool isChanged = false;
+
         public ElementId paramId { get; set; }
     }
 }

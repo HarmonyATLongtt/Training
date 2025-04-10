@@ -5,10 +5,20 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:FirstCommand.View"
              mc:Ignorable="d"
-             Height="450" Width="800">
+             WindowStartupLocation="CenterScreen"
+             Height="450" Width="1000">
     <Grid>
         <StackPanel>
-            <DataGrid LoadingRow="DataGrid_LoadingRow" BeginningEdit="DataGrid_BeginningEdit" AutoGeneratingColumn="DataGrid_AutoGeneratingColumn" CellEditEnding="DataGrid_CellEditEnding"  ItemsSource="{Binding dataTable}" IsReadOnly="False" />
+            <DataGrid PreviewKeyDown="dataGrid_PreviewKeyDown" x:Name="dataGrid" CanUserSortColumns="False"
+                      LoadingRow="DataGrid_LoadingRow" BeginningEdit="DataGrid_BeginningEdit" AutoGeneratingColumn="DataGrid_AutoGeneratingColumn"
+                      CellEditEnding="DataGrid_CellEditEnding"  ItemsSource="{Binding dataTable}" IsReadOnly="False">
+                <DataGrid.ContextMenu>
+                    <ContextMenu x:Name="dataGridContextMenu">
+                        <MenuItem Header="Copy" Click="MenuItem_Copy_Click" />
+                        <MenuItem Header="Paste" Click="MenuItem_Paste_Click" />
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+            </DataGrid>
             <Button Content="Update to Revit"  Margin="10" Click="Button_Click" />
         </StackPanel>
     </Grid>

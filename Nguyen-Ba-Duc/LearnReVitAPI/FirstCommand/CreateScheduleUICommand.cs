@@ -21,12 +21,15 @@ namespace FirstCommand
     public class CreateScheduleUICommand : IExternalCommand
     {
         private double FeetToMm = 304.8;
+        public List<CellIsReadOnly> CellIsReadOnlys { get; set; }
+        public List<RowInfo> RowInfoList { get; set; }
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
+            Application app = uiapp.Application;
 
             // Lấy tất cả các ViewSchedule trong project
             FilteredElementCollector collector = new FilteredElementCollector(doc);
@@ -43,12 +46,12 @@ namespace FirstCommand
                 }
                 List<ScheduleInfo> scheduleInfos = GetElementIdAndRowOnSchdule(doc, viewSchedule);
 
-                ScheduleView scheduleView = new ScheduleView(doc, viewSchedule);
+                ScheduleView scheduleView = new ScheduleView(doc, viewSchedule, CellIsReadOnlys, RowInfoList);
                 ScheduleViewModel viewModel = scheduleView.DataContext as ScheduleViewModel;
                 if (scheduleView.ShowDialog() == true)
                 {
                     List<CellInfo> cellInfos = viewModel.CellInfos;
-                    UpdateScheduleData(doc, cellInfos, scheduleInfos);
+                    UpdateScheduleData(doc, cellInfos, scheduleInfos, app);
                     return Result.Succeeded;
                 }
                 return Result.Failed;
@@ -73,7 +76,7 @@ namespace FirstCommand
             }
         }
 
-        private void UpdateScheduleData(Document doc, List<CellInfo> cellInfos, List<ScheduleInfo> scheduleInfos)
+        private void UpdateScheduleData(Document doc, List<CellInfo> cellInfos, List<ScheduleInfo> scheduleInfos, Application app)
         {
             RunTransaction(doc, "Create Schedule", (Transaction t) =>
             {
@@ -89,22 +92,85 @@ namespace FirstCommand
                                 {
                                     if (param.Id == cellInfo.paramId)
                                     {
-                                        Element ele = doc.GetElement(param.AsElementId());
-                                        if (ele != null)
+                                        if (!param.IsReadOnly)
                                         {
-                                            ElementId elementId = GetElementIdByName(doc, cellInfo.value);
-                                            if (elementId != ElementId.InvalidElementId)
+                                            if (param.StorageType == StorageType.ElementId)
                                             {
-                                                SetParameterValue(param, elementId);
+                                                Element ele = doc.GetElement(param.AsElementId());
+                                                if (ele != null)
+                                                {
+                                                    if (ele is ElementType elementType)
+                                                    {
+                                                        ICollection<ElementId> listElementIdtype = elementType.GetSimilarTypes();
+                                                        foreach (ElementId elementId in listElementIdtype)
+                                                        {
+                                                            if (elementId != ElementId.InvalidElementId)
+                                                            {
+                                                                Element element = doc.GetElement(elementId);
+                                                                if (element != null && element.Name == cellInfo.value)
+                                                                {
+                                                                    SetParameterValue(param, elementId);
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        BuiltInCategory builtInCategory = ele.Category.BuiltInCategory;
+
+                                                        ElementId elementId = GetElementIdByName(doc, cellInfo.value, builtInCategory);
+                                                        if (elementId != ElementId.InvalidElementId)
+                                                        {
+                                                            SetParameterValue(param, elementId);
+                                                        }
+                                                        else
+                                                        {
+                                                            TaskDialog.Show("Lỗi", "Không tồn tại ElementId với tên là:" + cellInfo.value);
+                                                        }
+                                                    }
+                                                }
+                                                else if (param.IsShared)
+                                                {
+                                                    Definition def = param.Definition;
+                                                    ForgeTypeId typeId = def.GetDataType();
+                                                    Dictionary<ForgeTypeId, BuiltInCategory> keyValuePairs = GetBuiltInCategoryFromSharedParam(app);
+                                                    foreach (var item in keyValuePairs)
+                                                    {
+                                                        if (typeId == item.Key)
+                                                        {
+                                                            BuiltInCategory builtInCategory = item.Value;
+                                                            if (builtInCategory != BuiltInCategory.INVALID)
+                                                            {
+                                                                ElementId elementId = GetElementIdByName(doc, cellInfo.value, builtInCategory);
+                                                                if (elementId != ElementId.InvalidElementId)
+                                                                {
+                                                                    SetParameterValue(param, elementId);
+                                                                }
+                                                                else
+                                                                {
+                                                                    TaskDialog.Show("Lỗi", "Không tồn tại ElementId với tên là:" + cellInfo.value);
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            else if (param.StorageType == StorageType.Integer)
+                                            {
+                                                int? num = FindMatchingEnumValue(param, cellInfo.value);
+                                                if (num != null)
+                                                {
+                                                    SetParameterValue(param, num);
+                                                }
+                                                else
+                                                {
+                                                    TaskDialog.Show("Error", "Do not exist ElementId:" + cellInfo.value);
+                                                }
                                             }
                                             else
                                             {
-                                                TaskDialog.Show("Lỗi", "Không tồn tại ElementId với tên là:" + cellInfo.value);
+                                                SetParameterValue(param, cellInfo.value);
                                             }
-                                        }
-                                        else
-                                        {
-                                            SetParameterValue(param, cellInfo.value);
                                         }
                                     }
                                 }
@@ -113,6 +179,61 @@ namespace FirstCommand
                     }
                 }
             });
+        }
+
+        private int? FindMatchingEnumValue(Parameter param, string userInput)
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                if (param.Set(i))
+                {
+                    if (param.AsValueString()?.Trim() == userInput.Trim())
+                    {
+                        return i;
+                    }
+                }
+            }
+            return null; // không tìm thấy
+        }
+
+        private Dictionary<ForgeTypeId, BuiltInCategory> GetBuiltInCategoryFromSharedParam(Application app)
+        {
+            DefinitionFile sharedParamFile = app.OpenSharedParameterFile();
+            DefinitionGroups groups = sharedParamFile.Groups;
+            Dictionary<ForgeTypeId, BuiltInCategory> keyValuePairs = new Dictionary<ForgeTypeId, BuiltInCategory>();
+            HashSet<ForgeTypeId> keySet = new HashSet<ForgeTypeId>();
+            foreach (DefinitionGroup group in groups)
+            {
+                foreach (Definition definition in group.Definitions)
+                {
+                    ForgeTypeId typeId = definition.GetDataType();
+                    keySet.Add(typeId);
+                }
+            }
+            foreach (ForgeTypeId typeId in keySet)
+            {
+                if (typeId.Equals(SpecTypeId.Reference.Material))
+                {
+                    keyValuePairs.Add(typeId, BuiltInCategory.OST_Materials);
+                }
+                else if (typeId.Equals(SpecTypeId.Length))
+                {
+                    keyValuePairs.Add(typeId, BuiltInCategory.INVALID);
+                }
+                else if (typeId.Equals(SpecTypeId.Reference.Image))
+                {
+                    keyValuePairs.Add(typeId, BuiltInCategory.INVALID);
+                }
+                else if (typeId.Equals(SpecTypeId.String.Text))
+                {
+                    keyValuePairs.Add(typeId, BuiltInCategory.INVALID);
+                }
+                else if (typeId.Equals(SpecTypeId.String.Url))
+                {
+                    keyValuePairs.Add(typeId, BuiltInCategory.INVALID);
+                }
+            }
+            return keyValuePairs;
         }
 
         private double IsDouble(string input)
@@ -125,10 +246,11 @@ namespace FirstCommand
             return 0.0;
         }
 
-        private ElementId GetElementIdByName(Document doc, string name)
+        private ElementId GetElementIdByName(Document doc, string name, BuiltInCategory builtInCategory)
         {
-            FilteredElementCollector collector = new FilteredElementCollector(doc);
-            collector.WhereElementIsNotElementType();
+            FilteredElementCollector collector = new FilteredElementCollector(doc)
+                .OfCategory(builtInCategory)
+                .WhereElementIsNotElementType();
             Element element = collector.FirstOrDefault(e => e.Name == name);
             if (element != null)
             {
@@ -143,12 +265,13 @@ namespace FirstCommand
             {
                 switch (parameter.StorageType)
                 {
-                    //if (value is int intValue)
-                    //{
-                    //    parameter.Set(intValue);
-                    //}
-                    //break;
                     case StorageType.Integer:
+                        if (value is int intValue)
+                        {
+                            parameter.Set(intValue);
+                        }
+                        break;
+
                     case StorageType.Double:
 
                         double result = IsDouble(value.ToString());
@@ -273,12 +396,36 @@ namespace FirstCommand
                     {
                         ScheduleInfo scheduleInfo = new ScheduleInfo();
                         scheduleInfo.Row = rowinfo.Row;
+                        rowinfo.ListParams = paramOfElement.ListParam.ToList();
                         scheduleInfo.ElementId = paramOfElement.ElementId;
                         scheduleInfo.ListParam = paramOfElement.ListParam;
                         scheduleInfoList.Add(scheduleInfo);
                     }
                 }
             }
+            List<CellIsReadOnly> listCellIsReadOnly = new List<CellIsReadOnly>();
+            foreach (var rowinfo in rowInfoList)
+            {
+                foreach (Parameter param in rowinfo.ListParams.Where(p => p.IsReadOnly == true))
+                {
+                    foreach (var keyValuePair in rowinfo.columnValues)
+                    {
+                        if (param.AsValueString() == keyValuePair.Value.ToString())
+                        {
+                            CellIsReadOnly cellIsReadOnly = new CellIsReadOnly();
+                            cellIsReadOnly.Row = rowinfo.Row;
+                            cellIsReadOnly.Column = keyValuePair.Key;
+                            cellIsReadOnly.Value = keyValuePair.Value;
+                            //cellIsReadOnly.paramId = param.Id;
+                            listCellIsReadOnly.Add(cellIsReadOnly);
+                        }
+                    }
+                }
+            }
+            CellIsReadOnlys = new List<CellIsReadOnly>();
+            CellIsReadOnlys = listCellIsReadOnly.ToList();
+            RowInfoList = new List<RowInfo>();
+            RowInfoList = rowInfoList.ToList();
             return scheduleInfoList;
         }
 
@@ -326,10 +473,12 @@ namespace FirstCommand
     {
         public int Row { get; set; }
         public Dictionary<int, string> columnValues { get; set; }
+        public List<Parameter> ListParams { get; set; }
 
         public RowInfo()
         {
             columnValues = new Dictionary<int, string>();
+            ListParams = new List<Parameter>();
         }
     }
 
@@ -338,11 +487,30 @@ namespace FirstCommand
         public ElementId ElementId { get; set; }
 
         public HashSet<Parameter> ListParam { get; set; }
+        //public Dictionary<bool, Parameter> paramList { get; set; }
 
         public ParamOfElement()
         {
             ListParam = new HashSet<Parameter>();
+            //paramList = new Dictionary<bool, Parameter>();
         }
+    }
+
+    //public class ColumnInputType
+    //{
+    //    public int Column { get; set; }
+    //    public StorageType StorageType { get; set; }
+    //    public bool IsSharedParam { get; set; }
+    //    public BuiltInCategory BuiltInCategory { get; set; }
+    //    public bool isElementType { get; set; }
+    //}
+
+    public class CellIsReadOnly
+    {
+        public string Value { get; set; }
+        public int Row { get; set; }
+        public int Column { get; set; }
+        //public ElementId paramId { get; set; }
     }
 
     public class ScheduleInfo
