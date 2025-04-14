@@ -213,6 +213,14 @@ namespace FirstCommand
                 // 8 Tính tổng số lượng tường
                 definition.IsItemized = false;
                 //definition.ShowGrandTotal = true; // Hiển thị tổng số lượng của mỗi nhóm
+
+                //TableData tableData = schedule.GetTableData();
+                //TableSectionData headerSection = tableData.GetSectionData(SectionType.Header);
+
+                //TableMergedCell mergedCell = new TableMergedCell(0, 1, 0, 2);
+
+                //headerSection.MergeCells(mergedCell);
+                //headerSection.SetCellText(0, 1, "Kích thước");
             });
         }
 

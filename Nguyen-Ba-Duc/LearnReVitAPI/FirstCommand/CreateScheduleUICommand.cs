@@ -125,7 +125,7 @@ namespace FirstCommand
                                                         }
                                                         else
                                                         {
-                                                            TaskDialog.Show("Lỗi", "Không tồn tại ElementId với tên là:" + cellInfo.value);
+                                                            TaskDialog.Show("Error", "Do not exist ElementId:" + cellInfo.value);
                                                         }
                                                     }
                                                 }
@@ -148,7 +148,7 @@ namespace FirstCommand
                                                                 }
                                                                 else
                                                                 {
-                                                                    TaskDialog.Show("Lỗi", "Không tồn tại ElementId với tên là:" + cellInfo.value);
+                                                                    TaskDialog.Show("Error", "Do not exist ElementId:" + cellInfo.value);
                                                                 }
                                                             }
                                                         }
@@ -193,7 +193,7 @@ namespace FirstCommand
                     }
                 }
             }
-            return null; // không tìm thấy
+            return null;
         }
 
         private Dictionary<ForgeTypeId, BuiltInCategory> GetBuiltInCategoryFromSharedParam(Application app)
@@ -279,12 +279,7 @@ namespace FirstCommand
                         {
                             parameter.Set(result / FeetToMm);
                         }
-
                         break;
-                    //if (result is double doubleValue)
-                    //{
-                    //    parameter.Set(doubleValue);
-                    //}
 
                     case StorageType.String:
                         if (value is string stringValue)
@@ -495,15 +490,6 @@ namespace FirstCommand
             //paramList = new Dictionary<bool, Parameter>();
         }
     }
-
-    //public class ColumnInputType
-    //{
-    //    public int Column { get; set; }
-    //    public StorageType StorageType { get; set; }
-    //    public bool IsSharedParam { get; set; }
-    //    public BuiltInCategory BuiltInCategory { get; set; }
-    //    public bool isElementType { get; set; }
-    //}
 
     public class CellIsReadOnly
     {

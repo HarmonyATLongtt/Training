@@ -46,13 +46,22 @@ namespace FirstCommand.View
             var viewmodel = (ScheduleViewModel)this.DataContext;
             if (viewmodel != null)
             {
+                int rowCount = viewmodel.RowCount;
+                int colCount = viewmodel.ColCount;
                 readOnlyCells.UnionWith(viewmodel.cellIsReadOnlys);
 
                 foreach (var (name, col) in viewmodel.ListFieldCombinedOrCaculated)
                 {
-                    for (int row = 0; row < 8; row++)
+                    for (int row = 0; row < rowCount; row++)
                     {
-                        readOnlyCells.Add((row, col));
+                        readOnlyCells.Add((row + 1, col));
+                    }
+                }
+                foreach (int row in viewmodel.RowIndexes)
+                {
+                    for (int col = 0; col < colCount; col++)
+                    {
+                        readOnlyCells.Add((row + 1, col));
                     }
                 }
             }

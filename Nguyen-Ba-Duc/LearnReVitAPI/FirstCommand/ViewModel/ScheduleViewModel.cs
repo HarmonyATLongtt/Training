@@ -20,6 +20,9 @@ namespace FirstCommand.ViewModel
         public ViewSchedule _schedule;
         public List<int> RowIndexes { get; set; }
 
+        public int RowCount { get; set; }
+
+        public int ColCount { get; set; }
         private List<RowInfo> RowInfoList { get; set; }
         public List<(int, int)> cellIsReadOnlys { get; set; }
 
@@ -138,33 +141,36 @@ namespace FirstCommand.ViewModel
                     }
                 }
             }
-            RowInfo newRowInfo = RowInfoList[2];
+            //RowInfo newRowInfo = RowInfoList[2];
             HashSet<int> setDoubles = new HashSet<int>();
-            foreach (Parameter param in newRowInfo.ListParams)
+            foreach (RowInfo rowInfo in RowInfoList)
             {
-                foreach (CellInfo info in cellInfos)
+                if (rowInfo.ListParams.Count > 0)
                 {
+                    foreach (Parameter param in rowInfo.ListParams)
                     {
-                        if (param.Id == info.paramId && param.StorageType == StorageType.Double)
+                        foreach (CellInfo info in cellInfos)
                         {
-                            setDoubles.Add(info.colCellTable);
+                            {
+                                if (param.Id == info.paramId && param.StorageType == StorageType.Double)
+                                {
+                                    setDoubles.Add(info.colCellTable);
+                                }
+                            }
                         }
                     }
+                    break;
                 }
             }
+
             foreach (int col in setDoubles)
             {
                 ScheduleField field = schedule.Definition.GetField(col);
                 DoubleColumns.Add(field.GetName());
             }
             RowIndexes = GetRowIndexs(dataTable, colCount);
-            //foreach (int row in RowIndexes)
-            //{
-            //    for (int i = 0; i < colCount; i++)
-            //    {
-            //        cellIsReadOnlys.Add((row + 1, i));
-            //    }
-            //}
+            ColCount = colCount;
+            RowCount = dataTable.Rows.Count;
             return cellInfos;
         }
 
