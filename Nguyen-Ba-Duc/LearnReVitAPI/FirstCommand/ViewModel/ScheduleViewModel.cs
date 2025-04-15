@@ -19,14 +19,10 @@ namespace FirstCommand.ViewModel
         private Document _doc;
         public ViewSchedule _schedule;
         public List<int> RowIndexes { get; set; }
-
         public int RowCount { get; set; }
-
         public int ColCount { get; set; }
         private List<RowInfo> RowInfoList { get; set; }
         public List<(int, int)> cellIsReadOnlys { get; set; }
-
-        //public List<string> DoubleColumns { get; } = new List<string> { "W", "L", "H", "Unconnected Height" };
         public List<string> DoubleColumns { get; set; }
 
         private List<(string Name, int Col)> _listFieldCombinedOrCaculated;
@@ -55,8 +51,6 @@ namespace FirstCommand.ViewModel
 
         public DataTable dataTable { get; set; }
 
-        //public ObservableCollection<ScheduleRowModel> ScheduleRows { get; set; }
-        //public RelayCommand UpdateCommand { get; }
         public List<CellIsReadOnly> listCellIsReadOnly { get; set; }
 
         public ScheduleViewModel(Document doc, ViewSchedule schedule, List<CellIsReadOnly> CellIsReadOnlys, List<RowInfo> rowInfoList)
@@ -70,8 +64,6 @@ namespace FirstCommand.ViewModel
             RowInfoList = rowInfoList;
             cellIsReadOnlys = new List<(int, int)>();
             ListFieldCombinedOrCaculated = new List<(string, int)>();
-            //ListListCellInfos = new List<List<CellInfo>>();
-            //UpdateCommand = new RelayCommand(Update);
             CellInfos = GetDataFromSchedule(schedule, dataTable);
         }
 
@@ -91,31 +83,15 @@ namespace FirstCommand.ViewModel
 
             List<CellInfo> cellInfos = new List<CellInfo>();
 
-            List<RowInfo> rowInfosList = new List<RowInfo>();
-            for (int row = 1; row < rowCount; row++)
-            {
-                RowInfo rowInfo = new RowInfo();
-                rowInfo.Row = row;
-                for (int col = 0; col < colCount; col++)
-                {
-                    string cellValue = schedule.GetCellText(SectionType.Body, row, col);
-                    rowInfo.columnValues.Add(col, cellValue);
-                }
-                if (IsRowHasValue(rowInfo.columnValues))
-                {
-                    rowInfosList.Add(rowInfo);
-                }
-            }
+            List<RowInfo> rowInfosList = GetInfoFromRowHasValue(rowCount, colCount, schedule);
             foreach (RowInfo info in rowInfosList)
             {
                 var newRow = dataTable.NewRow();
                 foreach (var keyPairValue in info.columnValues)
                 {
                     ScheduleField field = schedule.Definition.GetField(keyPairValue.Key);
-                    if (field.IsCombinedParameterField == true || field.IsCalculatedField == true)
-                    {
-                        ListFieldCombinedOrCaculated.Add((field.GetName(), keyPairValue.Key));
-                    }
+
+                    AddListFieldCombinedOrCaculated(field, keyPairValue.Key);
 
                     CellInfo cellInfo = new CellInfo();
                     cellInfo.rowCellSchedule = info.Row;
@@ -126,22 +102,22 @@ namespace FirstCommand.ViewModel
                     cellInfo.paramId = field.ParameterId;
 
                     cellInfos.Add(cellInfo);
+
                     newRow[keyPairValue.Key] = keyPairValue.Value;
                 }
                 dataTable.Rows.Add(newRow);
             }
 
-            foreach (CellIsReadOnly cell in listCellIsReadOnly)
-            {
-                foreach (CellInfo info in cellInfos)
-                {
-                    if (info.rowCellSchedule == cell.Row && info.colCellSchedule == cell.Column)
-                    {
-                        cellIsReadOnlys.Add((info.rowCellTable, info.colCellTable));
-                    }
-                }
-            }
-            //RowInfo newRowInfo = RowInfoList[2];
+            AddListCellReadOnly(cellInfos);
+            AddListDoubleColumns(cellInfos, schedule);
+            GetGroupRowIndexs(dataTable, colCount);
+            ColCount = colCount;
+            RowCount = dataTable.Rows.Count;
+            return cellInfos;
+        }
+
+        private void AddListDoubleColumns(List<CellInfo> cellInfos, ViewSchedule schedule)
+        {
             HashSet<int> setDoubles = new HashSet<int>();
             foreach (RowInfo rowInfo in RowInfoList)
             {
@@ -168,15 +144,52 @@ namespace FirstCommand.ViewModel
                 ScheduleField field = schedule.Definition.GetField(col);
                 DoubleColumns.Add(field.GetName());
             }
-            RowIndexes = GetRowIndexs(dataTable, colCount);
-            ColCount = colCount;
-            RowCount = dataTable.Rows.Count;
-            return cellInfos;
         }
 
-        private List<int> GetRowIndexs(DataTable dataTable, int colCount)
+        private void AddListCellReadOnly(List<CellInfo> cellInfos)
         {
-            List<int> listRowIndexs = new List<int>();
+            foreach (CellIsReadOnly cell in listCellIsReadOnly)
+            {
+                foreach (CellInfo info in cellInfos)
+                {
+                    if (info.rowCellSchedule == cell.Row && info.colCellSchedule == cell.Column)
+                    {
+                        cellIsReadOnlys.Add((info.rowCellTable, info.colCellTable));
+                    }
+                }
+            }
+        }
+
+        private void AddListFieldCombinedOrCaculated(ScheduleField field, int col)
+        {
+            if (field.IsCombinedParameterField == true || field.IsCalculatedField == true)
+            {
+                ListFieldCombinedOrCaculated.Add((field.GetName(), col));
+            }
+        }
+
+        private List<RowInfo> GetInfoFromRowHasValue(int rowCount, int colCount, ViewSchedule schedule)
+        {
+            List<RowInfo> rowInfosList = new List<RowInfo>();
+            for (int row = 1; row < rowCount; row++)
+            {
+                RowInfo rowInfo = new RowInfo();
+                rowInfo.Row = row;
+                for (int col = 0; col < colCount; col++)
+                {
+                    string cellValue = schedule.GetCellText(SectionType.Body, row, col);
+                    rowInfo.columnValues.Add(col, cellValue);
+                }
+                if (IsRowHasValue(rowInfo.columnValues))
+                {
+                    rowInfosList.Add(rowInfo);
+                }
+            }
+            return rowInfosList;
+        }
+
+        private void GetGroupRowIndexs(DataTable dataTable, int colCount)
+        {
             for (int i = 0; i < dataTable.Rows.Count; i++)
             {
                 int num = 0;
@@ -190,10 +203,9 @@ namespace FirstCommand.ViewModel
                 }
                 if (num == 1)
                 {
-                    listRowIndexs.Add(i);
+                    RowIndexes.Add(i);
                 }
             }
-            return listRowIndexs;
         }
 
         private bool IsRowHasValue(Dictionary<int, string> colValues)

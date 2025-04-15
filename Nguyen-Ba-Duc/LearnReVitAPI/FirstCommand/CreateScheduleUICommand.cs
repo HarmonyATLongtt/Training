@@ -47,7 +47,9 @@ namespace FirstCommand
                 List<ScheduleInfo> scheduleInfos = GetElementIdAndRowOnSchdule(doc, viewSchedule);
 
                 ScheduleView scheduleView = new ScheduleView(doc, viewSchedule, CellIsReadOnlys, RowInfoList);
+
                 ScheduleViewModel viewModel = scheduleView.DataContext as ScheduleViewModel;
+
                 if (scheduleView.ShowDialog() == true)
                 {
                     List<CellInfo> cellInfos = viewModel.CellInfos;
@@ -311,17 +313,114 @@ namespace FirstCommand
             FilteredElementCollector collector = new FilteredElementCollector(doc, viewSchedule.Id);
             ICollection<ElementId> elementIds = collector.ToElementIds();
 
-            List<ElementId> paramIds = new List<ElementId>();
+            List<ParamOfElement> ListParamOfElements = GetListParamOfElements(doc, elementIds);
 
-            List<ParamOfElement> listElementIdsToChoose = new List<ParamOfElement>();
-            for (int col = 0; col < colCount; col++)
+            List<ElementId> paramIds = GetListParamIdsOnSchedule(colCount, viewSchedule);
+
+            List<ParamOfElement> listElementIdsToChoose = GetListElementIdsToChoose(ListParamOfElements, paramIds);
+
+            List<RowInfo> rowInfoList = AddListRowInfos(rowCount, colCount, viewSchedule);
+
+            List<ScheduleInfo> scheduleInfoList = AddListScheduleInfo(listElementIdsToChoose, rowInfoList);
+
+            AddListCellReadOnly(rowInfoList);
+
+            RowInfoList = rowInfoList.ToList();
+
+            return scheduleInfoList;
+        }
+
+        private void AddListCellReadOnly(List<RowInfo> rowInfoList)
+        {
+            List<CellIsReadOnly> listCellIsReadOnly = new List<CellIsReadOnly>();
+            foreach (var rowinfo in rowInfoList)
             {
-                ScheduleField scheduleField = viewSchedule.Definition.GetField(col);
-                if (scheduleField.ParameterId != ElementId.InvalidElementId)
+                foreach (Parameter param in rowinfo.ListParams.Where(p => p.IsReadOnly == true))
                 {
-                    paramIds.Add(scheduleField.ParameterId);
+                    foreach (var keyValuePair in rowinfo.columnValues)
+                    {
+                        if (param.AsValueString() == keyValuePair.Value.ToString())
+                        {
+                            CellIsReadOnly cellIsReadOnly = new CellIsReadOnly();
+                            cellIsReadOnly.Row = rowinfo.Row;
+                            cellIsReadOnly.Column = keyValuePair.Key;
+                            cellIsReadOnly.Value = keyValuePair.Value;
+                            listCellIsReadOnly.Add(cellIsReadOnly);
+                        }
+                    }
                 }
             }
+            CellIsReadOnlys = listCellIsReadOnly.ToList();
+        }
+
+        private List<ScheduleInfo> AddListScheduleInfo(List<ParamOfElement> listElementIdsToChoose, List<RowInfo> rowInfoList)
+        {
+            List<ScheduleInfo> scheduleInfoList = new List<ScheduleInfo>();
+            foreach (var paramOfElement in listElementIdsToChoose)
+            {
+                List<string> paramValues = new List<string>();
+                foreach (Parameter param in paramOfElement.ListParam)
+                {
+                    if (param.AsValueString() != "" && param.AsValueString() != null)
+                    {
+                        paramValues.Add(param.AsValueString());
+                    }
+                }
+                foreach (var rowinfo in rowInfoList)
+                {
+                    if (CompareListWithDictionaryValues(paramValues, rowinfo.columnValues))
+                    {
+                        ScheduleInfo scheduleInfo = new ScheduleInfo();
+                        scheduleInfo.Row = rowinfo.Row;
+                        rowinfo.ListParams = paramOfElement.ListParam.ToList();
+                        scheduleInfo.ElementId = paramOfElement.ElementId;
+                        scheduleInfo.ListParam = paramOfElement.ListParam;
+                        scheduleInfoList.Add(scheduleInfo);
+                    }
+                }
+            }
+            return scheduleInfoList;
+        }
+
+        private List<RowInfo> AddListRowInfos(int rowCount, int colCount, ViewSchedule viewSchedule)
+        {
+            List<RowInfo> rowInfoList = new List<RowInfo>();
+            for (int row = 1; row < rowCount; row++)
+            {
+                RowInfo rowInfo = new RowInfo();
+                rowInfo.Row = row;
+                for (int col = 0; col < colCount; col++)
+                {
+                    string cellValue = viewSchedule.GetCellText(SectionType.Body, row, col);
+                    if (cellValue != "")
+                    {
+                        rowInfo.columnValues.Add(col, cellValue);
+                    }
+                }
+                rowInfoList.Add(rowInfo);
+            }
+            return rowInfoList;
+        }
+
+        private List<ParamOfElement> GetListElementIdsToChoose(List<ParamOfElement> ListParamOfElements, List<ElementId> paramIds)
+        {
+            List<ParamOfElement> listElementIdsToChoose = new List<ParamOfElement>();
+            foreach (var paramOfElement in ListParamOfElements)
+            {
+                if (IsParamBelongElement(paramIds, paramOfElement.ListParam))
+                {
+                    ParamOfElement paramOfEle = new ParamOfElement();
+                    paramOfEle.ElementId = paramOfElement.ElementId;
+                    paramOfEle.ListParam = FilterList(paramOfElement.ListParam, paramIds);
+
+                    listElementIdsToChoose.Add(paramOfEle);
+                }
+            }
+            return listElementIdsToChoose;
+        }
+
+        private List<ParamOfElement> GetListParamOfElements(Document doc, ICollection<ElementId> elementIds)
+        {
             List<ParamOfElement> ListParamOfElements = new List<ParamOfElement>();
             foreach (ElementId elementId in elementIds)
             {
@@ -348,80 +447,21 @@ namespace FirstCommand
 
                 ListParamOfElements.Add(paramOfElement);
             }
-            foreach (var paramOfElement in ListParamOfElements)
-            {
-                if (IsParamBelongElement(paramIds, paramOfElement.ListParam))
-                {
-                    ParamOfElement paramOfEle = new ParamOfElement();
-                    paramOfEle.ElementId = paramOfElement.ElementId;
-                    paramOfEle.ListParam = FilterList(paramOfElement.ListParam, paramIds);
+            return ListParamOfElements;
+        }
 
-                    listElementIdsToChoose.Add(paramOfEle);
-                }
-            }
-            List<ScheduleInfo> scheduleInfoList = new List<ScheduleInfo>();
-            List<RowInfo> rowInfoList = new List<RowInfo>();
-            for (int row = 1; row < rowCount; row++)
+        private List<ElementId> GetListParamIdsOnSchedule(int colCount, ViewSchedule viewSchedule)
+        {
+            List<ElementId> paramIds = new List<ElementId>();
+            for (int col = 0; col < colCount; col++)
             {
-                RowInfo rowInfo = new RowInfo();
-                rowInfo.Row = row;
-                for (int col = 0; col < colCount; col++)
+                ScheduleField scheduleField = viewSchedule.Definition.GetField(col);
+                if (scheduleField.ParameterId != ElementId.InvalidElementId)
                 {
-                    string cellValue = viewSchedule.GetCellText(SectionType.Body, row, col);
-                    if (cellValue != "")
-                    {
-                        rowInfo.columnValues.Add(col, cellValue);
-                    }
-                }
-                rowInfoList.Add(rowInfo);
-            }
-            foreach (var paramOfElement in listElementIdsToChoose)
-            {
-                List<string> paramValues = new List<string>();
-                foreach (Parameter param in paramOfElement.ListParam)
-                {
-                    if (param.AsValueString() != "" && param.AsValueString() != null)
-                    {
-                        paramValues.Add(param.AsValueString());
-                    }
-                }
-                foreach (var rowinfo in rowInfoList)
-                {
-                    if (CompareListWithDictionaryValues(paramValues, rowinfo.columnValues))
-                    {
-                        ScheduleInfo scheduleInfo = new ScheduleInfo();
-                        scheduleInfo.Row = rowinfo.Row;
-                        rowinfo.ListParams = paramOfElement.ListParam.ToList();
-                        scheduleInfo.ElementId = paramOfElement.ElementId;
-                        scheduleInfo.ListParam = paramOfElement.ListParam;
-                        scheduleInfoList.Add(scheduleInfo);
-                    }
+                    paramIds.Add(scheduleField.ParameterId);
                 }
             }
-            List<CellIsReadOnly> listCellIsReadOnly = new List<CellIsReadOnly>();
-            foreach (var rowinfo in rowInfoList)
-            {
-                foreach (Parameter param in rowinfo.ListParams.Where(p => p.IsReadOnly == true))
-                {
-                    foreach (var keyValuePair in rowinfo.columnValues)
-                    {
-                        if (param.AsValueString() == keyValuePair.Value.ToString())
-                        {
-                            CellIsReadOnly cellIsReadOnly = new CellIsReadOnly();
-                            cellIsReadOnly.Row = rowinfo.Row;
-                            cellIsReadOnly.Column = keyValuePair.Key;
-                            cellIsReadOnly.Value = keyValuePair.Value;
-                            //cellIsReadOnly.paramId = param.Id;
-                            listCellIsReadOnly.Add(cellIsReadOnly);
-                        }
-                    }
-                }
-            }
-            CellIsReadOnlys = new List<CellIsReadOnly>();
-            CellIsReadOnlys = listCellIsReadOnly.ToList();
-            RowInfoList = new List<RowInfo>();
-            RowInfoList = rowInfoList.ToList();
-            return scheduleInfoList;
+            return paramIds;
         }
 
         private bool CompareListWithDictionaryValues(List<string> list, Dictionary<int, string> dict)
@@ -482,12 +522,10 @@ namespace FirstCommand
         public ElementId ElementId { get; set; }
 
         public HashSet<Parameter> ListParam { get; set; }
-        //public Dictionary<bool, Parameter> paramList { get; set; }
 
         public ParamOfElement()
         {
             ListParam = new HashSet<Parameter>();
-            //paramList = new Dictionary<bool, Parameter>();
         }
     }
 
@@ -496,7 +534,6 @@ namespace FirstCommand
         public string Value { get; set; }
         public int Row { get; set; }
         public int Column { get; set; }
-        //public ElementId paramId { get; set; }
     }
 
     public class ScheduleInfo
