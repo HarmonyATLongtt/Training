@@ -21,6 +21,8 @@ namespace FirstCommand
     public class CreateScheduleUICommand : IExternalCommand
     {
         private double FeetToMm = 304.8;
+
+        private List<string> _listValueExclude = new List<string> { "", "<varies>" };
         public List<CellIsReadOnly> CellIsReadOnlys { get; set; }
         public List<RowInfo> RowInfoList { get; set; }
 
@@ -92,95 +94,107 @@ namespace FirstCommand
                             {
                                 foreach (Parameter param in scheduleInfo.ListParam)
                                 {
-                                    if (param.Id == cellInfo.paramId)
+                                    if (param.Id == cellInfo.paramId && !param.IsReadOnly)
                                     {
-                                        if (!param.IsReadOnly)
+                                        if (param.StorageType == StorageType.ElementId)
                                         {
-                                            if (param.StorageType == StorageType.ElementId)
-                                            {
-                                                Element ele = doc.GetElement(param.AsElementId());
-                                                if (ele != null)
-                                                {
-                                                    if (ele is ElementType elementType)
-                                                    {
-                                                        ICollection<ElementId> listElementIdtype = elementType.GetSimilarTypes();
-                                                        foreach (ElementId elementId in listElementIdtype)
-                                                        {
-                                                            if (elementId != ElementId.InvalidElementId)
-                                                            {
-                                                                Element element = doc.GetElement(elementId);
-                                                                if (element != null && element.Name == cellInfo.value)
-                                                                {
-                                                                    SetParameterValue(param, elementId);
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        BuiltInCategory builtInCategory = ele.Category.BuiltInCategory;
-
-                                                        ElementId elementId = GetElementIdByName(doc, cellInfo.value, builtInCategory);
-                                                        if (elementId != ElementId.InvalidElementId)
-                                                        {
-                                                            SetParameterValue(param, elementId);
-                                                        }
-                                                        else
-                                                        {
-                                                            TaskDialog.Show("Error", "Do not exist ElementId:" + cellInfo.value);
-                                                        }
-                                                    }
-                                                }
-                                                else if (param.IsShared)
-                                                {
-                                                    Definition def = param.Definition;
-                                                    ForgeTypeId typeId = def.GetDataType();
-                                                    Dictionary<ForgeTypeId, BuiltInCategory> keyValuePairs = GetBuiltInCategoryFromSharedParam(app);
-                                                    foreach (var item in keyValuePairs)
-                                                    {
-                                                        if (typeId == item.Key)
-                                                        {
-                                                            BuiltInCategory builtInCategory = item.Value;
-                                                            if (builtInCategory != BuiltInCategory.INVALID)
-                                                            {
-                                                                ElementId elementId = GetElementIdByName(doc, cellInfo.value, builtInCategory);
-                                                                if (elementId != ElementId.InvalidElementId)
-                                                                {
-                                                                    SetParameterValue(param, elementId);
-                                                                }
-                                                                else
-                                                                {
-                                                                    TaskDialog.Show("Error", "Do not exist ElementId:" + cellInfo.value);
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            else if (param.StorageType == StorageType.Integer)
-                                            {
-                                                int? num = FindMatchingEnumValue(param, cellInfo.value);
-                                                if (num != null)
-                                                {
-                                                    SetParameterValue(param, num);
-                                                }
-                                                else
-                                                {
-                                                    TaskDialog.Show("Error", "Do not exist ElementId:" + cellInfo.value);
-                                                }
-                                            }
-                                            else
-                                            {
-                                                SetParameterValue(param, cellInfo.value);
-                                            }
+                                            SetParamForElementIdType(doc, param, cellInfo.value, app);
                                         }
+                                        else if (param.StorageType == StorageType.Integer)
+                                        {
+                                            SetParamForIntegerType(param, cellInfo.value);
+                                        }
+                                        else
+                                        {
+                                            SetParameterValue(param, cellInfo.value);
+                                        }
+                                        break;
                                     }
                                 }
+                                break;
                             }
                         }
                     }
                 }
             });
+        }
+
+        private void SetParamForElementIdType(Document doc, Parameter param, string value, Application app)
+        {
+            if (!param.IsShared)
+            {
+                Element ele = doc.GetElement(param.AsElementId());
+                if (ele != null)
+                {
+                    if (ele is ElementType elementType)
+                    {
+                        ICollection<ElementId> listElementIdtype = elementType.GetSimilarTypes();
+                        foreach (ElementId elementId in listElementIdtype)
+                        {
+                            if (elementId != ElementId.InvalidElementId)
+                            {
+                                Element element = doc.GetElement(elementId);
+                                if (element != null && element.Name == value)
+                                {
+                                    SetParameterValue(param, elementId);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        BuiltInCategory builtInCategory = ele.Category.BuiltInCategory;
+
+                        ElementId elementId = GetElementIdByName(doc, value, builtInCategory);
+                        if (elementId != ElementId.InvalidElementId)
+                        {
+                            SetParameterValue(param, elementId);
+                        }
+                        else
+                        {
+                            TaskDialog.Show("Error", "Do not exist ElementId:" + value);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                Definition def = param.Definition;
+                ForgeTypeId typeId = def.GetDataType();
+                Dictionary<ForgeTypeId, BuiltInCategory> keyValuePairs = GetBuiltInCategoryFromSharedParam(app);
+                foreach (var item in keyValuePairs)
+                {
+                    if (typeId == item.Key)
+                    {
+                        BuiltInCategory builtInCategory = item.Value;
+                        if (builtInCategory != BuiltInCategory.INVALID)
+                        {
+                            ElementId elementId = GetElementIdByName(doc, value, builtInCategory);
+                            if (elementId != ElementId.InvalidElementId)
+                            {
+                                SetParameterValue(param, elementId);
+                            }
+                            else
+                            {
+                                TaskDialog.Show("Error", "Do not exist ElementId:" + value);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void SetParamForIntegerType(Parameter param, string value)
+        {
+            int? num = FindMatchingEnumValue(param, value);
+            if (num != null)
+            {
+                SetParameterValue(param, num);
+            }
+            else
+            {
+                TaskDialog.Show("Error", "Do not exist ElementId:" + value);
+            }
         }
 
         private int? FindMatchingEnumValue(Parameter param, string userInput)
@@ -311,23 +325,78 @@ namespace FirstCommand
             int colCount = sectionData.NumberOfColumns;
 
             FilteredElementCollector collector = new FilteredElementCollector(doc, viewSchedule.Id);
-            ICollection<ElementId> elementIds = collector.ToElementIds();
+            List<ElementId> elementIds = new List<ElementId>(collector.ToElementIds());
 
-            List<ParamOfElement> ListParamOfElements = GetListParamOfElements(doc, elementIds);
+            List<ScheduleInfo> scheduleInfoList = new List<ScheduleInfo>();
 
-            List<ElementId> paramIds = GetListParamIdsOnSchedule(colCount, viewSchedule);
+            Dictionary<int, ElementId> dictParamIdsAndCol = ListParamIdAndCol(colCount, viewSchedule);
 
-            List<ParamOfElement> listElementIdsToChoose = GetListElementIdsToChoose(ListParamOfElements, paramIds);
+            List<RowInfo> rowInfoList = new List<RowInfo>();
 
-            List<RowInfo> rowInfoList = AddListRowInfos(rowCount, colCount, viewSchedule);
+            for (int row = 1; row < rowCount; row++)
+            {
+                Dictionary<ElementId, string> keyValuePairs = new Dictionary<ElementId, string>();
 
-            List<ScheduleInfo> scheduleInfoList = AddListScheduleInfo(listElementIdsToChoose, rowInfoList);
+                RowInfo rowInfo = new RowInfo();
+                rowInfo.Row = row;
+                for (int col = 0; col < colCount; col++)
+                {
+                    string cellValue = viewSchedule.GetCellText(SectionType.Body, row, col);
+                    if (!_listValueExclude.Contains(cellValue) && dictParamIdsAndCol.TryGetValue(col, out ElementId paramId))
+                    {
+                        rowInfo.columnValues.Add(col, cellValue);
+                        keyValuePairs.Add(paramId, cellValue);
+                    }
+                }
+                if (keyValuePairs.Count > 1)
+                {
+                    HashSet<ElementId> listElementIds = new HashSet<ElementId>(FilterElementsByParameterValue(elementIds, doc, keyValuePairs, viewSchedule));
+                    if (listElementIds.Count > 0)
+                    {
+                        ScheduleInfo scheduleData = new ScheduleInfo();
+                        scheduleData.ListElementId = listElementIds.ToList();
+                        scheduleData.ListParam = GetListParam(doc, scheduleData.ListElementId, dictParamIdsAndCol);
+                        scheduleData.Row = row;
+                        rowInfo.ListParams = scheduleData.ListParam.ToList();
+                        elementIds.RemoveAll(x => listElementIds.Contains(x));
+                        scheduleInfoList.Add(scheduleData);
+                    }
+                }
+                rowInfoList.Add(rowInfo);
+            }
 
             AddListCellReadOnly(rowInfoList);
 
             RowInfoList = rowInfoList.ToList();
 
             return scheduleInfoList;
+        }
+
+        private HashSet<Parameter> GetListParam(Document doc, List<ElementId> elementIds, Dictionary<int, ElementId> dictParamIdsAndCol)
+        {
+            HashSet<Parameter> listParams = new HashSet<Parameter>();
+            foreach (ElementId id in elementIds)
+            {
+                Element ele = doc.GetElement(id);
+                ElementId typeId = ele.GetTypeId();
+                Element elementType = doc.GetElement(typeId);
+
+                foreach (Parameter p in ele.Parameters)
+                {
+                    if (dictParamIdsAndCol.ContainsValue(p.Id))
+                    {
+                        listParams.Add(p);
+                    }
+                }
+                foreach (Parameter p in elementType.Parameters)
+                {
+                    if (dictParamIdsAndCol.ContainsValue(p.Id))
+                    {
+                        listParams.Add(p);
+                    }
+                }
+            }
+            return listParams;
         }
 
         private void AddListCellReadOnly(List<RowInfo> rowInfoList)
@@ -353,154 +422,60 @@ namespace FirstCommand
             CellIsReadOnlys = listCellIsReadOnly.ToList();
         }
 
-        private List<ScheduleInfo> AddListScheduleInfo(List<ParamOfElement> listElementIdsToChoose, List<RowInfo> rowInfoList)
+        public List<ElementId> FilterElementsByParameterValue(List<ElementId> elementIds, Document doc, Dictionary<ElementId, string> keyValuePairs, ViewSchedule viewSchedule)
         {
-            List<ScheduleInfo> scheduleInfoList = new List<ScheduleInfo>();
-            foreach (var paramOfElement in listElementIdsToChoose)
+            List<ElementId> listElementIds = new List<ElementId>();
+            foreach (ElementId id in elementIds)
             {
-                List<string> paramValues = new List<string>();
-                foreach (Parameter param in paramOfElement.ListParam)
-                {
-                    if (param.AsValueString() != "" && param.AsValueString() != null)
-                    {
-                        paramValues.Add(param.AsValueString());
-                    }
-                }
-                foreach (var rowinfo in rowInfoList)
-                {
-                    if (CompareListWithDictionaryValues(paramValues, rowinfo.columnValues))
-                    {
-                        ScheduleInfo scheduleInfo = new ScheduleInfo();
-                        scheduleInfo.Row = rowinfo.Row;
-                        rowinfo.ListParams = paramOfElement.ListParam.ToList();
-                        scheduleInfo.ElementId = paramOfElement.ElementId;
-                        scheduleInfo.ListParam = paramOfElement.ListParam;
-                        scheduleInfoList.Add(scheduleInfo);
-                    }
-                }
-            }
-            return scheduleInfoList;
-        }
-
-        private List<RowInfo> AddListRowInfos(int rowCount, int colCount, ViewSchedule viewSchedule)
-        {
-            List<RowInfo> rowInfoList = new List<RowInfo>();
-            for (int row = 1; row < rowCount; row++)
-            {
-                RowInfo rowInfo = new RowInfo();
-                rowInfo.Row = row;
-                for (int col = 0; col < colCount; col++)
-                {
-                    string cellValue = viewSchedule.GetCellText(SectionType.Body, row, col);
-                    if (cellValue != "")
-                    {
-                        rowInfo.columnValues.Add(col, cellValue);
-                    }
-                }
-                rowInfoList.Add(rowInfo);
-            }
-            return rowInfoList;
-        }
-
-        private List<ParamOfElement> GetListElementIdsToChoose(List<ParamOfElement> ListParamOfElements, List<ElementId> paramIds)
-        {
-            List<ParamOfElement> listElementIdsToChoose = new List<ParamOfElement>();
-            foreach (var paramOfElement in ListParamOfElements)
-            {
-                if (IsParamBelongElement(paramIds, paramOfElement.ListParam))
-                {
-                    ParamOfElement paramOfEle = new ParamOfElement();
-                    paramOfEle.ElementId = paramOfElement.ElementId;
-                    paramOfEle.ListParam = FilterList(paramOfElement.ListParam, paramIds);
-
-                    listElementIdsToChoose.Add(paramOfEle);
-                }
-            }
-            return listElementIdsToChoose;
-        }
-
-        private List<ParamOfElement> GetListParamOfElements(Document doc, ICollection<ElementId> elementIds)
-        {
-            List<ParamOfElement> ListParamOfElements = new List<ParamOfElement>();
-            foreach (ElementId elementId in elementIds)
-            {
-                ParamOfElement paramOfElement = new ParamOfElement();
-                paramOfElement.ElementId = elementId;
-                Element element = doc.GetElement(elementId);
-                ElementId typeId = element.GetTypeId();
-
-                Element elementType = doc.GetElement(typeId);
+                int num = keyValuePairs.Count;
+                int count = 0;
+                Element element = doc.GetElement(id);
                 if (element != null)
                 {
-                    foreach (Parameter parameter in element.Parameters)
+                    count += GetCount(element, keyValuePairs);
+                    ElementId typeId = element.GetTypeId();
+                    Element elementType = doc.GetElement(typeId);
+
+                    if (elementType != null)
                     {
-                        paramOfElement.ListParam.Add(parameter);
-                    }
-                }
-                if (elementType != null)
-                {
-                    foreach (Parameter parameter in elementType.Parameters)
-                    {
-                        paramOfElement.ListParam.Add(parameter);
+                        count += GetCount(elementType, keyValuePairs);
                     }
                 }
 
-                ListParamOfElements.Add(paramOfElement);
+                if (count == num)
+                {
+                    listElementIds.Add(id);
+                }
             }
-            return ListParamOfElements;
+
+            return listElementIds;
         }
 
-        private List<ElementId> GetListParamIdsOnSchedule(int colCount, ViewSchedule viewSchedule)
+        private int GetCount(Element element, Dictionary<ElementId, string> keyValuePairs)
         {
-            List<ElementId> paramIds = new List<ElementId>();
+            int count = 0;
+            foreach (Parameter parameter in element.Parameters)
+            {
+                if (keyValuePairs.ContainsKey(parameter.Id) && keyValuePairs.ContainsValue(parameter.AsValueString()))
+                {
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        private Dictionary<int, ElementId> ListParamIdAndCol(int colCount, ViewSchedule viewSchedule)
+        {
+            Dictionary<int, ElementId> paramIds = new Dictionary<int, ElementId>();
             for (int col = 0; col < colCount; col++)
             {
                 ScheduleField scheduleField = viewSchedule.Definition.GetField(col);
                 if (scheduleField.ParameterId != ElementId.InvalidElementId)
                 {
-                    paramIds.Add(scheduleField.ParameterId);
+                    paramIds.Add(col, scheduleField.ParameterId);
                 }
             }
             return paramIds;
-        }
-
-        private bool CompareListWithDictionaryValues(List<string> list, Dictionary<int, string> dict)
-        {
-            List<string> dictValueList = new List<string>(dict.Values);
-            foreach (string value in list)
-            {
-                if (!dictValueList.Contains(value))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        private HashSet<Parameter> FilterList(HashSet<Parameter> listParams, List<ElementId> paramIds)
-        {
-            return listParams.Where(p => paramIds.Contains(p.Id))
-                            .ToHashSet();
-        }
-
-        private bool IsParamBelongElement(List<ElementId> paramIds, HashSet<Parameter> listParams)
-        {
-            bool result = true;
-            List<ElementId> listParamIds = new List<ElementId>();
-            foreach (Parameter param in listParams)
-            {
-                listParamIds.Add(param.Id);
-            }
-            foreach (ElementId paramId in paramIds)
-            {
-                if (!listParamIds.Contains(paramId))
-                {
-                    result = false;
-                    break;
-                }
-            }
-            return result;
         }
     }
 
@@ -517,18 +492,6 @@ namespace FirstCommand
         }
     }
 
-    public class ParamOfElement
-    {
-        public ElementId ElementId { get; set; }
-
-        public HashSet<Parameter> ListParam { get; set; }
-
-        public ParamOfElement()
-        {
-            ListParam = new HashSet<Parameter>();
-        }
-    }
-
     public class CellIsReadOnly
     {
         public string Value { get; set; }
@@ -539,12 +502,13 @@ namespace FirstCommand
     public class ScheduleInfo
     {
         public int Row { get; set; }
-        public ElementId ElementId { get; set; }
+        public List<ElementId> ListElementId { get; set; }
         public HashSet<Parameter> ListParam { get; set; }
 
         public ScheduleInfo()
         {
             ListParam = new HashSet<Parameter>();
+            ListElementId = new List<ElementId>();
         }
     }
 }

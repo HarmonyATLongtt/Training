@@ -17,6 +17,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Autodesk.Revit.DB;
 using FirstCommand.ViewModel;
+using OpenQA.Selenium.Chrome;
 
 namespace FirstCommand.View
 {
@@ -28,7 +29,6 @@ namespace FirstCommand.View
         private object copiedValue = null;
         private int copiedColumnIndex = -1;
 
-        //private Stack<UndoAction> undoStack { get; set; }
         private HashSet<(int, int)> readOnlyCells = new HashSet<(int, int)>();
 
         public ScheduleView(Document doc, ViewSchedule schedule, List<CellIsReadOnly> CellIsReadOnlys, List<RowInfo> RowInfoList)
@@ -36,9 +36,6 @@ namespace FirstCommand.View
             InitializeComponent();
             DataContext = new ScheduleViewModel(doc, schedule, CellIsReadOnlys, RowInfoList);
             UpdateReadOnlyCells();
-            //undoStack = new Stack<UndoAction>();
-            //dataGrid.PreviewKeyDown += dataGrid_PreviewKeyDown;
-            //dataGrid.PreviewKeyDown += dataGrid_PreviewKeyDown_ForPaste;
         }
 
         private void UpdateReadOnlyCells()
@@ -89,6 +86,7 @@ namespace FirstCommand.View
                     {
                         cellInfo.value = editedValue.ToString();
                         cellInfo.isChanged = true;
+                        break;
                     }
                 }
             }
@@ -198,6 +196,7 @@ namespace FirstCommand.View
 
         private void dataGrid_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            var viewModel = this.DataContext as ScheduleViewModel;
             if (e.Key == Key.C && Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
             {
                 var cellInfo = dataGrid.CurrentCell;
@@ -224,18 +223,23 @@ namespace FirstCommand.View
                         var row = item as DataRowView;
                         if (row != null)
                         {
-                            //var oldValue = row.Row[copiedColumnIndex];
-                            //undoStack.Push(new UndoAction
-                            //{
-                            //    Row = row,
-                            //    ColumnIndex = copiedColumnIndex,
-                            //    OldValue = oldValue
-                            //});
                             int rowIndex = dataGrid.Items.IndexOf(row);
                             int colIndex = copiedColumnIndex;
                             if (readOnlyCells.Contains((rowIndex + 1, colIndex)))
                                 continue;
                             row.Row[copiedColumnIndex] = copiedValue;
+                            if (viewModel != null)
+                            {
+                                foreach (var cellInfo in viewModel.CellInfos)
+                                {
+                                    if (cellInfo.colCellTable == copiedColumnIndex && cellInfo.rowCellTable == rowIndex + 1)
+                                    {
+                                        cellInfo.isChanged = true;
+                                        cellInfo.value = copiedValue.ToString();
+                                        break;
+                                    }
+                                }
+                            }
                         }
                     }
 
@@ -243,16 +247,6 @@ namespace FirstCommand.View
                 }
                 e.Handled = true; // Ngăn Ctrl+V mặc định
             }
-            //if (e.Key == Key.Z && Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
-            //{
-            //    if (undoStack.Count > 0)
-            //    {
-            //        var action = undoStack.Pop();
-            //        action.Row.Row[action.ColumnIndex] = action.OldValue;
-            //        dataGrid.Items.Refresh();
-            //    }
-            //    e.Handled = true;
-            //}
         }
 
         private void MenuItem_Copy_Click(object sender, RoutedEventArgs e)
@@ -269,78 +263,38 @@ namespace FirstCommand.View
 
         private void MenuItem_Paste_Click(object sender, RoutedEventArgs e)
         {
+            var viewModel = this.DataContext as ScheduleViewModel;
+
             if (copiedValue != null && copiedColumnIndex >= 0)
             {
                 foreach (var item in dataGrid.SelectedItems)
                 {
                     if (item is DataRowView row)
                     {
-                        //var oldValue = row.Row[copiedColumnIndex];
-                        //undoStack.Push(new UndoAction
-                        //{
-                        //    Row = row,
-                        //    ColumnIndex = copiedColumnIndex,
-                        //    OldValue = oldValue
-                        //});
                         int rowIndex = dataGrid.Items.IndexOf(row);
                         int colIndex = copiedColumnIndex;
                         if (readOnlyCells.Contains((rowIndex + 1, colIndex)))
                             continue;
                         row.Row[copiedColumnIndex] = copiedValue;
+                        if (viewModel != null)
+                        {
+                            foreach (var cellInfo in viewModel.CellInfos)
+                            {
+                                if (cellInfo.colCellTable == copiedColumnIndex && cellInfo.rowCellTable == rowIndex + 1)
+                                {
+                                    cellInfo.isChanged = true;
+                                    cellInfo.value = copiedValue.ToString();
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
 
                 dataGrid.Items.Refresh(); // Cập nhật UI
             }
         }
-
-        //private void dataGrid_PreviewKeyDown_ForPaste(object sender, KeyEventArgs e)
-        //{
-        //if (e.Key == Key.V && Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
-        //{
-        //    if (copiedValue != null && copiedColumnIndex >= 0)
-        //    {
-        //        foreach (var item in dataGrid.SelectedItems)
-        //        {
-        //            var row = item as DataRowView;
-        //            if (row != null)
-        //            {
-        //                row.Row[copiedColumnIndex] = copiedValue;
-        //            }
-        //        }
-
-        //        dataGrid.Items.Refresh(); // Cập nhật lại UI nếu cần
-        //    }
-
-        //    e.Handled = true; // Ngăn Ctrl+V mặc định
-        //}
-        //}
-
-        //private void dataGrid_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
-        //{
-        //var dep = (DependencyObject)e.OriginalSource;
-
-        //// Tìm đến DataGridCell
-        //var cell = FindParent<DataGridCell>(dep);
-        //if (cell != null)
-        //{
-        //    cell.Focus(); // Đưa cell đó làm CurrentCell (quan trọng)
-
-        //    var row = FindParent<DataGridRow>(cell);
-        //    if (row != null)
-        //    {
-        //        row.IsSelected = true; // Đảm bảo dòng đang được chọn
-        //    }
-        //}
-        //}
     }
-
-    //public class UndoAction
-    //{
-    //    public DataRowView Row { get; set; }
-    //    public int ColumnIndex { get; set; }
-    //    public object OldValue { get; set; }
-    //}
 
     public class DoubleValidationRule : ValidationRule
     {
