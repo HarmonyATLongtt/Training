@@ -26,6 +26,10 @@ namespace FirstCommand
         public List<CellIsReadOnly> CellIsReadOnlys { get; set; }
         public List<RowInfo> RowInfoList { get; set; }
 
+        public List<string> listMessageError { get; set; } = new List<string> { "Can not change value of :" };
+
+        public string showMessageError { get; set; }
+
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UIApplication uiapp = commandData.Application;
@@ -56,6 +60,11 @@ namespace FirstCommand
                 {
                     List<CellInfo> cellInfos = viewModel.CellInfos;
                     UpdateScheduleData(doc, cellInfos, scheduleInfos, app);
+                    if (listMessageError.Count > 1)
+                    {
+                        showMessageError = string.Join(Environment.NewLine, listMessageError);
+                        TaskDialog.Show("Error", showMessageError);
+                    }
                     return Result.Succeeded;
                 }
                 return Result.Failed;
@@ -92,26 +101,28 @@ namespace FirstCommand
                         {
                             if (scheduleInfo.Row == cellInfo.rowCellSchedule)
                             {
-                                foreach (Parameter param in scheduleInfo.ListParam)
+                                foreach (var listParam in scheduleInfo.DictIdAndParams.Values)
                                 {
-                                    if (param.Id == cellInfo.paramId && !param.IsReadOnly)
+                                    foreach (Parameter param in listParam)
                                     {
-                                        if (param.StorageType == StorageType.ElementId)
+                                        if (param.Id == cellInfo.paramId && !param.IsReadOnly)
                                         {
-                                            SetParamForElementIdType(doc, param, cellInfo.value, app);
+                                            if (param.StorageType == StorageType.ElementId)
+                                            {
+                                                SetParamForElementIdType(doc, param, cellInfo.value, app);
+                                            }
+                                            else if (param.StorageType == StorageType.Integer)
+                                            {
+                                                SetParamForIntegerType(param, cellInfo.value);
+                                            }
+                                            else
+                                            {
+                                                SetParameterValue(param, cellInfo.value);
+                                            }
+                                            break;
                                         }
-                                        else if (param.StorageType == StorageType.Integer)
-                                        {
-                                            SetParamForIntegerType(param, cellInfo.value);
-                                        }
-                                        else
-                                        {
-                                            SetParameterValue(param, cellInfo.value);
-                                        }
-                                        break;
                                     }
                                 }
-                                break;
                             }
                         }
                     }
@@ -128,6 +139,7 @@ namespace FirstCommand
                 {
                     if (ele is ElementType elementType)
                     {
+                        bool result = false;
                         ICollection<ElementId> listElementIdtype = elementType.GetSimilarTypes();
                         foreach (ElementId elementId in listElementIdtype)
                         {
@@ -136,9 +148,15 @@ namespace FirstCommand
                                 Element element = doc.GetElement(elementId);
                                 if (element != null && element.Name == value)
                                 {
+                                    result = true;
                                     SetParameterValue(param, elementId);
+                                    break;
                                 }
                             }
+                        }
+                        if (result == false)
+                        {
+                            listMessageError.Add(param.Definition.Name + " to : " + value);
                         }
                     }
                     else
@@ -152,7 +170,7 @@ namespace FirstCommand
                         }
                         else
                         {
-                            TaskDialog.Show("Error", "Do not exist ElementId:" + value);
+                            listMessageError.Add(param.Definition.Name + " to : " + value);
                         }
                     }
                 }
@@ -176,7 +194,7 @@ namespace FirstCommand
                             }
                             else
                             {
-                                TaskDialog.Show("Error", "Do not exist ElementId:" + value);
+                                listMessageError.Add(param.Definition.Name + " to : " + value);
                             }
                         }
                     }
@@ -193,21 +211,30 @@ namespace FirstCommand
             }
             else
             {
-                TaskDialog.Show("Error", "Do not exist ElementId:" + value);
+                listMessageError.Add(param.Definition.Name + " to : " + value);
             }
         }
 
         private int? FindMatchingEnumValue(Parameter param, string userInput)
         {
-            for (int i = 0; i < 100; i++)
+            int paramIntValue = param.AsInteger();
+            try
             {
-                if (param.Set(i))
+                for (int i = 0; i < 100; i++)
                 {
-                    if (param.AsValueString()?.Trim() == userInput.Trim())
+                    if (param.Set(i))
                     {
-                        return i;
+                        if (param.AsValueString()?.Trim() == userInput.Trim())
+                        {
+                            return i;
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                param.Set(paramIntValue);
+                return null;
             }
             return null;
         }
@@ -355,9 +382,13 @@ namespace FirstCommand
                     {
                         ScheduleInfo scheduleData = new ScheduleInfo();
                         scheduleData.ListElementId = listElementIds.ToList();
-                        scheduleData.ListParam = GetListParam(doc, scheduleData.ListElementId, dictParamIdsAndCol);
+                        scheduleData.DictIdAndParams = GetListParam(doc, scheduleData.ListElementId, dictParamIdsAndCol);
                         scheduleData.Row = row;
-                        rowInfo.ListParams = scheduleData.ListParam.ToList();
+                        foreach (var listParam in scheduleData.DictIdAndParams.Values)
+                        {
+                            rowInfo.ListParams = listParam;
+                            break;
+                        }
                         elementIds.RemoveAll(x => listElementIds.Contains(x));
                         scheduleInfoList.Add(scheduleData);
                     }
@@ -372,11 +403,13 @@ namespace FirstCommand
             return scheduleInfoList;
         }
 
-        private HashSet<Parameter> GetListParam(Document doc, List<ElementId> elementIds, Dictionary<int, ElementId> dictParamIdsAndCol)
+        private Dictionary<ElementId, List<Parameter>> GetListParam(Document doc, List<ElementId> elementIds, Dictionary<int, ElementId> dictParamIdsAndCol)
         {
-            HashSet<Parameter> listParams = new HashSet<Parameter>();
+            Dictionary<ElementId, List<Parameter>> dict = new Dictionary<ElementId, List<Parameter>>();
             foreach (ElementId id in elementIds)
             {
+                List<Parameter> listParamOfElement = new List<Parameter>();
+
                 Element ele = doc.GetElement(id);
                 ElementId typeId = ele.GetTypeId();
                 Element elementType = doc.GetElement(typeId);
@@ -385,18 +418,19 @@ namespace FirstCommand
                 {
                     if (dictParamIdsAndCol.ContainsValue(p.Id))
                     {
-                        listParams.Add(p);
+                        listParamOfElement.Add(p);
                     }
                 }
                 foreach (Parameter p in elementType.Parameters)
                 {
                     if (dictParamIdsAndCol.ContainsValue(p.Id))
                     {
-                        listParams.Add(p);
+                        listParamOfElement.Add(p);
                     }
                 }
+                dict.Add(id, listParamOfElement);
             }
-            return listParams;
+            return dict;
         }
 
         private void AddListCellReadOnly(List<RowInfo> rowInfoList)
@@ -505,10 +539,13 @@ namespace FirstCommand
         public List<ElementId> ListElementId { get; set; }
         public HashSet<Parameter> ListParam { get; set; }
 
+        public Dictionary<ElementId, List<Parameter>> DictIdAndParams { get; set; }
+
         public ScheduleInfo()
         {
             ListParam = new HashSet<Parameter>();
             ListElementId = new List<ElementId>();
+            DictIdAndParams = new Dictionary<ElementId, List<Parameter>>();
         }
     }
 }

@@ -63,6 +63,7 @@ namespace FirstCommand.ViewModel
             RowIndexes = new List<int>();
             RowInfoList = rowInfoList;
             cellIsReadOnlys = new List<(int, int)>();
+
             ListFieldCombinedOrCaculated = new List<(string, int)>();
             CellInfos = GetDataFromSchedule(schedule, dataTable);
         }
@@ -108,11 +109,12 @@ namespace FirstCommand.ViewModel
                 dataTable.Rows.Add(newRow);
             }
 
-            AddListCellReadOnly(cellInfos);
+            AddListCellReadOnly(cellInfos, colCount);
             AddListDoubleColumns(cellInfos, schedule);
             GetGroupRowIndexs(dataTable, colCount);
             ColCount = colCount;
             RowCount = dataTable.Rows.Count;
+
             return cellInfos;
         }
 
@@ -127,11 +129,9 @@ namespace FirstCommand.ViewModel
                     {
                         foreach (CellInfo info in cellInfos)
                         {
+                            if (param.Id == info.paramId && param.StorageType == StorageType.Double)
                             {
-                                if (param.Id == info.paramId && param.StorageType == StorageType.Double)
-                                {
-                                    setDoubles.Add(info.colCellTable);
-                                }
+                                setDoubles.Add(info.colCellTable);
                             }
                         }
                     }
@@ -146,7 +146,7 @@ namespace FirstCommand.ViewModel
             }
         }
 
-        private void AddListCellReadOnly(List<CellInfo> cellInfos)
+        private void AddListCellReadOnly(List<CellInfo> cellInfos, int colCount)
         {
             foreach (CellIsReadOnly cell in listCellIsReadOnly)
             {

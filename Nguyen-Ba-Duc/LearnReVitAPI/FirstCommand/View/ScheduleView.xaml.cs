@@ -28,6 +28,8 @@ namespace FirstCommand.View
     {
         private object copiedValue = null;
         private int copiedColumnIndex = -1;
+        public TextBox EditText { get; set; }
+        public string OldText { get; set; }
 
         private HashSet<(int, int)> readOnlyCells = new HashSet<(int, int)>();
 
@@ -89,6 +91,12 @@ namespace FirstCommand.View
                         break;
                     }
                 }
+            }
+
+            if (EditText != null && !DoubleValidationRule.IsValid)
+            {
+                EditText.Text = OldText;
+                DoubleValidationRule.IsValid = true;
             }
         }
 
@@ -196,57 +204,57 @@ namespace FirstCommand.View
 
         private void dataGrid_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            var viewModel = this.DataContext as ScheduleViewModel;
-            if (e.Key == Key.C && Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
-            {
-                var cellInfo = dataGrid.CurrentCell;
-                if (cellInfo != null && cellInfo.IsValid)
-                {
-                    var columnIndex = cellInfo.Column.DisplayIndex;
-                    var row = cellInfo.Item as DataRowView;
+            //var viewModel = this.DataContext as ScheduleViewModel;
+            //if (e.Key == Key.C && Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
+            //{
+            //    var cellInfo = dataGrid.CurrentCell;
+            //    if (cellInfo != null && cellInfo.IsValid)
+            //    {
+            //        var columnIndex = cellInfo.Column.DisplayIndex;
+            //        var row = cellInfo.Item as DataRowView;
 
-                    if (row != null)
-                    {
-                        copiedValue = row.Row[columnIndex];
-                        copiedColumnIndex = columnIndex;
-                    }
-                }
+            //        if (row != null)
+            //        {
+            //            copiedValue = row.Row[columnIndex];
+            //            copiedColumnIndex = columnIndex;
+            //        }
+            //    }
 
-                e.Handled = true; // Ngăn hành vi mặc định nếu muốn
-            }
-            if (e.Key == Key.V && Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
-            {
-                if (copiedValue != null && copiedColumnIndex >= 0)
-                {
-                    foreach (var item in dataGrid.SelectedItems)
-                    {
-                        var row = item as DataRowView;
-                        if (row != null)
-                        {
-                            int rowIndex = dataGrid.Items.IndexOf(row);
-                            int colIndex = copiedColumnIndex;
-                            if (readOnlyCells.Contains((rowIndex + 1, colIndex)))
-                                continue;
-                            row.Row[copiedColumnIndex] = copiedValue;
-                            if (viewModel != null)
-                            {
-                                foreach (var cellInfo in viewModel.CellInfos)
-                                {
-                                    if (cellInfo.colCellTable == copiedColumnIndex && cellInfo.rowCellTable == rowIndex + 1)
-                                    {
-                                        cellInfo.isChanged = true;
-                                        cellInfo.value = copiedValue.ToString();
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
+            //    e.Handled = true; // Ngăn hành vi mặc định nếu muốn
+            //}
+            //if (e.Key == Key.V && Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
+            //{
+            //    if (copiedValue != null && copiedColumnIndex >= 0)
+            //    {
+            //        foreach (var item in dataGrid.SelectedItems)
+            //        {
+            //            var row = item as DataRowView;
+            //            if (row != null)
+            //            {
+            //                int rowIndex = dataGrid.Items.IndexOf(row);
+            //                int colIndex = copiedColumnIndex;
+            //                if (readOnlyCells.Contains((rowIndex + 1, colIndex)))
+            //                    continue;
+            //                row.Row[copiedColumnIndex] = copiedValue;
+            //                if (viewModel != null)
+            //                {
+            //                    foreach (var cellInfo in viewModel.CellInfos)
+            //                    {
+            //                        if (cellInfo.colCellTable == copiedColumnIndex && cellInfo.rowCellTable == rowIndex + 1)
+            //                        {
+            //                            cellInfo.isChanged = true;
+            //                            cellInfo.value = copiedValue.ToString();
+            //                            break;
+            //                        }
+            //                    }
+            //                }
+            //            }
+            //        }
 
-                    dataGrid.Items.Refresh(); // Cập nhật lại UI nếu cần
-                }
-                e.Handled = true; // Ngăn Ctrl+V mặc định
-            }
+            //        //dataGrid.Items.Refresh(); // Cập nhật lại UI nếu cần
+            //    }
+            //    e.Handled = true; // Ngăn Ctrl+V mặc định
+            //}
         }
 
         private void MenuItem_Copy_Click(object sender, RoutedEventArgs e)
@@ -291,23 +299,32 @@ namespace FirstCommand.View
                     }
                 }
 
-                dataGrid.Items.Refresh(); // Cập nhật UI
+                //dataGrid.Items.Refresh(); // Cập nhật UI
             }
+        }
+
+        private void DataGrid_PreparingCellForEdit(object sender, DataGridPreparingCellForEditEventArgs e)
+        {
+            EditText = (TextBox)e.EditingElement;
+            OldText = EditText?.Text;
         }
     }
 
     public class DoubleValidationRule : ValidationRule
     {
+        public static bool IsValid = true;
+
         public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
-            //if (value == null || string.IsNullOrWhiteSpace(value.ToString()))
-            //return new ValidationResult(false, "Không được để trống");
-
-            if (!double.TryParse(value.ToString(), out _))
+            if (value == null || string.IsNullOrWhiteSpace(value.ToString()))
             {
-                MessageBox.Show("Giá trị phải là số!", "Lỗi nhập liệu", MessageBoxButton.OK, MessageBoxImage.Error);
-
-                //return new ValidationResult(false, "Phải là số");
+                MessageBox.Show("Value should not blank", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                IsValid = false;
+            }
+            else if (!double.TryParse(value.ToString(), out _))
+            {
+                MessageBox.Show("Value must be a number", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                IsValid = false;
             }
 
             return ValidationResult.ValidResult;

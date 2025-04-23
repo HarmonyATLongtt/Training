@@ -11,7 +11,7 @@
         <StackPanel>
             <DataGrid PreviewKeyDown="dataGrid_PreviewKeyDown" x:Name="dataGrid" CanUserSortColumns="False"
                       LoadingRow="DataGrid_LoadingRow" BeginningEdit="DataGrid_BeginningEdit" AutoGeneratingColumn="DataGrid_AutoGeneratingColumn"
-                      CellEditEnding="DataGrid_CellEditEnding"  ItemsSource="{Binding dataTable}" IsReadOnly="False">
+                      CellEditEnding="DataGrid_CellEditEnding" PreparingCellForEdit="DataGrid_PreparingCellForEdit"  ItemsSource="{Binding dataTable}" IsReadOnly="False">
                 <DataGrid.ContextMenu>
                     <ContextMenu x:Name="dataGridContextMenu">
                         <MenuItem Header="Copy" Click="MenuItem_Copy_Click" />
