@@ -165,114 +165,148 @@ namespace FirstCommand
             }
         }
 
+        private (List<PlanarFace>, List<CylindricalFace>) GetGroupedFacesFromSolid(Document doc, Solid solid)
+        {
+            List<PlanarFace> planarFaces = new List<PlanarFace>();
+            List<CylindricalFace> cylindricalFaces = new List<CylindricalFace>();
+
+            if (solid.Faces.Size > 0 && solid.Volume > 0)
+            {
+                foreach (Face face in solid.Faces)
+                {
+                    if (face is PlanarFace planarFace)
+                    {
+                        planarFaces.Add(planarFace);
+                    }
+                    else if (face is CylindricalFace cylindricalFace)
+                    {
+                        cylindricalFaces.Add(cylindricalFace);
+                    }
+                }
+            }
+            return (planarFaces, cylindricalFaces);
+        }
+
         private List<CylinderInfo> GetOrigins(Element element, Document doc)
         {
             Options options = new Options();
-            //options.View = doc.ActiveView;
             options.IncludeNonVisibleObjects = true;
             options.DetailLevel = ViewDetailLevel.Fine;
             options.ComputeReferences = true;
             GeometryElement elementGeo = element.get_Geometry(options);
 
             List<XYZ> points = new List<XYZ>();
-
             List<CylinderInfo> cylinderInfos = new List<CylinderInfo>();
+            List<Solid> solids = new List<Solid>();
 
             foreach (GeometryObject geometryObj in elementGeo)
             {
                 if (geometryObj is Solid solid)
                 {
-                    if (solid.Faces.Size > 0 && solid.Volume > 0)
-                    {
-                        List<PlanarFace> planarFaces = new List<PlanarFace>();
-                        List<CylindricalFace> cylindricalFaces = new List<CylindricalFace>();
-                        foreach (Face face in solid.Faces)
-                        {
-                            if (face is PlanarFace planarFace)
-                            {
-                                planarFaces.Add(planarFace);
-                            }
-                            else if (face is CylindricalFace cylindricalFace)
-                            {
-                                cylindricalFaces.Add(cylindricalFace);
-                            }
-                        }
-                        if (planarFaces.Count == 2 && cylindricalFaces.Count > 0)
-                        {
-                            CylindricalFace cylindricalFace = cylindricalFaces.First();
-
-                            if (AreVectorsParallel(cylindricalFace.Axis, XYZ.BasisZ))
-                            {
-                                CylinderInfo cylinderInfo = new CylinderInfo();
-
-                                cylinderInfo.Radius = GetRadius(cylindricalFace);
-                                cylinderInfo.TopPoint = SetOriginPoint(cylindricalFace.Origin, planarFaces.Max(f => f.Origin.Z));
-                                cylinderInfo.BottomPoint = SetOriginPoint(cylindricalFace.Origin, planarFaces.Min(f => f.Origin.Z));
-                                cylinderInfo.Volume = solid.Volume;
-                                cylinderInfos.Add(cylinderInfo);
-                            }
-                        }
-                    }
+                    solids.Add(solid);
                 }
-                else if (geometryObj is GeometryInstance geomInstance)
+                if (geometryObj is GeometryInstance geomInstance)
                 {
                     GeometryElement instanceGeometry = geomInstance.GetInstanceGeometry();
                     foreach (GeometryObject geometryObject in instanceGeometry)
                     {
                         if (geometryObject is Solid nestedSolid)
                         {
-                            if (nestedSolid.Faces.Size > 0 && nestedSolid.Volume > 0)
+                            solids.Add(nestedSolid);
+                        }
+                    }
+                }
+            }
+
+            foreach (Solid solid in solids)
+            {
+                var tuple = GetGroupedFacesFromSolid(doc, solid);
+                List<PlanarFace> planarFaces = tuple.Item1;
+                List<CylindricalFace> cylindricalFaces = tuple.Item2;
+
+                if (planarFaces.Count > 0 && cylindricalFaces.Count > 0)
+                {
+                    // Lấy ra những mặt trụ song song với Z và mặt phẳng vuông góc với Z
+                    var listcylindricalFace = cylindricalFaces.Where(c => Math.Abs(Math.Abs(c.Axis.Z) - 1) < tolerance).ToList();
+                    var listPlanarFace = planarFaces.Where(f => Math.Abs(Math.Abs(f.FaceNormal.Z) - 1) < tolerance).ToList();
+                    if (listcylindricalFace.Count > 0)
+                    {
+                        if (listPlanarFace.Count == 2)
+                        {
+                            CylindricalFace cylindricalFace = listcylindricalFace.FirstOrDefault();
+                            cylinderInfos.Add(CreateCylinderInfo(cylindricalFace, planarFaces.Max(f => f.Origin.Z), planarFaces.Min(f => f.Origin.Z)));
+                        }
+                        else
+                        {
+                            XYZ firstOrigin = new XYZ();
+                            var newListFace = new List<CylindricalFace>();
+                            for (int i = 0; i < listcylindricalFace.Count; i++)
                             {
-                                List<PlanarFace> planarFaces = new List<PlanarFace>();
-                                List<CylindricalFace> cylindricalFaces = new List<CylindricalFace>();
-                                foreach (Face face in nestedSolid.Faces)
+                                if (!listcylindricalFace[i].Origin.IsAlmostEqualTo(firstOrigin, tolerance))
                                 {
-                                    if (face is PlanarFace planarFace)
-                                    {
-                                        planarFaces.Add(planarFace);
-                                    }
-                                    else if (face is CylindricalFace cylindricalFace)
-                                    {
-                                        cylindricalFaces.Add(cylindricalFace);
-                                    }
+                                    newListFace.Add(listcylindricalFace[i]);
+                                    firstOrigin = listcylindricalFace[i].Origin;
                                 }
-                                if (planarFaces.Count == 2 && cylindricalFaces.Count > 0)
+                            }
+                            foreach (var face in newListFace)
+                            {
+                                //CylindricalFace face = listcylindricalFace.FirstOrDefault();
+                                var tupleValue = GetHighestAndLowestZOfFace(face);
+                                if (tupleValue.Max != 0 && tupleValue.Min != 0)
                                 {
-                                    CylindricalFace cylindricalFace = cylindricalFaces.First();
-
-                                    if (AreVectorsParallel(cylindricalFace.Axis, XYZ.BasisZ))
-                                    {
-                                        CylinderInfo cylinderInfo = new CylinderInfo();
-
-                                        cylinderInfo.Radius = GetRadius(cylindricalFace);
-                                        cylinderInfo.TopPoint = SetOriginPoint(cylindricalFace.Origin, planarFaces.Max(f => f.Origin.Z));
-                                        cylinderInfo.BottomPoint = SetOriginPoint(cylindricalFace.Origin, planarFaces.Min(f => f.Origin.Z));
-                                        cylinderInfo.Volume = nestedSolid.Volume;
-                                        cylinderInfos.Add(cylinderInfo);
-                                    }
+                                    cylinderInfos.Add(CreateCylinderInfo(face, tupleValue.Max, tupleValue.Min));
                                 }
                             }
                         }
                     }
                 }
             }
-
-            //if (cylindricalFaces.Count > 0)
-            //{
-            //    XYZ firstOrigin = new XYZ();
-            //    foreach (var face in cylindricalFaces)
-            //    {
-            //        if (AreVectorsParallel(face.Axis, XYZ.BasisZ))
-            //        {
-            //            if (!face.Origin.IsAlmostEqualTo(firstOrigin))
-            //            {
-            //                points.Add(face.Origin);
-            //                firstOrigin = face.Origin;
-            //            }
-            //        }
-            //    }
-            //}
             return cylinderInfos;
+        }
+
+        private CylinderInfo CreateCylinderInfo(CylindricalFace face, double maxZ, double minZ)
+        {
+            CylinderInfo cylinderInfo = new CylinderInfo();
+
+            cylinderInfo.Radius = GetRadius(face);
+            cylinderInfo.TopPoint = SetOriginPoint(face.Origin, maxZ);
+            cylinderInfo.BottomPoint = SetOriginPoint(face.Origin, minZ);
+
+            return cylinderInfo;
+        }
+
+        private (double Max, double Min) GetHighestAndLowestZOfFace(CylindricalFace face)
+        {
+            XYZ highestPoint = null;
+            XYZ lowestPoint = null;
+
+            // Lấy tất cả các điểm từ Face bằng cách tessellate nó.
+            // Tessellate() trả về một Mesh (lưới) của các tam giác hoặc tứ giác.
+            Mesh mesh = face.Triangulate();
+
+            if (mesh == null || mesh.Vertices.Count == 0)
+            {
+                return (0, 0); // Face không có mesh hoặc không có đỉnh
+            }
+
+            // Khởi tạo điểm cao nhất và thấp nhất với đỉnh đầu tiên
+            highestPoint = mesh.Vertices[0];
+            lowestPoint = mesh.Vertices[0];
+
+            // Duyệt qua tất cả các đỉnh của mesh để tìm Z_max và Z_min
+            foreach (XYZ vertex in mesh.Vertices)
+            {
+                if (vertex.Z > highestPoint.Z)
+                {
+                    highestPoint = vertex;
+                }
+                if (vertex.Z < lowestPoint.Z)
+                {
+                    lowestPoint = vertex;
+                }
+            }
+
+            return (highestPoint.Z, lowestPoint.Z);
         }
 
         private double GetRadius(CylindricalFace face)
@@ -336,6 +370,13 @@ namespace FirstCommand
 
         private List<List<CylinderInfo>> GroupPointsOnPlaneParallelToZ(List<CylinderInfo> cylinderInfos)
         {
+            List<XYZ> points = new List<XYZ>();
+            foreach (var c in cylinderInfos)
+            {
+                points.Add(c.TopPoint);
+            }
+            string s = string.Join(";", points);
+
             // Nhóm các điểm thuộc cùng 1 mặt phẳng lại với nhau
             List<List<CylinderInfo>> result = new List<List<CylinderInfo>>();
             for (int i = 0; i < cylinderInfos.Count - 2; i++)
@@ -392,6 +433,8 @@ namespace FirstCommand
 
             // Trong các điểm cùng 1 mặt phẳng tìm ra chia các điểm bằng nhau thành 1 nhóm, các điểm tạo thành đường chéo làm 1 nhóm
             List<List<CylinderInfo>> newResult = new List<List<CylinderInfo>>();
+
+            // 1 group là 1 mặt phẳng
             foreach (var group in result)
             {
                 List<CylinderInfo> listThang = GroupEqualValues(group);
@@ -423,25 +466,53 @@ namespace FirstCommand
 
                     double zOnline = GetZOnLine(listCheo[0].TopPoint, listCheo[1].TopPoint, e.TopPoint);
                     XYZ C = new XYZ();
-
-                    if (zOnline < ze || zOnline > maxZC)
-                    {
-                        C = GetPointOnLine(listCheo[0].TopPoint, listCheo[1].TopPoint, e.TopPoint);
-                    }
-                    else if (zOnline > ze && zOnline < minZC)
+                    if (ze > minZC && ze < maxZC) // C cùng đường thẳng với E
                     {
                         C = new XYZ(e.TopPoint.X, e.TopPoint.Y, zOnline);
                     }
-
-                    if (C != null)
+                    else if (ze == minZC)
+                    {
+                        var listT1 = new List<CylinderInfo>();
+                        listT1.Add(e);
+                        listT1.Add(listCheo.FirstOrDefault(c => c.TopPoint.Z.Equals(minZC)));
+                        if (listT1.Count > 0)
+                        {
+                            newResult.Add(listT1);
+                        }
+                    }
+                    else if (ze == maxZC)
+                    {
+                        var listT2 = new List<CylinderInfo>();
+                        listT2.Add(e);
+                        listT2.Add(listCheo.FirstOrDefault(c => c.TopPoint.Z.Equals(maxZC)));
+                        if (listT2.Count > 0)
+                        {
+                            newResult.Add(listT2);
+                        }
+                    }
+                    else
+                    {
+                        if (zOnline < ze || zOnline > maxZC)
+                        {
+                            // dùng phương trình đường thẳng để tìm ra điểm C thuộc đường thẳng AB và có cao độ là E
+                            C = GetPointOnLine(listCheo[0].TopPoint, listCheo[1].TopPoint, e.TopPoint);
+                        }
+                        else if (zOnline > ze && zOnline < minZC)
+                        {
+                            // Tạo ra điểm C với tọa độ của E nhưng chỉnh cao độ lên bằng với giao điểm
+                            C = new XYZ(e.TopPoint.X, e.TopPoint.Y, zOnline);
+                        }
+                    }
+                    if (!C.IsAlmostEqualTo(XYZ.Zero))
                     {
                         CylinderInfo cylinderInfo = new CylinderInfo();
                         cylinderInfo.TopPoint = C;
-                        List<CylinderInfo> newListT = new List<CylinderInfo>();
-                        if (C.Z.Equals(e.TopPoint.Z))
+                        List<CylinderInfo> listT = new List<CylinderInfo>();
+                        // Nếu C cùng chiều cao nhưng khác x,y với E
+                        if (C.Z.Equals(e.TopPoint.Z) && !C.X.Equals(e.TopPoint.X) && !C.Y.Equals(e.TopPoint.Y))
                         {
-                            newListT.Add(e);
-                            newListT.Add(cylinderInfo);
+                            listT.Add(e);
+                            listT.Add(cylinderInfo);
                             if (C.Z < minZC)
                             {
                                 listCheo.Insert(0, cylinderInfo);
@@ -462,12 +533,12 @@ namespace FirstCommand
                                 listCheo.Add(cylinderInfo);
                             }
                         }
-                        if (newListT.Count > 0)
+                        if (listT.Count > 0)
                         {
-                            newResult.Add(newListT);
+                            newResult.Add(listT);
                         }
-                        newResult.Add(listCheo);
                     }
+                    newResult.Add(listCheo);
                 }
                 // không tồn tại điểm thừa
 
@@ -627,6 +698,7 @@ namespace FirstCommand
             return new XYZ(x, y, z);
         }
 
+        // Tìm chiều cao của điểm thuộc AB và có tọa độ x,y của E
         private double GetZOnLine(XYZ A, XYZ B, XYZ E)
         {
             double yE = E.Y;
@@ -644,22 +716,49 @@ namespace FirstCommand
 
         private List<CylinderInfo> GroupEqualValues(List<CylinderInfo> group)
         {
-            HashSet<CylinderInfo> mySet = new HashSet<CylinderInfo>();
+            //HashSet<CylinderInfo> mySet = new HashSet<CylinderInfo>();
             var result = new List<CylinderInfo>();
+            CylinderInfo first = null;
+            int indexFirst = 0;
+            int indexLast = 0;
+            CylinderInfo last = null;
+            //double distance = 0;
             for (int i = 0; i < group.Count - 1; i++)
             {
                 for (int j = i + 1; j < group.Count; j++)
                 {
                     if (KiemTra2DiemThangHang(group[i], group[j], group[j].Radius))
                     {
-                        mySet.Add(group[i]);
-                        mySet.Add(group[j]);
+                        //mySet.Add(group[i]);
+                        //mySet.Add(group[j]);
+                        if (first == null)
+                        {
+                            first = group[i];
+                            indexFirst = i;
+                        }
+                        last = group[j];
+                        indexLast = j;
+                        //if (first.TopPoint.DistanceTo(group[j].TopPoint) > distance)
+                        //{
+                        //    last = group[j];
+                        //    distance = first.TopPoint.DistanceTo(last.TopPoint);
+                        //}
                     }
                 }
+                if (first != null && last != null)
+                {
+                    break;
+                }
             }
-            if (mySet.Count > 2)
+            // Lấy ra danh sách các phần tử từ i đến j thuộc group
+            List<CylinderInfo> subList = new List<CylinderInfo>();
+            if (indexLast > 0)
             {
-                result.AddRange(mySet);
+                subList = group.GetRange(indexFirst, indexLast - indexFirst + 1);
+            }
+            if (subList.Count > 2)
+            {
+                result.AddRange(subList);
                 double topZ = result.Max(c => c.TopPoint.Z);
                 foreach (var c in result)
                 {
@@ -727,6 +826,14 @@ namespace FirstCommand
                 // Tính tích có hướng (cross product)
                 XYZ crossTop = vTop1.CrossProduct(vTop2);
                 //XYZ crossBot = vBot1.CrossProduct(vBot2);
+                //| Góc lệch giữa hai vector | Độ dài `CrossProduct` (nếu đã normalize) |
+                //        | ------------------------ | ---------------------------------------- |
+                //        | 1°                       | ≈ 0.01745 |
+                //        | 5°                       | ≈ 0.0872 |
+                //        | ✅ 10°                    | ≈ 0.1736 |
+                //        | 15°                      | ≈ 0.2588 |
+                //        | 30°                      | ≈ 0.5 |
+                //        | 90°                      | ≈ 1.0 |
 
                 // Nếu độ dài vector tích có hướng nhỏ hơn newTolerance(quy đổi từ 2 độ sang), các vector cùng phương ⇒ 3 điểm thẳng hàng
                 return crossTop.GetLength() < newTolerance;
@@ -771,6 +878,6 @@ namespace FirstCommand
         public XYZ TopPoint { get; set; }
         public XYZ BottomPoint { get; set; }
 
-        public double Volume { get; set; }
+        //public double Area { get; set; }
     }
 }
