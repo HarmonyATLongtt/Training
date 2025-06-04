@@ -4,19 +4,6 @@ using System.Linq;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using Autodesk.Revit.ApplicationServices;
-using System.Data;
-using System.Text;
-using System.IO;
-using Autodesk.Revit.DB.Mechanical;
-using System.Security.Cryptography;
-using OpenQA.Selenium.BiDi.Modules.Input;
-using Microsoft.SqlServer.Server;
-using Autodesk.Revit.DB.Architecture;
-using Autodesk.Revit.DB.Structure;
-using System.Windows.Controls;
-using System.Net;
-using Autodesk.Revit.UI.Selection;
 
 namespace FirstCommand
 {
