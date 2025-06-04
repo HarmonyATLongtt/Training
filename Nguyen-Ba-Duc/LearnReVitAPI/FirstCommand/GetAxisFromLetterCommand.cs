@@ -41,11 +41,12 @@ namespace FirstCommand
                 List<PlanarFace> planarFaces = new List<PlanarFace>();
                 List<CylindricalFace> cylindricalFaces = new List<CylindricalFace>();
                 Dictionary<Solid, List<PlanarFace>> solidPlanarFaces = new Dictionary<Solid, List<PlanarFace>>();
-
+                //List<Solid> solids = new List<Solid>();
                 foreach (GeometryObject geometryObj in elementGeo)
                 {
                     if (geometryObj is Solid solid)
                     {
+                        //solids.Add(solid);
                         var tupleValue = GetGroupedFacesFromSolid(doc, solid);
                         planarFaces = tupleValue.Item1;
                         cylindricalFaces = tupleValue.Item2;
@@ -58,6 +59,7 @@ namespace FirstCommand
                         {
                             if (geometryObject is Solid nestedSolid)
                             {
+                                //solids.Add(nestedSolid);
                                 var tupleValue = GetGroupedFacesFromSolid(doc, nestedSolid);
                                 planarFaces = tupleValue.Item1;
                                 cylindricalFaces = tupleValue.Item2;
@@ -66,6 +68,17 @@ namespace FirstCommand
                         }
                     }
                 }
+
+                //foreach (Solid solid in solids)
+                //{
+                //    var tupleValue = GetGroupedFacesFromSolid(doc, solid);
+                //    if (tupleValue.Item1.Count > 0 && tupleValue.Item2.Count > 0 && tupleValue.Item3.Count > 0)
+                //    {
+                //        planarFaces.AddRange(tupleValue.Item1);
+                //        cylindricalFaces.AddRange(tupleValue.Item2);
+                //        solidPlanarFaces.AddRange(tupleValue.Item3);
+                //    }
+                //}
 
                 if (cylindricalFaces.Count > 0)
                 {
