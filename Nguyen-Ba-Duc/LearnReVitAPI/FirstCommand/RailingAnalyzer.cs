@@ -55,7 +55,7 @@ namespace FirstCommand
                     List<CylinderInfo> cylinderInfos = GetCylinderInfosFromElements(linkedElem, doc);
 
                     // Trường hợp model là 1 khối thống nhất
-                    if (cylinderInfos.Count > 1)
+                    if (cylinderInfos.Count > 1 && cylinderInfos.Count != 2)
                     {
                         PrepareDataForExecution(cylinderInfos, doc, uidoc);
                     }
@@ -65,11 +65,21 @@ namespace FirstCommand
 
                         cylinderInfosOfElements.Add(firstCylinderInfo);
                     }
+                    // trường hợp chỉ có 2 trụ
+                    else if (cylinderInfos.Count == 2)
+                    {
+                        HandleInCaseHaveTwoCylinderInfos(doc, cylinderInfos);
+                    }
                 }
                 // Trường hợp model gồm nhiều element ghép lại
-                if (cylinderInfosOfElements.Count > 0)
+                if (cylinderInfosOfElements.Count > 0 && cylinderInfosOfElements.Count != 2)
                 {
                     PrepareDataForExecution(cylinderInfosOfElements, doc, uidoc);
+                }
+                // trường hợp chỉ có 2 trụ
+                else if (cylinderInfosOfElements.Count == 2)
+                {
+                    HandleInCaseHaveTwoCylinderInfos(doc, cylinderInfosOfElements);
                 }
             }
             catch (Autodesk.Revit.Exceptions.OperationCanceledException)
@@ -79,6 +89,18 @@ namespace FirstCommand
                 return Result.Cancelled;
             }
             return Result.Succeeded;
+        }
+
+        private void HandleInCaseHaveTwoCylinderInfos(Document doc, List<CylinderInfo> cylinderInfos)
+        {
+            if (cylinderInfos.Count == 2)
+            {
+                XYZ firstPoint = cylinderInfos[0].TopPoint;
+                XYZ endPoint = cylinderInfos[1].TopPoint;
+                double length = firstPoint.DistanceTo(endPoint);
+                CreateModelLine(doc, firstPoint, endPoint);
+                TaskDialog.Show("Nofi", "The length of railing is : " + length.ToString());
+            }
         }
 
         private void PrepareDataForExecution(List<CylinderInfo> cylinderInfos, Document doc, UIDocument uiDoc)
@@ -373,15 +395,36 @@ namespace FirstCommand
             }
             //var result = GroupFacesBySharedVertices(planarFacesParallelToZ);
             var result = GroupMeshTrianglesBySharedVertices(triangles);
+            result = result.OrderByDescending(x => x.Count).ToList();
+            double firstRadius = 0;
             foreach (var group in result)
             {
                 //cylinderInfos.Add(GetCylinderInfosFromMeshTriangles(group));
-                if (group.Count > 30)
+                if (group.Count > 10)
                 {
-                    cylinderInfos.Add(GetCylinderInfosFromMeshTriangles(group));
+                    var cylinderInfoFromMeshTriangles = GetCylinderInfosFromMeshTriangles(group);
+                    if (firstRadius == 0)
+                    {
+                        firstRadius = cylinderInfoFromMeshTriangles.Radius;
+                    }
+                    if (IsVaLidCylinderInfo(cylinderInfoFromMeshTriangles, firstRadius))
+                    {
+                        cylinderInfos.Add(cylinderInfoFromMeshTriangles);
+                    }
                 }
             }
             return cylinderInfos;
+        }
+
+        private bool IsVaLidCylinderInfo(CylinderInfo cylinderInfo, double radius)
+        {
+            double heightOfCylinder = cylinderInfo.TopPoint.Z - cylinderInfo.BottomPoint.Z;
+            // chiều cao của cột trụ lớn hơn 2 lần đường kính cột trụ
+            if (heightOfCylinder > radius * 4)
+            {
+                return true;
+            }
+            return false;
         }
 
         private void AddMeshTriangles(List<MeshTriangle> triangles, Mesh mesh)
@@ -889,6 +932,22 @@ namespace FirstCommand
                                 result.Add(group);
                             }
                         }
+                        //Trường hợp tồn tại group 3:
+
+                        //Nếu tồn tại chỉ 1 group 2 nữa : ko xử lý gì
+                        // Nếu tồn tại 2 group 2 :
+
+                        // Nếu group1(A,B) và group2(B,C) mà trong đó B chung , A và C đều thuộc 2 group 3 khác
+                        // tức là có 1 điểm lẻ nằm ở giữa 2 group 3 khác nhau thì xử lý điểm lẻ đó với từng group 3
+                        // Nếu chỉ có A thuộc group 3 khác, còn C thì không thì ko xử lý gì
+
+                        //Trường hợp không tồn tại group 3:
+                        // Xét trường hợp các điểm có tạo thành 1 hàng thẳng hay chéo (thẳng thì cho top bằng nhau, chéo thì kéo dài tia để tìm giao điểm)
+                        // Nếu chỉ tồn tại 3 group 2 mà group 1 vuông góc với group 3
+                        // Nếu chỉ tồn tại 2 group 2 trong đó có điểm B chung thì 2 điểm gần nhau nhất tạo thành 1 mặt phẳng
+                        if (group.Count == 2)
+                        {
+                        }
                     }
                 }
             }
@@ -1179,7 +1238,7 @@ namespace FirstCommand
 
             List<List<CylinderInfo>> newResult = new List<List<CylinderInfo>>();
 
-            // 1 group là 1 mặt phẳng
+            // 1 group là 1 mặt phẳng, 1 mặt phẳng yêu cầu có ít nhất 3 trụ
             foreach (var group in result)
             {
                 SortInstancesAlongLine(group);
@@ -1351,9 +1410,11 @@ namespace FirstCommand
             {
                 subList = group.GetRange(indexFirst, indexLast - indexFirst + 1);
             }
-            if (subList.Count > 2)
+            //if (subList.Count > 2)
+            if (subList.Count >= 2)
             {
                 result.AddRange(subList);
+                // Kiểm tra xem hàng chéo có chung trụ với hàng thẳng không, để khi thay đổi chiều cao hàng thẳng thì không ảnh hưởng đến hàng chéo
                 if (pointsAsDiagonalLine.Count > 0)
                 {
                     ChangeGroupPointsAsDiagonalLine(pointsAsDiagonalLine, result);
@@ -1477,6 +1538,9 @@ namespace FirstCommand
         {
             HashSet<CylinderInfo> mySet = new HashSet<CylinderInfo>();
             var result = new List<CylinderInfo>();
+            // Xét thêm trường hợp 2 điểm được coi là tạo thành 1 đường chéo nếu top1 < top2, bot1 < bot2 và đường thẳng tạo bởi top1_top2 phải
+            // song song với đường thẳng tạo bởi bot1_bot2
+
             for (int i = 2; i < group.Count; i++)
             {
                 List<CylinderInfo> cylinderInfos = new List<CylinderInfo> { group[i - 2], group[i - 1], group[i] };
@@ -1498,7 +1562,7 @@ namespace FirstCommand
         }
 
         /// <summary>
-        /// Hàm kiểm tra 3 điểm có tạo thành 1 đường chéo không
+        /// Hàm kiểm tra 3 điểm có tạo thành 1 đường chéo không, tức là top và bottom của trụ tăng dân
         /// </summary>
         /// <param name="cylinderInfos"></param>
         /// <returns></returns>
@@ -1507,19 +1571,26 @@ namespace FirstCommand
             if (cylinderInfos.Count == 3)
             {
                 SortInstancesAlongLine(cylinderInfos);
-                double topC1 = cylinderInfos[0].TopPoint.Z;
-                double topC2 = cylinderInfos[1].TopPoint.Z;
-                double topC3 = cylinderInfos[2].TopPoint.Z;
+                //double topC1 = cylinderInfos[0].TopPoint.Z;
+                //double topC2 = cylinderInfos[1].TopPoint.Z;
+                //double topC3 = cylinderInfos[2].TopPoint.Z;
                 double bottomC1 = cylinderInfos[0].BottomPoint.Z;
                 double bottomC2 = cylinderInfos[1].BottomPoint.Z;
                 double bottomC3 = cylinderInfos[2].BottomPoint.Z;
 
-                if ((topC1 < topC2 && topC2 < topC3 && bottomC1 < bottomC2 && bottomC2 < bottomC3)
-                    || (topC1 > topC2 && topC2 > topC3 && bottomC1 > bottomC2 && bottomC2 > bottomC3))
+                double minZ = Math.Min(bottomC1, Math.Min(bottomC2, bottomC3));
+                if (minZ != bottomC2)
                 {
                     return true;
                 }
                 return false;
+
+                //if ((topC1 < topC2 && topC2 < topC3 && bottomC1 < bottomC2 && bottomC2 < bottomC3)
+                //    || (topC1 > topC2 && topC2 > topC3 && bottomC1 > bottomC2 && bottomC2 > bottomC3))
+                //{
+                //    return true;
+                //}
+                //return false;
             }
             return false;
         }
@@ -1539,12 +1610,11 @@ namespace FirstCommand
         }
 
         /// <summary>
-        /// Kiểm tra xem 4 điểm có tạo thành 1 đường chéo hay không, sai số cho phép là các vector từ các điểm tạo thành 1 góc nhỏ hơn 5 độ
+        /// Kiểm tra xem 3 điểm có tạo thành 1 đường chéo hay không, sai số cho phép là các vector từ các điểm tạo thành 1 góc nhỏ hơn 5 độ
         /// </summary>
         /// <param name="c1"></param>
         /// <param name="c2"></param>
         /// <param name="c3"></param>
-        /// <param name="c4"></param>
         /// <returns></returns>
         private bool ArePointsCollinear(CylinderInfo c1, CylinderInfo c2, CylinderInfo c3)
         {
@@ -1554,9 +1624,13 @@ namespace FirstCommand
             XYZ B = c2.TopPoint;
             XYZ C = c3.TopPoint;
 
+            XYZ BottomA = c1.BottomPoint;
+
+            XYZ BottomC = c3.BottomPoint;
             double radius = c1.Radius;
 
-            if (Math.Abs(A.Z - B.Z) > radius * 2 && Math.Abs(B.Z - C.Z) > radius * 2)
+            if (Math.Abs(A.Z - B.Z) > radius * 2 && Math.Abs(B.Z - C.Z) > radius * 2
+                 && (Math.Abs(BottomA.Z - BottomC.Z) > radius))
             {
                 XYZ AB = (B - A).Normalize();
                 XYZ AC = (C - A).Normalize();
