@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 
 using Autodesk.Revit.Attributes;
@@ -110,7 +111,7 @@ namespace FirstCommand
             var mergedList = MergeCylinderInfos(cylinderInfos);
             SortInstancesAlongLine(mergedList);
 
-            if (GroupPointsOnSamePlane(mergedList).Count == 0)
+            if (GroupPointsOnSamePlane(mergedList).Count == 1)
             {
                 bool arePointsColinear = true;
                 for (int i = 0; i < mergedList.Count - 1; i++)
@@ -123,6 +124,7 @@ namespace FirstCommand
                 }
                 if (arePointsColinear)
                 {
+                    SetSameZForAllCylinderInfos(mergedList);
                     GetTopViewShape(meshes, mergedList);
                 }
                 else
@@ -143,6 +145,26 @@ namespace FirstCommand
                     CreateModelLine(doc, firstPoint, endPoint);
                 }
                 TaskDialog.Show("Nofi", "The length of railing is : " + length.ToString());
+            }
+        }
+
+        /// <summary>
+        /// Trường hợp tất cả các trụ được coi là bằng nhau thì để tránh sai số, set lại Z cho tất cả bằng nhau
+        /// </summary>
+        /// <param name="cylinderInfos"> Danh sách các trụ</param>
+        private void SetSameZForAllCylinderInfos(List<CylinderInfo> cylinderInfos)
+        {
+            double minZ = double.MaxValue;
+            foreach (var c in cylinderInfos)
+            {
+                if (minZ > c.TopPoint.Z)
+                {
+                    minZ = c.TopPoint.Z;
+                }
+            }
+            foreach (var c in cylinderInfos)
+            {
+                c.TopPoint = SetOriginPoint(c.TopPoint, minZ);
             }
         }
 
@@ -187,67 +209,253 @@ namespace FirstCommand
                         trianglesPresentForTopViewShape.Add(triangle);
                     }
                 }
-                Dictionary<XYZ, XYZ> keyValuePairs = FindPointAndAxisOfIt(firstPoint, lastPoint, trianglesPresentForTopViewShape, radius, topZ);
-                //List<Line> lines = new List<Line>();
-                Dictionary<XYZ, Line> topPointAndLine = new Dictionary<XYZ, Line>();
-                if (keyValuePairs.Count == 2)
+                List<XYZ> firstAndLastPoint = new List<XYZ> { firstPoint, lastPoint };
+
+                //FindPointAndAxisOfIt(firstPoint, lastPoint, trianglesPresentForTopViewShape, radius, topZ);
+                var tupleValues = GetLinesFromTriangles(trianglesPresentForTopViewShape, firstAndLastPoint, radius, topZ, true);
+                if (tupleValues.FirstLine != null && tupleValues.LastLine != null)
                 {
-                    foreach (var keyPairs in keyValuePairs)
-                    {
-                        //XYZ direction = null;
-                        //XYZ normal = GetNormalFromTriangle(keyPairs.Value);
-                        //if (IsPerpendicularToXAxis(normal))
-                        //{
-                        //    direction = XYZ.BasisX;
-                        //}
-                        //else if (IsPerpendicularToYAxis(normal))
-                        //{
-                        //    direction = XYZ.BasisY;
-                        //}
-                        //else
-                        //{
-                        //    direction = GetOrthogonalVectorForm(normal);
-                        //}
-                        Line line = CreateLine(keyPairs.Key, keyPairs.Value);
-                        topPointAndLine.Add(keyPairs.Key, line);
-                        //lines.Add(line);
-                    }
+                    Line firstLine = tupleValues.FirstLine;
+                    Line secondLine = tupleValues.LastLine;
+                    List<Line> lines = tupleValues.Lines;
+
+                    //lỗi tồn tại có 1 line trong lines mà rõ ràng là không có
+                    GetAllIntersecPoints(firstPoint, lastPoint, firstLine, secondLine, lines);
                 }
-                List<MeshTriangle> trianglesViewed = new List<MeshTriangle>();
-                foreach (var pointAndLine in topPointAndLine)
+                //var firstPointAndAxis = GetPointAndAxisOfTriangles(firstPoint, trianglesPresentForTopViewShape, radius, topZ, true);
+                //var secondPointAndAxis = GetPointAndAxisOfTriangles(lastPoint, trianglesPresentForTopViewShape, radius, topZ, true);
+
+                //Dictionary<XYZ, Line> topPointAndLine = new Dictionary<XYZ, Line>();
+                //if (keyValuePairs.Count == 2)
+                //{
+                //    foreach (var keyPairs in keyValuePairs)
+                //    {
+                //        Line line = CreateLine(keyPairs.Key, keyPairs.Value);
+                //        topPointAndLine.Add(keyPairs.Key, line);
+                //    }
+                //}
+                //List<(XYZ,Line)> pointAndLines = new List<(XYZ,Line)> ();
+                //Line firstLine = CreateLine(firstPointAndAxis.OriginPoint, firstPointAndAxis.Axis);
+                //Line secondLine = CreateLine(secondPointAndAxis.OriginPoint, secondPointAndAxis.Axis);
+                //pointAndLines.Add((firstPointAndAxis.OriginPoint, firstLine));
+                //pointAndLines.Add((secondPointAndAxis.OriginPoint, secondLine));
+
+                //List<MeshTriangle> trianglesViewed = new List<MeshTriangle>();
+                //foreach (var pointAndLine in topPointAndLine)
+                //{
+                //    foreach (var triangle in trianglesPresentForTopViewShape)
+                //    {
+                //        XYZ point1 = triangle.get_Vertex(0);
+                //        // Kiểm tra những point trong tam giác nào thỏa mãn nằm các đường line 1 khoảng thì gom vào 1 nhóm
+                //        if (DistancePointToLine(point1, pointAndLine.Value) < (topZ - pointAndLine.Key.Z) + tolerance)
+                //        {
+                //            trianglesViewed.Add(triangle);
+                //        }
+                //    }
+                //}
+                //List<MeshTriangle> remainTriangles = GetRemainTriangles(pointAndLines, trianglesPresentForTopViewShape, topZ);
+
+                //List<MeshTriangle> remainTriangles = GetElementsInANotInB(trianglesPresentForTopViewShape, trianglesViewed);
+                // Nếu còn các triangles thừa, tức là hình dáng của shape có ít nhất 3 đường
+                //if (remainTriangles.Count > 0)
+                //{
+                //    // Tạo 1 hàm đệ quy lấy ra tia của các tam giác còn lại, có thể nhiều hơn 1 tia
+                //}
+                //else
+                //{
+                //Line line1 = topPointAndLine[firstPoint];
+                //Line line2 = topPointAndLine[lastPoint];
+
+                // trường hợp vuông góc, tức là 2 đường vuông góc với nhau;
+                //if (AreLinesPerpendicular(firstLine, secondLine))
+                //{
+                //    XYZ intersectPoint = GetIntersectionPoint(firstLine, secondLine);
+                //    //Plane plane = CreatePlaneFromLine(line1);
+                //    //XYZ pointOnLine2 = line2.GetEndPoint(0);
+                //    //XYZ intersectPoint = GetProjectedPoint(plane, pointOnLine2);
+                //}
+                // trường hợp trùng nhau tức là chỉ có 1 đường thẳng
+                // không cần sử lý vì nếu tạo thành 1 đường thẳng thì đó là trường hợp có 2 trụ, đã được sử lý từ trước
+                //else if (AreLinesColinear(firstLine, secondLine))
+                //{
+                //}
+                //}
+            }
+        }
+
+        private List<(XYZ, XYZ)> GetAllIntersecPoints(XYZ firstPoint, XYZ lastPoint, Line firstLine, Line lastLine, List<Line> lines)
+        {
+            List<(XYZ, XYZ)> pairs = new List<(XYZ, XYZ)>();
+            if (lines.Count > 0)
+            {
+                lines.Add(firstLine);
+                lines.Add(lastLine);
+                for (int i = 0; i < lines.Count - 1; i++)
                 {
-                    foreach (var triangle in trianglesPresentForTopViewShape)
+                    List<XYZ> intersectPoints = new List<XYZ>();
+                    for (int j = i + 1; j < lines.Count; j++)
                     {
-                        XYZ point1 = triangle.get_Vertex(0);
-                        if (DistancePointToLine(point1, pointAndLine.Value) < (topZ - pointAndLine.Key.Z) + tolerance)
+                        XYZ intersectPoint = GetIntersectionPoint(lines[i], lines[j]);
+                        if (intersectPoint != null)
                         {
-                            trianglesViewed.Add(triangle);
+                            intersectPoints.Add(intersectPoint);
+                        }
+                    }
+                    if (intersectPoints.Count == 2)
+                    {
+                        pairs.Add((intersectPoints[0], intersectPoints[1]));
+                    }
+                    else if (intersectPoints.Count == 1)
+                    {
+                        if (IsPointOnLine(firstPoint, lines[i]))
+                        {
+                            pairs.Add((firstPoint, intersectPoints.First()));
+                        }
+                        else if (IsPointOnLine(lastPoint, lines[i]))
+                        {
+                            pairs.Add((lastPoint, intersectPoints.First()));
                         }
                     }
                 }
-                List<MeshTriangle> remainTriangles = GetElementsInANotInB(trianglesPresentForTopViewShape, trianglesViewed);
-                if (remainTriangles.Count > 0)
+            }
+            // Chỉ có 2 đường
+            else
+            {
+                //if (AreLinesPerpendicular(firstLine, lastLine))
+                //{
+                // Nếu 2 đường không trùng nhau
+                if (!AreLinesColinear(firstLine, lastLine))
                 {
-                }
-                else
-                {
-                    Line line1 = topPointAndLine[firstPoint];
-                    Line line2 = topPointAndLine[lastPoint];
-
-                    // trường hợp vuông góc, tức là có 1 đường vuông góc với nhau;
-                    if (AreLinesPerpendicular(line1, line2))
+                    XYZ intersectPoint = GetIntersectionPoint(firstLine, lastLine);
+                    if (intersectPoint != null)
                     {
-                        Plane plane = CreatePlaneFromLine(line1);
-                        XYZ pointOnLine2 = line2.GetEndPoint(0);
-                        XYZ intersectPoint = GetProjectedPoint(plane, pointOnLine2);
+                        pairs.Add((firstPoint, intersectPoint));
+                        pairs.Add((intersectPoint, lastPoint));
                     }
-                    // trường hợp trùng nhau tức là chỉ có 1 đường thẳng
-                    // không cần sử lý vì nếu tạo thành 1 đường thẳng thì đó là trường hợp có 2 trụ, đã được sử lý từ trước
-                    else if (AreLinesColinear(line1, line2))
+                }
+                //}
+            }
+            return pairs;
+        }
+
+        /// <summary>
+        /// Hàm kiểm tra xem 1 điểm có thuộc 1 đường thẳng hay không
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="line"></param>
+        /// <param name="epsilon"></param>
+        /// <returns></returns>
+        private bool IsPointOnLine(XYZ point, Line line)
+        {
+            XYZ start = line.GetEndPoint(0);
+            XYZ end = line.GetEndPoint(1);
+
+            // Vector từ start đến end và từ start đến point
+            XYZ lineVec = end - start;
+            XYZ pointVec = point - start;
+
+            // Nếu độ dài của lineVec là 0 (line sai), trả về false
+            if (lineVec.IsZeroLength())
+                return point.IsAlmostEqualTo(start, tolerance);
+
+            // Kiểm tra xem hai vector có cùng hướng (tức là tích có hướng gần bằng 0)
+            XYZ cross = lineVec.CrossProduct(pointVec);
+            if (cross.GetLength() > tolerance)
+                return false;
+
+            if ((point.DistanceTo(end) + point.DistanceTo(start)) - start.DistanceTo(end) > tolerance)
+                return false;
+
+            return true;
+        }
+
+        private (Line FirstLine, Line LastLine, List<Line> Lines) GetLinesFromTriangles(List<MeshTriangle> triangles, List<XYZ> points, double radius, double topZ, bool isTopPointOfCylinder)
+        {
+            List<Line> lines = new List<Line>();
+            Line firstLine = null;
+            Line lastLine = null;
+            List<(XYZ, Line)> pointAndLines = new List<(XYZ, Line)>();
+            foreach (var p in points)
+            {
+                var pointAndAxis = GetPointAndAxisOfTriangles(p, triangles, radius, topZ, isTopPointOfCylinder);
+                Line line = CreateLine(pointAndAxis.OriginPoint, pointAndAxis.Axis);
+                pointAndLines.Add((pointAndAxis.OriginPoint, line));
+            }
+
+            if (points.Count == 2)
+            {
+                firstLine = pointAndLines[0].Item2;
+                lastLine = pointAndLines[1].Item2;
+            }
+            else if (points.Count == 1)
+            {
+                lines.Add(pointAndLines.FirstOrDefault().Item2);
+            }
+
+            List<MeshTriangle> remainTriangles = GetRemainTriangles(pointAndLines, triangles, topZ);
+            if (remainTriangles.Count > 0)
+            {
+                List<XYZ> newPoints = new List<XYZ> { points[0] };
+                lines.AddRange(GetLinesFromTriangles(remainTriangles, newPoints, radius, topZ, false).Lines);
+            }
+
+            return (firstLine, lastLine, lines);
+        }
+
+        private List<MeshTriangle> GetRemainTriangles(List<(XYZ, Line)> pointAndLines, List<MeshTriangle> triangles, double topZ)
+        {
+            List<MeshTriangle> trianglesViewed = new List<MeshTriangle>();
+            foreach (var tuple in pointAndLines)
+            {
+                foreach (var triangle in triangles)
+                {
+                    XYZ point1 = triangle.get_Vertex(0);
+                    // Kiểm tra những point trong tam giác nào thỏa mãn nằm các đường line 1 khoảng thì gom vào 1 nhóm
+                    if (DistancePointToLine(point1, tuple.Item2) < (topZ - tuple.Item1.Z) + tolerance)
                     {
+                        trianglesViewed.Add(triangle);
                     }
                 }
             }
+            List<MeshTriangle> remainTriangles = GetElementsInANotInB(triangles, trianglesViewed);
+            return remainTriangles;
+        }
+
+        //private void GetLineFromRemainTriangles(List<MeshTriangle> triangles, double topZ)
+        //{
+        //    List<MeshTriangle> trianglesViewed = new List<MeshTriangle>();
+        //    foreach (var pointAndLine in topPointAndLine)
+        //    {
+        //        foreach (var triangle in triangles)
+        //        {
+        //            XYZ point1 = triangle.get_Vertex(0);
+        //            // Kiểm tra những point trong tam giác nào thỏa mãn nằm các đường line 1 khoảng thì gom vào 1 nhóm
+        //            if (DistancePointToLine(point1, pointAndLine.Value) < (topZ - pointAndLine.Key.Z) + tolerance)
+        //            {
+        //                trianglesViewed.Add(triangle);
+        //            }
+        //        }
+        //    }
+        //    List<MeshTriangle> remainTriangles = GetElementsInANotInB(triangles, trianglesViewed);
+        //    if (remainTriangles.Count > 0)
+        //    {
+        //        GetLineFromRemainTriangles(remainTriangles, topZ);
+        //    }
+        //}
+
+        private XYZ GetIntersectionPoint(Line line1, Line line2)
+        {
+            IntersectionResultArray resultArray;
+            SetComparisonResult result = line1.Intersect(line2, out resultArray);
+
+            if (result == SetComparisonResult.Overlap && resultArray != null && resultArray.Size > 0)
+            {
+                // Lấy điểm đầu tiên (thường chỉ có 1 điểm với đường thẳng)
+                return resultArray.get_Item(0).XYZPoint;
+            }
+
+            // Không có giao điểm
+            return null;
         }
 
         private Plane CreatePlaneFromLine(Line line)
@@ -257,6 +465,12 @@ namespace FirstCommand
             return plane;
         }
 
+        /// <summary>
+        /// Kiểm tra xem 2 đường có trùng nhau không
+        /// </summary>
+        /// <param name="line1"></param>
+        /// <param name="line2"></param>
+        /// <returns></returns>
         private bool AreLinesColinear(Line line1, Line line2)
         {
             // Vector hướng
@@ -282,14 +496,16 @@ namespace FirstCommand
             XYZ dir2 = (line2.GetEndPoint(1) - line2.GetEndPoint(0)).Normalize();
 
             double dot = dir1.DotProduct(dir2);
-            return Math.Abs(dot) < tolerance;
+            return Math.Abs(dot) < cosineAngleTolerance;
         }
 
         private Line CreateLine(XYZ origin, XYZ direction)
         {
-            double length = 1000;
+            // Nên giới han chiều dài của Line tránh trường hợp 2 line vuông góc với nhau, và do quá dài nên cắt nhau, gây ra sai điểm giao
+            double length = 5;
             XYZ p1 = origin + direction.Multiply(-length);
             XYZ p2 = origin + direction.Multiply(length);
+
             return Line.CreateBound(p1, p2);
         }
 
@@ -340,15 +556,24 @@ namespace FirstCommand
             return new XYZ(1, ya, 0);
         }
 
-        private Dictionary<XYZ, XYZ> FindPointAndAxisOfIt(XYZ A, XYZ B, List<MeshTriangle> triangles, double r, double topZ)
+        private List<MeshTriangle> GetSublistTriangles(List<MeshTriangle> triangles, XYZ point, double length)
         {
-            //XYZ pointC = null;
-            //XYZ pointD = null;
+            List<MeshTriangle> sublist = new List<MeshTriangle>();
+            foreach (var tr in triangles)
+            {
+                XYZ pt = tr.get_Vertex(0);
+                double dist = pt.DistanceTo(point);
+                if (dist < length)
+                {
+                    sublist.Add(tr);
+                }
+            }
+            return sublist;
+        }
+
+        private (XYZ OriginPoint, XYZ Axis) GetPointAndAxisOfTriangles(XYZ A, List<MeshTriangle> triangles, double r, double topZ, bool IsOrigin)
+        {
             XYZ pointA = SetOriginPoint(A, topZ);
-            XYZ pointB = SetOriginPoint(B, topZ);
-
-            Dictionary<XYZ, XYZ> keyValuePairs = new Dictionary<XYZ, XYZ>();
-
             List<XYZ> vertexs = new List<XYZ>();
             foreach (var tri in triangles)
             {
@@ -359,62 +584,125 @@ namespace FirstCommand
                 vertexs.Add(v2);
                 vertexs.Add(v3);
             }
-            XYZ closestToA = null;
-            XYZ closestToB = null;
+            // Điểm gần A nhất có chiều cao = topZ
+            XYZ B = null;
+
             double minDisToA = double.MaxValue;
-            double minDisToB = double.MaxValue;
+
             foreach (var v in vertexs)
             {
-                if (v.Z == topZ)
+                if (Math.Abs(v.Z - topZ) < r / 2)
                 {
-                    double distToA = pointA.DistanceTo(v);
+                    double distToA = A.DistanceTo(v);
                     if (distToA < minDisToA)
                     {
                         minDisToA = distToA;
-                        closestToA = v;
-                    }
-
-                    double distToB = pointB.DistanceTo(v);
-                    if (distToB < minDisToB)
-                    {
-                        minDisToB = distToB;
-                        closestToB = v;
+                        B = v;
                     }
                 }
             }
+            // Khoảng cách từ A đến B cộng thêm 1 khoảng 2r
+            double length = A.DistanceTo(B);
+            List<MeshTriangle> subListTriangleNearB = GetSublistTriangles(triangles, B, r * 6);
 
-            List<MeshTriangle> subListTriangleNearAPoint = new List<MeshTriangle>();
-            List<MeshTriangle> subListTriangleNearBPoint = new List<MeshTriangle>();
-            foreach (var tr in triangles)
+            // Lấy ra danh sách các triangles các điểm A 1 khoảng từ A đến closestToA
+            List<MeshTriangle> subListTriangleNearA = GetSublistTriangles(triangles, A, length);
+
+            //foreach (var tr in triangles)
+            //{
+            //    XYZ pt = tr.get_Vertex(0);
+            //    double distToB = pt.DistanceTo(B);
+            //    if (distToB > r && distToB < r * 6)
+            //    {
+            //        subListTriangleNearB.Add(tr);
+            //    }
+            //}
+
+            var trianglesInBNotInA = subListTriangleNearB.Where(a => !subListTriangleNearA.Contains(a)).ToList();
+            XYZ axis = GetAxisFromTriangles(trianglesInBNotInA);
+            if (IsOrigin)
             {
-                XYZ pt = tr.get_Vertex(0);
-                double distToA = pt.DistanceTo(closestToA);
-                if (distToA > r && distToA < r * 6)
-                {
-                    subListTriangleNearAPoint.Add(tr);
-                    //pointC = pt;
-                    //keyValuePairs.Add(A, tr);
-                }
-
-                double distToB = pt.DistanceTo(pointB);
-                if (distToB > r && distToB < r * 6)
-                {
-                    subListTriangleNearBPoint.Add(tr);
-                    //pointD = pt;
-                    //keyValuePairs.Add(B, tr);
-                }
-
-                //if (pointC != null && pointD != null)
-                //    break;
+                return (A, axis);
             }
-
-            XYZ firstAxis = GetAxisFromTriangles(subListTriangleNearAPoint);
-            XYZ secondAxis = GetAxisFromTriangles(subListTriangleNearBPoint);
-            keyValuePairs.Add(A, firstAxis);
-            keyValuePairs.Add(B, secondAxis);
-            return keyValuePairs;
+            else
+            {
+                XYZ newB = SetOriginPoint(B, A.Z);
+                return (newB, axis);
+            }
         }
 
+        //private Dictionary<XYZ, XYZ> FindPointAndAxisOfIt(XYZ A, XYZ B, List<MeshTriangle> triangles, double r, double topZ)
+        //{
+        //    XYZ pointA = SetOriginPoint(A, topZ);
+        //    XYZ pointB = SetOriginPoint(B, topZ);
+
+        //    Dictionary<XYZ, XYZ> keyValuePairs = new Dictionary<XYZ, XYZ>();
+
+        //    List<XYZ> vertexs = new List<XYZ>();
+        //    foreach (var tri in triangles)
+        //    {
+        //        XYZ v1 = tri.get_Vertex(0);
+        //        XYZ v2 = tri.get_Vertex(1);
+        //        XYZ v3 = tri.get_Vertex(2);
+        //        vertexs.Add(v1);
+        //        vertexs.Add(v2);
+        //        vertexs.Add(v3);
+        //    }
+        //    XYZ closestToA = null;
+        //    XYZ closestToB = null;
+        //    double minDisToA = double.MaxValue;
+        //    double minDisToB = double.MaxValue;
+        //    foreach (var v in vertexs)
+        //    {
+        //        if (v.Z == topZ)
+        //        {
+        //            double distToA = pointA.DistanceTo(v);
+        //            if (distToA < minDisToA)
+        //            {
+        //                minDisToA = distToA;
+        //                closestToA = v;
+        //            }
+
+        //            double distToB = pointB.DistanceTo(v);
+        //            if (distToB < minDisToB)
+        //            {
+        //                minDisToB = distToB;
+        //                closestToB = v;
+        //            }
+        //        }
+        //    }
+
+        //    List<MeshTriangle> subListTriangleNearAPoint = new List<MeshTriangle>();
+        //    List<MeshTriangle> subListTriangleNearBPoint = new List<MeshTriangle>();
+        //    foreach (var tr in triangles)
+        //    {
+        //        XYZ pt = tr.get_Vertex(0);
+        //        double distToA = pt.DistanceTo(closestToA);
+        //        if (distToA > r && distToA < r * 6)
+        //        {
+        //            subListTriangleNearAPoint.Add(tr);
+        //        }
+
+        //        double distToB = pt.DistanceTo(pointB);
+        //        if (distToB > r && distToB < r * 6)
+        //        {
+        //            subListTriangleNearBPoint.Add(tr);
+        //        }
+        //    }
+
+        //    XYZ firstAxis = GetAxisFromTriangles(subListTriangleNearAPoint);
+        //    XYZ secondAxis = GetAxisFromTriangles(subListTriangleNearBPoint);
+        //    keyValuePairs.Add(A, firstAxis);
+        //    keyValuePairs.Add(B, secondAxis);
+        //    return keyValuePairs;
+        //}
+
+        /// <summary>
+        /// Tìm tia song song với trục của trụ bằng cách lấy ra 2 tam giác bất kỳ có normal không
+        /// song song với nhau, sau đó cùng crossproduct 2 normal đó
+        /// </summary>
+        /// <param name="triangles"></param>
+        /// <returns></returns>
         private XYZ GetAxisFromTriangles(List<MeshTriangle> triangles)
         {
             MeshTriangle firstTriangle = triangles[0];
@@ -425,7 +713,7 @@ namespace FirstCommand
             {
                 XYZ normal = GetNormalFromTriangle(triangles[i]);
                 // Nếu 2 vector không song song với nhau
-                if (!IsParallel(firstNormal, secondNormal))
+                if (!IsParallel(firstNormal, normal))
                 {
                     secondTriangle = triangles[i];
                     secondNormal = normal;
@@ -437,7 +725,8 @@ namespace FirstCommand
             {
                 axisVector = firstNormal.CrossProduct(secondNormal).Normalize();
             }
-            return axisVector;
+            // vì là hình chiếu từ trên xuống nên Z = 0
+            return SetOriginPoint(axisVector, 0);
         }
 
         /// <summary>
