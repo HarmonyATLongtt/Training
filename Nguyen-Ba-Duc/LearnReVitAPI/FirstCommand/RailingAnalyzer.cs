@@ -10,6 +10,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.Exceptions;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
+using FirstCommand.Support;
 
 namespace FirstCommand
 {
@@ -20,6 +21,10 @@ namespace FirstCommand
         private const double cosineAngleTolerance = 0.0872; // 5 độ (góc lệch cho phép để vector normal và trục Z được coi là vuông góc)
         private Transform transform = null;
         private double defaultRadius = 0;
+        private double minX = 0;
+        private double minY = 0;
+        private double maxX = 0;
+        private double maxY = 0;
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
@@ -53,6 +58,15 @@ namespace FirstCommand
 
                     Element linkedElem = linkDoc.GetElement(linkedElemId);
                     transform = rli.GetTransform();
+
+                    var (minPoint, maxPoint) = GeometryUtility.GetBoundingBoxExtents(linkedElem);
+                    if (minPoint != null && maxPoint != null)
+                    {
+                        minX = minPoint.X;
+                        maxX = maxPoint.X;
+                        minY = minPoint.Y;
+                        maxY = maxPoint.Y;
+                    }
 
                     var tupleValues = GetCylinderInfosFromElements(linkedElem, doc);
                     List<CylinderInfo> cylinderInfos = tupleValues.CylinderInfos;
@@ -198,7 +212,7 @@ namespace FirstCommand
                 //trianglesOfElement.Where(t => !trianglesParallelToZ.Contains(t)).ToList();
 
                 trianglesOfElement.RemoveAll(t => trianglesParallelToZ.Contains(t));
-                RemoveTrianglesHaveLowerZ(trianglesOfElement);
+                GetTrianglesHaveHigherZ(trianglesOfElement, radius);
                 // TopZ này chỉ phù hợp trong trường hợp tất cả trụ có vị trí bằng nhau
                 //double topZ = double.MinValue;
                 //foreach (var triangle in trianglesOfElement)
@@ -225,16 +239,16 @@ namespace FirstCommand
 
                 //FindPointAndAxisOfIt(firstPoint, lastPoint, trianglesPresentForTopViewShape, radius, topZ);
 
-                var tupleValues = GetLinesFromTriangles(trianglesPresentForTopViewShape, firstAndLastPoint, radius, true);
-                if (tupleValues.FirstLine != null && tupleValues.LastLine != null)
-                {
-                    Line firstLine = tupleValues.FirstLine;
-                    Line lastLine = tupleValues.LastLine;
-                    // Danh sách các line theo thứ tự nối nhau
-                    List<Line> lines = tupleValues.Lines;
+                //var tupleValues = GetLinesFromTriangles(trianglesPresentForTopViewShape, firstAndLastPoint, radius, true);
+                //if (tupleValues.FirstLine != null && tupleValues.LastLine != null)
+                //{
+                //    Line firstLine = tupleValues.FirstLine;
+                //    Line lastLine = tupleValues.LastLine;
+                //    // Danh sách các line theo thứ tự nối nhau
+                //    List<Line> lines = tupleValues.Lines;
 
-                    GetAllIntersecPoints(firstPoint, lastPoint, firstLine, lastLine, lines);
-                }
+                //    GetAllIntersecPoints(firstPoint, lastPoint, firstLine, lastLine, lines);
+                //}
 
                 //var firstPointAndAxis = GetPointAndAxisOfTriangles(firstPoint, trianglesPresentForTopViewShape, radius, topZ, true);
                 //var secondPointAndAxis = GetPointAndAxisOfTriangles(lastPoint, trianglesPresentForTopViewShape, radius, topZ, true);
@@ -301,27 +315,77 @@ namespace FirstCommand
         /// Loại bỏ những triangles cùng vị trí (x,y) nhưng thấp hơn
         /// </summary>
         /// <param name="triangles"></param>
-        private void RemoveTrianglesHaveLowerZ(List<MeshTriangle> triangles)
+        private List<MeshTriangle> GetTrianglesHaveHigherZ(List<MeshTriangle> triangles, double r)
         {
-            List<MeshTriangle> trianglesLowest = new List<MeshTriangle>();
-            for (int i = 0; i < triangles.Count - 1; i++)
+            // Đoạn này dùng để gom nhóm các tam giác thuộc 1 grid
+            var squares = GeometryUtility.GenerateGridSquares(minX, maxX, minY, maxY, r * 2);
+            Dictionary<int, List<MeshTriangle>> keyValuePairs = new Dictionary<int, List<MeshTriangle>>();
+            int key = 0;
+            foreach (var square in squares)
             {
-                List<XYZ> listVertex1 = GetVerticesOfTriangle(triangles[i]);
-                for (int j = i + 1; j < triangles.Count; j++)
+                key++;
+                List<MeshTriangle> triangleList = new List<MeshTriangle>();
+                foreach (var tri in triangles)
                 {
-                    List<XYZ> listVertex2 = GetVerticesOfTriangle(triangles[j]);
-                    if (HasCommonVertex(listVertex1, listVertex2))
+                    var vertices = GetVerticesOfTriangle(tri);
+                    // Nếu grid và tam giác giao nhau
+                    if (GeometryUtility.AreTriangleAndSquareIntersecting(vertices, square))
                     {
-                        break;
+                        triangleList.Add(tri);
                     }
-                    if (IsTrianglesIntersect(triangles[i], triangles[j]))
+                }
+                if (triangleList.Count > 0)
+                {
+                    keyValuePairs.Add(key, triangleList);
+                }
+            }
+            // Lặp qua mỗi square, xóa đi những tam giác trong cùng 1 square mà ở dưới so với tam giác khác
+            // Kết quả còn lại là mỗi square sẽ có 1 số lượng tam giác ở trên cùng, các tam giác có thể trùng nhau trong
+            // square khác
+            foreach (var keyValue in keyValuePairs)
+            {
+                List<MeshTriangle> trianglesOnGrid = keyValue.Value;
+
+                // Lặp qua các tam giác trong square đó
+                for (int i = 0; i < trianglesOnGrid.Count; i++)
+                {
+                    for (int j = trianglesOnGrid.Count - 1; j > i; j--)
                     {
-                        MeshTriangle meshTriangle = GetTriangleLowest(triangles[i], triangles[j]);
-                        trianglesLowest.Add(meshTriangle);
+                        if (IsTrianglesIntersect(trianglesOnGrid[i], trianglesOnGrid[j]))
+                        {
+                            MeshTriangle triangleLower = GetTriangleLower(trianglesOnGrid[i], trianglesOnGrid[j]);
+                            trianglesOnGrid.Remove(triangleLower);
+                        }
                     }
                 }
             }
-            triangles.RemoveAll(tr => trianglesLowest.Contains(tr));
+            HashSet<MeshTriangle> meshTrianglesHigher = new HashSet<MeshTriangle>();
+            foreach (var keyValue in keyValuePairs)
+            {
+                meshTrianglesHigher.UnionWith(keyValue.Value);
+            }
+            return meshTrianglesHigher.ToList();
+
+            //List<MeshTriangle> trianglesLowest = new List<MeshTriangle>();
+            //List<MeshTriangle> trianglesViewed = new List<MeshTriangle>();
+            //for (int i = 0; i < triangles.Count - 1; i++)
+            //{
+            //    List<XYZ> listVertex1 = GetVerticesOfTriangle(triangles[i]);
+            //    for (int j = i + 1; j < triangles.Count; j++)
+            //    {
+            //        List<XYZ> listVertex2 = GetVerticesOfTriangle(triangles[j]);
+            //        if (HasCommonVertex(listVertex1, listVertex2))
+            //        {
+            //            break;
+            //        }
+            //        if (IsTrianglesIntersect(triangles[i], triangles[j]))
+            //        {
+            //            MeshTriangle meshTriangle = GetTriangleLowest(triangles[i], triangles[j]);
+            //            trianglesLowest.Add(meshTriangle);
+            //        }
+            //    }
+            //}
+            //triangles.RemoveAll(tr => trianglesLowest.Contains(tr));
         }
 
         /// <summary>
@@ -330,7 +394,7 @@ namespace FirstCommand
         /// <param name="tri1"></param>
         /// <param name="tri2"></param>
         /// <returns></returns>
-        private MeshTriangle GetTriangleLowest(MeshTriangle tri1, MeshTriangle tri2)
+        private MeshTriangle GetTriangleLower(MeshTriangle tri1, MeshTriangle tri2)
         {
             if (GetHighestAndLowestZPoint(tri1).Max.Z >= GetHighestAndLowestZPoint(tri2).Max.Z)
             {
@@ -1450,6 +1514,11 @@ namespace FirstCommand
             return (highest, lowest);
         }
 
+        /// <summary>
+        /// Hàm lấy ra vector normal của 1 tam giác
+        /// </summary>
+        /// <param name="tri"></param>
+        /// <returns></returns>
         private XYZ GetNormalFromTriangle(MeshTriangle tri)
         {
             XYZ p1 = tri.get_Vertex(0);
@@ -1490,16 +1559,35 @@ namespace FirstCommand
 
         private List<List<MeshTriangle>> GroupMeshTrianglesBySharedVertices(List<MeshTriangle> triangles)
         {
-            List<List<MeshTriangle>> result = new List<List<MeshTriangle>>();
-            HashSet<MeshTriangle> visited = new HashSet<MeshTriangle>();
+            var result = new List<List<MeshTriangle>>();
+            var visited = new HashSet<MeshTriangle>();
+            var vertexToTriangles = new Dictionary<XYZ, List<MeshTriangle>>(new XYZComparer(tolerance));
 
+            // Bước 1: tạo từ điển tra nhanh các đỉnh → các tam giác chứa đỉnh đó
+            foreach (var triangle in triangles)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    var vertex = triangle.get_Vertex(i);
+
+                    if (!vertexToTriangles.TryGetValue(vertex, out var list))
+                    {
+                        list = new List<MeshTriangle>();
+                        vertexToTriangles[vertex] = list;
+                    }
+
+                    list.Add(triangle);
+                }
+            }
+
+            // Bước 2: gom nhóm tam giác có chung đỉnh
             foreach (var triangle in triangles)
             {
                 if (visited.Contains(triangle))
                     continue;
 
-                List<MeshTriangle> group = new List<MeshTriangle>();
-                List<MeshTriangle> toCheck = new List<MeshTriangle> { triangle };
+                var group = new List<MeshTriangle>();
+                var toCheck = new List<MeshTriangle> { triangle };
 
                 for (int i = 0; i < toCheck.Count; i++)
                 {
@@ -1510,17 +1598,20 @@ namespace FirstCommand
                     visited.Add(current);
                     group.Add(current);
 
-                    var currentVertices = GetVerticesOfTriangle(current);
-
-                    foreach (var other in triangles)
+                    // Tìm các tam giác khác có đỉnh trùng (gần) với current
+                    for (int j = 0; j < 3; j++)
                     {
-                        if (visited.Contains(other) || toCheck.Contains(other))
+                        var vertex = current.get_Vertex(j);
+
+                        if (!vertexToTriangles.TryGetValue(vertex, out var neighbors))
                             continue;
 
-                        var otherVertices = GetVerticesOfTriangle(other);
-                        if (HasCommonVertex(currentVertices, otherVertices))
+                        foreach (var neighbor in neighbors)
                         {
-                            toCheck.Add(other);
+                            if (!visited.Contains(neighbor) && !toCheck.Contains(neighbor))
+                            {
+                                toCheck.Add(neighbor);
+                            }
                         }
                     }
                 }
@@ -1530,6 +1621,54 @@ namespace FirstCommand
 
             return result;
         }
+
+        /// <summary>
+        /// Hàm dùng để gom nhóm các tam giác có chung đỉnh lại với nhau
+        /// </summary>
+        /// <param name="triangles"></param>
+        /// <returns></returns>
+        //private List<List<MeshTriangle>> GroupMeshTrianglesBySharedVertices(List<MeshTriangle> triangles)
+        //{
+        //    List<List<MeshTriangle>> result = new List<List<MeshTriangle>>();
+        //    HashSet<MeshTriangle> visited = new HashSet<MeshTriangle>();
+
+        //    foreach (var triangle in triangles)
+        //    {
+        //        if (visited.Contains(triangle))
+        //            continue;
+
+        //        List<MeshTriangle> group = new List<MeshTriangle>();
+        //        List<MeshTriangle> toCheck = new List<MeshTriangle> { triangle };
+
+        //        for (int i = 0; i < toCheck.Count; i++)
+        //        {
+        //            var current = toCheck[i];
+        //            if (visited.Contains(current))
+        //                continue;
+
+        //            visited.Add(current);
+        //            group.Add(current);
+
+        //            var currentVertices = GetVerticesOfTriangle(current);
+
+        //            foreach (var other in triangles)
+        //            {
+        //                if (visited.Contains(other) || toCheck.Contains(other))
+        //                    continue;
+
+        //                var otherVertices = GetVerticesOfTriangle(other);
+        //                if (HasCommonVertex(currentVertices, otherVertices))
+        //                {
+        //                    toCheck.Add(other);
+        //                }
+        //            }
+        //        }
+
+        //        result.Add(group);
+        //    }
+
+        //    return result;
+        //}
 
         //private List<List<PlanarFace>> GroupFacesBySharedVertices(List<PlanarFace> faces)
         //{
@@ -1630,6 +1769,12 @@ namespace FirstCommand
         //    return vertices;
         //}
 
+        /// <summary>
+        ///  Hàm kiểm tra xem face có song song với trục Z hay không
+        /// </summary>
+        /// <param name="normal"></param>
+        /// <param name="tolerance"></param>
+        /// <returns></returns>
         private bool IsFaceParallelToZ(XYZ normal, double tolerance = 1e-3)
         {
             return Math.Abs(normal.DotProduct(XYZ.BasisZ)) < tolerance;
