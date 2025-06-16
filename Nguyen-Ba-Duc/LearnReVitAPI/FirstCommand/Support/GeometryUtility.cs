@@ -9,6 +9,8 @@ namespace FirstCommand.Support
 {
     public static class GeometryUtility
     {
+        private const double tolerance = 1e-6;
+
         //___Hàm kiểm tra xem hình vuông và hình tam giác có giao nhau không
         //___Start ___
         public static bool AreTriangleAndSquareIntersecting(List<XYZ> triangle, List<XYZ> square)
@@ -156,6 +158,17 @@ namespace FirstCommand.Support
             XYZ max = bbox.Max;
 
             return (min, max);
+        }
+
+        /// <summary>
+        /// Hàm kiểm tra xem face có vuông góc với trục Z hay không
+        /// </summary>
+        /// <param name="normal"></param>
+        /// <returns></returns>
+        public static bool IsFacePerpendicularToZ(XYZ normal)
+        {
+            double dot = normal.Normalize().DotProduct(XYZ.BasisZ);
+            return Math.Abs(Math.Abs(dot) - 1) < tolerance;
         }
     }
 
