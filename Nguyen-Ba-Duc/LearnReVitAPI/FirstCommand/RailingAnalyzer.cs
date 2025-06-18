@@ -292,7 +292,18 @@ namespace FirstCommand
             //TestFunction(trianglesOfElement, doc);
             List<MeshTriangle> trianglesHighest = GetTrianglesHaveHigherZ(trianglesOfElement, radius, firstPoint, doc);
 
-            //TestFunction(trianglesHighest, doc);
+            //List<MeshTriangle> list = new List<MeshTriangle>();
+            //foreach (var tri in trianglesHighest)
+            //{
+            //    double highestZ = GetHighestAndLowestZPoint(tri).Max.Z;
+            //    if (highestZ < firstPoint.Z + radius * 10)
+            //    {
+            //        list.Add(tri);
+            //    }
+            //}
+            //TaskDialog.Show("dfd", list.Count.ToString());
+
+            //TestFunction(list, doc);
 
             // TopZ này chỉ phù hợp trong trường hợp tất cả trụ có vị trí bằng nhau
             //double topZ = double.MinValue;
@@ -319,8 +330,16 @@ namespace FirstCommand
             List<XYZ> firstAndLastPoint = new List<XYZ> { firstPoint, lastPoint };
 
             //FindPointAndAxisOfIt(firstPoint, lastPoint, trianglesPresentForTopViewShape, radius, topZ);
-
+            //TestFunction(trianglesHighest, doc);
             var tupleValues = GetLinesFromTriangles(trianglesHighest, firstAndLastPoint, radius, true, doc, null);
+
+            //HashSet<MeshTriangle> myHashSet = new HashSet<MeshTriangle>(trianglesHighest);
+            //var result = GroupMeshTrianglesBySharedVertices(myHashSet);
+
+            //TaskDialog.Show("dfd", result.Count.ToString());
+
+            //TestFunction(result[8], doc);
+
             if (tupleValues.FirstLine != null && tupleValues.LastLine != null)
             {
                 Line firstLine = tupleValues.FirstLine;
@@ -335,7 +354,7 @@ namespace FirstCommand
                 //{
                 //    pairs.Add((line.GetEndPoint(0), line.GetEndPoint(1)));
                 //}
-                lines.RemoveRange(0, 2);
+                //lines.RemoveRange(0, 2);
 
                 GetAllIntersecPoints(firstPoint, lastPoint, firstLine, lastLine, lines, doc);
             }
@@ -408,7 +427,7 @@ namespace FirstCommand
         private List<MeshTriangle> GetTrianglesHaveHigherZ(List<MeshTriangle> triangles, double r, XYZ point, Document doc)
         {
             // Đoạn này dùng để gom nhóm các tam giác thuộc 1 grid
-            var squares = GeometryUtility.GenerateGridSquares(minX, maxX, minY, maxY, r * 2);
+            var squares = GeometryUtility.GenerateGridSquares(minX, maxX, minY, maxY, r * 10);
             //Dictionary<int, List<MeshTriangle>> keyValuePairs = new Dictionary<int, List<MeshTriangle>>();
             List<List<MeshTriangle>> groupTriangles = new List<List<MeshTriangle>>();
             //int key = 0;
@@ -469,7 +488,22 @@ namespace FirstCommand
             //TestFunction(testList, doc);
             foreach (var trianglesOnGrid in groupTriangles)
             {
+                //List<MeshTriangle> list1 = groupTriangles[0];
+                //List<MeshTriangle> list2 = groupTriangles[1];
+
+                //bool kq = list1.Any(x => list2.Contains(x));
+                //List<XYZ> tamgiac = new List<XYZ> { new XYZ(2, 4, 0), new XYZ(1.5, 0, 0), new XYZ(2.5, 0, 0) };
+                //List<XYZ> hinhvuong = new List<XYZ> { new XYZ(1, 1, 0), new XYZ(1, 3, 0), new XYZ(3, 3, 0), new XYZ(3, 1, 0) };
+                //bool kp = GeometryUtility.AreTriangleAndSquareIntersecting(tamgiac, hinhvuong);
+
+                //TaskDialog.Show("dfd", kp.ToString());
+
+                //var trianglesOnGrid = groupTriangles[2];
+
+                //TestFunction(trianglesOnGrid, doc);
                 double maxZ = double.MinValue;
+                XYZ maxPoint;
+                //MeshTriangle maxTri = null;
                 foreach (var tri in trianglesOnGrid)
                 {
                     double highest = GetHighestAndLowestZPoint(tri).Max.Z;
@@ -477,8 +511,15 @@ namespace FirstCommand
                     if (highest > maxZ)
                     {
                         maxZ = highest;
+                        maxPoint = GetHighestAndLowestZPoint(tri).Max;
+                        //maxTri = tri;
                     }
                 }
+                //List<XYZ> tamgiac = GetVerticesOfTriangle(maxTri);
+                //List<XYZ> hinhvuong = squares[1];
+                //bool kp = GeometryUtility.AreTriangleAndSquareIntersecting(tamgiac, hinhvuong);
+                //TaskDialog.Show("dfd", kp.ToString());
+
                 foreach (var tri1 in trianglesOnGrid)
                 {
                     if (meshTrianglesHigher.Contains(tri1)) continue;
@@ -488,7 +529,31 @@ namespace FirstCommand
                         meshTrianglesHigher.Add(tri1);
                     }
                 }
+                //List<MeshTriangle> list = new List<MeshTriangle>();
+                //foreach (var tri in meshTrianglesHigher)
+                //{
+                //    double highestZ = GetHighestAndLowestZPoint(tri).Max.Z;
+                //    if (highestZ < point.Z + r * 10)
+                //    {
+                //        list.Add(tri);
+                //    }
+                //}
+                //TaskDialog.Show("dfd", list.Count.ToString());
+
+                //TestFunction(meshTrianglesHigher.ToList(), doc);
             }
+
+            //List<MeshTriangle> list = new List<MeshTriangle>();
+            //foreach (var tri in meshTrianglesHigher)
+            //{
+            //    double highestZ = GetHighestAndLowestZPoint(tri).Max.Z;
+            //    if (highestZ < point.Z + r * 10)
+            //    {
+            //        list.Add(tri);
+            //    }
+            //}
+            //TaskDialog.Show("dfd", list.Count.ToString());
+
             //TestFunction(meshTrianglesHigher.ToList(), doc);
             //triangles.RemoveAll(x => meshTrianglesHigher.Contains(x));
             //TaskDialog.Show("dfd", meshTrianglesHigher.Count.ToString() + ", " + triangles.Count.ToString());
@@ -885,11 +950,11 @@ namespace FirstCommand
                 firstLine = pointAndLines[0].Item2;
                 lastLine = pointAndLines[1].Item2;
 
-                XYZ p1 = firstLine.GetEndPoint(0);
-                XYZ p2 = firstLine.GetEndPoint(1);
+                //XYZ p1 = firstLine.GetEndPoint(0);
+                //XYZ p2 = firstLine.GetEndPoint(1);
 
-                XYZ pt1 = lastLine.GetEndPoint(0);
-                XYZ pt2 = lastLine.GetEndPoint(1);
+                //XYZ pt1 = lastLine.GetEndPoint(0);
+                //XYZ pt2 = lastLine.GetEndPoint(1);
             }
             else if (points.Count == 1)
             {
@@ -897,6 +962,18 @@ namespace FirstCommand
             }
 
             List<XYZ> targetPoints = GetRemainTriangles(pointAndLines, triangles, radius, doc);
+
+            //TestFunction(triangles, doc);
+            //return (null, null, null);
+            //HashSet<MeshTriangle> myHashSet = new HashSet<MeshTriangle>(triangles);
+            //var result = GroupMeshTrianglesBySharedVertices(myHashSet);
+
+            //TaskDialog.Show("dfd", result.Count.ToString());
+
+            //TestFunction(result[0], doc);
+
+            //return (null, null, null);
+
             //if (triangles.Count > 0)
             //{
             //    if (targetPoints.Count > 0)
@@ -940,7 +1017,7 @@ namespace FirstCommand
                 // Nếu normal vuông góc với direction thì dot product gần 0
                 double dot = normal.Normalize().DotProduct(normalizedDirection);
 
-                if (Math.Abs(dot) < tolerance)
+                if (Math.Abs(dot) < 1e-3)
                 {
                     result.Add(triangle);
                 }
@@ -967,9 +1044,9 @@ namespace FirstCommand
             }
             foreach (var tuple in pointAndLines)
             {
-                Line line = tuple.Item2;
-                XYZ p1 = line.GetEndPoint(0);
-                XYZ p2 = line.GetEndPoint(1);
+                //Line line = tuple.Item2;
+                //XYZ p1 = line.GetEndPoint(0);
+                //XYZ p2 = line.GetEndPoint(1);
 
                 //CreateModelLine(doc, p1, p2);
                 //double distanceFromOriginToLine = DistancePointToLine(tuple.Item1, tuple.Item2);
@@ -1895,6 +1972,11 @@ namespace FirstCommand
             return new XYZ(sumX / count, sumY / count, sumZ / count);
         }
 
+        /// <summary>
+        /// Hàm dùng để gom nhóm các tam giác có chung đỉnh lại với nhau
+        /// </summary>
+        /// <param name="triangles"></param>
+        /// <returns></returns>
         private List<List<MeshTriangle>> GroupMeshTrianglesBySharedVertices(HashSet<MeshTriangle> triangles)
         {
             var result = new List<List<MeshTriangle>>();
@@ -2220,6 +2302,9 @@ namespace FirstCommand
             {
                 trans.Start();
                 ModelCurve modelCurve = null;
+
+                //XYZ p1 = transform.OfPoint(point1);
+                //XYZ p2 = transform.OfPoint(point2);
 
                 XYZ pt1 = transform.OfPoint(point1);
                 XYZ pt2 = transform.OfPoint(point2);

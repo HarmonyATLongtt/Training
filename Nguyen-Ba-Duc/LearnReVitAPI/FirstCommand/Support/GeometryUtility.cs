@@ -15,9 +15,12 @@ namespace FirstCommand.Support
         //___Start ___
         public static bool AreTriangleAndSquareIntersecting(List<XYZ> triangle, List<XYZ> square)
         {
+            // 1. Đỉnh tam giác nằm trong hình vuông
             if (triangle.Any(p => IsPointInPolygon(p, square))) return true;
+            // 2. Đỉnh hình vuông nằm trong tam giác
             if (square.Any(p => IsPointInPolygon(p, triangle))) return true;
 
+            // 3. Cạnh giao nhau
             for (int i = 0; i < 3; i++)
             {
                 XYZ a1 = triangle[i];
@@ -28,7 +31,8 @@ namespace FirstCommand.Support
                     XYZ b1 = square[j];
                     XYZ b2 = square[(j + 1) % 4];
 
-                    if (SegmentsIntersectProperly(a1, a2, b1, b2))
+                    //if (SegmentsIntersectProperly(a1, a2, b1, b2))
+                    if (DoSegmentsIntersect(a1, a2, b1, b2))
                         return true;
                 }
             }
@@ -36,23 +40,33 @@ namespace FirstCommand.Support
             return false;
         }
 
-        private static bool SegmentsIntersectProperly(XYZ a1, XYZ a2, XYZ b1, XYZ b2)
+        private static bool DoSegmentsIntersect(XYZ p1, XYZ p2, XYZ q1, XYZ q2)
         {
-            if (!TryGetSegmentsIntersection(a1, a2, b1, b2, out XYZ intersection))
-                return false;
-
-            return !IsPointOnEndpoint(intersection, a1, a2) && !IsPointOnEndpoint(intersection, b1, b2);
+            return CCW(p1, q1, q2) != CCW(p2, q1, q2) && CCW(p1, p2, q1) != CCW(p1, p2, q2);
         }
 
-        private static bool IsPointOnEndpoint(XYZ pt, XYZ p1, XYZ p2)
+        private static bool CCW(XYZ a, XYZ b, XYZ c)
         {
-            return IsSamePoint(pt, p1) || IsSamePoint(pt, p2);
+            return (c.Y - a.Y) * (b.X - a.X) > (b.Y - a.Y) * (c.X - a.X);
         }
 
-        private static bool IsSamePoint(XYZ a, XYZ b, double tol = 1e-6)
-        {
-            return a.DistanceTo(b) < tol;
-        }
+        //private static bool SegmentsIntersectProperly(XYZ a1, XYZ a2, XYZ b1, XYZ b2)
+        //{
+        //    if (!TryGetSegmentsIntersection(a1, a2, b1, b2, out XYZ intersection))
+        //        return false;
+
+        //    return !IsPointOnEndpoint(intersection, a1, a2) && !IsPointOnEndpoint(intersection, b1, b2);
+        //}
+
+        //private static bool IsPointOnEndpoint(XYZ pt, XYZ p1, XYZ p2)
+        //{
+        //    return IsSamePoint(pt, p1) || IsSamePoint(pt, p2);
+        //}
+
+        //private static bool IsSamePoint(XYZ a, XYZ b, double tol = 1e-6)
+        //{
+        //    return a.DistanceTo(b) < tol;
+        //}
 
         private static bool IsPointInPolygon(XYZ point, List<XYZ> polygon)
         {
@@ -74,43 +88,50 @@ namespace FirstCommand.Support
             return inside;
         }
 
-        private static bool TryGetSegmentsIntersection(XYZ p1, XYZ p2, XYZ q1, XYZ q2, out XYZ intersection)
-        {
-            intersection = null;
+        //private static bool TryGetSegmentsIntersection(XYZ p1, XYZ p2, XYZ q1, XYZ q2, out XYZ intersection)
+        //{
+        //    intersection = null;
 
-            double A1 = p2.Y - p1.Y;
-            double B1 = p1.X - p2.X;
-            double C1 = A1 * p1.X + B1 * p1.Y;
+        //    double A1 = p2.Y - p1.Y;
+        //    double B1 = p1.X - p2.X;
+        //    double C1 = A1 * p1.X + B1 * p1.Y;
 
-            double A2 = q2.Y - q1.Y;
-            double B2 = q1.X - q2.X;
-            double C2 = A2 * q1.X + B2 * q1.Y;
+        //    double A2 = q2.Y - q1.Y;
+        //    double B2 = q1.X - q2.X;
+        //    double C2 = A2 * q1.X + B2 * q1.Y;
 
-            double det = A1 * B2 - A2 * B1;
-            if (Math.Abs(det) < 1e-9)
-                return false;
+        //    double det = A1 * B2 - A2 * B1;
+        //    if (Math.Abs(det) < 1e-9)
+        //        return false;
 
-            double x = (B2 * C1 - B1 * C2) / det;
-            double y = (A1 * C2 - A2 * C1) / det;
+        //    double x = (B2 * C1 - B1 * C2) / det;
+        //    double y = (A1 * C2 - A2 * C1) / det;
 
-            XYZ pt = new XYZ(x, y, 0);
+        //    XYZ pt = new XYZ(x, y, 0);
 
-            if (IsPointOnSegment(pt, p1, p2) && IsPointOnSegment(pt, q1, q2))
-            {
-                intersection = pt;
-                return true;
-            }
+        //    if (IsPointOnSegment(pt, p1, p2) && IsPointOnSegment(pt, q1, q2))
+        //    {
+        //        intersection = pt;
+        //        return true;
+        //    }
 
-            return false;
-        }
+        //    return false;
+        //}
 
-        private static bool IsPointOnSegment(XYZ pt, XYZ a, XYZ b, double tol = 1e-6)
-        {
-            double ab = a.DistanceTo(b);
-            double ap = a.DistanceTo(pt);
-            double pb = pt.DistanceTo(b);
-            return Math.Abs(ap + pb - ab) < tol;
-        }
+        //private static bool IsPointOnSegment(XYZ pt, XYZ a, XYZ b, double tol = 1e-3)
+        //{
+        //    // Đầu tiên kiểm tra theo hình học: pt phải nằm trong bounding box của đoạn [a, b]
+        //    if (pt.X < Math.Min(a.X, b.X) - tol || pt.X > Math.Max(a.X, b.X) + tol ||
+        //        pt.Y < Math.Min(a.Y, b.Y) - tol || pt.Y > Math.Max(a.Y, b.Y) + tol)
+        //        return false;
+
+        //    // Sau đó kiểm tra khoảng cách tổng
+
+        //    double ab = a.DistanceTo(b);
+        //    double ap = a.DistanceTo(pt);
+        //    double pb = pt.DistanceTo(b);
+        //    return Math.Abs(ap + pb - ab) < tol;
+        //}
 
         //___End ___
 
