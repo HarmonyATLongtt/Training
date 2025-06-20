@@ -10,6 +10,7 @@ namespace FirstCommand.Support
     public static class GeometryUtility
     {
         private const double tolerance = 1e-6;
+        private const double cosineAngleTolerance = 0.0872;
 
         //___Hàm kiểm tra xem hình vuông và hình tam giác có giao nhau không
         //___Start ___
@@ -162,6 +163,49 @@ namespace FirstCommand.Support
             }
 
             return squares;
+        }
+
+        /// <summary>
+        /// Hàm dùng để nhóm các điểm gần nhau thành 1 nhóm
+        /// </summary>
+        /// <param name="points"></param>
+        /// <param name="tolerance"></param>
+        /// <returns></returns>
+        public static List<List<XYZ>> GroupClosePoints(List<XYZ> points, double length)
+        {
+            var groups = new List<List<XYZ>>();
+            var visited = new HashSet<XYZ>();
+
+            foreach (var p in points)
+            {
+                if (visited.Contains(p)) continue;
+
+                var group = new List<XYZ> { p };
+                visited.Add(p);
+
+                // Hàng đợi để duyệt theo BFS
+                var queue = new Queue<XYZ>();
+                queue.Enqueue(p);
+
+                while (queue.Count > 0)
+                {
+                    var current = queue.Dequeue();
+
+                    foreach (var other in points)
+                    {
+                        if (!visited.Contains(other) && current.DistanceTo(other) <= length)
+                        {
+                            group.Add(other);
+                            visited.Add(other);
+                            queue.Enqueue(other);
+                        }
+                    }
+                }
+
+                groups.Add(group);
+            }
+
+            return groups;
         }
 
         /// <summary>
