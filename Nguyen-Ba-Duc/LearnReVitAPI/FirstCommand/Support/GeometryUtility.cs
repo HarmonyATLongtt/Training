@@ -235,6 +235,56 @@ namespace FirstCommand.Support
             double dot = normal.Normalize().DotProduct(XYZ.BasisZ);
             return Math.Abs(Math.Abs(dot) - 1) < tolerance;
         }
+
+        /// <summary>
+        /// Hàm dùng để kiểm tra xem line có giao cắt với solid hay không
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="solid"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static bool IsLineIntersectSolid(Line line, Solid solid)
+        {
+            if (line == null || solid == null)
+                throw new ArgumentNullException("Line or solid is null");
+
+            // Dùng phương thức Intersect với Line (Curve) và Solid
+            SolidCurveIntersection intersection = solid.IntersectWithCurve(line, new SolidCurveIntersectionOptions());
+
+            // Kết quả có ít nhất một điểm giao là giao cắt
+            return intersection.SegmentCount > 0;
+        }
+
+        /// <summary>
+        /// Hàm tìm điểm thuộc một đường thẳng (Line) là hình chiếu vuông góc từ một điểm khác
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="point"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        public static XYZ GetPerpendicularProjectionPointOnLine(Line line, XYZ point)
+        {
+            if (line == null || point == null || !line.IsBound)
+                throw new ArgumentException("Invalid input");
+
+            // Điểm đầu và cuối của line
+            XYZ p0 = line.GetEndPoint(0);
+            XYZ p1 = line.GetEndPoint(1);
+
+            // Vector chỉ phương của đường thẳng
+            XYZ lineDirection = (p1 - p0).Normalize();
+
+            // Vector từ điểm gốc của line đến điểm cần chiếu
+            XYZ vectorToPoint = point - p0;
+
+            // Chiều dài chiếu của vector lên đường thẳng (tức là khoảng cách theo hướng line)
+            double projectionLength = vectorToPoint.DotProduct(lineDirection);
+
+            // Tọa độ điểm chiếu vuông góc trên line
+            XYZ projectedPoint = p0 + projectionLength * lineDirection;
+
+            return projectedPoint;
+        }
     }
 
     /// <summary>
