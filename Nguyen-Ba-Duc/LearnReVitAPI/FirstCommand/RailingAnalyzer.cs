@@ -114,6 +114,22 @@ namespace FirstCommand
             return Result.Succeeded;
         }
 
+        public void RunTransaction(Document doc, string transactionName, Action<Transaction> action)
+        {
+            using (Transaction trans = new Transaction(doc, transactionName))
+            {
+                trans.Start();
+
+                FailureHandlingOptions options = trans.GetFailureHandlingOptions();
+                options.SetFailuresPreprocessor(new WarningSuppressor());
+                trans.SetFailureHandlingOptions(options);
+
+                action(trans); // Thực thi hành động trong Transaction
+
+                trans.Commit();
+            }
+        }
+
         private void TestFunction(List<MeshTriangle> triangles, Document doc)
         {
             double maxZ = double.MinValue;
@@ -333,7 +349,7 @@ namespace FirstCommand
                 var trianglesHighest = tupleValues.TrianglesHigher;
                 var topPointsForEachPart = tupleValues.TopPoints;
 
-                if (topPointsForEachPart.Count == 3) continue;
+                if (topPointsForEachPart.Count == 1) continue;
 
                 var cylinderInfosForEachPart = cylinderInfos
                     .Where(c => topPointsForEachPart.Any(p => c.TopPoint.IsAlmostEqualTo(p, TOLERANCE)))
@@ -370,38 +386,39 @@ namespace FirstCommand
                     topPointsForEachPart.RemoveAll(x => topPointsViewed.Any(y => x.IsAlmostEqualTo(y, TOLERANCE)));
                 }
                 topPointsViewed.Clear();
-                int num = topPointsClone.Count;
-                int indexToRemove = num;
-                for (int i = 0; i < num; i++)
-                {
-                    if (topPointsClone[i].IsAlmostEqualTo(firstPoint, TOLERANCE))
-                    {
-                        indexToRemove = i;
-                        break;
-                    }
-                }
-                if (indexToRemove != num)
-                {
-                    topPointsClone.RemoveAt(indexToRemove);
-                }
-                topPointsClone.Insert(0, firstPoint);
-                if (topPointsClone.Count == num)
-                {
-                    while (topPointsClone.Count > 1 && firstPoint != null)
-                    {
-                        var lines = GetLinesFromTriangles(trianglesHighestClone, topPointsClone.First(), radius, true, doc, topPointsClone, topPointsViewed, ref lastPoint, null);
 
-                        if (lines != null && lines.Count > 0)
+                if (firstPoint != null)
+                {
+                    int num = topPointsClone.Count;
+                    int indexToRemove = num;
+                    for (int i = 0; i < num; i++)
+                    {
+                        if (topPointsClone[i].IsAlmostEqualTo(firstPoint, TOLERANCE))
                         {
-                            allLine.AddRange(lines);
+                            indexToRemove = i;
+                            break;
                         }
-                        topPointsClone.RemoveAll(x => topPointsViewed.Any(y => x.IsAlmostEqualTo(y, TOLERANCE)));
+                    }
+                    if (indexToRemove != num)
+                    {
+                        topPointsClone.RemoveAt(indexToRemove);
+                    }
+                    topPointsClone.Insert(0, firstPoint);
+                    if (topPointsClone.Count == num)
+                    {
+                        while (topPointsClone.Count > 1 && firstPoint != null)
+                        {
+                            var lines = GetLinesFromTriangles(trianglesHighestClone, topPointsClone.First(), radius, true, doc, topPointsClone, topPointsViewed, ref lastPoint, null);
+
+                            if (lines != null && lines.Count > 0)
+                            {
+                                allLine.AddRange(lines);
+                            }
+                            topPointsClone.RemoveAll(x => topPointsViewed.Any(y => x.IsAlmostEqualTo(y, TOLERANCE)));
+                        }
                     }
                 }
-                //Line l = allLine.Last();
-                //XYZ p1 = l.GetEndPoint(0);
-                //XYZ p2 = l.GetEndPoint(1);
-                //CreateModelLine(doc, p1, p2);
+
                 if (firstPoint != null && lastPoint != null && allLine.Count >= 2)
                 {
                     GetAllIntersecPoints(firstPoint, lastPoint, allLine, doc);
@@ -417,8 +434,9 @@ namespace FirstCommand
         {
             // Đoạn này dùng để gom nhóm các tam giác thuộc 1 grid
             //double gridSize = r * 1.75;
-            double gridSize = r * 4; //nhanh cho gần tất cả
+            //double gridSize = r * 4; //nhanh cho gần tất cả
             //double gridSize = r / 2;
+            double gridSize = r * 2.25;
             var squares = GeometryUtility.GenerateGridSquares(minX, maxX, minY, maxY, gridSize);
 
             List<(XYZ, List<MeshTriangle>)> tupleValues = new List<(XYZ, List<MeshTriangle>)>();
@@ -607,6 +625,7 @@ namespace FirstCommand
         /// <returns></returns>
         private List<Line> GetTriangleEdges(MeshTriangle tri)
         {
+            // Set Z=0 để đưa các điểm về mặt phẳng XY để so sánh với các hình vuông trên XY
             var a = SetOriginPoint(tri.get_Vertex(0), 0);
             var b = SetOriginPoint(tri.get_Vertex(1), 0);
             var c = SetOriginPoint(tri.get_Vertex(2), 0);
@@ -723,7 +742,7 @@ namespace FirstCommand
         {
             List<(XYZ, XYZ)> pairs = new List<(XYZ, XYZ)>();
             List<XYZ> points = new List<XYZ>();
-            points.Add(firstPoint);
+            //points.Add(firstPoint);
 
             MakeLinesCoplanar(lines);
 
@@ -737,6 +756,7 @@ namespace FirstCommand
             }
             //Plane lastPlane = CreatePlaneParallelToZFromLine(lines.Last());
             //points.Add(GetProjectedPoint(lastPlane, lastPoint));
+            points.Insert(0, GeometryUtility.GetPerpendicularProjectionPointOnLine(lines.First(), firstPoint));
             points.Add(GeometryUtility.GetPerpendicularProjectionPointOnLine(lines.Last(), lastPoint));
             for (int i = 0; i < points.Count - 1; i++)
             {
@@ -827,14 +847,6 @@ namespace FirstCommand
                     }
                 }
                 return null;
-                //if (isReferencePoint)
-                //{
-                //    return null;
-                //}
-                //else if (isTopPoint)
-                //{
-                //    return null;
-                //}
             }
             Line line = CreateLine(pointAndAxis.OriginPoint, pointAndAxis.Axis);
             lines.Add(line);
@@ -877,16 +889,22 @@ namespace FirstCommand
         private XYZ GetTopPoint(List<XYZ> topPoints, XYZ point, double radius, XYZ originPointToCreateLine, bool hasAxis)
         {
             List<XYZ> list = new List<XYZ>();
+            List<double> checkDistances = new List<double> { radius * 6, radius * 12 };
             for (int i = 0; i < topPoints.Count; i++)
             {
                 if (point.IsAlmostEqualTo(topPoints[i], TOLERANCE))
                 {
                     return point;
                 }
-                else if (point.DistanceTo(topPoints[i]) < radius * 6)
+                //else if (point.DistanceTo(topPoints[i]) < radius * 6)
+                else if (checkDistances.Any(l => point.DistanceTo(topPoints[i]) < l))
                 {
                     list.Add(topPoints[i]);
                 }
+                //else if (point.DistanceTo(topPoints[i]) < radius * 12)
+                //{
+                //    list.Add(topPoints[i]);
+                //}
             }
             if (list.Count == 1)
             {
@@ -940,7 +958,7 @@ namespace FirstCommand
         /// <returns></returns>
         private XYZ GetRemainTriangles((XYZ, Line) tuple, List<MeshTriangle> triangles, double r, Document doc)
         {
-            double distance = r * 6;
+            double distance = r * 4;
             List<MeshTriangle> trianglesNearLine = new List<MeshTriangle>();
             foreach (var triangle in triangles)
             {
@@ -1120,31 +1138,49 @@ namespace FirstCommand
         private List<MeshTriangle> GetSublistTriangles(List<MeshTriangle> triangles, XYZ point, double length, double radius)
         {
             List<MeshTriangle> sublist = new List<MeshTriangle>();
-            foreach (var tr in triangles)
+            //List<double> checkDistances = new List<double> { radius * 3, radius * 2.5, radius * 2, radius * 1.5, radius };
+            List<double> checkDistances = new List<double> { radius * 3 };
+
+            foreach (var lengthOfEdge in checkDistances)
             {
-                List<XYZ> vertices = GetVerticesOfTriangle(tr);
-                foreach (var pt in vertices)
+                foreach (var tr in triangles)
                 {
-                    double dist = pt.DistanceTo(point);
-                    if (dist < length + radius * 2)
+                    var vertices = GetVerticesOfTriangle(tr);
+                    if (vertices.Any(pt => pt.DistanceTo(point) < length + radius * 2))
                     {
-                        int count = 0;
-                        List<Line> edges = GetTriangleEdges(tr);
-                        foreach (Line line in edges)
-                        {
-                            if (line.Length > radius * 3)
-                            {
-                                count++;
-                                break;
-                            }
-                        }
-                        if (count > 0)
+                        var edges = GetTriangleEdges(tr);
+                        if (edges.Any(edge => edge.Length > lengthOfEdge))
                         {
                             sublist.Add(tr);
-                            break;
                         }
                     }
+
+                    //
+                    //foreach (var pt in vertices)
+                    //{
+                    //    double dist = pt.DistanceTo(point);
+                    //    if (dist < length + radius * 2)
+                    //    {
+                    //        int count = 0;
+                    //        List<Line> edges = GetTriangleEdges(tr);
+                    //        foreach (Line line in edges)
+                    //        {
+                    //            if (line.Length > radius * 3)
+                    //            {
+                    //                count++;
+                    //                break;
+                    //            }
+                    //        }
+                    //        if (count > 0)
+                    //        {
+                    //            sublist.Add(tr);
+                    //            break;
+                    //        }
+                    //    }
+                    //}
                 }
+                if (sublist.Count > 1)
+                    break;
             }
             return sublist;
         }
@@ -1198,69 +1234,49 @@ namespace FirstCommand
             XYZ B = null;
 
             double maxDisToA = double.MinValue;
-            double minLengthToGetB = r * 6;
-            double maxLengthToGetB = r * 14;
+            //double minLengthToGetB = r * 6;
+            //double maxLengthToGetB = r * 14;
             //double maxLengthToGetB = r * 12;
-            List<double> checkDistances = new List<double> { minLengthToGetB, maxLengthToGetB };
-            double minLengthOfEdge = r * 3;
+            //List<double> checkDistances = new List<double> { minLengthToGetB, maxLengthToGetB };
+            List<double> checkDistances = new List<double> { r * 6, r * 14 };
+            List<double> lengthOfEdge = new List<double> { r * 3 };
+            //double minLengthOfEdge = r * 3;
 
             foreach (var lengthToGetB in checkDistances)
             {
-                foreach (var v in vertexs)
+                foreach (var l in lengthOfEdge)
                 {
-                    double distToA = A.DistanceTo(v);
-                    if (distToA > lengthToGetB)
-                        continue;
-
-                    if (vertexToTriangles.TryGetValue(v, out var triList))
+                    foreach (var v in vertexs)
                     {
-                        foreach (var tri in triList)
+                        double distToA = A.DistanceTo(v);
+                        if (distToA > lengthToGetB)
+                            continue;
+
+                        if (vertexToTriangles.TryGetValue(v, out var triList))
                         {
-                            if (HasEdgeLongerThan(tri, minLengthOfEdge))
+                            foreach (var tri in triList)
                             {
-                                if (distToA > maxDisToA)
+                                if (HasEdgeLongerThan(tri, l))
                                 {
-                                    maxDisToA = distToA;
-                                    B = v;
+                                    if (distToA > maxDisToA)
+                                    {
+                                        maxDisToA = distToA;
+                                        B = v;
+                                    }
+
+                                    break; // đã xác định v nằm trên tam giác hợp lệ -> không cần kiểm tra thêm tam giác
                                 }
-                                break; // đã xác định v nằm trên tam giác hợp lệ -> không cần kiểm tra thêm tam giác
                             }
                         }
                     }
+                    if (B != null)
+                        break;
                 }
-
                 // Nếu đã tìm được B ở khoảng cách hiện tại thì dừng luôn
                 if (B != null)
                     break;
             }
 
-            //foreach (var v in vertexs)
-            //{
-            //    if (A.DistanceTo(v) < minLengthToGetB)
-            //    {
-            //        bool hasEdgeLongerThan = false;
-            //        if (vertexToTriangles.TryGetValue(v, out var list))
-            //        {
-            //            foreach (var tri in list)
-            //            {
-            //                if (HasEdgeLongerThan(tri, minLengthOfEdge))
-            //                {
-            //                    hasEdgeLongerThan = true;
-            //                    break;
-            //                }
-            //            }
-            //        }
-            //        if (hasEdgeLongerThan)
-            //        {
-            //            double distToA = A.DistanceTo(v);
-            //            if (distToA > maxDisToA)
-            //            {
-            //                maxDisToA = distToA;
-            //                B = v;
-            //            }
-            //        }
-            //    }
-            //}
             //Nếu B null thì trụ nằm giữa của 1 thanh
             if (B == null)
             {
@@ -1274,14 +1290,15 @@ namespace FirstCommand
             if (subListTriangleNearB.Count > 1)
             {
                 XYZ axis = GetAxisFromTriangles(subListTriangleNearB);
-                if (IsOrigin)
-                {
-                    return (A, axis);
-                }
-                else
-                {
-                    return (B, axis);
-                }
+                return (B, axis);
+                //if (IsOrigin)
+                //{
+                //    return (A, axis);
+                //}
+                //else
+                //{
+                //    return (B, axis);
+                //}
             }
             else
             {
@@ -1299,14 +1316,15 @@ namespace FirstCommand
         private bool HasEdgeLongerThan(MeshTriangle triangle, double length)
         {
             List<Line> edges = GetTriangleEdges(triangle);
-            foreach (Line line in edges)
-            {
-                if (line.Length > length)
-                {
-                    return true;
-                }
-            }
-            return false;
+            return edges.Any(e => e.Length > length);
+            //foreach (Line line in edges)
+            //{
+            //    if (line.Length > length)
+            //    {
+            //        return true;
+            //    }
+            //}
+            //return false;
         }
 
         /// <summary>
@@ -2112,9 +2130,11 @@ namespace FirstCommand
         /// <param name="point2"></param>
         private void CreateModelLine(Document doc, XYZ point1, XYZ point2)
         {
-            using (Transaction trans = new Transaction(doc, "Create Model Line with Auto Plane"))
+            //using (Transaction trans = new Transaction(doc, "Create Model Line with Auto Plane"))
+            //{
+            //trans.Start();
+            RunTransaction(doc, "Create Model Line", (Transaction t) =>
             {
-                trans.Start();
                 ModelCurve modelCurve = null;
 
                 //XYZ p1 = transform.OfPoint(point1);
@@ -2182,9 +2202,9 @@ namespace FirstCommand
                 //ogs.SetProjectionLineColor(new Color(red, green, blue));
 
                 //doc.ActiveView.SetElementOverrides(modelCurve.Id, ogs);
-
-                trans.Commit();
-            }
+            });
+            //trans.Commit();
+            //}
         }
 
         /// <summary>

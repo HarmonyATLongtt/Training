@@ -112,6 +112,7 @@
     <Compile Include="ScheduleRowModel.cs" />
     <Compile Include="ScheduleViewModel.cs" />
     <Compile Include="Support\GeometryUtility.cs" />
+    <Compile Include="Support\WarningSuppressor.cs" />
     <Compile Include="View\AddElevationView.xaml.cs">
       <DependentUpon>AddElevationView.xaml</DependentUpon>
     </Compile>
