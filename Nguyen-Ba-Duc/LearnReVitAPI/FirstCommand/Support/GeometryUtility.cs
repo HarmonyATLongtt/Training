@@ -51,24 +51,6 @@ namespace FirstCommand.Support
             return (c.Y - a.Y) * (b.X - a.X) > (b.Y - a.Y) * (c.X - a.X);
         }
 
-        //private static bool SegmentsIntersectProperly(XYZ a1, XYZ a2, XYZ b1, XYZ b2)
-        //{
-        //    if (!TryGetSegmentsIntersection(a1, a2, b1, b2, out XYZ intersection))
-        //        return false;
-
-        //    return !IsPointOnEndpoint(intersection, a1, a2) && !IsPointOnEndpoint(intersection, b1, b2);
-        //}
-
-        //private static bool IsPointOnEndpoint(XYZ pt, XYZ p1, XYZ p2)
-        //{
-        //    return IsSamePoint(pt, p1) || IsSamePoint(pt, p2);
-        //}
-
-        //private static bool IsSamePoint(XYZ a, XYZ b, double tol = 1e-6)
-        //{
-        //    return a.DistanceTo(b) < tol;
-        //}
-
         private static bool IsPointInPolygon(XYZ point, List<XYZ> polygon)
         {
             int n = polygon.Count;
@@ -88,51 +70,6 @@ namespace FirstCommand.Support
 
             return inside;
         }
-
-        //private static bool TryGetSegmentsIntersection(XYZ p1, XYZ p2, XYZ q1, XYZ q2, out XYZ intersection)
-        //{
-        //    intersection = null;
-
-        //    double A1 = p2.Y - p1.Y;
-        //    double B1 = p1.X - p2.X;
-        //    double C1 = A1 * p1.X + B1 * p1.Y;
-
-        //    double A2 = q2.Y - q1.Y;
-        //    double B2 = q1.X - q2.X;
-        //    double C2 = A2 * q1.X + B2 * q1.Y;
-
-        //    double det = A1 * B2 - A2 * B1;
-        //    if (Math.Abs(det) < 1e-9)
-        //        return false;
-
-        //    double x = (B2 * C1 - B1 * C2) / det;
-        //    double y = (A1 * C2 - A2 * C1) / det;
-
-        //    XYZ pt = new XYZ(x, y, 0);
-
-        //    if (IsPointOnSegment(pt, p1, p2) && IsPointOnSegment(pt, q1, q2))
-        //    {
-        //        intersection = pt;
-        //        return true;
-        //    }
-
-        //    return false;
-        //}
-
-        //private static bool IsPointOnSegment(XYZ pt, XYZ a, XYZ b, double tol = 1e-3)
-        //{
-        //    // Đầu tiên kiểm tra theo hình học: pt phải nằm trong bounding box của đoạn [a, b]
-        //    if (pt.X < Math.Min(a.X, b.X) - tol || pt.X > Math.Max(a.X, b.X) + tol ||
-        //        pt.Y < Math.Min(a.Y, b.Y) - tol || pt.Y > Math.Max(a.Y, b.Y) + tol)
-        //        return false;
-
-        //    // Sau đó kiểm tra khoảng cách tổng
-
-        //    double ab = a.DistanceTo(b);
-        //    double ap = a.DistanceTo(pt);
-        //    double pb = pt.DistanceTo(b);
-        //    return Math.Abs(ap + pb - ab) < tol;
-        //}
 
         //___End ___
 
@@ -284,6 +221,47 @@ namespace FirstCommand.Support
             XYZ projectedPoint = p0 + projectionLength * lineDirection;
 
             return projectedPoint;
+        }
+
+        /// <summary>
+        /// Hàm lấy BoundingBoxXYZ bao toàn bộ một mô hình gồm nhiều Element và trả về 2 điểm min max
+        /// </summary>
+        /// <param name="doc"></param>
+        /// <param name="elements"></param>
+        /// <returns></returns>
+        public static (XYZ minPoint, XYZ maxPoint) GetOverallBoundingBox(Document doc, List<Element> elements)
+        {
+            XYZ min = null;
+            XYZ max = null;
+
+            foreach (var element in elements)
+            {
+                BoundingBoxXYZ bbox = element.get_BoundingBox(null);
+                if (bbox == null) continue;
+
+                XYZ minPt = bbox.Min;
+                XYZ maxPt = bbox.Max;
+
+                if (min == null)
+                {
+                    min = new XYZ(minPt.X, minPt.Y, minPt.Z);
+                    max = new XYZ(maxPt.X, maxPt.Y, maxPt.Z);
+                }
+                else
+                {
+                    min = new XYZ(
+                        Math.Min(min.X, minPt.X),
+                        Math.Min(min.Y, minPt.Y),
+                        Math.Min(min.Z, minPt.Z));
+
+                    max = new XYZ(
+                        Math.Max(max.X, maxPt.X),
+                        Math.Max(max.Y, maxPt.Y),
+                        Math.Max(max.Z, maxPt.Z));
+                }
+            }
+
+            return (min, max);
         }
     }
 

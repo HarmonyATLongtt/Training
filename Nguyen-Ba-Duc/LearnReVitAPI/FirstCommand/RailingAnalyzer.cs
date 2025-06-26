@@ -8,6 +8,9 @@ using System.Text;
 
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Architecture;
+using Autodesk.Revit.DB.Mechanical;
+using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.Exceptions;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
@@ -37,8 +40,8 @@ namespace FirstCommand
 
             try
             {
-                //IList<Reference> selectedRefs = uidoc.Selection.PickObjects(ObjectType.Element, "Chọn các đối tượng");
-                IList<Reference> selectedRefs = uidoc.Selection.PickObjects(ObjectType.LinkedElement, "Chọn các đối tượng");
+                IList<Reference> selectedRefs = uidoc.Selection.PickObjects(ObjectType.Element, "Chọn các đối tượng");
+                //IList<Reference> selectedRefs = uidoc.Selection.PickObjects(ObjectType.LinkedElement, "Chọn các đối tượng");
 
                 if (selectedRefs.Count == 0)
                 {
@@ -46,53 +49,105 @@ namespace FirstCommand
                     return Result.Cancelled;
                 }
                 List<CylinderInfo> cylinderInfosOfElements = new List<CylinderInfo>();
+                List<Element> collectedElements = new List<Element>();
                 List<Mesh> meshes = new List<Mesh>();
                 foreach (Reference r in selectedRefs)
                 {
                     //ElementId elementId = r.ElementId;
                     //Element element = doc.GetElement(elementId);
 
-                    Element linkInstance = uidoc.Document.GetElement(r.ElementId);
-                    RevitLinkInstance rli = linkInstance as RevitLinkInstance;
-
-                    Document linkDoc = rli.GetLinkDocument();
-
-                    ElementId linkedElemId = r.LinkedElementId;
-
-                    Element linkedElem = linkDoc.GetElement(linkedElemId);
-                    transform = rli.GetTransform();
-
-                    var (minPoint, maxPoint) = GeometryUtility.GetBoundingBoxExtents(linkedElem);
-                    if (minPoint != null && maxPoint != null)
+                    //Element linkInstance = uidoc.Document.GetElement(r.ElementId);
+                    Element element = uidoc.Document.GetElement(r.ElementId);
+                    Element targetElement = null;
+                    if (element is RevitLinkInstance rli)
                     {
-                        minX = minPoint.X;
-                        maxX = maxPoint.X;
-                        minY = minPoint.Y;
-                        maxY = maxPoint.Y;
+                        //RevitLinkInstance rli = linkInstance as RevitLinkInstance;
+
+                        Document linkDoc = rli.GetLinkDocument();
+
+                        ElementId linkedElemId = r.LinkedElementId;
+
+                        //Element linkedElem = linkDoc.GetElement(linkedElemId);
+                        targetElement = linkDoc.GetElement(linkedElemId);
+                        transform = rli.GetTransform();
+                    }
+                    else
+                    {
+                        targetElement = element;
                     }
 
-                    var tupleValues = GetCylinderInfosFromElements(linkedElem, doc);
-                    List<CylinderInfo> cylinderInfos = tupleValues.CylinderInfos;
-                    meshes.AddRange(tupleValues.Meshs);
-                    List<Solid> solids = tupleValues.Solids;
-
-                    // Trường hợp model là 1 khối thống nhất
-                    //if (cylinderInfos.Count > 1 && cylinderInfos.Count != 2)
-                    if (cylinderInfos.Count > 1)
+                    // Xử lý cụ thể theo từng loại
+                    if (targetElement is Railing railing)
                     {
-                        PrepareDataForExecution(cylinderInfos, doc, uidoc, meshes, solids);
+                        // xử lý với railing...
+                        HandleRailingCase(doc, railing);
                     }
-                    else if (cylinderInfos.Count == 1)
+                    else if (targetElement is Duct || targetElement is Pipe
+                        || targetElement is FamilyInstance)
                     {
-                        CylinderInfo firstCylinderInfo = cylinderInfos.FirstOrDefault();
-
-                        cylinderInfosOfElements.Add(firstCylinderInfo);
+                        collectedElements.Add(targetElement);
                     }
-                    // trường hợp chỉ có 2 trụ
-                    //else if (cylinderInfos.Count == 2)
+                    //else if (targetElement is Duct duct)
                     //{
-                    //    HandleInCaseHaveTwoCylinderInfos(doc, cylinderInfos);
+                    //    TaskDialog.Show("Loại", "Đây là Duct.\nName: " + duct.Name);
+                    //    // xử lý với duct...
                     //}
+                    //else if (targetElement is Pipe pipe)
+                    //{
+                    //    TaskDialog.Show("Loại", "Đây là Pipe.\nName: " + pipe.Name);
+                    //    // xử lý với pipe...
+                    //}
+                    //else if (targetElement is FamilyInstance fi)
+                    //{
+                    //    var mepModel = fi.MEPModel;
+                    //    if (mepModel != null)
+                    //    {
+                    //        if (fi.Category.Id.IntegerValue == (int)BuiltInCategory.OST_DuctFitting)
+                    //        {
+                    //            TaskDialog.Show("Loại", "Đây là Duct Fitting.\nName: " + fi.Name);
+                    //            // xử lý với duct fitting...
+                    //        }
+                    //        else if (fi.Category.Id.IntegerValue == (int)BuiltInCategory.OST_PipeFitting)
+                    //        {
+                    //            TaskDialog.Show("Loại", "Đây là Pipe Fitting.\nName: " + fi.Name);
+                    //            // xử lý với pipe fitting...
+                    //        }
+                    //    }
+                    //}
+                    else // Trường hợp còn lại là meshes
+                    {
+                        var (minPoint, maxPoint) = GeometryUtility.GetBoundingBoxExtents(targetElement);
+                        if (minPoint != null && maxPoint != null)
+                        {
+                            minX = minPoint.X;
+                            maxX = maxPoint.X;
+                            minY = minPoint.Y;
+                            maxY = maxPoint.Y;
+                        }
+
+                        var tupleValues = GetCylinderInfosFromElements(targetElement, doc);
+                        List<CylinderInfo> cylinderInfos = tupleValues.CylinderInfos;
+                        meshes.AddRange(tupleValues.Meshs);
+                        List<Solid> solids = tupleValues.Solids;
+
+                        // Trường hợp model là 1 khối thống nhất
+                        //if (cylinderInfos.Count > 1 && cylinderInfos.Count != 2)
+                        if (cylinderInfos.Count > 1)
+                        {
+                            PrepareDataForExecution(cylinderInfos, doc, uidoc, meshes, solids);
+                        }
+                        else if (cylinderInfos.Count == 1)
+                        {
+                            CylinderInfo firstCylinderInfo = cylinderInfos.FirstOrDefault();
+
+                            cylinderInfosOfElements.Add(firstCylinderInfo);
+                        }
+                        // trường hợp chỉ có 2 trụ
+                        else if (cylinderInfos.Count == 2)
+                        {
+                            HandleInCaseHaveTwoCylinderInfos(doc, cylinderInfos);
+                        }
+                    }
                 }
                 // Trường hợp model gồm nhiều element ghép lại
                 //if (cylinderInfosOfElements.Count > 0 && cylinderInfosOfElements.Count != 2)
@@ -104,6 +159,12 @@ namespace FirstCommand
                 //{
                 //    HandleInCaseHaveTwoCylinderInfos(doc, cylinderInfosOfElements);
                 //}
+
+                // Xử lý cho  trường hợp model gồm nhiều element nhỏ ghép lại
+                if (collectedElements.Count > 0)
+                {
+                    HandleCollectedElements(uidoc, doc, collectedElements);
+                }
             }
             catch (Autodesk.Revit.Exceptions.OperationCanceledException)
             {
@@ -114,6 +175,12 @@ namespace FirstCommand
             return Result.Succeeded;
         }
 
+        /// <summary>
+        /// Hàm để runtransaction
+        /// </summary>
+        /// <param name="doc"></param>
+        /// <param name="transactionName"></param>
+        /// <param name="action"></param>
         public void RunTransaction(Document doc, string transactionName, Action<Transaction> action)
         {
             using (Transaction trans = new Transaction(doc, transactionName))
@@ -128,6 +195,187 @@ namespace FirstCommand
 
                 trans.Commit();
             }
+        }
+
+        /// <summary>
+        /// Hàm xử lý cho trường hợp model gồm nhiều element ghép lại
+        /// </summary>
+        /// <param name="doc"></param>
+        /// <param name="collectedElements"></param>
+        private void HandleCollectedElements(UIDocument uidoc, Document doc, List<Element> collectedElements)
+        {
+            List<(Element, List<Solid>)> solidsOfElement = new List<(Element, List<Solid>)>();
+            foreach (Element element in collectedElements)
+            {
+                var solids = GetSolids(element, doc).Solids;
+                solidsOfElement.Add((element, solids));
+            }
+            double radius = 0;
+            HashSet<Element> elementsAreCylinder = new HashSet<Element>();
+            foreach (var pairs in solidsOfElement)
+            {
+                foreach (var solid in pairs.Item2)
+                {
+                    var tuple = GetGroupedFacesFromSolid(doc, solid);
+
+                    List<PlanarFace> planarFacesOfSolid = tuple.Item1;
+                    List<CylindricalFace> cylindricalFaces = tuple.Item2;
+
+                    if (planarFacesOfSolid.Count > 0 && cylindricalFaces.Count > 0)
+                    {
+                        // Lấy ra những mặt trụ song song với Z và mặt phẳng vuông góc với Z
+                        var listcylindricalFace = cylindricalFaces.Where(c => Math.Abs(Math.Abs(c.Axis.Z) - 1) < TOLERANCE).ToList();
+                        var listPlanarFace = planarFacesOfSolid.Where(f => Math.Abs(Math.Abs(f.FaceNormal.Z) - 1) < TOLERANCE).ToList();
+                        if (listcylindricalFace.Count == 4 && listPlanarFace.Count == 2)
+                        {
+                            elementsAreCylinder.Add(pairs.Item1);
+                            if (radius == 0)
+                            {
+                                radius = GetRadius(listcylindricalFace.First());
+                            }
+                        }
+                    }
+                }
+            }
+            var (minPoint, maxPoint) = GeometryUtility.GetOverallBoundingBox(doc, collectedElements);
+
+            if (minPoint != null && maxPoint != null)
+            {
+                minX = minPoint.X;
+                maxX = maxPoint.X;
+                minY = minPoint.Y;
+                maxY = maxPoint.Y;
+            }
+            if (radius > 0)
+            {
+                solidsOfElement.RemoveAll(x => elementsAreCylinder.Contains(x.Item1));
+
+                double gridSize = radius * 1.5;
+                var squares = GeometryUtility.GenerateGridSquares(minX, maxX, minY, maxY, gridSize);
+
+                var topElementIds = GetElementIdHighestOnEachSquare(doc, solidsOfElement, squares, maxPoint.Z, minPoint.Z);
+
+                if (topElementIds.Count > 0)
+                {
+                    uidoc.Selection.SetElementIds(topElementIds);
+                    uidoc.ShowElements(topElementIds);
+                }
+                else
+                {
+                    TaskDialog.Show("Error", "Does not exist any ElementId");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Hàm trả về những element cao nhất trong mỗi 1 square
+        /// </summary>
+        /// <param name="solidsOfElement"></param>
+        /// <param name="squares"></param>
+        /// <returns></returns>
+        private List<ElementId> GetElementIdHighestOnEachSquare(Document doc, List<(Element, List<Solid>)> solidsOfElement, List<List<XYZ>> squares, double maxZ, double minZ)
+        {
+            HashSet<ElementId> topElementIds = new HashSet<ElementId>();
+            foreach (var square in squares)
+            {
+                // Vẽ 1 đường line thẳng đứng dựa vào tâm hình vuông
+                XYZ centerPoint = GetCenterPoint(square);
+                XYZ maxPoint = SetOriginPoint(centerPoint, maxZ);
+                XYZ minPoint = SetOriginPoint(centerPoint, minZ);
+
+                Line line = Line.CreateBound(maxPoint, minPoint);
+
+                List<(Element, List<Solid>)> solidsOfSquare = new List<(Element, List<Solid>)>();
+                foreach (var pairs in solidsOfElement)
+                {
+                    foreach (var solid in pairs.Item2)
+                    {
+                        if (GeometryUtility.IsLineIntersectSolid(line, solid))
+                        {
+                            solidsOfSquare.Add(pairs);
+                            break;
+                        }
+                    }
+                }
+                if (solidsOfSquare.Count == 0) continue;
+
+                double minDistance = double.MaxValue;
+                Element highestElement = null;
+
+                foreach (var pairs in solidsOfSquare)
+                {
+                    var (min, max) = GeometryUtility.GetBoundingBoxExtents(pairs.Item1);
+                    if (max != null)
+                    {
+                        if (maxPoint.Z - max.Z < minDistance)
+                        {
+                            minDistance = maxPoint.Z - max.Z;
+                            highestElement = pairs.Item1;
+                        }
+                    }
+                }
+                if (highestElement != null)
+                {
+                    topElementIds.Add(highestElement.Id);
+                }
+            }
+            return topElementIds.ToList();
+        }
+
+        /// <summary>
+        /// Xử lý trường hợp element là railing
+        /// </summary>
+        /// <param name=""></param>
+        /// <param name=""></param>
+        private void HandleRailingCase(Document doc, Railing railing)
+        {
+            double length = 0;
+            List<Curve> curves = GetTopRailLines(doc, railing);
+            foreach (Curve c in curves)
+            {
+                if (c is CylindricalHelix helix)
+                {
+                    length += helix.Length;
+                }
+                if (c is Arc arc)
+                {
+                    length += arc.Length;
+                }
+                if (c is Line line)
+                {
+                    if (!IsParallel(line.Direction, XYZ.BasisZ, COSINE_ANGLE_TOLERANCE_1_DEGREE))
+                    {
+                        length += line.Length;
+                    }
+                }
+            }
+            TaskDialog.Show("Notif", "Length of railing is: " + length.ToString());
+        }
+
+        /// <summary>
+        /// Hàm lấy ra danh sách curves của toprailing
+        /// </summary>
+        /// <param name="doc"></param>
+        /// <param name="railing"></param>
+        /// <returns></returns>
+        public List<Curve> GetTopRailLines(Document doc, Railing railing)
+        {
+            var result = new List<Curve>();
+
+            ElementId topRailId = railing.TopRail;
+            if (topRailId == ElementId.InvalidElementId) return result;
+
+            TopRail topRail = doc.GetElement(topRailId) as TopRail;
+            if (topRail == null) return result;
+
+            IList<Curve> curves = topRail.GetPath();
+            foreach (Curve c in curves)
+            {
+                //if (c is Line line)
+                result.Add(c);
+            }
+
+            return result;
         }
 
         private void TestFunction(List<MeshTriangle> triangles, Document doc)
