@@ -26,11 +26,11 @@ namespace FirstCommand
         private const double COSINE_ANGLE_TOLERANCE_5_DEGREE = 0.0872; // 5 độ (góc lệch cho phép để vector normal và trục Z được coi là vuông góc)
         private Transform transform = null;
         private double lengthOfLine = 5;
-        private double defaultRadius = 0;
         private double minX = 0;
         private double minY = 0;
         private double maxX = 0;
         private double maxY = 0;
+        private bool isRevitLink = false;
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
@@ -40,17 +40,18 @@ namespace FirstCommand
 
             try
             {
-                IList<Reference> selectedRefs = uidoc.Selection.PickObjects(ObjectType.Element, "Chọn các đối tượng");
-                //IList<Reference> selectedRefs = uidoc.Selection.PickObjects(ObjectType.LinkedElement, "Chọn các đối tượng");
+                //IList<Reference> selectedRefs = uidoc.Selection.PickObjects(ObjectType.Element, "Chọn các đối tượng");
+                //IList<Reference> selectedRefs = uidoc.Selection.PickObjects(ObjectType.PointOnElement, "Chọn các đối tượng");
+                IList<Reference> selectedRefs = uidoc.Selection.PickObjects(ObjectType.LinkedElement, "Chọn các đối tượng");
 
                 if (selectedRefs.Count == 0)
                 {
                     TaskDialog.Show("Thông báo", "Không có đối tượng nào được chọn.");
                     return Result.Cancelled;
                 }
-                List<CylinderInfo> cylinderInfosOfElements = new List<CylinderInfo>();
+                //List<CylinderInfo> cylinderInfosOfElements = new List<CylinderInfo>();
                 List<Element> collectedElements = new List<Element>();
-                List<Mesh> meshes = new List<Mesh>();
+                //List<Mesh> meshes = new List<Mesh>();
                 foreach (Reference r in selectedRefs)
                 {
                     //ElementId elementId = r.ElementId;
@@ -70,6 +71,7 @@ namespace FirstCommand
                         //Element linkedElem = linkDoc.GetElement(linkedElemId);
                         targetElement = linkDoc.GetElement(linkedElemId);
                         transform = rli.GetTransform();
+                        isRevitLink = true;
                     }
                     else
                     {
@@ -83,7 +85,7 @@ namespace FirstCommand
                         HandleRailingCase(doc, railing);
                     }
                     else if (targetElement is Duct || targetElement is Pipe
-                        || targetElement is FamilyInstance)
+                        || CheckElementIsPipeFittingOrDuctFitting(targetElement))
                     {
                         collectedElements.Add(targetElement);
                     }
@@ -104,44 +106,50 @@ namespace FirstCommand
                     //    {
                     //        if (fi.Category.Id.IntegerValue == (int)BuiltInCategory.OST_DuctFitting)
                     //        {
-                    //            TaskDialog.Show("Loại", "Đây là Duct Fitting.\nName: " + fi.Name);
                     //            // xử lý với duct fitting...
                     //        }
                     //        else if (fi.Category.Id.IntegerValue == (int)BuiltInCategory.OST_PipeFitting)
                     //        {
-                    //            TaskDialog.Show("Loại", "Đây là Pipe Fitting.\nName: " + fi.Name);
                     //            // xử lý với pipe fitting...
                     //        }
                     //    }
                     //}
-                    else // Trường hợp còn lại là meshes
+                    else // Trường hợp còn lại là meshes hoặc solid
                     {
-                        var (minPoint, maxPoint) = GeometryUtility.GetBoundingBoxExtents(targetElement);
-                        if (minPoint != null && maxPoint != null)
+                        //List<Mesh> meshes = new List<Mesh>();
+
+                        // Trường hợp là solid thì không cần tìm min,max làm gì
+                        if (!(targetElement is FamilyInstance))
                         {
-                            minX = minPoint.X;
-                            maxX = maxPoint.X;
-                            minY = minPoint.Y;
-                            maxY = maxPoint.Y;
+                            var (minPoint, maxPoint) = GeometryUtility.GetBoundingBoxExtents(targetElement);
+                            if (minPoint != null && maxPoint != null)
+                            {
+                                minX = minPoint.X;
+                                maxX = maxPoint.X;
+                                minY = minPoint.Y;
+                                maxY = maxPoint.Y;
+                            }
                         }
 
-                        var tupleValues = GetCylinderInfosFromElements(targetElement, doc);
-                        List<CylinderInfo> cylinderInfos = tupleValues.CylinderInfos;
-                        meshes.AddRange(tupleValues.Meshs);
-                        List<Solid> solids = tupleValues.Solids;
+                        //var tupleValues = GetCylinderInfosFromElements(targetElement, doc);
+                        //List<CylinderInfo> cylinderInfos = tupleValues.CylinderInfos;
+                        //meshes.AddRange(tupleValues.Meshs);
+                        //List<Solid> solids = tupleValues.Solids;
+
+                        var (meshes, cylinderInfos, solids) = GetCylinderInfosFromElements(targetElement, doc);
 
                         // Trường hợp model là 1 khối thống nhất
-                        //if (cylinderInfos.Count > 1 && cylinderInfos.Count != 2)
-                        if (cylinderInfos.Count > 1)
+
+                        if (cylinderInfos.Count > 2)
                         {
                             PrepareDataForExecution(cylinderInfos, doc, uidoc, meshes, solids);
                         }
-                        else if (cylinderInfos.Count == 1)
-                        {
-                            CylinderInfo firstCylinderInfo = cylinderInfos.FirstOrDefault();
+                        //else if (cylinderInfos.Count == 1)
+                        //{
+                        //    CylinderInfo firstCylinderInfo = cylinderInfos.FirstOrDefault();
 
-                            cylinderInfosOfElements.Add(firstCylinderInfo);
-                        }
+                        //    cylinderInfosOfElements.Add(firstCylinderInfo);
+                        //}
                         // trường hợp chỉ có 2 trụ
                         else if (cylinderInfos.Count == 2)
                         {
@@ -322,6 +330,22 @@ namespace FirstCommand
             return topElementIds.ToList();
         }
 
+        private bool CheckElementIsPipeFittingOrDuctFitting(Element element)
+        {
+            if (element is FamilyInstance fi)
+            {
+                var mepModel = fi.MEPModel;
+                if (mepModel != null)
+                {
+                    if (fi.Category.Id.IntegerValue == (int)BuiltInCategory.OST_DuctFitting || fi.Category.Id.IntegerValue == (int)BuiltInCategory.OST_PipeFitting)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
         /// <summary>
         /// Xử lý trường hợp element là railing
         /// </summary>
@@ -466,58 +490,58 @@ namespace FirstCommand
 
         private void PrepareDataForExecution(List<CylinderInfo> cylinderInfos, Document doc, UIDocument uiDoc, List<Mesh> meshes, List<Solid> solids)
         {
-            //bool areSolidsConnected = true;
-            var mergedList = MergeCylinderInfos(cylinderInfos);
-            SortInstancesAlongLine(mergedList);
-            //if (solids.Count > 0 && meshes.Count == 0)
-            //{
-            //    CheckAreSolidsConnected(ref areSolidsConnected, mergedList, solids);
-            //}
-
-            // Trường hợp railing chỉ gồm mesh
-
-            if (mergedList.Count == 2)
+            if (meshes.Count == 0)
             {
-                CreateModelLine(doc, mergedList[0].TopPoint, mergedList[1].TopPoint);
+                cylinderInfos = MergeCylinderInfos(cylinderInfos);
+                if (cylinderInfos.Count == 2)
+                {
+                    HandleInCaseHaveTwoCylinderInfos(doc, cylinderInfos);
+                }
             }
-            else
-            {
-                if (GroupPointsOnSamePlane(mergedList).Count == 0)
-                {
-                    var results = new List<List<CylinderInfo>> { mergedList };
-                    CalculateSpiralRailingLength(results, doc, uiDoc);
-                }
-                else
-                {
-                    var result = GroupPointsForDistanceCalculation(mergedList, meshes, doc);
-                    if (result.Count > 0)
-                    {
-                        double length = 0;
-                        foreach (var group in result)
-                        {
-                            XYZ firstPoint = group.FirstOrDefault().TopPoint;
-                            XYZ endPoint = group.LastOrDefault().TopPoint;
-                            length += firstPoint.DistanceTo(endPoint);
-                            CreateModelLine(doc, firstPoint, endPoint);
-                        }
-                        TaskDialog.Show("Nofi", "The length of railing is : " + length.ToString());
-                    }
-                }
+            //var mergedList = MergeCylinderInfos(cylinderInfos);
+            //SortInstancesAlongLine(mergedList);
 
-                //bool arePointsColinear = true;
-                //for (int i = 0; i < mergedList.Count - 1; i++)
+            if (meshes.Count > 0 || cylinderInfos.Count > 2)
+            {
+                //if (GroupPointsOnSamePlane(mergedList).Count == 0)
                 //{
-                //    if (!ArePointsColinear(mergedList[i], mergedList[i + 1], mergedList[i].Radius))
+                //    var results = new List<List<CylinderInfo>> { mergedList };
+                //    CalculateSpiralRailingLength(results, doc, uiDoc);
+                //}
+                //else
+                //{
+                SortInstancesAlongLine(cylinderInfos);
+                GroupPointsForDistanceCalculation(cylinderInfos, meshes, doc);
+                //GetLengthOfRailing(doc, result);
+                //if (result.Count > 0)
+                //{
+                //    double length = 0;
+                //    foreach (var group in result)
                 //    {
-                //        arePointsColinear = false;
-                //        break;
+                //        XYZ firstPoint = group.FirstOrDefault().TopPoint;
+                //        XYZ endPoint = group.LastOrDefault().TopPoint;
+                //        length += firstPoint.DistanceTo(endPoint);
+                //        CreateModelLine(doc, firstPoint, endPoint);
                 //    }
+                //    TaskDialog.Show("Nofi", "The length of railing is : " + length.ToString());
                 //}
-                //if (arePointsColinear)
-                //{
-                //    SetSameZForAllCylinderInfos(mergedList);
                 //}
-                //GetTopViewShape(meshes, mergedList, doc);
+            }
+        }
+
+        private void GetLengthOfRailing(Document doc, List<List<CylinderInfo>> result)
+        {
+            if (result.Count > 0)
+            {
+                double length = 0;
+                foreach (var group in result)
+                {
+                    XYZ firstPoint = group.FirstOrDefault().TopPoint;
+                    XYZ endPoint = group.LastOrDefault().TopPoint;
+                    length += firstPoint.DistanceTo(endPoint);
+                    CreateModelLine(doc, firstPoint, endPoint);
+                }
+                //TaskDialog.Show("Nofi", "The length of railing is : " + length.ToString());
             }
         }
 
@@ -591,83 +615,112 @@ namespace FirstCommand
             //Hàm này trả về List<List<MeshTriangle>> phân chia thành các nhóm tam giác
             var topPointsAndTrianglesHighestOfEachPart = GetTrianglesHaveHigherZ(trianglesOfElement, radius, doc, topPoints);
 
-            foreach (var tupleValues in topPointsAndTrianglesHighestOfEachPart)
+            foreach (var (topPointsForEachPart, trianglesHighest) in topPointsAndTrianglesHighestOfEachPart)
             {
                 //var trianglesHighest = topPointsAndTrianglesHighestOfEachPart[0];
-                var trianglesHighest = tupleValues.TrianglesHigher;
-                var topPointsForEachPart = tupleValues.TopPoints;
+                //var (trianglesHighest) = tupleValues.TrianglesHigher;
+                //var topPointsForEachPart = tupleValues.TopPoints;
 
                 if (topPointsForEachPart.Count == 1) continue;
 
                 var cylinderInfosForEachPart = cylinderInfos
                     .Where(c => topPointsForEachPart.Any(p => c.TopPoint.IsAlmostEqualTo(p, TOLERANCE)))
                     .ToList();
+
                 SortInstancesAlongLine(cylinderInfosForEachPart);
 
                 var result = GroupPointsOnSamePlane(cylinderInfosForEachPart);
                 //if (result.Count > 0) continue;
 
                 var remainingcylinderInfos = GetRemainCylinderInfo(cylinderInfosForEachPart, result);
+                bool isComplex = false;
+                if (remainingcylinderInfos.Count == 0)
+                {
+                    isComplex = IsElementComplex(doc, result);
+                }
 
-                bool areAllCylindersHaveSameZ = GroupCylinderAsStraightLine(cylinderInfosForEachPart, null).Count == cylinderInfosForEachPart.Count;
+                //var pointsAsDiagonalLine = GroupPointsAsDiagonalLine(cylinderInfosForEachPart);
+
+                //var remainPoins = cylinderInfosForEachPart.Where(a => !pointsAsDiagonalLine.Contains(a));
+
+                //bool areAllCylindersMakeDiagonalLine = pointsAsDiagonalLine.Count == cylinderInfosForEachPart.Count;
+                //bool areAllCylindersMakeStraightLine = GroupCylinderAsStraightLine(cylinderInfosForEachPart, null).Count == cylinderInfosForEachPart.Count;
 
                 // Nếu các trụ thẳng và chỉ có 1 mặt phẳng
-                if (result.Count == 1 && remainingcylinderInfos.Count == 0
-                    && areAllCylindersHaveSameZ)
-                {
-                    CreateModelLine(doc, cylinderInfosForEachPart.First().TopPoint, cylinderInfosForEachPart.Last().TopPoint);
-                    continue;
-                }
+                //if (result.Count == 1 && remainingcylinderInfos.Count == 0
+                //    && (areAllCylindersMakeStraightLine || areAllCylindersMakeDiagonalLine))
+                //{
+                //    CreateModelLine(doc, cylinderInfosForEachPart.First().TopPoint, cylinderInfosForEachPart.Last().TopPoint);
+                //    continue;
+                //}
+
                 // Các trường hợp còn lại như thừa trụ lẻ, hoặc các trụ không thẳng
-
-                List<Line> allLine = new List<Line>();
-
-                HashSet<XYZ> topPointsViewed = new HashSet<XYZ>();
-                XYZ firstPoint = null;
-                XYZ lastPoint = null;
-                List<MeshTriangle> trianglesHighestClone = trianglesHighest.ToList();
-                List<XYZ> topPointsClone = topPointsForEachPart.ToList();
-                while (topPointsForEachPart.Count > 1 && firstPoint == null)
+                if (isComplex == true || remainingcylinderInfos.Count > 0)
                 {
-                    GetLinesFromTriangles(trianglesHighest, topPointsForEachPart.FirstOrDefault(), radius, true, doc, topPointsForEachPart, topPointsViewed, ref firstPoint, null);
-
-                    topPointsForEachPart.RemoveAll(x => topPointsViewed.Any(y => x.IsAlmostEqualTo(y, TOLERANCE)));
+                    HandleForMeshesComplex(trianglesHighest, topPointsForEachPart, doc, radius, result, remainingcylinderInfos);
                 }
-                topPointsViewed.Clear();
+            }
+        }
 
-                if (firstPoint != null)
+        /// <summary>
+        /// Hàm xử lý những trường hợp element là mesh và có hình dạng phức tạp
+        /// </summary>
+        private void HandleForMeshesComplex(List<MeshTriangle> trianglesHighest, List<XYZ> topPointsForEachPart, Document doc, double radius, List<List<CylinderInfo>> result, List<CylinderInfo> remainingcylinderInfos)
+        {
+            List<Line> allLine = new List<Line>();
+
+            HashSet<XYZ> topPointsViewed = new HashSet<XYZ>();
+            XYZ firstPoint = null;
+            XYZ lastPoint = null;
+            List<MeshTriangle> trianglesHighestClone = trianglesHighest.ToList();
+            List<XYZ> topPointsClone = topPointsForEachPart.ToList();
+            while (topPointsForEachPart.Count > 1 && firstPoint == null)
+            {
+                GetLinesFromTriangles(trianglesHighest, topPointsForEachPart.FirstOrDefault(), radius, true, doc, topPointsForEachPart, topPointsViewed, ref firstPoint, null);
+
+                topPointsForEachPart.RemoveAll(x => topPointsViewed.Any(y => x.IsAlmostEqualTo(y, TOLERANCE)));
+            }
+            topPointsViewed.Clear();
+
+            if (firstPoint != null)
+            {
+                int num = topPointsClone.Count;
+                int indexToRemove = num;
+                for (int i = 0; i < num; i++)
                 {
-                    int num = topPointsClone.Count;
-                    int indexToRemove = num;
-                    for (int i = 0; i < num; i++)
+                    if (topPointsClone[i].IsAlmostEqualTo(firstPoint, TOLERANCE))
                     {
-                        if (topPointsClone[i].IsAlmostEqualTo(firstPoint, TOLERANCE))
-                        {
-                            indexToRemove = i;
-                            break;
-                        }
-                    }
-                    if (indexToRemove != num)
-                    {
-                        topPointsClone.RemoveAt(indexToRemove);
-                    }
-                    topPointsClone.Insert(0, firstPoint);
-                    if (topPointsClone.Count == num)
-                    {
-                        while (topPointsClone.Count > 1 && firstPoint != null)
-                        {
-                            var lines = GetLinesFromTriangles(trianglesHighestClone, topPointsClone.First(), radius, true, doc, topPointsClone, topPointsViewed, ref lastPoint, null);
-
-                            if (lines != null && lines.Count > 0)
-                            {
-                                allLine.AddRange(lines);
-                            }
-                            topPointsClone.RemoveAll(x => topPointsViewed.Any(y => x.IsAlmostEqualTo(y, TOLERANCE)));
-                        }
+                        indexToRemove = i;
+                        break;
                     }
                 }
+                if (indexToRemove != num)
+                {
+                    topPointsClone.RemoveAt(indexToRemove);
+                }
+                topPointsClone.Insert(0, firstPoint);
+                if (topPointsClone.Count == num)
+                {
+                    while (topPointsClone.Count > 1 && firstPoint != null)
+                    {
+                        var lines = GetLinesFromTriangles(trianglesHighestClone, topPointsClone.First(), radius, true, doc, topPointsClone, topPointsViewed, ref lastPoint, null);
 
-                if (firstPoint != null && lastPoint != null && allLine.Count >= 2)
+                        if (lines != null && lines.Count > 0)
+                        {
+                            allLine.AddRange(lines);
+                        }
+                        topPointsClone.RemoveAll(x => topPointsViewed.Any(y => x.IsAlmostEqualTo(y, TOLERANCE)));
+                    }
+                }
+            }
+
+            if (firstPoint != null && lastPoint != null)
+            {
+                if (allLine.Count == 1 && result.Count == 1 && remainingcylinderInfos.Count == 0)
+                {
+                    CreateModelLine(doc, firstPoint, lastPoint);
+                }
+                else if (allLine.Count >= 2)
                 {
                     GetAllIntersecPoints(firstPoint, lastPoint, allLine, doc);
                 }
@@ -1765,7 +1818,10 @@ namespace FirstCommand
             {
                 if (geometryObj is Solid solid)
                 {
-                    solids.Add(solid);
+                    if (solid.Faces.Size > 0 && solid.Volume > 0)
+                    {
+                        solids.Add(solid);
+                    }
                 }
                 if (geometryObj is GeometryInstance geomInstance)
                 {
@@ -1774,7 +1830,10 @@ namespace FirstCommand
                     {
                         if (geometryObject is Solid nestedSolid)
                         {
-                            solids.Add(nestedSolid);
+                            if (nestedSolid.Faces.Size > 0 && nestedSolid.Volume > 0)
+                            {
+                                solids.Add(nestedSolid);
+                            }
                         }
                         if (geometryObject is Mesh mesh)
                         {
@@ -1822,8 +1881,10 @@ namespace FirstCommand
                     if (planarFacesOfSolid.Count > 0 && cylindricalFaces.Count > 0)
                     {
                         // Lấy ra tất cả các mesh từ các face
-                        AddMesh(meshes, planarFacesOfSolid);
-                        AddMesh(meshes, cylindricalFaces);
+
+                        //AddMesh(meshes, planarFacesOfSolid);
+                        //AddMesh(meshes, cylindricalFaces);
+
                         // Lấy ra những mặt trụ song song với Z và mặt phẳng vuông góc với Z
                         var listcylindricalFace = cylindricalFaces.Where(c => Math.Abs(Math.Abs(c.Axis.Z) - 1) < TOLERANCE).ToList();
                         var listPlanarFace = planarFacesOfSolid.Where(f => Math.Abs(Math.Abs(f.FaceNormal.Z) - 1) < TOLERANCE).ToList();
@@ -1848,11 +1909,11 @@ namespace FirstCommand
                                 }
                                 foreach (var face in newListFace)
                                 {
-                                    var tupleValues = GetHighestAndLowestPointOfFace(face);
-                                    if (tupleValues.Max.Z > 0 && tupleValues.Min.Z > 0)
+                                    var (maxPoint, minPoint) = GetHighestAndLowestPointOfFace(face);
+                                    if (maxPoint != null && minPoint != null)
                                     {
-                                        double maxZ = tupleValues.Max.Z;
-                                        double minZ = tupleValues.Min.Z;
+                                        double maxZ = maxPoint.Z;
+                                        double minZ = minPoint.Z;
 
                                         cylinderInfos.Add(CreateCylinderInfo(face, maxZ, minZ));
                                     }
@@ -1975,10 +2036,10 @@ namespace FirstCommand
             cylinderInfo.TopPoint = SetOriginPoint(centerPoint, highestPoint.Z);
             cylinderInfo.BottomPoint = SetOriginPoint(centerPoint, lowestPoint.Z);
             cylinderInfo.Radius = highestPoint.DistanceTo(cylinderInfo.TopPoint);
-            if (defaultRadius < cylinderInfo.Radius)
-            {
-                defaultRadius = cylinderInfo.Radius;
-            }
+            //if (defaultRadius < cylinderInfo.Radius)
+            //{
+            //    defaultRadius = cylinderInfo.Radius;
+            //}
 
             return cylinderInfo;
         }
@@ -2385,15 +2446,22 @@ namespace FirstCommand
             {
                 ModelCurve modelCurve = null;
 
-                //XYZ p1 = transform.OfPoint(point1);
-                //XYZ p2 = transform.OfPoint(point2);
+                if (isRevitLink)
+                {
+                    point1 = transform.OfPoint(point1);
+                    point2 = transform.OfPoint(point2);
+                }
 
-                XYZ pt1 = transform.OfPoint(point1);
-                XYZ pt2 = transform.OfPoint(point2);
+                //XYZ pt1 = transform.OfPoint(point1);
+                //XYZ pt2 = transform.OfPoint(point2);
+
+                //XYZ newVector = XYZ.BasisZ.Multiply(1);
+                //XYZ p1 = pt1.Add(newVector);
+                //XYZ p2 = pt2.Add(newVector);
 
                 XYZ newVector = XYZ.BasisZ.Multiply(1);
-                XYZ p1 = pt1.Add(newVector);
-                XYZ p2 = pt2.Add(newVector);
+                XYZ p1 = point1.Add(newVector);
+                XYZ p2 = point2.Add(newVector);
 
                 Line line = Line.CreateBound(p1, p2);
                 XYZ direction = (p2 - p1).Normalize();
@@ -2512,7 +2580,8 @@ namespace FirstCommand
                         // Nếu pháp tuyến vuông góc với trục Z, nghĩa là mặt phẳng song song với trục Z
                         XYZ zAxis = XYZ.BasisZ;
                         double dot = Math.Abs(normal.DotProduct(zAxis));
-                        if (dot > COSINE_ANGLE_TOLERANCE_5_DEGREE)
+                        //if (dot > COSINE_ANGLE_TOLERANCE_1_DEGREE)
+                        if (dot > COSINE_ANGLE_TOLERANCE_1_DEGREE / 2)
                             continue;
 
                         // Tạo mặt phẳng
@@ -2538,22 +2607,6 @@ namespace FirstCommand
                                 result.Add(group);
                             }
                         }
-                        //Trường hợp tồn tại group 3:
-
-                        //Nếu tồn tại chỉ 1 group 2 nữa : ko xử lý gì
-                        // Nếu tồn tại 2 group 2 :
-
-                        // Nếu group1(A,B) và group2(B,C) mà trong đó B chung , A và C đều thuộc 2 group 3 khác
-                        // tức là có 1 điểm lẻ nằm ở giữa 2 group 3 khác nhau thì xử lý điểm lẻ đó với từng group 3
-                        // Nếu chỉ có A thuộc group 3 khác, còn C thì không thì ko xử lý gì
-
-                        //Trường hợp không tồn tại group 3:
-                        // Xét trường hợp các điểm có tạo thành 1 hàng thẳng hay chéo (thẳng thì cho top bằng nhau, chéo thì kéo dài tia để tìm giao điểm)
-                        // Nếu chỉ tồn tại 3 group 2 mà group 1 vuông góc với group 3
-                        // Nếu chỉ tồn tại 2 group 2 trong đó có điểm B chung thì 2 điểm gần nhau nhất tạo thành 1 mặt phẳng
-                        //if (group.Count == 2)
-                        //{
-                        //}
                     }
                 }
             }
@@ -2586,16 +2639,23 @@ namespace FirstCommand
         /// <param name="pointsAsStraightLine"></param>
         private void HandleSinglePointOutOfStraightLine(List<CylinderInfo> remainCylinderInfos, List<CylinderInfo> pointsAsStraightLine)
         {
-            CylinderInfo remainCylinderInfo = remainCylinderInfos.FirstOrDefault();
+            List<CylinderInfo> cylinderInfosViewed = new List<CylinderInfo>();
+            //CylinderInfo remainCylinderInfo = remainCylinderInfos.FirstOrDefault();
             CylinderInfo firstCylinderInfo = pointsAsStraightLine.FirstOrDefault();
 
-            if (remainCylinderInfo.TopPoint.Z < firstCylinderInfo.TopPoint.Z
-                && remainCylinderInfo.BottomPoint.Z > firstCylinderInfo.BottomPoint.Z)
+            foreach (var remainCylinderInfo in remainCylinderInfos)
             {
-                remainCylinderInfo.TopPoint = SetOriginPoint(remainCylinderInfo.TopPoint, firstCylinderInfo.TopPoint.Z);
-                pointsAsStraightLine.Add(remainCylinderInfo);
-                SortInstancesAlongLine(pointsAsStraightLine);
+                if (remainCylinderInfo.TopPoint.Z < firstCylinderInfo.TopPoint.Z
+                    && remainCylinderInfo.BottomPoint.Z > firstCylinderInfo.BottomPoint.Z)
+                {
+                    remainCylinderInfo.TopPoint = SetOriginPoint(remainCylinderInfo.TopPoint, firstCylinderInfo.TopPoint.Z);
+                    pointsAsStraightLine.Add(remainCylinderInfo);
+                    SortInstancesAlongLine(pointsAsStraightLine);
+                    cylinderInfosViewed.Add(remainCylinderInfo);
+                }
             }
+
+            remainCylinderInfos.RemoveAll(c => cylinderInfosViewed.Contains(c));
         }
 
         /// <summary>
@@ -2704,7 +2764,7 @@ namespace FirstCommand
         /// <param name="newResult"></param>
         /// <param name="pointsAsDiagonalLine"></param>
         /// <param name="pointsAsStraightLine"></param>
-        private void HandleDiagonalAndStraightLines(List<List<CylinderInfo>> newResult, List<CylinderInfo> pointsAsDiagonalLine, List<CylinderInfo> pointsAsStraightLine)
+        private void HandleDiagonalAndStraightLines(List<CylinderInfo> pointsAsDiagonalLine, List<CylinderInfo> pointsAsStraightLine)
         {
             // kiểm tra có điểm chung không
             bool haveCommonItem = false;
@@ -2846,70 +2906,174 @@ namespace FirstCommand
             return remainingcylinderInfos;
         }
 
+        private bool IsElementComplex(Document doc, List<List<CylinderInfo>> result)
+        {
+            List<List<CylinderInfo>> newResult = new List<List<CylinderInfo>>();
+            foreach (var group in result)
+            {
+                SortInstancesAlongLine(group);
+                var newGroup = CloneList(group);
+
+                // Danh sách chéo
+                List<CylinderInfo> pointsAsDiagonalLine = GroupPointsAsDiagonalLine(newGroup);
+                // Danh sách thẳng
+                List<CylinderInfo> pointsAsStraightLine = GroupCylinderAsStraightLine(newGroup, pointsAsDiagonalLine);
+
+                HashSet<CylinderInfo> excluded = new HashSet<CylinderInfo>(pointsAsStraightLine.Concat(pointsAsDiagonalLine));
+
+                List<CylinderInfo> remainCylinderInfos = newGroup.Where(x => !excluded.Contains(x)).ToList();
+
+                // Xử lý trường hợp có điểm thừa không thuộc danh sách thẳng
+                if (remainCylinderInfos.Count > 0 && pointsAsStraightLine.Count > 0)
+                {
+                    HandleSinglePointOutOfStraightLine(remainCylinderInfos, pointsAsStraightLine);
+                }
+
+                // Trường hợp này nếu là solid thì nên chuyển tất cả solid về mesh rồi tính lại từ đầu theo mesh
+                // Còn trường hợp là mesh thì sẽ đưa về tính theo cách tổng quát
+                if (remainCylinderInfos.Count > 0)
+                {
+                    return true;
+                    //IsSolidComplex = true;
+                    //IsMeshComplex = true;
+                    //break;
+                }
+
+                // Xử lý trường hợp có 1 điểm thừa không thuộc danh sách chéo
+                //if (remainCylinderInfos.Count == 1 && pointsAsDiagonalLine.Count > 0) // có tồn tại 1 điểm thừa
+                //{
+                //    HandleSinglePointOutOfDiagonalLine(newResult, remainCylinderInfos, pointsAsDiagonalLine);
+                //}
+
+                // Trường hợp không tồn tại điểm thừa
+                // Tồn tại cả danh sách thẳng và chéo
+                if (pointsAsStraightLine.Count > 0 && pointsAsDiagonalLine.Count > 0)
+                {
+                    HandleDiagonalAndStraightLines(pointsAsDiagonalLine, pointsAsStraightLine);
+                }
+                if (pointsAsStraightLine.Count > 0)
+                {
+                    newResult.Add(pointsAsStraightLine);
+                }
+                if (pointsAsDiagonalLine.Count > 0)
+                {
+                    newResult.Add(pointsAsDiagonalLine);
+                }
+            }
+            GetLengthOfRailing(doc, newResult);
+            return false;
+        }
+
         /// <summary>
         /// Nhóm các hình trụ có thành các nhóm nhỏ để tính khoảng cách, các nhóm nhỏ bao gồm các nhóm chéo, nhóm thẳng
         /// </summary>
         /// <param name="cylinderInfos"></param>
         /// <returns></returns>
-        private List<List<CylinderInfo>> GroupPointsForDistanceCalculation(List<CylinderInfo> cylinderInfos, List<Mesh> meshes, Document doc)
+        private void GroupPointsForDistanceCalculation(List<CylinderInfo> cylinderInfos, List<Mesh> meshes, Document doc)
         {
             var result = GroupPointsOnSamePlane(cylinderInfos);
-            //HashSet<CylinderInfo> allGroupedPoints = new HashSet<CylinderInfo>(result.SelectMany(g => g));
-            //var remainingcylinderInfos = cylinderInfos.Where(p => !allGroupedPoints.Any(q => q.Equals(p))).ToList();
+
             var remainingcylinderInfos = GetRemainCylinderInfo(cylinderInfos, result);
 
-            List<List<CylinderInfo>> newResult = new List<List<CylinderInfo>>();
+            //List<List<CylinderInfo>> newResult = new List<List<CylinderInfo>>();
 
             bool hasMeshes = meshes.Count > 0;
             bool hasRemaining = remainingcylinderInfos.Count > 0;
             bool isMultipleResults = result.Count > 1;
 
+            // Trường hợp mesh có thừa 1 điểm hoặc có nhiều mặt phẳng
             if (hasMeshes && (hasRemaining || isMultipleResults))
             {
                 GetTopViewShape(meshes, cylinderInfos, doc);
             }
+            // Trường hợp solid hoặc mesh chỉ có 1 mặt phẳng (không có điểm thừa)
             else
             {
-                // 1 group là 1 mặt phẳng, 1 mặt phẳng yêu cầu có ít nhất 3 trụ
-                foreach (var group in result)
+                bool IsMeshComplex = false;
+                bool IsSolidComplex = false;
+                if (IsElementComplex(doc, result))
                 {
-                    SortInstancesAlongLine(group);
-                    var newGroup = CloneList(group);
-
-                    List<CylinderInfo> pointsAsDiagonalLine = GroupPointsAsDiagonalLine(newGroup);
-                    List<CylinderInfo> pointsAsStraightLine = GroupCylinderAsStraightLine(newGroup, pointsAsDiagonalLine);
-
-                    HashSet<CylinderInfo> excluded = new HashSet<CylinderInfo>(pointsAsStraightLine.Concat(pointsAsDiagonalLine));
-
-                    List<CylinderInfo> remainCylinderInfos = newGroup.Where(x => !excluded.Contains(x)).ToList();
-
-                    // Xử lý trường hợp có 1 điểm thừa không thuộc danh sách thẳng
-                    if (remainCylinderInfos.Count == 1 && pointsAsStraightLine.Count > 0)
+                    if (hasMeshes)
                     {
-                        HandleSinglePointOutOfStraightLine(remainCylinderInfos, pointsAsStraightLine);
+                        IsMeshComplex = true;
                     }
-
-                    // Xử lý trường hợp có 1 điểm thừa không thuộc danh sách chéo
-                    if (remainCylinderInfos.Count == 1 && pointsAsDiagonalLine.Count > 0) // có tồn tại 1 điểm thừa
+                    else
                     {
-                        HandleSinglePointOutOfDiagonalLine(newResult, remainCylinderInfos, pointsAsDiagonalLine);
-                    }
-                    // Trường hợp không tồn tại điểm thừa
-                    // Tồn tại cả danh sách thẳng và chéo
-                    if (pointsAsStraightLine.Count > 0 && pointsAsDiagonalLine.Count > 0)
-                    {
-                        HandleDiagonalAndStraightLines(newResult, pointsAsDiagonalLine, pointsAsStraightLine);
-                    }
-
-                    if (pointsAsStraightLine.Count > 0)
-                    {
-                        newResult.Add(pointsAsStraightLine);
-                    }
-                    if (!newResult.Contains(pointsAsDiagonalLine) && pointsAsDiagonalLine.Count > 0)
-                    {
-                        newResult.Add(pointsAsDiagonalLine);
+                        IsSolidComplex = true;
                     }
                 }
+                //bool IsMeshComplex = false;
+                //bool IsSolidComplex = false;
+
+                // 1 group là 1 mặt phẳng, 1 mặt phẳng yêu cầu có ít nhất 3 trụ
+                //foreach (var group in result)
+                //{
+                //    SortInstancesAlongLine(group);
+                //    var newGroup = CloneList(group);
+
+                //    // Danh sách chéo
+                //    List<CylinderInfo> pointsAsDiagonalLine = GroupPointsAsDiagonalLine(newGroup);
+                //    // Danh sách thẳng
+                //    List<CylinderInfo> pointsAsStraightLine = GroupCylinderAsStraightLine(newGroup, pointsAsDiagonalLine);
+
+                //    HashSet<CylinderInfo> excluded = new HashSet<CylinderInfo>(pointsAsStraightLine.Concat(pointsAsDiagonalLine));
+
+                //    List<CylinderInfo> remainCylinderInfos = newGroup.Where(x => !excluded.Contains(x)).ToList();
+
+                //    // Xử lý trường hợp có điểm thừa không thuộc danh sách thẳng
+                //    if (remainCylinderInfos.Count > 0 && pointsAsStraightLine.Count > 0)
+                //    {
+                //        HandleSinglePointOutOfStraightLine(remainCylinderInfos, pointsAsStraightLine);
+                //    }
+
+                //    // Trường hợp này nếu là solid thì nên chuyển tất cả solid về mesh rồi tính lại từ đầu theo mesh
+                //    // Còn trường hợp là mesh thì sẽ đưa về tính theo cách tổng quát
+                //    if (remainCylinderInfos.Count > 0)
+                //    {
+                //        IsSolidComplex = true;
+                //        IsMeshComplex = true;
+                //        break;
+                //    }
+
+                //    // Xử lý trường hợp có 1 điểm thừa không thuộc danh sách chéo
+                //    //if (remainCylinderInfos.Count == 1 && pointsAsDiagonalLine.Count > 0) // có tồn tại 1 điểm thừa
+                //    //{
+                //    //    HandleSinglePointOutOfDiagonalLine(newResult, remainCylinderInfos, pointsAsDiagonalLine);
+                //    //}
+
+                //    // Trường hợp không tồn tại điểm thừa
+                //    // Tồn tại cả danh sách thẳng và chéo
+                //    if (pointsAsStraightLine.Count > 0 && pointsAsDiagonalLine.Count > 0)
+                //    {
+                //        HandleDiagonalAndStraightLines(pointsAsDiagonalLine, pointsAsStraightLine);
+                //    }
+
+                //    if (pointsAsStraightLine.Count > 0)
+                //    {
+                //        newResult.Add(pointsAsStraightLine);
+                //    }
+                //    if (pointsAsDiagonalLine.Count > 0)
+                //    {
+                //        newResult.Add(pointsAsDiagonalLine);
+                //    }
+                //    //if (!newResult.Contains(pointsAsDiagonalLine) && pointsAsDiagonalLine.Count > 0)
+                //    //{
+                //    //    newResult.Add(pointsAsDiagonalLine);
+                //    //}
+                //}
+
+                // Trường hợp mesh chỉ có 1 mặt phẳng nhưng thứ tự các trụ phức tạp, không thẳng hết hoặc chéo hết
+                if (IsMeshComplex)
+                {
+                    GetTopViewShape(meshes, cylinderInfos, doc);
+                }
+
+                // Trường hợp solid phức tạp, có những điểm thừa không thuộc nhóm các trụ thẳng hoặc chéo
+                //if (IsSolidComplex)
+                //{
+                //    //var meshes = ChangeSolidtoMesh(solids);
+                //    //GetTopViewShape(meshes, cylinderInfos, doc);
+                //}
 
                 // Trường hợp thừa 1-2 điểm không tạo thành 1 mặt phẳng
                 //HashSet<CylinderInfo> allGroupedPoints = new HashSet<CylinderInfo>(result.SelectMany(g => g));
@@ -2920,7 +3084,7 @@ namespace FirstCommand
                 //    HandleRedundantPoint(newResult, remainingcylinderInfos, usedCylinderInfo);
                 //}
             }
-            return newResult;
+            //return newResult;
         }
 
         /// <summary>
@@ -3043,7 +3207,7 @@ namespace FirstCommand
                 subList = group.GetRange(indexFirst, indexLast - indexFirst + 1);
             }
             //if (subList.Count > 2)
-            if (subList.Count >= 2)
+            if (subList.Count > 2)
             {
                 result.AddRange(subList);
                 // Kiểm tra xem hàng chéo có chung trụ với hàng thẳng không, để khi thay đổi chiều cao hàng thẳng thì không ảnh hưởng đến hàng chéo
