@@ -1,17 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows;
+using System.Xml.Linq;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using FirstCommand.Support.Constants;
+using FirstCommand.Support.DrawOnRevit;
+using FirstCommand.Support.FaceHandle;
+using FirstCommand.Support.GenericClass;
+using FirstCommand.Support.GeometryHandle;
+using FirstCommand.Support.LineHandle;
+using FirstCommand.Support.PlaneHandle;
+using FirstCommand.Support.PointHandle;
+using FirstCommand.Support.SolidHandle;
+using FirstCommand.Support.TrianglesHandle;
 
 namespace FirstCommand
 {
     [TransactionAttribute(TransactionMode.Manual)]
     public class GetAxisFromLetterCommand : IExternalCommand
     {
-        private double tolerance = 1e-6;
         private Transform transform = null;
+        private bool isRevitLink = false;
         private List<RectangularDimensions> ListRectangularDimension = new List<RectangularDimensions>();
         private List<CylinderDimensions> ListCylinderDimension = new List<CylinderDimensions>();
 
@@ -20,84 +32,113 @@ namespace FirstCommand
             UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
-            Reference r = uidoc.Selection.PickObject(Autodesk.Revit.UI.Selection.ObjectType.LinkedElement);
-            if (r != null)
+
+            try
             {
-                Element linkInstance = uidoc.Document.GetElement(r.ElementId);
-                RevitLinkInstance rli = linkInstance as RevitLinkInstance;
-
-                Document linkDoc = rli.GetLinkDocument();
-
-                ElementId linkedElemId = r.LinkedElementId;
-
-                Element linkedElem = linkDoc.GetElement(linkedElemId);
-                transform = rli.GetTransform();
-
-                Options options = new Options();
-                options.DetailLevel = ViewDetailLevel.Fine;
-                options.ComputeReferences = true;
-                GeometryElement elementGeo = linkedElem.get_Geometry(options);
-
-                List<PlanarFace> planarFaces = new List<PlanarFace>();
-                List<CylindricalFace> cylindricalFaces = new List<CylindricalFace>();
-                Dictionary<Solid, List<PlanarFace>> solidPlanarFaces = new Dictionary<Solid, List<PlanarFace>>();
-                //List<Solid> solids = new List<Solid>();
-                foreach (GeometryObject geometryObj in elementGeo)
+                Reference r = uidoc.Selection.PickObject(Autodesk.Revit.UI.Selection.ObjectType.LinkedElement);
+                if (r != null)
                 {
-                    if (geometryObj is Solid solid)
+                    Element linkInstance = uidoc.Document.GetElement(r.ElementId);
+                    RevitLinkInstance rli = linkInstance as RevitLinkInstance;
+
+                    Document linkDoc = rli.GetLinkDocument();
+
+                    ElementId linkedElemId = r.LinkedElementId;
+
+                    Element linkedElem = linkDoc.GetElement(linkedElemId);
+                    transform = rli.GetTransform();
+
+                    //GeometryUtility.GetSolids(linkedElem, doc);
+
+                    Options options = new Options();
+                    //
+                    options.IncludeNonVisibleObjects = true;
+                    //
+                    options.DetailLevel = ViewDetailLevel.Fine;
+                    options.ComputeReferences = true;
+                    GeometryElement elementGeo = linkedElem.get_Geometry(options);
+
+                    List<PlanarFace> planarFaces = new List<PlanarFace>();
+                    List<CylindricalFace> cylindricalFaces = new List<CylindricalFace>();
+                    Dictionary<Solid, List<PlanarFace>> solidPlanarFaces = new Dictionary<Solid, List<PlanarFace>>();
+                    foreach (GeometryObject geometryObj in elementGeo)
                     {
-                        //solids.Add(solid);
-                        var tupleValue = GetGroupedFacesFromSolid(doc, solid);
-                        planarFaces = tupleValue.Item1;
-                        cylindricalFaces = tupleValue.Item2;
-                        solidPlanarFaces = tupleValue.Item3;
-                    }
-                    else if (geometryObj is GeometryInstance geomInstance)
-                    {
-                        GeometryElement instanceGeometry = geomInstance.GetInstanceGeometry();
-                        foreach (GeometryObject geometryObject in instanceGeometry)
+                        if (geometryObj is Solid solid)
                         {
-                            if (geometryObject is Solid nestedSolid)
+                            var tupleValue = GetGroupedFacesFromSolid(doc, solid);
+                            planarFaces = tupleValue.Item1;
+                            cylindricalFaces = tupleValue.Item2;
+                            solidPlanarFaces = tupleValue.Item3;
+                        }
+                        else if (geometryObj is GeometryInstance geomInstance)
+                        {
+                            GeometryElement instanceGeometry = geomInstance.GetInstanceGeometry();
+                            foreach (GeometryObject geometryObject in instanceGeometry)
                             {
-                                //solids.Add(nestedSolid);
-                                var tupleValue = GetGroupedFacesFromSolid(doc, nestedSolid);
-                                planarFaces = tupleValue.Item1;
-                                cylindricalFaces = tupleValue.Item2;
-                                solidPlanarFaces = tupleValue.Item3;
+                                if (geometryObject is Solid nestedSolid)
+                                {
+                                    //solids.Add(nestedSolid);
+                                    var tupleValue = GetGroupedFacesFromSolid(doc, nestedSolid);
+                                    GetPointOnSolid(nestedSolid);
+                                    planarFaces = tupleValue.Item1;
+                                    cylindricalFaces = tupleValue.Item2;
+                                    solidPlanarFaces = tupleValue.Item3;
+                                    if (solidPlanarFaces.Count > 0)
+                                    {
+                                        GetPointOnSolid(nestedSolid);
+                                    }
+                                }
                             }
                         }
                     }
+
+                    //CurveLoop.IsCounterclockwise()
+
+                    if (cylindricalFaces.Count > 0)
+                    {
+                        var listCylindricalFaces = GetCylindricalFaces(cylindricalFaces, planarFaces);
+
+                        var lineAndIntersectPointOnFaces = FindLinesAndIntersectionsOnFace(doc, planarFaces, listCylindricalFaces);
+
+                        ListCylinderDimension = PreparePointsForDrawingModelLine(doc, lineAndIntersectPointOnFaces);
+                    }
+                    else
+                    {
+                        PrepareSolidCuttingData(doc, solidPlanarFaces);
+                    }
+
+                    var x = ListRectangularDimension;
+                    var y = ListCylinderDimension;
+                    return Result.Succeeded;
                 }
-
-                //foreach (Solid solid in solids)
-                //{
-                //    var tupleValue = GetGroupedFacesFromSolid(doc, solid);
-                //    if (tupleValue.Item1.Count > 0 && tupleValue.Item2.Count > 0 && tupleValue.Item3.Count > 0)
-                //    {
-                //        planarFaces.AddRange(tupleValue.Item1);
-                //        cylindricalFaces.AddRange(tupleValue.Item2);
-                //        solidPlanarFaces.AddRange(tupleValue.Item3);
-                //    }
-                //}
-
-                if (cylindricalFaces.Count > 0)
-                {
-                    var listCylindricalFaces = GetCylindricalFaces(cylindricalFaces, planarFaces);
-
-                    var lineAndIntersectPointOnFaces = FindLinesAndIntersectionsOnFace(doc, planarFaces, listCylindricalFaces);
-
-                    ListCylinderDimension = PreparePointsForDrawingModelLine(doc, lineAndIntersectPointOnFaces);
-                }
-                else
-                {
-                    PrepareSolidCuttingData(doc, solidPlanarFaces);
-                }
-
-                var x = ListRectangularDimension;
-                var y = ListCylinderDimension;
-                return Result.Succeeded;
+                return Result.Failed;
             }
-            return Result.Failed;
+            catch (Autodesk.Revit.Exceptions.OperationCanceledException)
+            {
+                // Người dùng nhấn ESC
+                TaskDialog.Show("Notif", "Command has been cancel by user.");
+                return Result.Cancelled;
+            }
+        }
+
+        private void GetPointOnSolid(Solid solid)
+        {
+            HashSet<XYZ> points = new HashSet<XYZ>(new XYZComparer());
+
+            foreach (Face face in solid.Faces)
+            {
+                IList<CurveLoop> loops = face.GetEdgesAsCurveLoops();
+
+                foreach (CurveLoop loop in loops)
+                {
+                    foreach (Curve curve in loop)
+                    {
+                        points.Add(curve.GetEndPoint(0));
+                        points.Add(curve.GetEndPoint(1));
+                    }
+                }
+            }
+            int a = points.Count;
         }
 
         //__Hình trụ//
@@ -116,10 +157,11 @@ namespace FirstCommand
             foreach (var tupleValue in lineAndIntersectPointOnFaces)
             {
                 CylinderDimensions cylinderDimensions = new CylinderDimensions();
-                double radius = GetRadius(tupleValue.Item3);
+                double radius = FaceUtility.GetRadius(tupleValue.Item3);
                 if (tupleValue.Item2.Count == 2)
                 {
-                    Line newLine = CreateModelLine(doc, tupleValue.Item2[0], tupleValue.Item2[1]);
+                    Line newLine = Line.CreateBound(tupleValue.Item2[0], tupleValue.Item2[1]);
+                    DrawPointLineArc.CreateModelLine(doc, tupleValue.Item2[0], tupleValue.Item2[1], isRevitLink, transform, 0);
 
                     cylinderDimensions.LengthLine = newLine;
                     cylinderDimensions.Radius = radius;
@@ -129,11 +171,12 @@ namespace FirstCommand
                     foreach (var tuple in lineAndIntersectPointOnFaces)
                     {
                         double dot = tupleValue.Item1.Direction.Normalize().DotProduct(tuple.Item1.Direction.Normalize());
-                        if (Math.Abs(dot) < tolerance)
+                        if (Math.Abs(dot) < CommonConstants.TOLERANCE)
                         {
                             XYZ point = tupleValue.Item2.FirstOrDefault();
                             XYZ projectedPoint = GetProjectedPoint(tupleValue.Item1.Direction.Normalize(), tuple.Item1, point);
-                            Line newLine = CreateModelLine(doc, point, projectedPoint);
+                            Line newLine = Line.CreateBound(point, projectedPoint);
+                            DrawPointLineArc.CreateModelLine(doc, point, projectedPoint, isRevitLink, transform, 0);
 
                             cylinderDimensions.LengthLine = newLine;
                             cylinderDimensions.Radius = radius;
@@ -148,7 +191,7 @@ namespace FirstCommand
                     foreach (var tuple in lineAndIntersectPointOnFaces)
                     {
                         double dot = tupleValue.Item1.Direction.Normalize().DotProduct(tuple.Item1.Direction.Normalize());
-                        if (Math.Abs(dot) < tolerance)
+                        if (Math.Abs(dot) < CommonConstants.TOLERANCE)
                         {
                             XYZ projectedPoint = GetProjectedPoint(line.Direction.Normalize(), tuple.Item1, pointOnLine);
                             listProjectedPoints.Add(projectedPoint);
@@ -156,7 +199,8 @@ namespace FirstCommand
                     }
                     if (listProjectedPoints.Count == 2)
                     {
-                        Line newLine = CreateModelLine(doc, listProjectedPoints[0], listProjectedPoints[1]);
+                        Line newLine = Line.CreateBound(listProjectedPoints[0], listProjectedPoints[1]);
+                        DrawPointLineArc.CreateModelLine(doc, listProjectedPoints[0], listProjectedPoints[1], isRevitLink, transform, 0);
                         cylinderDimensions.LengthLine = newLine;
                         cylinderDimensions.Radius = radius;
                     }
@@ -164,18 +208,6 @@ namespace FirstCommand
                 listCylinderDimension.Add(cylinderDimensions);
             }
             return listCylinderDimension;
-        }
-
-        /// <summary>
-        /// Lấy ra bán kính của 1 CylindricalFace
-        /// </summary>
-        /// <param name="face">Face cần lấy bán kính</param>
-        /// <returns>Trả về 1 double là bán kính của face</returns>
-        private double GetRadius(CylindricalFace face)
-        {
-            CylindricalSurface s = face.GetSurface() as CylindricalSurface;
-            double radius = s.Radius;
-            return radius;
         }
 
         private List<(Line, List<XYZ>, CylindricalFace)> FindLinesAndIntersectionsOnFace(Document doc, List<PlanarFace> planarFaces, List<CylindricalFace> cylindricalFaces)
@@ -187,11 +219,11 @@ namespace FirstCommand
                 {
                     XYZ vectorAxis = cylindricalFace.Axis;
                     XYZ originPoint = cylindricalFace.Origin;
-                    Line line = CreateUnboundLine(originPoint, vectorAxis);
+                    Line line = Line.CreateUnbound(originPoint, vectorAxis.Normalize());
                     List<XYZ> points = new List<XYZ>();
                     foreach (var face in planarFaces)
                     {
-                        XYZ point = GetIntersectionPoint(line, face);
+                        XYZ point = FaceUtility.GetIntersectionPoint(line, face);
                         if (point != null)
                         {
                             points.Add(point);
@@ -237,88 +269,59 @@ namespace FirstCommand
             return listCylindricalFace;
         }
 
-        /// <summary>
-        /// Hàm tạo 1 unbound line
-        /// </summary>
-        /// <param name="point"></param>
-        /// <param name="direction"></param>
-        /// <returns>Trả về 1 unbound line</returns>
-        private Line CreateUnboundLine(XYZ point, XYZ direction)
-        {
-            return Line.CreateUnbound(point, direction.Normalize());
-        }
+        ///// <summary>
+        ///// Tạo modelline từ 2 điểm bất kỳ
+        ///// </summary>
+        ///// <param name="doc"></param>
+        ///// <param name="point1"></param>
+        ///// <param name="point2"></param>
+        ///// <returns>Trả về line được tạo bởi 2 điểm</returns>
+        //private Line CreateModelLine(Document doc, XYZ point1, XYZ point2)
+        //{
+        //    Line line = null;
+        //    using (Transaction trans = new Transaction(doc, "Create Model Line with Auto Plane"))
+        //    {
+        //        trans.Start();
 
-        /// <summary>
-        /// Kiểm tra xem 1 unboundLine có giao với 1 face hay không
-        /// </summary>
-        /// <param name="unboundLine">là 1 line unbound</param>
-        /// <param name="face"></param>
-        /// <returns>Trả về 1 điểm nếu có giao nhau, không thì trả về null</returns>
-        private XYZ GetIntersectionPoint(Line unboundLine, Face face)
-        {
-            IntersectionResultArray results;
-            SetComparisonResult result = face.Intersect(unboundLine, out results);
+        //        XYZ p1 = transform.OfPoint(point1);
+        //        XYZ p2 = transform.OfPoint(point2);
 
-            if (result == SetComparisonResult.Overlap && results != null && results.Size > 0)
-            {
-                return results.get_Item(0).XYZPoint;
-            }
-            return null;
-        }
+        //        line = Line.CreateBound(p1, p2);
+        //        XYZ direction = (p1 - p2).Normalize();
 
-        /// <summary>
-        /// Tạo modelline từ 2 điểm bất kỳ
-        /// </summary>
-        /// <param name="doc"></param>
-        /// <param name="point1"></param>
-        /// <param name="point2"></param>
-        /// <returns>Trả về line được tạo bởi 2 điểm</returns>
-        private Line CreateModelLine(Document doc, XYZ point1, XYZ point2)
-        {
-            Line line = null;
-            using (Transaction trans = new Transaction(doc, "Create Model Line with Auto Plane"))
-            {
-                trans.Start();
+        //        bool isParallelToX = Math.Abs(direction.DotProduct(XYZ.BasisX)) > 0.99;
+        //        bool isParallelToY = Math.Abs(direction.DotProduct(XYZ.BasisY)) > 0.99;
+        //        bool isParallelToZ = Math.Abs(direction.DotProduct(XYZ.BasisZ)) > 0.99;
 
-                XYZ p1 = transform.OfPoint(point1);
-                XYZ p2 = transform.OfPoint(point2);
+        //        Plane plane;
 
-                line = Line.CreateBound(p1, p2);
-                XYZ direction = (p1 - p2).Normalize();
+        //        if (isParallelToX)
+        //        {
+        //            plane = Plane.CreateByNormalAndOrigin(XYZ.BasisY, p1);
+        //        }
+        //        else if (isParallelToY)
+        //        {
+        //            plane = Plane.CreateByNormalAndOrigin(XYZ.BasisX, p1);
+        //        }
+        //        else if (isParallelToZ)
+        //        {
+        //            plane = Plane.CreateByNormalAndOrigin(XYZ.BasisX, p1);
+        //        }
+        //        else
+        //        {
+        //            XYZ normal = direction.CrossProduct(XYZ.BasisZ).Normalize();
 
-                bool isParallelToX = Math.Abs(direction.DotProduct(XYZ.BasisX)) > 0.99;
-                bool isParallelToY = Math.Abs(direction.DotProduct(XYZ.BasisY)) > 0.99;
-                bool isParallelToZ = Math.Abs(direction.DotProduct(XYZ.BasisZ)) > 0.99;
+        //            plane = Plane.CreateByNormalAndOrigin(normal, p1);
+        //        }
 
-                Plane plane;
+        //        SketchPlane sketchPlane = SketchPlane.Create(doc, plane);
 
-                if (isParallelToX)
-                {
-                    plane = Plane.CreateByNormalAndOrigin(XYZ.BasisY, p1);
-                }
-                else if (isParallelToY)
-                {
-                    plane = Plane.CreateByNormalAndOrigin(XYZ.BasisX, p1);
-                }
-                else if (isParallelToZ)
-                {
-                    plane = Plane.CreateByNormalAndOrigin(XYZ.BasisX, p1);
-                }
-                else
-                {
-                    XYZ normal = direction.CrossProduct(XYZ.BasisZ).Normalize();
+        //        doc.Create.NewModelCurve(line, sketchPlane);
 
-                    plane = Plane.CreateByNormalAndOrigin(normal, p1);
-                }
-
-                SketchPlane sketchPlane = SketchPlane.Create(doc, plane);
-
-                doc.Create.NewModelCurve(line, sketchPlane);
-
-                trans.Commit();
-            }
-            return line;
-        }
+        //        trans.Commit();
+        //    }
+        //    return line;
+        //}
 
         /// <summary>
         /// Lấy ra 1 điểm là điểm được chiếu từ 1 điểm đến 1 mặt phẳng
@@ -358,6 +361,11 @@ namespace FirstCommand
             {
                 GetRectangularDimensions(doc, solid);
             }
+
+            //var (planarFaces, cylindricalFaces) = SolidUtility.GetGroupedFacesFromSolid(doc, solid);
+
+            //solidPlanarFaces.Add(solid, planarFaces);
+            //return (planarFaces, cylindricalFaces, solidPlanarFaces);
             else if (solid.Faces.Size > 0 && solid.Volume > 0)
             {
                 foreach (Face face in solid.Faces)
@@ -464,7 +472,7 @@ namespace FirstCommand
                 XYZ candidateDirection = (candidateCurve.GetEndPoint(1) - candidateCurve.GetEndPoint(0)).Normalize();
 
                 double dot = targetDirection.DotProduct(candidateDirection);
-                if (Math.Abs(Math.Abs(dot) - 1.0) > tolerance)
+                if (Math.Abs(Math.Abs(dot) - 1.0) > CommonConstants.TOLERANCE)
                     continue;
 
                 XYZ midTarget = (targetCurve.GetEndPoint(0) + targetCurve.GetEndPoint(1)) * 0.5;
@@ -537,7 +545,7 @@ namespace FirstCommand
         {
             RectangularDimensions rectangularDim = new RectangularDimensions();
 
-            PlanarFace face1 = GetSmallestFace(solid);
+            PlanarFace face1 = FaceUtility.GetSmallestFace(solid);
             PlanarFace face2 = null;
             foreach (Face face in solid.Faces)
             {
@@ -545,7 +553,7 @@ namespace FirstCommand
                 {
                     if (face is PlanarFace planarFace)
                     {
-                        if (AreFacesParallel(face1, planarFace))
+                        if (FaceUtility.AreFacesParallel(face1, planarFace))
                         {
                             face2 = planarFace;
                             break;
@@ -556,16 +564,19 @@ namespace FirstCommand
 
             if (face1 != null && face2 != null)
             {
-                XYZ point1 = GetCenterOfFace(face1);
-                XYZ point2 = GetCenterOfFace(face2);
+                XYZ point1 = FaceUtility.GetCenterOfFace(face1);
+                XYZ point2 = FaceUtility.GetCenterOfFace(face2);
                 var tupleValues = GetMidPointPairsOfRectangleFace(face1);
                 if (tupleValues != null && tupleValues.Count == 2)
                 {
-                    rectangularDim.WidthLine = CreateModelLine(doc, tupleValues[0].Item1, tupleValues[0].Item2);
-                    rectangularDim.HeightLine = CreateModelLine(doc, tupleValues[1].Item1, tupleValues[1].Item2);
+                    rectangularDim.WidthLine = Line.CreateBound(tupleValues[0].Item1, tupleValues[0].Item2);
+                    DrawPointLineArc.CreateModelLine(doc, tupleValues[0].Item1, tupleValues[0].Item2, isRevitLink, transform, 0);
+                    rectangularDim.HeightLine = Line.CreateBound(tupleValues[1].Item1, tupleValues[1].Item2);
+                    DrawPointLineArc.CreateModelLine(doc, tupleValues[1].Item1, tupleValues[1].Item2, isRevitLink, transform, 0);
                 }
 
-                rectangularDim.LengthLine = CreateModelLine(doc, point1, point2);
+                rectangularDim.LengthLine = Line.CreateBound(point1, point2);
+                DrawPointLineArc.CreateModelLine(doc, point1, point2, isRevitLink, transform, 0);
             }
             ListRectangularDimension.Add(rectangularDim);
         }
@@ -620,21 +631,6 @@ namespace FirstCommand
                 }
             }
             return null;
-        }
-
-        /// <summary>
-        /// Kiểm tra xem 2 face có song song với nhau hay không
-        /// </summary>
-        /// <param name="face1"></param>
-        /// <param name="face2"></param>
-        /// <returns>Trả về true nếu song song và false nếu không</returns>
-        private bool AreFacesParallel(PlanarFace face1, PlanarFace face2)
-        {
-            XYZ normal1 = face1.FaceNormal.Normalize();
-            XYZ normal2 = face2.FaceNormal.Normalize();
-            XYZ cross = normal1.CrossProduct(normal2);
-
-            return cross.GetLength() < tolerance;
         }
 
         /// <summary>
@@ -699,44 +695,8 @@ namespace FirstCommand
                 }
                 sum += edges.Size;
             }
+
             return (listEdge, sum);
-        }
-
-        /// <summary>
-        /// Lấy ra face có diện tích nhỏ nhất
-        /// </summary>
-        /// <param name="solid">Tham số truyền vào là 1 solid</param>
-        /// <returns>Trả về 1 face là face có diện tích nhỏ nhất</returns>
-        private PlanarFace GetSmallestFace(Solid solid)
-        {
-            PlanarFace smallestFace = null;
-            double minArea = double.MaxValue;
-            foreach (Face face in solid.Faces)
-            {
-                if (face is PlanarFace planarFace)
-                {
-                    double area = planarFace.Area;
-                    if (area < minArea)
-                    {
-                        minArea = area;
-                        smallestFace = planarFace;
-                    }
-                }
-            }
-            return smallestFace;
-        }
-
-        /// <summary>
-        /// Lấy ra tâm của 1 face
-        /// </summary>
-        /// <param name="face"></param>
-        /// <returns>Trả về 1 điểm XYZ là tâm của 1 face</returns>
-        private XYZ GetCenterOfFace(Face face)
-        {
-            BoundingBoxUV bbox = face.GetBoundingBox();
-            UV centerUV = (bbox.Min + bbox.Max) * 0.5;
-            XYZ centerXYZ = face.Evaluate(centerUV);
-            return centerXYZ;
         }
 
         //End_________

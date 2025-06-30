@@ -111,8 +111,18 @@
     <Compile Include="RectangularCommand.cs" />
     <Compile Include="ScheduleRowModel.cs" />
     <Compile Include="ScheduleViewModel.cs" />
-    <Compile Include="Support\GeometryUtility.cs" />
-    <Compile Include="Support\WarningSuppressor.cs" />
+    <Compile Include="Support\Constants\CommonConstants.cs" />
+    <Compile Include="Support\DrawOnRevit\DrawPointLineArc.cs" />
+    <Compile Include="Support\FaceHandle\FaceUtility.cs" />
+    <Compile Include="Support\GenericClass\XYZComparer.cs" />
+    <Compile Include="Support\GeometryHandle\GeometryUtility.cs" />
+    <Compile Include="Support\GenericClass\WarningSuppressor.cs" />
+    <Compile Include="Support\LineHandle\LineUtility.cs" />
+    <Compile Include="Support\PlaneHandle\PlaneUtility.cs" />
+    <Compile Include="Support\PointHandle\PointUtility.cs" />
+    <Compile Include="Support\SolidHandle\SolidUtility.cs" />
+    <Compile Include="Support\TransactionHandle\HandleForTransaction.cs" />
+    <Compile Include="Support\TrianglesHandle\TrianglesUtility.cs" />
     <Compile Include="View\AddElevationView.xaml.cs">
       <DependentUpon>AddElevationView.xaml</DependentUpon>
     </Compile>
@@ -179,6 +189,7 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>
