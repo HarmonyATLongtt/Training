@@ -112,9 +112,11 @@
     <Compile Include="ScheduleRowModel.cs" />
     <Compile Include="ScheduleViewModel.cs" />
     <Compile Include="Support\Constants\CommonConstants.cs" />
+    <Compile Include="Support\DebugTest\TestForDebug.cs" />
     <Compile Include="Support\DrawOnRevit\DrawPointLineArc.cs" />
     <Compile Include="Support\FaceHandle\FaceUtility.cs" />
-    <Compile Include="Support\GenericClass\XYZComparer.cs" />
+    <Compile Include="Support\GenericClass\ComparerClass\LineEqualityComparer.cs" />
+    <Compile Include="Support\GenericClass\ComparerClass\XYZComparer.cs" />
     <Compile Include="Support\GeometryHandle\GeometryUtility.cs" />
     <Compile Include="Support\GenericClass\WarningSuppressor.cs" />
     <Compile Include="Support\LineHandle\LineUtility.cs" />

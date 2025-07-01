@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using FirstCommand.Support.GenericClass;
+using FirstCommand.Support.GenericClass.ComparerClass;
 using FirstCommand.Support.DrawOnRevit;
 using FirstCommand.Support.PointHandle;
 using FirstCommand.Support.LineHandle;
 using FirstCommand.Support.Constants;
+using FirstCommand.Support.GeometryHandle;
 
 namespace FirstCommand.Support.TrianglesHandle
 {
@@ -319,6 +321,112 @@ namespace FirstCommand.Support.TrianglesHandle
                 triangle.get_Vertex(1),
                 triangle.get_Vertex(2)
             };
+        }
+
+        /// <summary>
+        /// Hàm dùng để lấy ra các cặp điểm trong tam giác
+        /// </summary>
+        /// <param name="triangle"></param>
+        /// <returns></returns>
+        public static List<(XYZ, XYZ)> GetXYZPairsOfTriangle(MeshTriangle triangle)
+        {
+            return new List<(XYZ, XYZ)>
+            {
+                (triangle.get_Vertex(0), triangle.get_Vertex(1)),
+                (triangle.get_Vertex(1), triangle.get_Vertex(2)),
+                (triangle.get_Vertex(2), triangle.get_Vertex(0))
+            };
+        }
+
+        /// <summary>
+        /// Hàm dùng để lấy ra tất cả tam giác trong 1 solid
+        /// </summary>
+        /// <param name="solid"></param>
+        /// <returns></returns>
+        public static List<MeshTriangle> ExtractTrianglesFromSolid(Solid solid)
+        {
+            List<MeshTriangle> triangles = new List<MeshTriangle>();
+            foreach (Face face in solid.Faces)
+            {
+                Mesh mesh = face.Triangulate();
+                int triCount = mesh.NumTriangles;
+
+                for (int i = 0; i < triCount; i++)
+                {
+                    MeshTriangle tri = mesh.get_Triangle(i);
+                    triangles.Add(tri);
+                }
+            }
+            return triangles;
+        }
+
+        /// <summary>
+        /// Hàm dùng để gom nhóm các tam giác có điểm chung và cùng nằm trên 1 mặt phẳng
+        /// </summary>
+        /// <param name="triangles"></param>
+        /// <returns></returns>
+        public static List<List<MeshTriangle>> GroupTrianglesByVertexAndNormal(List<MeshTriangle> triangles)
+        {
+            // B1: Tạo dictionary: mỗi điểm XYZ ánh xạ đến các tam giác chứa nó
+            var vertexToTriangles = new Dictionary<XYZ, List<MeshTriangle>>(new XYZComparer());
+
+            foreach (var tri in triangles)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    XYZ v = tri.get_Vertex(i);
+                    if (!vertexToTriangles.TryGetValue(v, out var list))
+                    {
+                        list = new List<MeshTriangle>();
+                        vertexToTriangles[v] = list;
+                    }
+                    list.Add(tri);
+                }
+            }
+
+            // B2: Gom nhóm các tam giác
+            var result = new List<List<MeshTriangle>>();
+            var visited = new HashSet<MeshTriangle>();
+
+            foreach (var tri in triangles)
+            {
+                if (visited.Contains(tri)) continue;
+
+                var group = new List<MeshTriangle>();
+                var queue = new Queue<MeshTriangle>();
+                queue.Enqueue(tri);
+                visited.Add(tri);
+
+                var normal = GetNormalFromTriangle(tri);
+
+                while (queue.Count > 0)
+                {
+                    var current = queue.Dequeue();
+                    group.Add(current);
+
+                    for (int i = 0; i < 3; i++)
+                    {
+                        XYZ v = current.get_Vertex(i);
+                        if (!vertexToTriangles.TryGetValue(v, out var candidates)) continue;
+
+                        foreach (var neighbor in candidates)
+                        {
+                            if (visited.Contains(neighbor)) continue;
+
+                            var neighborNormal = GetNormalFromTriangle(neighbor);
+                            if (GeometryUtility.IsParallel(normal, neighborNormal, CommonConstants.TOLERANCE))
+                            {
+                                queue.Enqueue(neighbor);
+                                visited.Add(neighbor);
+                            }
+                        }
+                    }
+                }
+
+                result.Add(group);
+            }
+
+            return result;
         }
     }
 }

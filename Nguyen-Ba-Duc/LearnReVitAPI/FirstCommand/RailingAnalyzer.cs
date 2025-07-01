@@ -16,6 +16,7 @@ using FirstCommand.Support.Constants;
 using FirstCommand.Support.DrawOnRevit;
 using FirstCommand.Support.FaceHandle;
 using FirstCommand.Support.GenericClass;
+using FirstCommand.Support.GenericClass.ComparerClass;
 using FirstCommand.Support.GeometryHandle;
 using FirstCommand.Support.LineHandle;
 using FirstCommand.Support.PointHandle;

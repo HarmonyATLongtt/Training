@@ -1,15 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Controls;
 using System.Xml.Linq;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.DirectContext3D;
 using Autodesk.Revit.UI;
 using FirstCommand.Support.Constants;
+using FirstCommand.Support.DebugTest;
 using FirstCommand.Support.DrawOnRevit;
 using FirstCommand.Support.FaceHandle;
 using FirstCommand.Support.GenericClass;
+using FirstCommand.Support.GenericClass.ComparerClass;
 using FirstCommand.Support.GeometryHandle;
 using FirstCommand.Support.LineHandle;
 using FirstCommand.Support.PlaneHandle;
@@ -26,12 +31,14 @@ namespace FirstCommand
         private bool isRevitLink = false;
         private List<RectangularDimensions> ListRectangularDimension = new List<RectangularDimensions>();
         private List<CylinderDimensions> ListCylinderDimension = new List<CylinderDimensions>();
+        private Document doc;
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
-            Document doc = uidoc.Document;
+            //Document doc = uidoc.Document;
+            doc = uidoc.Document;
 
             try
             {
@@ -48,8 +55,6 @@ namespace FirstCommand
                     Element linkedElem = linkDoc.GetElement(linkedElemId);
                     transform = rli.GetTransform();
 
-                    //GeometryUtility.GetSolids(linkedElem, doc);
-
                     Options options = new Options();
                     //
                     options.IncludeNonVisibleObjects = true;
@@ -61,38 +66,43 @@ namespace FirstCommand
                     List<PlanarFace> planarFaces = new List<PlanarFace>();
                     List<CylindricalFace> cylindricalFaces = new List<CylindricalFace>();
                     Dictionary<Solid, List<PlanarFace>> solidPlanarFaces = new Dictionary<Solid, List<PlanarFace>>();
-                    foreach (GeometryObject geometryObj in elementGeo)
-                    {
-                        if (geometryObj is Solid solid)
-                        {
-                            var tupleValue = GetGroupedFacesFromSolid(doc, solid);
-                            planarFaces = tupleValue.Item1;
-                            cylindricalFaces = tupleValue.Item2;
-                            solidPlanarFaces = tupleValue.Item3;
-                        }
-                        else if (geometryObj is GeometryInstance geomInstance)
-                        {
-                            GeometryElement instanceGeometry = geomInstance.GetInstanceGeometry();
-                            foreach (GeometryObject geometryObject in instanceGeometry)
-                            {
-                                if (geometryObject is Solid nestedSolid)
-                                {
-                                    //solids.Add(nestedSolid);
-                                    var tupleValue = GetGroupedFacesFromSolid(doc, nestedSolid);
-                                    GetPointOnSolid(nestedSolid);
-                                    planarFaces = tupleValue.Item1;
-                                    cylindricalFaces = tupleValue.Item2;
-                                    solidPlanarFaces = tupleValue.Item3;
-                                    if (solidPlanarFaces.Count > 0)
-                                    {
-                                        GetPointOnSolid(nestedSolid);
-                                    }
-                                }
-                            }
-                        }
-                    }
 
-                    //CurveLoop.IsCounterclockwise()
+                    var solid = CreateSolidFromMeshes(linkedElem);
+                    var tupleValue = GetGroupedFacesFromSolid(doc, solid);
+                    planarFaces = tupleValue.Item1;
+                    cylindricalFaces = tupleValue.Item2;
+                    solidPlanarFaces = tupleValue.Item3;
+
+                    //foreach (GeometryObject geometryObj in elementGeo)
+                    //{
+                    //    if (geometryObj is Solid solid)
+                    //    {
+                    //        var tupleValue = GetGroupedFacesFromSolid(doc, solid);
+                    //        planarFaces = tupleValue.Item1;
+                    //        cylindricalFaces = tupleValue.Item2;
+                    //        solidPlanarFaces = tupleValue.Item3;
+                    //    }
+                    //    else if (geometryObj is GeometryInstance geomInstance)
+                    //    {
+                    //        GeometryElement instanceGeometry = geomInstance.GetInstanceGeometry();
+                    //        foreach (GeometryObject geometryObject in instanceGeometry)
+                    //        {
+                    //            if (geometryObject is Solid nestedSolid)
+                    //            {
+                    //                //solids.Add(nestedSolid);
+                    //                var tupleValue = GetGroupedFacesFromSolid(doc, nestedSolid);
+
+                    //                planarFaces = tupleValue.Item1;
+                    //                cylindricalFaces = tupleValue.Item2;
+                    //                solidPlanarFaces = tupleValue.Item3;
+                    //                //if (solidPlanarFaces.Count > 0)
+                    //                //{
+                    //                //    TestForDebug.ShowValues(SolidUtility.GetPointOnSolid(nestedSolid));
+                    //                //}
+                    //            }
+                    //        }
+                    //    }
+                    //}
 
                     if (cylindricalFaces.Count > 0)
                     {
@@ -121,28 +131,161 @@ namespace FirstCommand
             }
         }
 
-        private void GetPointOnSolid(Solid solid)
-        {
-            HashSet<XYZ> points = new HashSet<XYZ>(new XYZComparer());
-
-            foreach (Face face in solid.Faces)
-            {
-                IList<CurveLoop> loops = face.GetEdgesAsCurveLoops();
-
-                foreach (CurveLoop loop in loops)
-                {
-                    foreach (Curve curve in loop)
-                    {
-                        points.Add(curve.GetEndPoint(0));
-                        points.Add(curve.GetEndPoint(1));
-                    }
-                }
-            }
-            int a = points.Count;
-        }
-
         //__Hình trụ//
         //Start_______
+
+        private Solid CreateSolidFromMeshes(Element element)
+        {
+            List<Solid> solids = GeometryUtility.GetSolids(element, doc).Solids;
+            //Lấy ra danh sách các triangles của element
+            List<MeshTriangle> meshTriangles = new List<MeshTriangle>();
+            foreach (var s in solids)
+            {
+                meshTriangles.AddRange(TrianglesUtility.ExtractTrianglesFromSolid(s));
+            }
+
+            //Gom nhóm các triangel theo mặt phẳng
+            var result = TrianglesUtility.GroupTrianglesByVertexAndNormal(meshTriangles);
+
+            var pointsOfTrianglesGroupComplex = new List<List<(XYZ, XYZ)>>();
+            var pointsOfTrianglesGroupSimple = new List<List<(XYZ, XYZ)>>();
+
+            foreach (var triangles in result)
+            {
+                var dict = new Dictionary<UnorderedXYZPair, List<MeshTriangle>>();
+                foreach (var tri in triangles)
+                {
+                    var XYZPairs = TrianglesUtility.GetXYZPairsOfTriangle(tri);
+                    foreach (var pair in XYZPairs)
+                    {
+                        var newPair = new UnorderedXYZPair(pair.Item1, pair.Item2);
+                        if (!dict.TryGetValue(newPair, out var list))
+                        {
+                            list = new List<MeshTriangle>();
+                            dict[newPair] = list;
+                        }
+
+                        list.Add(tri);
+                    }
+                }
+                // Danh sách các cạnh bên ngoài cùng
+                var pairs = new List<UnorderedXYZPair>();
+                foreach (var keyValue in dict)
+                {
+                    if (keyValue.Value.Count == 1)
+                    {
+                        pairs.Add(keyValue.Key);
+                    }
+                }
+
+                var groups = PointUtility.GroupColinearPairs(pairs);
+                //HashSet<XYZ> setPoints = new HashSet<XYZ>(new XYZComparer());
+                List<(XYZ, XYZ)> startEndPairs = new List<(XYZ, XYZ)>();
+                foreach (var group in groups)
+                {
+                    var (startPoint, endPoint) = PointUtility.FindFurthestPointsInGroup(group);
+                    startEndPairs.Add((startPoint, endPoint));
+                    //setPoints.Add(startPoint);
+                    //setPoints.Add(endPoint);
+                    // dùng startPoint và endPoint làm đầu – cuối đoạn thẳng đại diện
+                }
+                if (startEndPairs.Count == 4)
+                {
+                    pointsOfTrianglesGroupSimple.Add(startEndPairs.ToList());
+                }
+                else if (startEndPairs.Count > 4)
+                {
+                    pointsOfTrianglesGroupComplex.Add(startEndPairs.ToList());
+                    //TestForDebug.ShowPointsToDraw(setPoints.ToList());
+                }
+            }
+
+            if (pointsOfTrianglesGroupSimple.Count == 6 && pointsOfTrianglesGroupComplex.Count == 0)
+            {
+                var group1 = pointsOfTrianglesGroupSimple[0];
+                var group1Points = new HashSet<XYZ>(group1.SelectMany(pair => new[] { pair.Item1, pair.Item2 }), new XYZComparer());
+
+                var group2 = pointsOfTrianglesGroupSimple
+                    .Skip(1)
+                    .FirstOrDefault(group => !group.Any(pair => group1Points.Contains(pair.Item1) || group1Points.Contains(pair.Item2)));
+                if (group2 != default)
+                {
+                    return MakeAxisHeigthForExtrusion(group1, group2);
+                }
+            }
+            else if (pointsOfTrianglesGroupComplex.Count == 2)
+            {
+                var group1 = pointsOfTrianglesGroupComplex[0];
+                var group2 = pointsOfTrianglesGroupComplex[1];
+                return MakeAxisHeigthForExtrusion(group1, group2);
+            }
+            return null;
+        }
+
+        private Solid MakeAxisHeigthForExtrusion(List<(XYZ, XYZ)> group1, List<(XYZ, XYZ)> group2)
+        {
+            XYZ randomPoint = group1[0].Item1;
+            XYZ closestPoint = null;
+            double minDistance = double.MaxValue;
+            foreach (var (start, end) in group2)
+            {
+                if (randomPoint.DistanceTo(start) < minDistance)
+                {
+                    minDistance = randomPoint.DistanceTo(start);
+                    closestPoint = start;
+                }
+            }
+            if (closestPoint != null)
+            {
+                XYZ axis = (closestPoint - randomPoint).Normalize();
+                double height = minDistance;
+                var results = GroupClosedLoops(group1);
+                Solid newsolid = SolidUtility.CreateNewSolidFromPoints(results, axis, height);
+                return newsolid;
+                //TestForDebug.CreateDirectShapeFromSolid(doc, newsolid);
+            }
+            return null;
+        }
+
+        private List<List<(XYZ start, XYZ end)>> GroupClosedLoops(List<(XYZ start, XYZ end)> segments)
+        {
+            var comparer = new XYZComparer();
+            var remaining = new List<(XYZ start, XYZ end)>(segments);
+            var result = new List<List<(XYZ start, XYZ end)>>();
+
+            while (remaining.Count > 0)
+            {
+                var loop = new List<(XYZ start, XYZ end)>();
+
+                // Lấy đoạn đầu
+                var current = remaining[0];
+                loop.Add(current);
+                remaining.RemoveAt(0);
+
+                while (true)
+                {
+                    var next = remaining.FirstOrDefault(s => comparer.Equals(s.start, current.end));
+
+                    if (next == default) break;
+
+                    loop.Add(next);
+                    remaining.Remove(next);
+                    current = next;
+
+                    // Nếu khép kín thì kết thúc
+                    if (comparer.Equals(current.end, loop[0].start))
+                        break;
+                }
+
+                // Kiểm tra vòng có khép kín không
+                if (!comparer.Equals(loop.Last().end, loop.First().start))
+                    throw new InvalidOperationException("Tồn tại một chuỗi không khép kín.");
+
+                result.Add(loop);
+            }
+
+            return result;
+        }
 
         /// <summary>
         /// Chuẩn bị các thông số như danh sách các cặp điểm để tạo line

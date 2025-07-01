@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Autodesk.Revit.DB;
 using FirstCommand.Support.Constants;
+using FirstCommand.Support.GeometryHandle;
 
 namespace FirstCommand.Support.PointHandle
 {
@@ -197,6 +198,152 @@ namespace FirstCommand.Support.PointHandle
         {
             var result = new XYZ(p.X, p.Y, z);
             return result;
+        }
+
+        /// <summary>
+        /// Hàm kiểm tra xem 2 cặp điểm có điểm chung không
+        /// </summary>
+        /// <param name="pair1"></param>
+        /// <param name="pair2"></param>
+        /// <returns></returns>
+        public static bool HasCommonPoint(UnorderedXYZPair a, UnorderedXYZPair b)
+        {
+            return a.Contains(b.Point1) || a.Contains(b.Point2);
+        }
+
+        /// <summary>
+        /// Hàm kiểm tra xem 2 UnorderedXYZPair có cùng phương với nhau không
+        /// </summary>
+        /// <param name="pair1"></param>
+        /// <param name="pair2"></param>
+        /// <returns></returns>
+        public static bool ArePairsParallel(UnorderedXYZPair pair1, UnorderedXYZPair pair2)
+        {
+            XYZ dir1 = (pair1.Point1 - pair1.Point2).Normalize();
+            XYZ dir2 = (pair2.Point1 - pair2.Point2).Normalize();
+            return GeometryUtility.IsParallel(dir1, dir2, CommonConstants.TOLERANCE);
+        }
+
+        /// <summary>
+        /// Hàm dùng để gom nhóm các UnorderedXYZPair thành các nhóm nhỏ có điểm chung và thẳng hàng
+        /// </summary>
+        /// <param name="pairs"></param>
+        /// <returns></returns>
+        public static List<List<UnorderedXYZPair>> GroupColinearPairs(List<UnorderedXYZPair> pairs)
+        {
+            List<List<UnorderedXYZPair>> groups = new List<List<UnorderedXYZPair>>();
+
+            foreach (var pair in pairs)
+            {
+                bool addedToGroup = false;
+
+                foreach (var group in groups)
+                {
+                    if (group.Any(existing =>
+                        HasCommonPoint(pair, existing) &&
+                        ArePairsParallel(pair, existing)))
+                    {
+                        group.Add(pair);
+                        addedToGroup = true;
+                        break;
+                    }
+                }
+
+                if (!addedToGroup)
+                {
+                    groups.Add(new List<UnorderedXYZPair> { pair });
+                }
+            }
+
+            return groups;
+        }
+
+        /// <summary>
+        /// Hàm tìm ra 2 điểm xa nhau nhất trong 1 group
+        /// </summary>
+        /// <param name="group"></param>
+        /// <returns></returns>
+        public static (XYZ, XYZ) FindFurthestPointsInGroup(List<UnorderedXYZPair> group)
+        {
+            // 1. Gom tất cả điểm
+            List<XYZ> points = new List<XYZ>();
+
+            foreach (var pair in group)
+            {
+                if (!points.Any(p => p.IsAlmostEqualTo(pair.Point1)))
+                    points.Add(pair.Point1);
+
+                if (!points.Any(p => p.IsAlmostEqualTo(pair.Point2)))
+                    points.Add(pair.Point2);
+            }
+
+            // 2. Tìm 2 điểm xa nhau nhất
+            double maxDistance = 0;
+            XYZ p1Max = null, p2Max = null;
+
+            for (int i = 0; i < points.Count - 1; i++)
+            {
+                for (int j = i + 1; j < points.Count; j++)
+                {
+                    double dist = points[i].DistanceTo(points[j]);
+                    if (dist > maxDistance)
+                    {
+                        maxDistance = dist;
+                        p1Max = points[i];
+                        p2Max = points[j];
+                    }
+                }
+            }
+
+            return (p1Max, p2Max);
+        }
+    }
+
+    /// <summary>
+    /// Lớp này dùng để nhận vào 1 cặp điểm, có overide equals, gethashcode để instance của class có thể làm key trong dictionary
+    /// </summary>
+    public class UnorderedXYZPair
+    {
+        public XYZ Point1 { get; }
+        public XYZ Point2 { get; }
+
+        public UnorderedXYZPair(XYZ p1, XYZ p2)
+        {
+            Point1 = p1;
+            Point2 = p2;
+        }
+
+        // Kiểm tra 1 điểm có nằm trong cặp không (gần đúng)
+        public bool Contains(XYZ p)
+        {
+            return Point1.IsAlmostEqualTo(p, CommonConstants.TOLERANCE) || Point2.IsAlmostEqualTo(p, CommonConstants.TOLERANCE);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is UnorderedXYZPair other)
+            {
+                return (Point1.IsAlmostEqualTo(other.Point1, CommonConstants.TOLERANCE) && Point2.IsAlmostEqualTo(other.Point2, CommonConstants.TOLERANCE)) ||
+                       (Point1.IsAlmostEqualTo(other.Point2, CommonConstants.TOLERANCE) && Point2.IsAlmostEqualTo(other.Point1, CommonConstants.TOLERANCE));
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            long hash1 = GetPointHash(Point1);
+            long hash2 = GetPointHash(Point2);
+
+            // Bỏ thứ tự bằng cách luôn cộng min + max
+            long min = Math.Min(hash1, hash2);
+            long max = Math.Max(hash1, hash2);
+
+            return (min + max).GetHashCode();
+        }
+
+        private long GetPointHash(XYZ p)
+        {
+            return (p.X * 73856093 + p.Y * 19349663 + p.Z * 83492791).GetHashCode();
         }
     }
 }
