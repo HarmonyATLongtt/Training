@@ -169,13 +169,14 @@ namespace FirstCommand.Support.GeometryHandle
         /// <param name="v1"></param>
         /// <param name="v2"></param>
         /// <returns></returns>
-        public static bool AreVectorsPerpendicular(XYZ v1, XYZ v2)
+        public static bool AreVectorsPerpendicular(XYZ v1, XYZ v2, double tolerance)
         {
             if (v1.IsZeroLength() || v2.IsZeroLength())
                 return false;  // Vector rỗng không có hướng xác định
 
             double dot = v1.Normalize().DotProduct(v2.Normalize());
-            return Math.Abs(dot) < CommonConstants.COSINE_ANGLE_TOLERANCE_1_DEGREE;
+            //return Math.Abs(dot) < CommonConstants.COSINE_ANGLE_TOLERANCE_1_DEGREE;
+            return Math.Abs(dot) < tolerance;
         }
 
         /// <summary>

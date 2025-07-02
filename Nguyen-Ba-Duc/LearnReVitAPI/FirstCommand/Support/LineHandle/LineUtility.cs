@@ -83,7 +83,7 @@ namespace FirstCommand.Support.LineHandle
                 // Tạo mặt phẳng đi qua 1 line và thẳng đứng song song với trục Z
                 Plane plane = PlaneUtility.CreatePlaneParallelToZFromLine(lines[i]);
                 // Nếu line[i + 1] song song với plane
-                if (GeometryUtility.AreVectorsPerpendicular(plane.Normal.Normalize(), dir2))
+                if (GeometryUtility.AreVectorsPerpendicular(plane.Normal.Normalize(), dir2, CommonConstants.COSINE_ANGLE_TOLERANCE_1_DEGREE))
                 {
                     lines[i + 1] = CreateLineOnPlane(plane, lines[i + 1]);
                     // Sau đó sẽ xét giao điểm

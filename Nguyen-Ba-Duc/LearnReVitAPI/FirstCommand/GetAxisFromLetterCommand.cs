@@ -68,10 +68,10 @@ namespace FirstCommand
                     Dictionary<Solid, List<PlanarFace>> solidPlanarFaces = new Dictionary<Solid, List<PlanarFace>>();
 
                     var solid = CreateSolidFromMeshes(linkedElem);
-                    var tupleValue = GetGroupedFacesFromSolid(doc, solid);
-                    planarFaces = tupleValue.Item1;
-                    cylindricalFaces = tupleValue.Item2;
-                    solidPlanarFaces = tupleValue.Item3;
+                    //var tupleValue = GetGroupedFacesFromSolid(doc, solid);
+                    //planarFaces = tupleValue.Item1;
+                    //cylindricalFaces = tupleValue.Item2;
+                    //solidPlanarFaces = tupleValue.Item3;
 
                     //foreach (GeometryObject geometryObj in elementGeo)
                     //{
@@ -104,18 +104,18 @@ namespace FirstCommand
                     //    }
                     //}
 
-                    if (cylindricalFaces.Count > 0)
-                    {
-                        var listCylindricalFaces = GetCylindricalFaces(cylindricalFaces, planarFaces);
+                    //if (cylindricalFaces.Count > 0)
+                    //{
+                    //    var listCylindricalFaces = GetCylindricalFaces(cylindricalFaces, planarFaces);
 
-                        var lineAndIntersectPointOnFaces = FindLinesAndIntersectionsOnFace(doc, planarFaces, listCylindricalFaces);
+                    //    var lineAndIntersectPointOnFaces = FindLinesAndIntersectionsOnFace(doc, planarFaces, listCylindricalFaces);
 
-                        ListCylinderDimension = PreparePointsForDrawingModelLine(doc, lineAndIntersectPointOnFaces);
-                    }
-                    else
-                    {
-                        PrepareSolidCuttingData(doc, solidPlanarFaces);
-                    }
+                    //    ListCylinderDimension = PreparePointsForDrawingModelLine(doc, lineAndIntersectPointOnFaces);
+                    //}
+                    //else
+                    //{
+                    //    PrepareSolidCuttingData(doc, solidPlanarFaces);
+                    //}
 
                     var x = ListRectangularDimension;
                     var y = ListCylinderDimension;
@@ -143,83 +143,235 @@ namespace FirstCommand
             {
                 meshTriangles.AddRange(TrianglesUtility.ExtractTrianglesFromSolid(s));
             }
+            bool isCylinder = false;
+            bool isRectangle = false;
+            IsElementCylinderOrRectangle(meshTriangles, ref isCylinder, ref isRectangle);
 
-            //Gom nhóm các triangel theo mặt phẳng
-            var result = TrianglesUtility.GroupTrianglesByVertexAndNormal(meshTriangles);
-
-            var pointsOfTrianglesGroupComplex = new List<List<(XYZ, XYZ)>>();
-            var pointsOfTrianglesGroupSimple = new List<List<(XYZ, XYZ)>>();
-
-            foreach (var triangles in result)
+            if (isRectangle)
             {
-                var dict = new Dictionary<UnorderedXYZPair, List<MeshTriangle>>();
-                foreach (var tri in triangles)
+                //Gom nhóm các triangel theo mặt phẳng
+                var result = TrianglesUtility.GroupTrianglesByVertexAndNormal(meshTriangles);
+
+                //foreach (var group in result)
+                //{
+                //    if (group.Count == 2)
+                //    {
+                //        XYZ normal1 = TrianglesUtility.GetNormalFromTriangle(group[0]);
+                //        XYZ normal2 = TrianglesUtility.GetNormalFromTriangle(group[1]);
+
+                //        if (GeometryUtility.IsParallel(normal1, normal2, CommonConstants.TOLERANCE))
+                //        {
+                //            TaskDialog.Show("Noti", "Song song");
+                //        }
+                //        else
+                //        {
+                //            TaskDialog.Show("Noti", " Không song song");
+                //        }
+                //        //TrianglesUtility.DrawTriangles(group, doc, isRevitLink, transform);
+                //        break;
+                //    }
+                //}
+
+                //HashSet<MeshTriangle> setTriangles = new HashSet<MeshTriangle>(result.SelectMany(subList => subList));
+                //var remainTriangles = meshTriangles.Where(tri => !setTriangles.Contains(tri)).ToList();
+
+                var pointsOfTrianglesGroupComplex = new List<List<(XYZ, XYZ)>>();
+                var pointsOfTrianglesGroupSimple = new List<List<(XYZ, XYZ)>>();
+
+                foreach (var triangles in result)
                 {
-                    var XYZPairs = TrianglesUtility.GetXYZPairsOfTriangle(tri);
-                    foreach (var pair in XYZPairs)
+                    var dict = new Dictionary<UnorderedXYZPair, List<MeshTriangle>>();
+                    foreach (var tri in triangles)
                     {
-                        var newPair = new UnorderedXYZPair(pair.Item1, pair.Item2);
-                        if (!dict.TryGetValue(newPair, out var list))
+                        var XYZPairs = TrianglesUtility.GetXYZPairsOfTriangle(tri);
+                        foreach (var pair in XYZPairs)
                         {
-                            list = new List<MeshTriangle>();
-                            dict[newPair] = list;
+                            var newPair = new UnorderedXYZPair(pair.Item1, pair.Item2);
+                            if (!dict.TryGetValue(newPair, out var list))
+                            {
+                                list = new List<MeshTriangle>();
+                                dict[newPair] = list;
+                            }
+
+                            list.Add(tri);
                         }
-
-                        list.Add(tri);
                     }
-                }
-                // Danh sách các cạnh bên ngoài cùng
-                var pairs = new List<UnorderedXYZPair>();
-                foreach (var keyValue in dict)
-                {
-                    if (keyValue.Value.Count == 1)
+                    // Danh sách các cạnh bên ngoài cùng
+                    var pairs = new List<UnorderedXYZPair>();
+                    foreach (var keyValue in dict)
                     {
-                        pairs.Add(keyValue.Key);
+                        if (keyValue.Value.Count == 1)
+                        {
+                            pairs.Add(keyValue.Key);
+                        }
+                    }
+
+                    var groups = PointUtility.GroupColinearPairs(pairs);
+                    //HashSet<XYZ> setPoints = new HashSet<XYZ>(new XYZComparer());
+                    List<(XYZ, XYZ)> startEndPairs = new List<(XYZ, XYZ)>();
+                    foreach (var group in groups)
+                    {
+                        var (startPoint, endPoint) = PointUtility.FindFurthestPointsInGroup(group);
+                        startEndPairs.Add((startPoint, endPoint));
+                        //setPoints.Add(startPoint);
+                        //setPoints.Add(endPoint);
+                        // dùng startPoint và endPoint làm đầu – cuối đoạn thẳng đại diện
+                    }
+                    if (startEndPairs.Count == 4)
+                    {
+                        pointsOfTrianglesGroupSimple.Add(startEndPairs.ToList());
+                    }
+                    else if (startEndPairs.Count > 4)
+                    {
+                        pointsOfTrianglesGroupComplex.Add(startEndPairs.ToList());
+                        //TestForDebug.ShowPointsToDraw(setPoints.ToList());
                     }
                 }
 
-                var groups = PointUtility.GroupColinearPairs(pairs);
-                //HashSet<XYZ> setPoints = new HashSet<XYZ>(new XYZComparer());
-                List<(XYZ, XYZ)> startEndPairs = new List<(XYZ, XYZ)>();
-                foreach (var group in groups)
+                if (pointsOfTrianglesGroupSimple.Count > 1 && pointsOfTrianglesGroupComplex.Count == 0)
                 {
-                    var (startPoint, endPoint) = PointUtility.FindFurthestPointsInGroup(group);
-                    startEndPairs.Add((startPoint, endPoint));
-                    //setPoints.Add(startPoint);
-                    //setPoints.Add(endPoint);
-                    // dùng startPoint và endPoint làm đầu – cuối đoạn thẳng đại diện
-                }
-                if (startEndPairs.Count == 4)
-                {
-                    pointsOfTrianglesGroupSimple.Add(startEndPairs.ToList());
-                }
-                else if (startEndPairs.Count > 4)
-                {
-                    pointsOfTrianglesGroupComplex.Add(startEndPairs.ToList());
-                    //TestForDebug.ShowPointsToDraw(setPoints.ToList());
-                }
-            }
+                    var group1 = pointsOfTrianglesGroupSimple[0];
+                    var group1Points = new HashSet<XYZ>(group1.SelectMany(pair => new[] { pair.Item1, pair.Item2 }), new XYZComparer());
 
-            if (pointsOfTrianglesGroupSimple.Count == 6 && pointsOfTrianglesGroupComplex.Count == 0)
-            {
-                var group1 = pointsOfTrianglesGroupSimple[0];
-                var group1Points = new HashSet<XYZ>(group1.SelectMany(pair => new[] { pair.Item1, pair.Item2 }), new XYZComparer());
-
-                var group2 = pointsOfTrianglesGroupSimple
-                    .Skip(1)
-                    .FirstOrDefault(group => !group.Any(pair => group1Points.Contains(pair.Item1) || group1Points.Contains(pair.Item2)));
-                if (group2 != default)
+                    var group2 = pointsOfTrianglesGroupSimple
+                        .Skip(1)
+                        .FirstOrDefault(group => !group.Any(pair => group1Points.Contains(pair.Item1) || group1Points.Contains(pair.Item2)));
+                    if (group2 != default)
+                    {
+                        return MakeAxisHeigthForExtrusion(group1, group2);
+                    }
+                }
+                else if (pointsOfTrianglesGroupComplex.Count == 2)
                 {
+                    var group1 = pointsOfTrianglesGroupComplex[0];
+                    var group2 = pointsOfTrianglesGroupComplex[1];
                     return MakeAxisHeigthForExtrusion(group1, group2);
                 }
+                return null;
             }
-            else if (pointsOfTrianglesGroupComplex.Count == 2)
+            else if (isCylinder)
             {
-                var group1 = pointsOfTrianglesGroupComplex[0];
-                var group2 = pointsOfTrianglesGroupComplex[1];
-                return MakeAxisHeigthForExtrusion(group1, group2);
+                var groups = new List<List<MeshTriangle>>();
+                bool stop = false;
+                do
+                {
+                    GetCylindricalFaces(meshTriangles, groups, ref stop);
+                }
+                while (stop == false);
+
+                TaskDialog.Show("Noti", groups.Count.ToString());
+                //for (int i = 0; i < meshTriangles.Count - 1; i++)
+                //{
+                //    XYZ normal1 = TrianglesUtility.GetNormalFromTriangle(meshTriangles[i]);
+                //    for (int j = i + 1; j < meshTriangles.Count; j++)
+                //    {
+                //        XYZ normal2 = TrianglesUtility.GetNormalFromTriangle(meshTriangles[j]);
+                //        if (TrianglesUtility.HasCommonVertex(meshTriangles[i], meshTriangles[j])
+                //            && GeometryUtility.IsParallel(normal1, normal2, CommonConstants.TOLERANCE))
+                //        {
+                //            refVector = normal1;
+                //            break;
+                //        }
+                //    }
+                //    if (refVector != null) break;
+                //}
+                //var trianglesMakePlanarFace = new HashSet<MeshTriangle>();
+                //var trianglesMakeCylinderFace = new HashSet<MeshTriangle>();
+                //int plananarCount = 0;
+                //int cylinderCount = 0;
+                //foreach (var tri in meshTriangles)
+                //{
+                //    if (GeometryUtility.IsParallel(TrianglesUtility.GetNormalFromTriangle(tri), refVector, CommonConstants.TOLERANCE))
+                //    {
+                //        trianglesMakePlanarFace.Add(tri);
+                //        plananarCount++;
+                //    }
+                //    if (GeometryUtility.AreVectorsPerpendicular(TrianglesUtility.GetNormalFromTriangle(tri), refVector, CommonConstants.TOLERANCE))
+                //    {
+                //        trianglesMakeCylinderFace.Add(tri);
+                //        cylinderCount++;
+                //    }
+                //}
+                //var groupTriangleMakePlanarFace = TrianglesUtility.GroupMeshTrianglesBySharedVertices(trianglesMakePlanarFace);
+                //var groupTriangleMakeCylinderFace = TrianglesUtility.GroupMeshTrianglesBySharedVertices(trianglesMakeCylinderFace);
+
+                //TaskDialog.Show("Noti", "Cylinder Count: " + groupTriangleMakePlanarFace.Count.ToString() + "\n" + "PlanarFace Count: " + groupTriangleMakeCylinderFace.Count.ToString());
             }
             return null;
+        }
+
+        private void GetCylindricalFaces(List<MeshTriangle> meshTriangles, List<List<MeshTriangle>> groups, ref bool stop)
+        {
+            XYZ axis = null;
+            MeshTriangle originTriangle = null;
+            //var trianglesPerpendicularToAxis = new HashSet<MeshTriangle>();
+            //var setTriangles = groups.SelectMany(tri => tri).ToHashSet();
+            for (int i = 0; i < meshTriangles.Count - 1; i++)
+            {
+                //if (setTriangles.Contains(meshTriangles[i])) continue;
+                //if (trianglesPerpendicularToAxis.Contains(meshTriangles[i])) continue;
+
+                XYZ normal1 = TrianglesUtility.GetNormalFromTriangle(meshTriangles[i]);
+                for (int j = i + 1; j < meshTriangles.Count; j++)
+                {
+                    //if (setTriangles.Contains(meshTriangles[j])) continue;
+                    //if (trianglesPerpendicularToAxis.Contains(meshTriangles[i])) continue;
+
+                    XYZ normal2 = TrianglesUtility.GetNormalFromTriangle(meshTriangles[j]);
+                    if (TrianglesUtility.HasCommonVertex(meshTriangles[i], meshTriangles[j])
+                        && !GeometryUtility.IsParallel(normal1, normal2, CommonConstants.TOLERANCE)
+                        && !GeometryUtility.AreVectorsPerpendicular(normal1, normal2, CommonConstants.COSINE_ANGLE_TOLERANCE_1_DEGREE))
+                    {
+                        axis = normal1.CrossProduct(normal2).Normalize();
+                        originTriangle = meshTriangles[i];
+                        //var list = new List<MeshTriangle> { meshTriangles[i], meshTriangles[j] };
+                        //TrianglesUtility.DrawTriangles(list, doc, isRevitLink, transform);
+                        break;
+                    }
+                }
+                if (axis != null) break;
+            }
+            //stop = true;
+            //var trianglesPerpendicularToAxis = TrianglesUtility.GetTrianglesPerpendicularToVector(axis, meshTriangles, CommonConstants.COSINE_ANGLE_TOLERANCE_1_DEGREE).ToHashSet();
+
+            //meshTriangles.RemoveAll(a => trianglesPerpendicularToAxis.Contains(a));
+
+            //var setTriangles = groups.SelectMany(tri => tri).ToHashSet();
+            if (axis != null)
+            {
+                var trianglesParallelToVector = TrianglesUtility.GetTrianglesParallelToVector(axis, meshTriangles, CommonConstants.COSINE_ANGLE_TOLERANCE_5_DEGREE).ToHashSet();
+                var list = TrianglesUtility.FindConnectedTrianglesByVertex(trianglesParallelToVector.ToList(), originTriangle).ToHashSet();
+
+                groups.Add(list.ToList());
+                meshTriangles.RemoveAll(a => list.Contains(a));
+                //if (groups.Count == 3)
+                //{
+                //    TrianglesUtility.DrawHighestAndLowestTriangle(list.ToList(), doc, isRevitLink, transform);
+                //    stop = true;
+                //}
+            }
+            else
+            {
+                stop = true;
+            }
+        }
+
+        private void IsElementCylinderOrRectangle(List<MeshTriangle> meshTriangles, ref bool isCylinder, ref bool isRectangle)
+        {
+            for (int i = 0; i < meshTriangles.Count - 1; i++)
+            {
+                XYZ normal1 = TrianglesUtility.GetNormalFromTriangle(meshTriangles[i]);
+                XYZ normal2 = TrianglesUtility.GetNormalFromTriangle(meshTriangles[i + 1]);
+                if (!GeometryUtility.IsParallel(normal1, normal2, CommonConstants.TOLERANCE)
+                    && !GeometryUtility.AreVectorsPerpendicular(normal1, normal2, CommonConstants.TOLERANCE))
+                {
+                    isCylinder = true;
+                }
+            }
+            if (isCylinder == false)
+            {
+                isRectangle = true;
+            }
         }
 
         private Solid MakeAxisHeigthForExtrusion(List<(XYZ, XYZ)> group1, List<(XYZ, XYZ)> group2)

@@ -4,14 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.DirectContext3D;
 using Autodesk.Revit.UI;
+using FirstCommand.Support.Constants;
+using FirstCommand.Support.DrawOnRevit;
 using FirstCommand.Support.GenericClass;
 using FirstCommand.Support.GenericClass.ComparerClass;
-using FirstCommand.Support.DrawOnRevit;
-using FirstCommand.Support.PointHandle;
-using FirstCommand.Support.LineHandle;
-using FirstCommand.Support.Constants;
 using FirstCommand.Support.GeometryHandle;
+using FirstCommand.Support.LineHandle;
+using FirstCommand.Support.PointHandle;
 
 namespace FirstCommand.Support.TrianglesHandle
 {
@@ -67,6 +68,30 @@ namespace FirstCommand.Support.TrianglesHandle
                 DrawPointLineArc.CreateModelLine(doc, p1, p2, isRevitLink, transform, 0);
                 DrawPointLineArc.CreateModelLine(doc, p2, p3, isRevitLink, transform, 0);
                 DrawPointLineArc.CreateModelLine(doc, p3, p1, isRevitLink, transform, 0);
+            }
+        }
+
+        /// <summary>
+        /// Hàm dùng để vẽ tam giác
+        /// </summary>
+        /// <param name="meshTriangles"></param>
+        /// <param name="doc"></param>
+        /// <param name="isRevitLink"></param>
+        /// <param name="transform"></param>
+        public static void DrawTriangles(List<MeshTriangle> meshTriangles, Document doc, bool isRevitLink, Transform transform)
+        {
+            foreach (var tri in meshTriangles)
+            {
+                var points = GetVerticesOfTriangle(tri);
+                if (points.Count == 3)
+                {
+                    XYZ p1 = points[0];
+                    XYZ p2 = points[1];
+                    XYZ p3 = points[2];
+                    DrawPointLineArc.CreateModelLine(doc, p1, p2, isRevitLink, transform, 0);
+                    DrawPointLineArc.CreateModelLine(doc, p2, p3, isRevitLink, transform, 0);
+                    DrawPointLineArc.CreateModelLine(doc, p3, p1, isRevitLink, transform, 0);
+                }
             }
         }
 
@@ -133,24 +158,45 @@ namespace FirstCommand.Support.TrianglesHandle
         }
 
         /// <summary>
-        /// Hàm lấy ra tập hợp các tam giác cùng phương với 1 line
+        /// Hàm lấy ra tập hợp các tam giác song song với 1 vector
         /// </summary>
-        /// <param name="line"></param>
+        /// <param name="vector"></param>
         /// <param name="triangles"></param>
         /// <returns></returns>
-        public static List<MeshTriangle> GetTrianglesParallelToLine(Line line, List<MeshTriangle> triangles)
+        public static List<MeshTriangle> GetTrianglesParallelToVector(XYZ vector, List<MeshTriangle> triangles, double tolerance)
         {
             List<MeshTriangle> result = new List<MeshTriangle>();
-            XYZ normalizedDirection = line.Direction.Normalize();
+            //XYZ normalizedDirection = line.Direction.Normalize();
             foreach (var triangle in triangles)
             {
                 XYZ normal = GetNormalFromTriangle(triangle);
 
                 // Nếu normal vuông góc với direction thì dot product gần 0
-                double dot = normal.Normalize().DotProduct(normalizedDirection);
+                double dot = normal.Normalize().DotProduct(vector);
 
                 //if (Math.Abs(dot) < COSINE_ANGLE_TOLERANCE_5_DEGREE)
-                if (Math.Abs(dot) < CommonConstants.COSINE_ANGLE_TOLERANCE_1_DEGREE)
+                if (Math.Abs(dot) < tolerance)
+                {
+                    result.Add(triangle);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Lấy ra tất cả tam giác vuông góc với 1 vector
+        /// </summary>
+        /// <param name="vector"></param>
+        /// <param name="triangles"></param>
+        /// <returns></returns>
+        public static List<MeshTriangle> GetTrianglesPerpendicularToVector(XYZ vector, List<MeshTriangle> triangles, double tolerance)
+        {
+            List<MeshTriangle> result = new List<MeshTriangle>();
+            foreach (var triangle in triangles)
+            {
+                XYZ normal = GetNormalFromTriangle(triangle);
+
+                if (GeometryUtility.IsParallel(vector, normal, tolerance))
                 {
                     result.Add(triangle);
                 }
@@ -290,22 +336,14 @@ namespace FirstCommand.Support.TrianglesHandle
         /// <summary>
         /// Hàm kiểm tra xem 2 tam giác có điểm chung không
         /// </summary>
-        /// <param name="vertsA"></param>
-        /// <param name="vertsB"></param>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
         /// <returns></returns>
-        public static bool HasCommonVertex(List<XYZ> vertsA, List<XYZ> vertsB)
+        public static bool HasCommonVertex(MeshTriangle a, MeshTriangle b)
         {
-            return vertsA.Any(a => vertsB.Any(b => a.IsAlmostEqualTo(b, CommonConstants.TOLERANCE)));
-
-            //foreach (var a in vertsA)
-            //{
-            //    foreach (var b in vertsB)
-            //    {
-            //        if (a.IsAlmostEqualTo(b, TOLERANCE))
-            //            return true;
-            //    }
-            //}
-            //return false;
+            var vertsA = TrianglesUtility.GetVerticesOfTriangle(a);
+            var vertsB = TrianglesUtility.GetVerticesOfTriangle(b);
+            return vertsA.Any(va => vertsB.Any(vb => va.IsAlmostEqualTo(vb, CommonConstants.TOLERANCE)));
         }
 
         /// <summary>
@@ -423,7 +461,67 @@ namespace FirstCommand.Support.TrianglesHandle
                     }
                 }
 
-                result.Add(group);
+                if (group.Count > 1)
+                {
+                    result.Add(group);
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Hàm dùng để gom nhóm các tam giác có điểm chung từ 1 triangle cho trước
+        /// </summary>
+        /// <param name="inputTriangles"></param>
+        /// <param name="startTriangle"></param>
+        /// <returns></returns>
+        public static List<MeshTriangle> FindConnectedTrianglesByVertex(List<MeshTriangle> inputTriangles, MeshTriangle startTriangle)
+        {
+            var visited = new HashSet<MeshTriangle>();
+            var result = new List<MeshTriangle>();
+            var queue = new Queue<MeshTriangle>();
+
+            // Tạo dictionary ánh xạ từ XYZ → các tam giác chứa nó
+            var vertexToTriangles = new Dictionary<XYZ, List<MeshTriangle>>(new XYZComparer());
+
+            foreach (var tri in inputTriangles)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    var v = tri.get_Vertex(i);
+                    if (!vertexToTriangles.TryGetValue(v, out var list))
+                    {
+                        list = new List<MeshTriangle>();
+                        vertexToTriangles[v] = list;
+                    }
+                    list.Add(tri);
+                }
+            }
+
+            // Bắt đầu BFS
+            queue.Enqueue(startTriangle);
+            visited.Add(startTriangle);
+
+            while (queue.Count > 0)
+            {
+                var current = queue.Dequeue();
+                result.Add(current);
+
+                for (int i = 0; i < 3; i++)
+                {
+                    var v = current.get_Vertex(i);
+                    if (!vertexToTriangles.TryGetValue(v, out var neighbors)) continue;
+
+                    foreach (var neighbor in neighbors)
+                    {
+                        if (!visited.Contains(neighbor))
+                        {
+                            visited.Add(neighbor);
+                            queue.Enqueue(neighbor);
+                        }
+                    }
+                }
             }
 
             return result;

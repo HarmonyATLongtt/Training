@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Architecture;
@@ -11,7 +10,6 @@ using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.Exceptions;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
-
 using FirstCommand.Support.Constants;
 using FirstCommand.Support.DrawOnRevit;
 using FirstCommand.Support.FaceHandle;
@@ -19,8 +17,8 @@ using FirstCommand.Support.GenericClass;
 using FirstCommand.Support.GenericClass.ComparerClass;
 using FirstCommand.Support.GeometryHandle;
 using FirstCommand.Support.LineHandle;
-using FirstCommand.Support.PointHandle;
 using FirstCommand.Support.PlaneHandle;
+using FirstCommand.Support.PointHandle;
 using FirstCommand.Support.SolidHandle;
 using FirstCommand.Support.TrianglesHandle;
 
@@ -970,7 +968,8 @@ namespace FirstCommand
                 }
             }
             // Danh sách tam giác song song với line
-            List<MeshTriangle> trianglesParallelToLine = TrianglesUtility.GetTrianglesParallelToLine(tuple.Item2, trianglesNearLine);
+            XYZ normalizedDirection = tuple.Item2.Direction.Normalize();
+            List<MeshTriangle> trianglesParallelToLine = TrianglesUtility.GetTrianglesParallelToVector(normalizedDirection, trianglesNearLine, CommonConstants.COSINE_ANGLE_TOLERANCE_1_DEGREE);
             XYZ farthestPoint = GetFarthestPoint(tuple.Item1, trianglesParallelToLine);
             //targetPoint.Add(farthestPoint);
             HashSet<MeshTriangle> trianglesViewed = new HashSet<MeshTriangle>(trianglesParallelToLine);
