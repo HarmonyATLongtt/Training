@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-
-using FirstCommand.Support.TransactionHandle;
 using FirstCommand.Support.LineHandle;
+using FirstCommand.Support.TransactionHandle;
 
 namespace FirstCommand.Support.DrawOnRevit
 {
@@ -21,91 +21,92 @@ namespace FirstCommand.Support.DrawOnRevit
         /// <param name="point2"></param>
         public static void CreateModelLine(Document doc, XYZ p1, XYZ p2, bool isRevitLink, Transform transform, double multiply)
         {
-            //using (Transaction trans = new Transaction(doc, "Create Model Line with Auto Plane"))
-            //{
-            //trans.Start();
-            HandleForTransaction.RunTransaction(doc, "Create Model Line", (Transaction t) =>
+            try
             {
-                ModelCurve modelCurve = null;
-
-                if (isRevitLink)
+                HandleForTransaction.RunTransaction(doc, "Create Model Line", (Transaction t) =>
                 {
-                    p1 = transform.OfPoint(p1);
-                    p2 = transform.OfPoint(p2);
-                }
+                    ModelCurve modelCurve = null;
 
-                //XYZ pt1 = transform.OfPoint(point1);
-                //XYZ pt2 = transform.OfPoint(point2);
-
-                //XYZ newVector = XYZ.BasisZ.Multiply(1);
-                //XYZ p1 = pt1.Add(newVector);
-                //XYZ p2 = pt2.Add(newVector);
-
-                if (multiply > 0)
-                {
-                    XYZ newVector = XYZ.BasisZ.Multiply(1);
-                    p1 = p1.Add(newVector);
-                    p2 = p2.Add(newVector);
-                }
-
-                Line line = Line.CreateBound(p1, p2);
-                XYZ direction = (p2 - p1).Normalize();
-
-                bool isParallelToX = Math.Abs(direction.DotProduct(XYZ.BasisX)) > 0.99;
-                bool isParallelToY = Math.Abs(direction.DotProduct(XYZ.BasisY)) > 0.99;
-                bool isParallelToZ = Math.Abs(direction.DotProduct(XYZ.BasisZ)) > 0.99;
-
-                Plane plane;
-
-                if (isParallelToX)
-                {
-                    plane = Plane.CreateByNormalAndOrigin(XYZ.BasisY, p1);
-                }
-                else if (isParallelToY)
-                {
-                    plane = Plane.CreateByNormalAndOrigin(XYZ.BasisX, p1);
-                }
-                else if (isParallelToZ)
-                {
-                    plane = Plane.CreateByNormalAndOrigin(XYZ.BasisX, p1);
-                }
-                else
-                {
-                    XYZ normal = direction.CrossProduct(XYZ.BasisZ).Normalize();
-                    plane = Plane.CreateByNormalAndOrigin(normal, p1);
-                }
-                SketchPlane sketchPlane = SketchPlane.Create(doc, plane);
-
-                if (isParallelToX || isParallelToY || isParallelToZ)
-                {
-                    Line snappedLine = LineUtility.ProjectLineOntoSketchPlane(line, plane);
-                    if (snappedLine != null)
+                    if (isRevitLink)
                     {
-                        modelCurve = doc.Create.NewModelCurve(snappedLine, sketchPlane);
+                        p1 = transform.OfPoint(p1);
+                        p2 = transform.OfPoint(p2);
+                    }
+
+                    //XYZ pt1 = transform.OfPoint(point1);
+                    //XYZ pt2 = transform.OfPoint(point2);
+
+                    //XYZ newVector = XYZ.BasisZ.Multiply(1);
+                    //XYZ p1 = pt1.Add(newVector);
+                    //XYZ p2 = pt2.Add(newVector);
+
+                    if (multiply > 0)
+                    {
+                        XYZ newVector = XYZ.BasisZ.Multiply(1);
+                        p1 = p1.Add(newVector);
+                        p2 = p2.Add(newVector);
+                    }
+
+                    Line line = Line.CreateBound(p1, p2);
+                    XYZ direction = (p2 - p1).Normalize();
+
+                    bool isParallelToX = Math.Abs(direction.DotProduct(XYZ.BasisX)) > 0.99;
+                    bool isParallelToY = Math.Abs(direction.DotProduct(XYZ.BasisY)) > 0.99;
+                    bool isParallelToZ = Math.Abs(direction.DotProduct(XYZ.BasisZ)) > 0.99;
+
+                    Plane plane;
+
+                    if (isParallelToX)
+                    {
+                        plane = Plane.CreateByNormalAndOrigin(XYZ.BasisY, p1);
+                    }
+                    else if (isParallelToY)
+                    {
+                        plane = Plane.CreateByNormalAndOrigin(XYZ.BasisX, p1);
+                    }
+                    else if (isParallelToZ)
+                    {
+                        plane = Plane.CreateByNormalAndOrigin(XYZ.BasisX, p1);
                     }
                     else
                     {
-                        //TaskDialog.Show("Lỗi", "Line không nằm gần SketchPlane. Không thể vẽ.");
+                        XYZ normal = direction.CrossProduct(XYZ.BasisZ).Normalize();
+                        plane = Plane.CreateByNormalAndOrigin(normal, p1);
                     }
-                }
-                else
-                {
-                    modelCurve = doc.Create.NewModelCurve(line, sketchPlane);
-                }
-                //Random random = new Random();
+                    SketchPlane sketchPlane = SketchPlane.Create(doc, plane);
 
-                //// Tạo giá trị RGB ngẫu nhiên từ 0 đến 255
-                //byte red = (byte)random.Next(0, 256);
-                //byte green = (byte)random.Next(0, 256);
-                //byte blue = (byte)random.Next(0, 256);
+                    if (isParallelToX || isParallelToY || isParallelToZ)
+                    {
+                        Line snappedLine = LineUtility.ProjectLineOntoSketchPlane(line, plane);
+                        if (snappedLine != null)
+                        {
+                            modelCurve = doc.Create.NewModelCurve(snappedLine, sketchPlane);
+                        }
+                        else
+                        {
+                            //TaskDialog.Show("Lỗi", "Line không nằm gần SketchPlane. Không thể vẽ.");
+                        }
+                    }
+                    else
+                    {
+                        modelCurve = doc.Create.NewModelCurve(line, sketchPlane);
+                    }
+                    //Random random = new Random();
 
-                //OverrideGraphicSettings ogs = new OverrideGraphicSettings();
-                //ogs.SetProjectionLineColor(new Color(red, green, blue));
+                    //// Tạo giá trị RGB ngẫu nhiên từ 0 đến 255
+                    //byte red = (byte)random.Next(0, 256);
+                    //byte green = (byte)random.Next(0, 256);
+                    //byte blue = (byte)random.Next(0, 256);
 
-                //doc.ActiveView.SetElementOverrides(modelCurve.Id, ogs);
-            });
-            //trans.Commit();
-            //}
+                    //OverrideGraphicSettings ogs = new OverrideGraphicSettings();
+                    //ogs.SetProjectionLineColor(new Color(red, green, blue));
+
+                    //doc.ActiveView.SetElementOverrides(modelCurve.Id, ogs);
+                });
+            }
+            catch (Exception ex)
+            {
+            }
         }
 
         /// <summary>
@@ -175,6 +176,16 @@ namespace FirstCommand.Support.DrawOnRevit
                 trans.Commit();
             }
             uiDoc.ShowElements(modelCurve.Id);
+        }
+
+        public static void DrawLines(Document doc, List<Line> lines, bool isRevitLink, Transform transform, double multiply)
+        {
+            foreach (Line line in lines)
+            {
+                XYZ p1 = line.GetEndPoint(0);
+                XYZ p2 = line.GetEndPoint(1);
+                CreateModelLine(doc, p1, p2, isRevitLink, transform, multiply);
+            }
         }
     }
 }

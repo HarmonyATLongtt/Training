@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Converters;
 using System.Xml.Linq;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
@@ -106,6 +107,7 @@ namespace FirstCommand
 
                     //if (cylindricalFaces.Count > 0)
                     //{
+                    //    // với mesh thì không cần
                     //    var listCylindricalFaces = GetCylindricalFaces(cylindricalFaces, planarFaces);
 
                     //    var lineAndIntersectPointOnFaces = FindLinesAndIntersectionsOnFace(doc, planarFaces, listCylindricalFaces);
@@ -150,30 +152,7 @@ namespace FirstCommand
             if (isRectangle)
             {
                 //Gom nhóm các triangel theo mặt phẳng
-                var result = TrianglesUtility.GroupTrianglesByVertexAndNormal(meshTriangles);
-
-                //foreach (var group in result)
-                //{
-                //    if (group.Count == 2)
-                //    {
-                //        XYZ normal1 = TrianglesUtility.GetNormalFromTriangle(group[0]);
-                //        XYZ normal2 = TrianglesUtility.GetNormalFromTriangle(group[1]);
-
-                //        if (GeometryUtility.IsParallel(normal1, normal2, CommonConstants.TOLERANCE))
-                //        {
-                //            TaskDialog.Show("Noti", "Song song");
-                //        }
-                //        else
-                //        {
-                //            TaskDialog.Show("Noti", " Không song song");
-                //        }
-                //        //TrianglesUtility.DrawTriangles(group, doc, isRevitLink, transform);
-                //        break;
-                //    }
-                //}
-
-                //HashSet<MeshTriangle> setTriangles = new HashSet<MeshTriangle>(result.SelectMany(subList => subList));
-                //var remainTriangles = meshTriangles.Where(tri => !setTriangles.Contains(tri)).ToList();
+                var result = TrianglesUtility.GroupTrianglesByVertexAndNormal(meshTriangles, 2);
 
                 var pointsOfTrianglesGroupComplex = new List<List<(XYZ, XYZ)>>();
                 var pointsOfTrianglesGroupSimple = new List<List<(XYZ, XYZ)>>();
@@ -213,8 +192,7 @@ namespace FirstCommand
                     {
                         var (startPoint, endPoint) = PointUtility.FindFurthestPointsInGroup(group);
                         startEndPairs.Add((startPoint, endPoint));
-                        //setPoints.Add(startPoint);
-                        //setPoints.Add(endPoint);
+
                         // dùng startPoint và endPoint làm đầu – cuối đoạn thẳng đại diện
                     }
                     if (startEndPairs.Count == 4)
@@ -251,72 +229,182 @@ namespace FirstCommand
             }
             else if (isCylinder)
             {
-                var groups = new List<List<MeshTriangle>>();
+                var groupTrianglesAndAxis = new List<(XYZ, List<MeshTriangle>)>();
+
+                var meshTrianglesMakePlarnarFace = TrianglesUtility.GroupTrianglesByVertexAndNormal(meshTriangles, 3).SelectMany(tri => tri).ToList();
+                var setmeshTrianglesMakePlarnarFace = meshTrianglesMakePlarnarFace.ToHashSet();
+                meshTriangles.RemoveAll(tr => setmeshTrianglesMakePlarnarFace.Contains(tr));
+
                 bool stop = false;
                 do
                 {
-                    GetCylindricalFaces(meshTriangles, groups, ref stop);
+                    GetCylindricalFaces(meshTriangles, groupTrianglesAndAxis, ref stop);
                 }
                 while (stop == false);
 
-                TaskDialog.Show("Noti", groups.Count.ToString());
-                //for (int i = 0; i < meshTriangles.Count - 1; i++)
-                //{
-                //    XYZ normal1 = TrianglesUtility.GetNormalFromTriangle(meshTriangles[i]);
-                //    for (int j = i + 1; j < meshTriangles.Count; j++)
-                //    {
-                //        XYZ normal2 = TrianglesUtility.GetNormalFromTriangle(meshTriangles[j]);
-                //        if (TrianglesUtility.HasCommonVertex(meshTriangles[i], meshTriangles[j])
-                //            && GeometryUtility.IsParallel(normal1, normal2, CommonConstants.TOLERANCE))
-                //        {
-                //            refVector = normal1;
-                //            break;
-                //        }
-                //    }
-                //    if (refVector != null) break;
-                //}
-                //var trianglesMakePlanarFace = new HashSet<MeshTriangle>();
-                //var trianglesMakeCylinderFace = new HashSet<MeshTriangle>();
-                //int plananarCount = 0;
-                //int cylinderCount = 0;
-                //foreach (var tri in meshTriangles)
-                //{
-                //    if (GeometryUtility.IsParallel(TrianglesUtility.GetNormalFromTriangle(tri), refVector, CommonConstants.TOLERANCE))
-                //    {
-                //        trianglesMakePlanarFace.Add(tri);
-                //        plananarCount++;
-                //    }
-                //    if (GeometryUtility.AreVectorsPerpendicular(TrianglesUtility.GetNormalFromTriangle(tri), refVector, CommonConstants.TOLERANCE))
-                //    {
-                //        trianglesMakeCylinderFace.Add(tri);
-                //        cylinderCount++;
-                //    }
-                //}
-                //var groupTriangleMakePlanarFace = TrianglesUtility.GroupMeshTrianglesBySharedVertices(trianglesMakePlanarFace);
-                //var groupTriangleMakeCylinderFace = TrianglesUtility.GroupMeshTrianglesBySharedVertices(trianglesMakeCylinderFace);
+                //TaskDialog.Show("Noti", groupTrianglesAndAxis.Count.ToString());
 
-                //TaskDialog.Show("Noti", "Cylinder Count: " + groupTriangleMakePlanarFace.Count.ToString() + "\n" + "PlanarFace Count: " + groupTriangleMakeCylinderFace.Count.ToString());
+                if (groupTrianglesAndAxis.Count > 0)
+                {
+                    var lines = new List<Line>();
+                    foreach (var (axis, triangles) in groupTrianglesAndAxis)
+                    {
+                        //if (GeometryUtility.IsParallel(axis, XYZ.BasisZ, CommonConstants.COSINE_ANGLE_TOLERANCE_5_DEGREE)) continue;
+                        //TrianglesUtility.DrawTriangles(triangles, doc, isRevitLink, transform);
+                        var points = TrianglesUtility.GetVerticesOfAllTriangles(triangles).ToList();
+
+                        var (min, max) = TrianglesUtility.GetMinMaxXYZFromMeshTriangles(triangles);
+                        if (min != null && max != null)
+                        {
+                            double minDisToMin = double.MaxValue;
+                            double minDisToMax = double.MaxValue;
+                            XYZ minPointOfTriangles = null;
+                            XYZ maxPointOfTriangles = null;
+                            foreach (var p in points)
+                            {
+                                if (p.DistanceTo(min) < minDisToMin)
+                                {
+                                    minDisToMin = p.DistanceTo(min);
+                                    minPointOfTriangles = p;
+                                }
+                            }
+                            foreach (var p in points)
+                            {
+                                if (p.DistanceTo(max) < minDisToMax)
+                                {
+                                    minDisToMax = p.DistanceTo(max);
+                                    maxPointOfTriangles = p;
+                                }
+                            }
+                            if (minPointOfTriangles != null && maxPointOfTriangles != null)
+                            {
+                                var minMaxPairs = new List<XYZ> { minPointOfTriangles, maxPointOfTriangles };
+                                XYZ centerPoint = PointUtility.GetCenterPoint(minMaxPairs);
+                                double maxLenghOfLine = minPointOfTriangles.DistanceTo(maxPointOfTriangles);
+                                Line line = LineUtility.CreateLine(centerPoint, axis, maxLenghOfLine);
+                                XYZ minCenterPoint = LineUtility.GetPerpendicularProjectionPointOnLine(line, minPointOfTriangles);
+                                XYZ maxCenterPoint = LineUtility.GetPerpendicularProjectionPointOnLine(line, maxPointOfTriangles);
+
+                                Line newLine = Line.CreateBound(minCenterPoint, maxCenterPoint);
+                                lines.Add(newLine);
+                                //Line radiusLine = Line.CreateBound(maxCenterPoint, max);
+
+                                //DrawPointLineArc.CreateModelLine(doc, minCenterPoint, maxCenterPoint, isRevitLink, transform, 0);
+                                //DrawPointLineArc.CreateModelLine(doc, maxPointOfTriangles, maxCenterPoint, isRevitLink, transform, 0);
+                            }
+                        }
+                    }
+
+                    if (lines.Count >= 2)
+                    {
+                        Plane plane = null;
+                        for (int i = 1; i < lines.Count; i++)
+                        {
+                            plane = LineUtility.CreatePlaneFromTwoLineAndIncludeOneLine(lines[0], lines[i], CommonConstants.COSINE_ANGLE_TOLERANCE_1_DEGREE);
+                            if (plane != null) break;
+                        }
+                        if (plane != null)
+                        {
+                            var newLines = new List<Line> { lines[0] };
+
+                            for (int i = 1; i < lines.Count; i++)
+                            {
+                                newLines.Add(LineUtility.CreateLineOnPlane(plane, lines[i]));
+                            }
+                            var dict = new Dictionary<Line, List<XYZ>>(new LineEqualityComparer());
+                            for (int i = 0; i < newLines.Count - 1; i++)
+                            {
+                                XYZ dir1 = newLines[i].Direction.Normalize();
+                                //List<XYZ> listInterectPoint = new List<XYZ>();
+
+                                for (int j = i + 1; j < newLines.Count; j++)
+                                {
+                                    XYZ dir2 = newLines[i].Direction.Normalize();
+                                    if (GeometryUtility.AreVectorsPerpendicular(dir1, dir2, CommonConstants.COSINE_ANGLE_TOLERANCE_5_DEGREE))
+                                    {
+                                        XYZ intersectPoint = LineUtility.FindIntersectionFromLines(newLines[i], newLines[j]);
+                                        if (intersectPoint != null)
+                                        {
+                                            //listInterectPoint.Add(intersectPoint);
+                                            if (!LineUtility.IsPointBetweenTwoPointsOfLine(newLines[i], intersectPoint))
+                                            {
+                                                if (!dict.TryGetValue(newLines[i], out var list))
+                                                {
+                                                    list = new List<XYZ>();
+                                                    dict[newLines[i]] = list;
+                                                }
+
+                                                list.Add(intersectPoint);
+                                            }
+                                            else if (!LineUtility.IsPointBetweenTwoPointsOfLine(newLines[j], intersectPoint))
+                                            {
+                                                if (!dict.TryGetValue(newLines[j], out var list))
+                                                {
+                                                    list = new List<XYZ>();
+                                                    dict[newLines[j]] = list;
+                                                }
+
+                                                list.Add(intersectPoint);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            foreach (var keyValue in dict)
+                            {
+                                if (keyValue.Value.Count == 1)
+                                {
+                                    newLines.Remove(keyValue.Key);
+                                    Line newLine = null;
+                                    XYZ p1 = keyValue.Key.GetEndPoint(0);
+                                    XYZ p2 = keyValue.Key.GetEndPoint(1);
+                                    XYZ intersectPoint = keyValue.Value[0];
+                                    double dis1 = intersectPoint.DistanceTo(p1);
+                                    double dis2 = intersectPoint.DistanceTo(p2);
+
+                                    if (dis1 < dis2)
+                                    {
+                                        newLine = Line.CreateUnbound(intersectPoint, p2);
+                                    }
+                                    else
+                                    {
+                                        newLine = Line.CreateUnbound(intersectPoint, p1);
+                                    }
+                                    newLines.Add(newLine);
+                                }
+                                else if (keyValue.Value.Count == 2)
+                                {
+                                    XYZ p1 = keyValue.Value[0];
+                                    XYZ p2 = keyValue.Value[1];
+                                    Line newLine = Line.CreateUnbound(p1, p2);
+                                    newLines.Remove(keyValue.Key);
+                                    newLines.Add(newLine);
+                                }
+                            }
+
+                            DrawPointLineArc.DrawLines(doc, newLines, isRevitLink, transform, 0);
+                        }
+                    }
+                    if (lines.Count == 1)
+                    {
+                        DrawPointLineArc.DrawLines(doc, lines, isRevitLink, transform, 0);
+                    }
+                }
             }
             return null;
         }
 
-        private void GetCylindricalFaces(List<MeshTriangle> meshTriangles, List<List<MeshTriangle>> groups, ref bool stop)
+        private void GetCylindricalFaces(List<MeshTriangle> meshTriangles, List<(XYZ, List<MeshTriangle>)> groupTrianglesAndAxis, ref bool stop)
         {
             XYZ axis = null;
             MeshTriangle originTriangle = null;
-            //var trianglesPerpendicularToAxis = new HashSet<MeshTriangle>();
-            //var setTriangles = groups.SelectMany(tri => tri).ToHashSet();
+
             for (int i = 0; i < meshTriangles.Count - 1; i++)
             {
-                //if (setTriangles.Contains(meshTriangles[i])) continue;
-                //if (trianglesPerpendicularToAxis.Contains(meshTriangles[i])) continue;
-
                 XYZ normal1 = TrianglesUtility.GetNormalFromTriangle(meshTriangles[i]);
                 for (int j = i + 1; j < meshTriangles.Count; j++)
                 {
-                    //if (setTriangles.Contains(meshTriangles[j])) continue;
-                    //if (trianglesPerpendicularToAxis.Contains(meshTriangles[i])) continue;
-
                     XYZ normal2 = TrianglesUtility.GetNormalFromTriangle(meshTriangles[j]);
                     if (TrianglesUtility.HasCommonVertex(meshTriangles[i], meshTriangles[j])
                         && !GeometryUtility.IsParallel(normal1, normal2, CommonConstants.TOLERANCE)
@@ -324,30 +412,30 @@ namespace FirstCommand
                     {
                         axis = normal1.CrossProduct(normal2).Normalize();
                         originTriangle = meshTriangles[i];
-                        //var list = new List<MeshTriangle> { meshTriangles[i], meshTriangles[j] };
-                        //TrianglesUtility.DrawTriangles(list, doc, isRevitLink, transform);
+
                         break;
                     }
                 }
                 if (axis != null) break;
             }
-            //stop = true;
-            //var trianglesPerpendicularToAxis = TrianglesUtility.GetTrianglesPerpendicularToVector(axis, meshTriangles, CommonConstants.COSINE_ANGLE_TOLERANCE_1_DEGREE).ToHashSet();
 
-            //meshTriangles.RemoveAll(a => trianglesPerpendicularToAxis.Contains(a));
-
-            //var setTriangles = groups.SelectMany(tri => tri).ToHashSet();
             if (axis != null)
             {
-                var trianglesParallelToVector = TrianglesUtility.GetTrianglesParallelToVector(axis, meshTriangles, CommonConstants.COSINE_ANGLE_TOLERANCE_5_DEGREE).ToHashSet();
-                var list = TrianglesUtility.FindConnectedTrianglesByVertex(trianglesParallelToVector.ToList(), originTriangle).ToHashSet();
+                GeometryUtility.IsParallelToAnyAxis(ref axis, CommonConstants.COSINE_ANGLE_TOLERANCE_5_DEGREE);
 
-                groups.Add(list.ToList());
+                var trianglesParallelToVector = TrianglesUtility.GetTrianglesParallelToVector(axis, meshTriangles, CommonConstants.COSINE_ANGLE_TOLERANCE_5_DEGREE).ToHashSet();
+                //var list = TrianglesUtility.FindConnectedTrianglesByVertex(trianglesParallelToVector.ToList(), originTriangle).ToHashSet();
+                var list = TrianglesUtility.FindConnectedTrianglesBySharedTwoVertex(trianglesParallelToVector.ToList(), originTriangle).ToHashSet();
+
+                groupTrianglesAndAxis.Add((axis, list.ToList()));
+
                 meshTriangles.RemoveAll(a => list.Contains(a));
-                //if (groups.Count == 3)
+                //if (groups.Count > 0)
                 //{
-                //    TrianglesUtility.DrawHighestAndLowestTriangle(list.ToList(), doc, isRevitLink, transform);
-                //    stop = true;
+                //    //TrianglesUtility.DrawHighestAndLowestTriangle(list.ToList(), doc, isRevitLink, transform);
+                //    TrianglesUtility.DrawTriangles(list.ToList(), doc, isRevitLink, transform);
+                //    //stop = true;
+                //    TaskDialog.Show("Noti", axis.ToString());
                 //}
             }
             else
@@ -563,60 +651,6 @@ namespace FirstCommand
             }
             return listCylindricalFace;
         }
-
-        ///// <summary>
-        ///// Tạo modelline từ 2 điểm bất kỳ
-        ///// </summary>
-        ///// <param name="doc"></param>
-        ///// <param name="point1"></param>
-        ///// <param name="point2"></param>
-        ///// <returns>Trả về line được tạo bởi 2 điểm</returns>
-        //private Line CreateModelLine(Document doc, XYZ point1, XYZ point2)
-        //{
-        //    Line line = null;
-        //    using (Transaction trans = new Transaction(doc, "Create Model Line with Auto Plane"))
-        //    {
-        //        trans.Start();
-
-        //        XYZ p1 = transform.OfPoint(point1);
-        //        XYZ p2 = transform.OfPoint(point2);
-
-        //        line = Line.CreateBound(p1, p2);
-        //        XYZ direction = (p1 - p2).Normalize();
-
-        //        bool isParallelToX = Math.Abs(direction.DotProduct(XYZ.BasisX)) > 0.99;
-        //        bool isParallelToY = Math.Abs(direction.DotProduct(XYZ.BasisY)) > 0.99;
-        //        bool isParallelToZ = Math.Abs(direction.DotProduct(XYZ.BasisZ)) > 0.99;
-
-        //        Plane plane;
-
-        //        if (isParallelToX)
-        //        {
-        //            plane = Plane.CreateByNormalAndOrigin(XYZ.BasisY, p1);
-        //        }
-        //        else if (isParallelToY)
-        //        {
-        //            plane = Plane.CreateByNormalAndOrigin(XYZ.BasisX, p1);
-        //        }
-        //        else if (isParallelToZ)
-        //        {
-        //            plane = Plane.CreateByNormalAndOrigin(XYZ.BasisX, p1);
-        //        }
-        //        else
-        //        {
-        //            XYZ normal = direction.CrossProduct(XYZ.BasisZ).Normalize();
-
-        //            plane = Plane.CreateByNormalAndOrigin(normal, p1);
-        //        }
-
-        //        SketchPlane sketchPlane = SketchPlane.Create(doc, plane);
-
-        //        doc.Create.NewModelCurve(line, sketchPlane);
-
-        //        trans.Commit();
-        //    }
-        //    return line;
-        //}
 
         /// <summary>
         /// Lấy ra 1 điểm là điểm được chiếu từ 1 điểm đến 1 mặt phẳng

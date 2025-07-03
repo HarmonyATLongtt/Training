@@ -213,5 +213,23 @@ namespace FirstCommand.Support.GeometryHandle
             //return cross.GetLength() < COSINE_ANGLE_TOLERANCE_5_DEGREE;
             return cross.GetLength() < tolerance;
         }
+
+        /// <summary>
+        /// Hàm dùng để kiểm tra xem 1 vector có song song với bất kỳ trục nào không, nếu có thì gán vector đó bằng trục đó
+        /// </summary>
+        /// <param name="vector"></param>
+        /// <param name="tolerance"></param>
+        public static void IsParallelToAnyAxis(ref XYZ vector, double tolerance)
+        {
+            List<XYZ> axises = new List<XYZ> { XYZ.BasisX, XYZ.BasisY, XYZ.BasisZ };
+            foreach (var axis in axises)
+            {
+                var cross = vector.CrossProduct(axis);
+                if (cross.GetLength() < tolerance)
+                {
+                    vector = axis;
+                }
+            }
+        }
     }
 }

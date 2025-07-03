@@ -362,6 +362,21 @@ namespace FirstCommand.Support.TrianglesHandle
         }
 
         /// <summary>
+        /// Hàm dùng để lấy ra tất cả các điểm trong 1 tập hợp tất cả tam giác
+        /// </summary>
+        /// <param name="meshTriangles"></param>
+        /// <returns></returns>
+        public static HashSet<XYZ> GetVerticesOfAllTriangles(List<MeshTriangle> meshTriangles)
+        {
+            var points = new HashSet<XYZ>(new XYZComparer());
+            foreach (var tri in meshTriangles)
+            {
+                points.UnionWith(GetVerticesOfTriangle(tri));
+            }
+            return points;
+        }
+
+        /// <summary>
         /// Hàm dùng để lấy ra các cặp điểm trong tam giác
         /// </summary>
         /// <param name="triangle"></param>
@@ -403,7 +418,7 @@ namespace FirstCommand.Support.TrianglesHandle
         /// </summary>
         /// <param name="triangles"></param>
         /// <returns></returns>
-        public static List<List<MeshTriangle>> GroupTrianglesByVertexAndNormal(List<MeshTriangle> triangles)
+        public static List<List<MeshTriangle>> GroupTrianglesByVertexAndNormal(List<MeshTriangle> triangles, double numOfTriangleMakePlanarFace)
         {
             // B1: Tạo dictionary: mỗi điểm XYZ ánh xạ đến các tam giác chứa nó
             var vertexToTriangles = new Dictionary<XYZ, List<MeshTriangle>>(new XYZComparer());
@@ -461,7 +476,7 @@ namespace FirstCommand.Support.TrianglesHandle
                     }
                 }
 
-                if (group.Count > 1)
+                if (group.Count >= numOfTriangleMakePlanarFace)
                 {
                     result.Add(group);
                 }
@@ -512,6 +527,168 @@ namespace FirstCommand.Support.TrianglesHandle
                 {
                     var v = current.get_Vertex(i);
                     if (!vertexToTriangles.TryGetValue(v, out var neighbors)) continue;
+
+                    foreach (var neighbor in neighbors)
+                    {
+                        if (!visited.Contains(neighbor))
+                        {
+                            visited.Add(neighbor);
+                            queue.Enqueue(neighbor);
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Hàm dùng để lấy ra boundingboxXYZ của 1 tập hợp các meshtriangles
+        /// </summary>
+        /// <param name="triangles"></param>
+        /// <returns></returns>
+        public static (XYZ Min, XYZ Max) GetMinMaxXYZFromMeshTriangles(List<MeshTriangle> triangles)
+        {
+            if (triangles == null || triangles.Count == 0)
+                return (null, null);
+
+            double minX = double.MaxValue, minY = double.MaxValue, minZ = double.MaxValue;
+            double maxX = double.MinValue, maxY = double.MinValue, maxZ = double.MinValue;
+
+            foreach (var tri in triangles)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    var pt = tri.get_Vertex(i);
+                    minX = Math.Min(minX, pt.X);
+                    minY = Math.Min(minY, pt.Y);
+                    minZ = Math.Min(minZ, pt.Z);
+
+                    maxX = Math.Max(maxX, pt.X);
+                    maxY = Math.Max(maxY, pt.Y);
+                    maxZ = Math.Max(maxZ, pt.Z);
+                }
+            }
+
+            XYZ minPoint = new XYZ(minX, minY, minZ);
+            XYZ maxPoint = new XYZ(maxX, maxY, maxZ);
+            return (minPoint, maxPoint);
+        }
+
+        /// <summary>
+        /// Hàm dùng để gom nhóm các tam giác có chung 2 đỉnh lại với nhau
+        /// </summary>
+        /// <param name="triangles"></param>
+        /// <returns></returns>
+        public static List<List<MeshTriangle>> GroupMeshTrianglesBySharedTwoVertices(HashSet<MeshTriangle> triangles)
+        {
+            var result = new List<List<MeshTriangle>>();
+            var visited = new HashSet<MeshTriangle>();
+            //var vertexToTriangles = new Dictionary<XYZ, List<MeshTriangle>>(new XYZComparer(CommonConstants.TOLERANCE));
+
+            // Bước 1: tạo từ điển tra nhanh các đỉnh → các tam giác chứa đỉnh đó
+            var vertexToTriangles = new Dictionary<UnorderedXYZPair, List<MeshTriangle>>();
+            foreach (var tri in triangles)
+            {
+                var XYZPairs = GetXYZPairsOfTriangle(tri);
+                foreach (var pair in XYZPairs)
+                {
+                    var newPair = new UnorderedXYZPair(pair.Item1, pair.Item2);
+                    if (!vertexToTriangles.TryGetValue(newPair, out var list))
+                    {
+                        list = new List<MeshTriangle>();
+                        vertexToTriangles[newPair] = list;
+                    }
+
+                    list.Add(tri);
+                }
+            }
+
+            // Bước 2: gom nhóm tam giác có chung đỉnh
+            foreach (var triangle in triangles)
+            {
+                if (visited.Contains(triangle))
+                    continue;
+
+                var group = new List<MeshTriangle>();
+                var toCheck = new List<MeshTriangle> { triangle };
+
+                for (int i = 0; i < toCheck.Count; i++)
+                {
+                    var current = toCheck[i];
+                    if (visited.Contains(current))
+                        continue;
+
+                    visited.Add(current);
+                    group.Add(current);
+
+                    // Tìm các tam giác khác có đỉnh trùng (gần) với current
+                    var XYZPairs = GetXYZPairsOfTriangle(current);
+                    foreach (var pair in XYZPairs)
+                    {
+                        var newPair = new UnorderedXYZPair(pair.Item1, pair.Item2);
+                        if (!vertexToTriangles.TryGetValue(newPair, out var neighbors))
+                            continue;
+                        foreach (var neighbor in neighbors)
+                        {
+                            if (!visited.Contains(neighbor) && !toCheck.Contains(neighbor))
+                            {
+                                toCheck.Add(neighbor);
+                            }
+                        }
+                    }
+                }
+
+                result.Add(group);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Hàm dùng để gom nhóm các tam giác có 2 đỉnh chung, với đầu vào là 1 tam giác cho trước
+        /// </summary>
+        /// <param name="inputTriangles"></param>
+        /// <param name="startTriangle"></param>
+        /// <returns></returns>
+        public static List<MeshTriangle> FindConnectedTrianglesBySharedTwoVertex(List<MeshTriangle> inputTriangles, MeshTriangle startTriangle)
+        {
+            var visited = new HashSet<MeshTriangle>();
+            var result = new List<MeshTriangle>();
+            var queue = new Queue<MeshTriangle>();
+
+            // Tạo dictionary ánh xạ từ XYZ → các tam giác chứa nó
+            var vertexToTriangles = new Dictionary<UnorderedXYZPair, List<MeshTriangle>>();
+            foreach (var tri in inputTriangles)
+            {
+                var XYZPairs = GetXYZPairsOfTriangle(tri);
+                foreach (var pair in XYZPairs)
+                {
+                    var newPair = new UnorderedXYZPair(pair.Item1, pair.Item2);
+                    if (!vertexToTriangles.TryGetValue(newPair, out var list))
+                    {
+                        list = new List<MeshTriangle>();
+                        vertexToTriangles[newPair] = list;
+                    }
+
+                    list.Add(tri);
+                }
+            }
+
+            // Bắt đầu BFS
+            queue.Enqueue(startTriangle);
+            visited.Add(startTriangle);
+
+            while (queue.Count > 0)
+            {
+                var current = queue.Dequeue();
+                result.Add(current);
+
+                var XYZPairs = GetXYZPairsOfTriangle(current);
+                foreach (var pair in XYZPairs)
+                {
+                    var newPair = new UnorderedXYZPair(pair.Item1, pair.Item2);
+                    if (!vertexToTriangles.TryGetValue(newPair, out var neighbors)) continue;
 
                     foreach (var neighbor in neighbors)
                     {

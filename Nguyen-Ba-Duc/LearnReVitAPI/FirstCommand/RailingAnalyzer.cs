@@ -1446,7 +1446,7 @@ namespace FirstCommand
         {
             CylinderInfo cylinderInfo = new CylinderInfo();
 
-            List<XYZ> points = new List<XYZ>();
+            var points = new HashSet<XYZ>(new XYZComparer());
             XYZ highestPoint = null;
             XYZ lowestPoint = null;
 
@@ -1467,9 +1467,9 @@ namespace FirstCommand
                     lowestPoint = tuple.Min;
                 }
 
-                points.AddRange(TrianglesUtility.GetVerticesOfTriangle(triangle));
+                points.UnionWith(TrianglesUtility.GetVerticesOfTriangle(triangle));
             }
-            XYZ centerPoint = PointUtility.GetCenterPoint(points);
+            XYZ centerPoint = PointUtility.GetCenterPoint(points.ToList());
 
             cylinderInfo.TopPoint = PointUtility.SetPointWithNewZValue(centerPoint, highestPoint.Z);
             cylinderInfo.BottomPoint = PointUtility.SetPointWithNewZValue(centerPoint, lowestPoint.Z);

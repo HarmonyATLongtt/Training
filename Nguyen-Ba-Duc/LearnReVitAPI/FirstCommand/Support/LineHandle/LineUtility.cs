@@ -103,7 +103,7 @@ namespace FirstCommand.Support.LineHandle
         }
 
         /// <summary>
-        /// Hàm lấy ra giao điểm của 2 line
+        /// Hàm lấy ra giao điểm của 2 line bound
         /// </summary>
         /// <param name="line1"></param>
         /// <param name="line2"></param>
@@ -227,6 +227,71 @@ namespace FirstCommand.Support.LineHandle
             double distance = cross.GetLength();
 
             return distance;
+        }
+
+        /// <summary>
+        /// Hàm dùng để tạo 1 mặt phẳng từ 2 line không song song với nhau và đi qua 1 line
+        /// </summary>
+        /// <param name="line1"></param>
+        /// <param name="line2"></param>
+        /// <returns></returns>
+        public static Plane CreatePlaneFromTwoLineAndIncludeOneLine(Line line1, Line line2, double tolerance)
+        {
+            Plane plane = null;
+            XYZ dir1 = line1.Direction.Normalize();
+            XYZ dir2 = line2.Direction.Normalize();
+            XYZ origin = line1.GetEndPoint(0);
+            if (!GeometryUtility.IsParallel(dir1, dir2, tolerance))
+            {
+                var cross = dir1.CrossProduct(dir2);
+                plane = Plane.CreateByNormalAndOrigin(cross, origin);
+            }
+            return plane;
+        }
+
+        /// <summary>
+        /// Hàm lấy ra giao điểm của 2 line nếu kéo dài ra
+        /// </summary>
+        /// <param name="line1"></param>
+        /// <param name="line2"></param>
+        /// <returns></returns>
+        public static XYZ FindIntersectionFromLines(Line line1, Line line2)
+        {
+            XYZ dir1 = (line1.GetEndPoint(1) - line1.GetEndPoint(0)).Normalize();
+            XYZ dir2 = (line2.GetEndPoint(1) - line2.GetEndPoint(0)).Normalize();
+
+            Line unbound1 = Line.CreateUnbound(line1.GetEndPoint(0), dir1);
+            Line unbound2 = Line.CreateUnbound(line2.GetEndPoint(0), dir2);
+
+            SetComparisonResult result = unbound1.Intersect(unbound2, out IntersectionResultArray resultArray);
+
+            if (result == SetComparisonResult.Overlap && resultArray != null && resultArray.Size > 0)
+            {
+                return resultArray.get_Item(0).XYZPoint;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Hàm này dùng để kiểm tra xem 1 điểm nằm giữa 2 điểm đầu và cuối của 1 Line hay nằm ngoài
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="point"></param>
+        /// <returns></returns>
+        public static bool IsPointBetweenTwoPointsOfLine(Line line, XYZ point)
+        {
+            double lineLength = line.Length;
+            XYZ p1 = line.GetEndPoint(0);
+            XYZ p2 = line.GetEndPoint(1);
+            double dis1 = point.DistanceTo(p1);
+            double dis2 = point.DistanceTo(p2);
+
+            if (dis1 > lineLength || dis2 > lineLength)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }
