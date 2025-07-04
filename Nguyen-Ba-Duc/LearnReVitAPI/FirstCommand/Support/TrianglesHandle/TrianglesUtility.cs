@@ -399,16 +399,47 @@ namespace FirstCommand.Support.TrianglesHandle
         public static List<MeshTriangle> ExtractTrianglesFromSolid(Solid solid)
         {
             List<MeshTriangle> triangles = new List<MeshTriangle>();
+            List<Face> faces = new List<Face>();
             foreach (Face face in solid.Faces)
             {
-                Mesh mesh = face.Triangulate();
-                int triCount = mesh.NumTriangles;
+                faces.Add(face);
+            }
+            triangles.AddRange(ExtractTrianglesFromFaces(faces));
+            //foreach (Face face in solid.Faces)
+            //{
+            //    Mesh mesh = face.Triangulate();
+            //    //int triCount = mesh.NumTriangles;
 
-                for (int i = 0; i < triCount; i++)
+            //    //for (int i = 0; i < triCount; i++)
+            //    //{
+            //    //    MeshTriangle tri = mesh.get_Triangle(i);
+            //    //    triangles.Add(tri);
+            //    //}
+            //}
+            return triangles;
+        }
+
+        /// <summary>
+        /// Hàm dùng để lấy ra tất cả tam giác trong tập hợp các face
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="faces"></param>
+        /// <returns></returns>
+        public static List<MeshTriangle> ExtractTrianglesFromFaces<T>(List<T> faces) where T : Face
+        {
+            List<MeshTriangle> triangles = new List<MeshTriangle>();
+            foreach (Face face in faces)
+            {
+                Mesh mesh = null;
+                if (face is PlanarFace pf)
                 {
-                    MeshTriangle tri = mesh.get_Triangle(i);
-                    triangles.Add(tri);
+                    mesh = pf.Triangulate();
                 }
+                else if (face is CylindricalFace cf)
+                {
+                    mesh = cf.Triangulate();
+                }
+                triangles.AddRange(ExtractTrianglesFromMeshes(mesh));
             }
             return triangles;
         }
@@ -713,6 +744,26 @@ namespace FirstCommand.Support.TrianglesHandle
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Hàm dùng để lấy ra tất cả meshtriangle trong mesh
+        /// </summary>
+        /// <param name="solid"></param>
+        /// <returns></returns>
+        public static List<MeshTriangle> ExtractTrianglesFromMeshes(Mesh mesh)
+        {
+            List<MeshTriangle> triangles = new List<MeshTriangle>();
+
+            int triCount = mesh.NumTriangles;
+
+            for (int i = 0; i < triCount; i++)
+            {
+                MeshTriangle tri = mesh.get_Triangle(i);
+                triangles.Add(tri);
+            }
+
+            return triangles;
         }
     }
 }

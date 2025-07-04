@@ -85,6 +85,13 @@ namespace FirstCommand.Support.SolidHandle
             return points.ToList();
         }
 
+        /// <summary>
+        /// Hàm tạo solid từ danh sách các points, axis, height
+        /// </summary>
+        /// <param name="result"></param>
+        /// <param name="axis"></param>
+        /// <param name="height"></param>
+        /// <returns></returns>
         public static Solid CreateNewSolidFromPoints(List<List<(XYZ, XYZ)>> result, XYZ axis, double height)
         {
             if (result.Count == 1)

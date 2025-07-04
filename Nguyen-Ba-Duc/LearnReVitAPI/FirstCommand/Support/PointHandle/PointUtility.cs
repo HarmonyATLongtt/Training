@@ -297,6 +297,48 @@ namespace FirstCommand.Support.PointHandle
 
             return (p1Max, p2Max);
         }
+
+        /// <summary>
+        /// Hàm tìm ra điểm gần nhất trong danh sách với 1 điểm cho trước
+        /// </summary>
+        /// <param name="points"></param>
+        /// <param name="targetPoint"></param>
+        /// <returns></returns>
+        public static XYZ FindNearestPoint(List<XYZ> points, XYZ targetPoint)
+        {
+            double minDis = double.MaxValue;
+            XYZ nearestPoint = null;
+            foreach (var p in points)
+            {
+                if (p.DistanceTo(targetPoint) < minDis)
+                {
+                    minDis = p.DistanceTo(targetPoint);
+                    nearestPoint = p;
+                }
+            }
+            return nearestPoint;
+        }
+
+        /// <summary>
+        /// Hàm tìm ra điểm xa nhất trong danh sách với 1 điểm cho trước
+        /// </summary>
+        /// <param name="points"></param>
+        /// <param name="targetPoint"></param>
+        /// <returns></returns>
+        public static XYZ FindFarthestPoint(List<XYZ> points, XYZ targetPoint)
+        {
+            double maxDis = double.MinValue;
+            XYZ farthestPoint = null;
+            foreach (var p in points)
+            {
+                if (p.DistanceTo(targetPoint) > maxDis)
+                {
+                    maxDis = p.DistanceTo(targetPoint);
+                    farthestPoint = p;
+                }
+            }
+            return farthestPoint;
+        }
     }
 
     /// <summary>
