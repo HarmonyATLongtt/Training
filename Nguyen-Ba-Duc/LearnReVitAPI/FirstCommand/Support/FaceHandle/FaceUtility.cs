@@ -136,5 +136,27 @@ namespace FirstCommand.Support.FaceHandle
             XYZ centerXYZ = face.Evaluate(centerUV);
             return centerXYZ;
         }
+
+        /// <summary>
+        /// Lấy ra danh sách và số lượng các cạnh của 1 face
+        /// </summary>
+        /// <param name="face"></param>
+        /// <returns>Trả về 1 tuple với giả trị đầu tiên là danh sách các cạnh, giá trị thứ 2 là số lượng</returns>
+        public static (List<Edge> Edges, int Num) GetEgdesAndNumOfFace(PlanarFace face)
+        {
+            EdgeArrayArray edgeArrays = face.EdgeLoops;
+            List<Edge> listEdge = new List<Edge>();
+            int sum = 0;
+            foreach (EdgeArray edges in edgeArrays)
+            {
+                foreach (Edge edge in edges)
+                {
+                    listEdge.Add(edge);
+                }
+                sum += edges.Size;
+            }
+
+            return (listEdge, sum);
+        }
     }
 }

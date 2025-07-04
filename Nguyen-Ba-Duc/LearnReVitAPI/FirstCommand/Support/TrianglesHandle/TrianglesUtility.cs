@@ -576,6 +576,17 @@ namespace FirstCommand.Support.TrianglesHandle
         }
 
         /// <summary>
+        /// Hàm dùng để lấy ra khoảng cách lớn nhất của 1 tập hợp các meshtriangles
+        /// </summary>
+        /// <param name="triangles"></param>
+        /// <returns></returns>
+        public static double GetMaxLengthOfGroupMeshTriangles(List<MeshTriangle> triangles)
+        {
+            var (minPoint, maxPoint) = GetMinMaxXYZFromMeshTriangles(triangles);
+            return minPoint.DistanceTo(maxPoint);
+        }
+
+        /// <summary>
         /// Hàm dùng để gom nhóm các tam giác có chung 2 đỉnh lại với nhau
         /// </summary>
         /// <param name="triangles"></param>
