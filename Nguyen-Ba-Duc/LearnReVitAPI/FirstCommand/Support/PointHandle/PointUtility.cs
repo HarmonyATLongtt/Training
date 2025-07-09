@@ -339,6 +339,23 @@ namespace FirstCommand.Support.PointHandle
             }
             return farthestPoint;
         }
+
+        /// <summary>
+        /// Hàm dùng để tìm ra 2 vector U,V vuông góc với direction và vuông góc với nhau để tạo 1 mặt phẳng
+        /// </summary>
+        /// <param name="direction"></param>
+        /// <param name="U"></param>
+        /// <param name="V"></param>
+        public static void BuildLocalUVFromDirection(XYZ direction, out XYZ U, out XYZ V)
+        {
+            XYZ W = direction.Normalize();
+            // Tạo vector U sao cho không song song với W
+            XYZ arbitrary = (Math.Abs(W.Z) < 0.99) ? XYZ.BasisZ : XYZ.BasisX;
+            U = W.CrossProduct(arbitrary).Normalize();
+
+            // Từ U và W => tìm V
+            V = W.CrossProduct(U); // đảm bảo V vuông góc cả W và U
+        }
     }
 
     /// <summary>

@@ -9,6 +9,7 @@ using Autodesk.Revit.DB;
 using FirstCommand.Support.GenericClass;
 using FirstCommand.Support.GenericClass.ComparerClass;
 using FirstCommand.Support.DebugTest;
+using FirstCommand.Support.PointHandle;
 
 namespace FirstCommand.Support.SolidHandle
 {
@@ -161,6 +162,39 @@ namespace FirstCommand.Support.SolidHandle
                 return solid;
             }
             else { return null; }
+        }
+
+        /// <summary>
+        /// Tạo solid hình trụ
+        /// </summary>
+        /// <param name="doc"></param>
+        /// <param name="center"></param>
+        /// <param name="radius"></param>
+        /// <param name="height"></param>
+        /// <param name="extrusionDirection"></param>
+        /// <returns></returns>
+        public static Solid CreateCylindricalSolid(Document doc, XYZ center, double radius, double height, XYZ extrusionDirection)
+        {
+            // 1.Tạo 2 vector UV để tạo mặt phẳng phác thảo
+            PointUtility.BuildLocalUVFromDirection(extrusionDirection, out XYZ U, out XYZ V);
+
+            // 2. Tạo đường tròn trên mặt phẳng phác thảo
+            Arc arc1 = Arc.Create(center, radius, 0, Math.PI, U, V);
+            Arc arc2 = Arc.Create(center, radius, Math.PI, 2 * Math.PI, U, V);
+
+            CurveLoop profile = new CurveLoop();
+            profile.Append(arc1);
+            profile.Append(arc2);
+
+            // 3. Hướng extrusion (đảm bảo là vector đơn vị)
+            extrusionDirection = extrusionDirection.Normalize();
+
+            // 4. Tạo hình trụ bằng extrusion
+            Solid solid = GeometryCreationUtilities.CreateExtrusionGeometry(
+                new List<CurveLoop> { profile }, extrusionDirection, height
+            );
+
+            return solid;
         }
     }
 }

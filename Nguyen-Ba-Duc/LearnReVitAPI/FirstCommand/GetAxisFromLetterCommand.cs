@@ -7,6 +7,7 @@ using Autodesk.Revit.DB;
 
 using Autodesk.Revit.UI;
 using FirstCommand.Support.Constants;
+using FirstCommand.Support.DebugTest;
 using FirstCommand.Support.DrawOnRevit;
 using FirstCommand.Support.FaceHandle;
 using FirstCommand.Support.GenericClass.ComparerClass;
@@ -57,8 +58,8 @@ namespace FirstCommand
 
                     var (solids, meshes) = GeometryUtility.GetSolids(linkedElem, doc);
 
-                    bool isSolid = true;
-                    bool isMesh = false;
+                    bool isSolid = false;
+                    bool isMesh = true;
 
                     //Thử trường hợp chuyển solid sang mesh
                     if (isMesh)
@@ -229,18 +230,34 @@ namespace FirstCommand
                         foreach (var keyValue in radiusAndLines)
                         {
                             var pairLines = new List<Line> { keyValue.Key, keyValue.Value };
-                            DrawPointLineArc.DrawLines(doc, pairLines, isRevitLink, transform, 0);
+                            GetSolidFromCoupleLines(pairLines);
+                            //DrawPointLineArc.DrawLines(doc, pairLines, isRevitLink, transform, 0);
                         }
-
-                        //DrawPointLineArc.DrawLines(doc, newLines, isRevitLink, transform, 0);
                     }
                 }
                 if (lines.Count == 1)
                 {
                     var firstPair = radiusAndLines.First();
+
                     var pairLines = new List<Line> { firstPair.Key, firstPair.Value };
-                    DrawPointLineArc.DrawLines(doc, pairLines, isRevitLink, transform, 0);
+                    GetSolidFromCoupleLines(pairLines);
+                    //DrawPointLineArc.DrawLines(doc, pairLines, isRevitLink, transform, 0);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Tạo solid từ 1 cặp line đại diện cho 1 hình trụ(bán kính và trục)
+        /// </summary>
+        /// <param name="lines"></param>
+        private void GetSolidFromCoupleLines(List<Line> lines)
+        {
+            if (lines.Count > 0)
+            {
+                Line linePresentForRadius = lines[0];
+                Line linePresentForAxis = lines[1];
+                Solid solid = SolidUtility.CreateCylindricalSolid(doc, linePresentForAxis.GetEndPoint(0), linePresentForRadius.Length, linePresentForAxis.Length, linePresentForAxis.Direction);
+                TestForDebug.CreateDirectShapeFromSolid(doc, solid);
             }
         }
 
@@ -663,8 +680,13 @@ namespace FirstCommand
                 double radius = FaceUtility.GetRadius(tupleValue.Item3);
                 if (tupleValue.Item2.Count == 2)
                 {
-                    Line newLine = Line.CreateBound(tupleValue.Item2[0], tupleValue.Item2[1]);
-                    DrawPointLineArc.CreateModelLine(doc, tupleValue.Item2[0], tupleValue.Item2[1], isRevitLink, transform, 0);
+                    XYZ p1 = tupleValue.Item2[0];
+                    XYZ p2 = tupleValue.Item2[1];
+                    Line newLine = Line.CreateBound(p1, p2);
+
+                    Solid solid = SolidUtility.CreateCylindricalSolid(doc, p1, radius, newLine.Length, newLine.Direction);
+                    TestForDebug.CreateDirectShapeFromSolid(doc, solid);
+                    //DrawPointLineArc.CreateModelLine(doc, p1,p2, isRevitLink, transform, 0);
 
                     cylinderDimensions.LengthLine = newLine;
                     cylinderDimensions.Radius = radius;
@@ -679,7 +701,9 @@ namespace FirstCommand
                             XYZ point = tupleValue.Item2.FirstOrDefault();
                             XYZ projectedPoint = GetProjectedPoint(tupleValue.Item1.Direction.Normalize(), tuple.Item1, point);
                             Line newLine = Line.CreateBound(point, projectedPoint);
-                            DrawPointLineArc.CreateModelLine(doc, point, projectedPoint, isRevitLink, transform, 0);
+                            //DrawPointLineArc.CreateModelLine(doc, point, projectedPoint, isRevitLink, transform, 0);
+                            Solid solid = SolidUtility.CreateCylindricalSolid(doc, point, radius, newLine.Length, newLine.Direction);
+                            TestForDebug.CreateDirectShapeFromSolid(doc, solid);
 
                             cylinderDimensions.LengthLine = newLine;
                             cylinderDimensions.Radius = radius;
@@ -703,7 +727,9 @@ namespace FirstCommand
                     if (listProjectedPoints.Count == 2)
                     {
                         Line newLine = Line.CreateBound(listProjectedPoints[0], listProjectedPoints[1]);
-                        DrawPointLineArc.CreateModelLine(doc, listProjectedPoints[0], listProjectedPoints[1], isRevitLink, transform, 0);
+                        Solid solid = SolidUtility.CreateCylindricalSolid(doc, listProjectedPoints[0], radius, newLine.Length, newLine.Direction);
+                        TestForDebug.CreateDirectShapeFromSolid(doc, solid);
+                        //DrawPointLineArc.CreateModelLine(doc, listProjectedPoints[0], listProjectedPoints[1], isRevitLink, transform, 0);
                         cylinderDimensions.LengthLine = newLine;
                         cylinderDimensions.Radius = radius;
                     }
