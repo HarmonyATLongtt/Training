@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Autodesk.Revit.DB;
 
-namespace FirstCommand.Support.GenericClass.ComparerClass
+namespace FirstCommand.Support.GenericClass.ComparerUtils
 {
     /// <summary>
     /// Class này dùng khi muốn key của 1 dictionary là  XYZ

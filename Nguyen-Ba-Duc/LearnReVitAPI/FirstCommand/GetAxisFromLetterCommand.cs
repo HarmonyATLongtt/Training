@@ -10,24 +10,34 @@ using FirstCommand.Support.Constants;
 using FirstCommand.Support.DebugTest;
 using FirstCommand.Support.DrawOnRevit;
 using FirstCommand.Support.FaceHandle;
-using FirstCommand.Support.GenericClass.ComparerClass;
+
+using FirstCommand.Support.GenericClass.ComparerUtils;
 using FirstCommand.Support.GeometryHandle;
 using FirstCommand.Support.LineHandle;
 using FirstCommand.Support.PlaneHandle;
 using FirstCommand.Support.PointHandle;
 using FirstCommand.Support.SolidHandle;
 using FirstCommand.Support.TrianglesHandle;
+using FirstCommand.Support.VectorHandle;
 
 namespace FirstCommand
 {
     [TransactionAttribute(TransactionMode.Manual)]
     public class GetAxisFromLetterCommand : IExternalCommand
     {
+        #region Propeties
+
         private Transform transform = null;
-        private bool isRevitLink = false;
+
+        //private bool isRevitLink = false;
         private List<RectangularDimensions> ListRectangularDimension = new List<RectangularDimensions>();
+
         private List<CylinderDimensions> ListCylinderDimension = new List<CylinderDimensions>();
         private Document doc;
+
+        #endregion Propeties
+
+        #region Methods
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
@@ -120,8 +130,8 @@ namespace FirstCommand
                                     for (int j = i + 1; j < planarFaces.Count; j++)
                                     {
                                         XYZ normal2 = planarFaces[j].FaceNormal.Normalize();
-                                        if (!GeometryUtility.IsParallel(normal1, normal2, CommonConstants.TOLERANCE)
-                                            && !GeometryUtility.AreVectorsPerpendicular(normal1, normal2, CommonConstants.TOLERANCE))
+                                        if (!VectorUtility.AreParallel(normal1, normal2, CommonConstants.TOLERANCE)
+                                            && !VectorUtility.ArePerpendicular(normal1, normal2, CommonConstants.TOLERANCE))
                                         {
                                             isCylinder = true;
                                             break;
@@ -203,7 +213,7 @@ namespace FirstCommand
             if (groupAxisAndTriangles.Count > 0)
             {
                 var lines = new List<Line>();
-                var radiusAndLines = new Dictionary<Line, Line>(new LineEqualityComparer());
+                var radiusAndLines = new Dictionary<Line, Line>(Comparers.Line);
 
                 AddLinesCreatedByAxisAndRadiusFromMeshTriangles(lines, radiusAndLines, groupAxisAndTriangles);
 
@@ -219,7 +229,7 @@ namespace FirstCommand
                     {
                         var newLines = CreateNewLinesByProjectAllLinesOnAPlane(plane, lines, radiusAndLines);
 
-                        var dictLineAndIntersectPoints = new Dictionary<Line, List<XYZ>>(new LineEqualityComparer());
+                        var dictLineAndIntersectPoints = new Dictionary<Line, List<XYZ>>(Comparers.Line);
                         AddLineAndIntersectPointsToDict(newLines, dictLineAndIntersectPoints);
 
                         if (dictLineAndIntersectPoints.Count > 0)
@@ -321,7 +331,7 @@ namespace FirstCommand
                 for (int j = i + 1; j < newLines.Count; j++)
                 {
                     XYZ dir2 = newLines[j].Direction.Normalize();
-                    if (GeometryUtility.AreVectorsPerpendicular(dir1, dir2, CommonConstants.COSINE_ANGLE_TOLERANCE_5_DEGREE))
+                    if (VectorUtility.ArePerpendicular(dir1, dir2, CommonConstants.COSINE_ANGLE_TOLERANCE_5_DEGREE))
                     {
                         XYZ intersectPoint = LineUtility.FindIntersectionFromLines(newLines[i], newLines[j]);
                         if (intersectPoint != null)
@@ -390,7 +400,7 @@ namespace FirstCommand
         {
             foreach (var (axis, triangles) in groupAxisAndTriangles)
             {
-                var points = TrianglesUtility.GetVerticesOfAllTriangles(triangles).ToList();
+                var points = TrianglesUtility.GetVerticesOfTriangles(triangles);
 
                 var (min, max) = TrianglesUtility.GetMinMaxXYZFromMeshTriangles(triangles);
                 if (min != null && max != null)
@@ -514,7 +524,7 @@ namespace FirstCommand
         private void HandleForSimpleCase(ref Solid solid, List<List<(XYZ, XYZ)>> pointsOfTrianglesFromGroupSimple)
         {
             var group1 = pointsOfTrianglesFromGroupSimple[0];
-            var group1Points = new HashSet<XYZ>(group1.SelectMany(pair => new[] { pair.Item1, pair.Item2 }), new XYZComparer());
+            var group1Points = new HashSet<XYZ>(group1.SelectMany(pair => new[] { pair.Item1, pair.Item2 }), Comparers.XYZ);
 
             var group2 = pointsOfTrianglesFromGroupSimple
                 .Skip(1)
@@ -543,8 +553,8 @@ namespace FirstCommand
                 {
                     XYZ normal2 = TrianglesUtility.GetNormalFromTriangle(meshTriangles[j]);
                     if (TrianglesUtility.HasCommonVertex(meshTriangles[i], meshTriangles[j])
-                        && !GeometryUtility.IsParallel(normal1, normal2, CommonConstants.TOLERANCE)
-                        && !GeometryUtility.AreVectorsPerpendicular(normal1, normal2, CommonConstants.COSINE_ANGLE_TOLERANCE_1_DEGREE))
+                        && !VectorUtility.AreParallel(normal1, normal2, CommonConstants.TOLERANCE)
+                        && !VectorUtility.ArePerpendicular(normal1, normal2, CommonConstants.COSINE_ANGLE_TOLERANCE_1_DEGREE))
                     {
                         axis = normal1.CrossProduct(normal2).Normalize();
                         originTriangle = meshTriangles[i];
@@ -557,7 +567,7 @@ namespace FirstCommand
 
             if (axis != null)
             {
-                GeometryUtility.IsParallelToAnyAxis(ref axis, CommonConstants.COSINE_ANGLE_TOLERANCE_5_DEGREE);
+                VectorUtility.IsParallelToAnyAxis(ref axis, CommonConstants.COSINE_ANGLE_TOLERANCE_5_DEGREE);
 
                 var trianglesParallelToVector = TrianglesUtility.GetTrianglesParallelToVector(axis, meshTriangles, CommonConstants.COSINE_ANGLE_TOLERANCE_5_DEGREE).ToHashSet();
                 var list = TrianglesUtility.FindConnectedTrianglesBySharedTwoVertex(trianglesParallelToVector.ToList(), originTriangle).ToHashSet();
@@ -583,8 +593,8 @@ namespace FirstCommand
             {
                 XYZ normal1 = TrianglesUtility.GetNormalFromTriangle(meshTriangles[i]);
                 XYZ normal2 = TrianglesUtility.GetNormalFromTriangle(meshTriangles[i + 1]);
-                if (!GeometryUtility.IsParallel(normal1, normal2, CommonConstants.TOLERANCE)
-                    && !GeometryUtility.AreVectorsPerpendicular(normal1, normal2, CommonConstants.TOLERANCE))
+                if (!VectorUtility.AreParallel(normal1, normal2, CommonConstants.TOLERANCE)
+                    && !VectorUtility.ArePerpendicular(normal1, normal2, CommonConstants.TOLERANCE))
                 {
                     isCylinder = true;
                 }
@@ -626,7 +636,7 @@ namespace FirstCommand
         /// <exception cref="InvalidOperationException"></exception>
         private List<List<(XYZ start, XYZ end)>> GroupClosedLoops(List<(XYZ start, XYZ end)> segments)
         {
-            var comparer = new XYZComparer();
+            var comparer = Comparers.XYZ;
             var remaining = new List<(XYZ start, XYZ end)>(segments);
             var result = new List<List<(XYZ start, XYZ end)>>();
 
@@ -827,7 +837,7 @@ namespace FirstCommand
 
             if (IsRectangularBox(solid))
             {
-                GetRectangularDimensions(doc, solid);
+                //GetRectangularDimensions(doc, solid);
             }
             else if (solid.Faces.Size > 0 && solid.Volume > 0)
             {
@@ -960,8 +970,7 @@ namespace FirstCommand
 
             Plane flippedPlane = Plane.CreateByNormalAndOrigin(-plane.Normal, plane.Origin);
             Solid remaining = BooleanOperationsUtils.CutWithHalfSpace(solid, flippedPlane);
-
-            GetRectangularDimensions(doc, part);
+            //GetRectangularDimensions(doc, part);
             Dictionary<Solid, List<PlanarFace>> solidPlanarFaces = new Dictionary<Solid, List<PlanarFace>>();
 
             IList<Solid> separatedSolids = SolidUtils.SplitVolumes(remaining);
@@ -969,7 +978,7 @@ namespace FirstCommand
             {
                 if (IsRectangularBox(s))
                 {
-                    GetRectangularDimensions(doc, s);
+                    //GetRectangularDimensions(doc, s);
                 }
                 else
                 {
@@ -999,45 +1008,45 @@ namespace FirstCommand
         /// </summary>
         /// <param name="doc"></param>
         /// <param name="solid"></param>
-        private void GetRectangularDimensions(Document doc, Solid solid)
-        {
-            RectangularDimensions rectangularDim = new RectangularDimensions();
+        //private void GetRectangularDimensions(Document doc, Solid solid)
+        //{
+        //    RectangularDimensions rectangularDim = new RectangularDimensions();
 
-            PlanarFace face1 = FaceUtility.GetSmallestFace(solid);
-            PlanarFace face2 = null;
-            foreach (Face face in solid.Faces)
-            {
-                if (!face.Equals(face1))
-                {
-                    if (face is PlanarFace planarFace)
-                    {
-                        if (FaceUtility.AreFacesParallel(face1, planarFace))
-                        {
-                            face2 = planarFace;
-                            break;
-                        }
-                    }
-                }
-            }
+        //    PlanarFace face1 = FaceUtility.GetSmallestFace(solid);
+        //    PlanarFace face2 = null;
+        //    foreach (Face face in solid.Faces)
+        //    {
+        //        if (!face.Equals(face1))
+        //        {
+        //            if (face is PlanarFace planarFace)
+        //            {
+        //                if (FaceUtility.AreFacesParallel(face1, planarFace))
+        //                {
+        //                    face2 = planarFace;
+        //                    break;
+        //                }
+        //            }
+        //        }
+        //    }
 
-            if (face1 != null && face2 != null)
-            {
-                XYZ point1 = FaceUtility.GetCenterOfFace(face1);
-                XYZ point2 = FaceUtility.GetCenterOfFace(face2);
-                var tupleValues = GetMidPointPairsOfRectangleFace(face1);
-                if (tupleValues != null && tupleValues.Count == 2)
-                {
-                    rectangularDim.WidthLine = Line.CreateBound(tupleValues[0].Item1, tupleValues[0].Item2);
-                    DrawPointLineArc.CreateModelLine(doc, tupleValues[0].Item1, tupleValues[0].Item2, isRevitLink, transform, 0);
-                    rectangularDim.HeightLine = Line.CreateBound(tupleValues[1].Item1, tupleValues[1].Item2);
-                    DrawPointLineArc.CreateModelLine(doc, tupleValues[1].Item1, tupleValues[1].Item2, isRevitLink, transform, 0);
-                }
+        //    if (face1 != null && face2 != null)
+        //    {
+        //        XYZ point1 = FaceUtility.GetCenterOfFace(face1);
+        //        XYZ point2 = FaceUtility.GetCenterOfFace(face2);
+        //        var tupleValues = GetMidPointPairsOfRectangleFace(face1);
+        //        if (tupleValues != null && tupleValues.Count == 2)
+        //        {
+        //            rectangularDim.WidthLine = Line.CreateBound(tupleValues[0].Item1, tupleValues[0].Item2);
+        //            DrawPointLineArc.CreateModelLine(doc, tupleValues[0].Item1, tupleValues[0].Item2,0, isRevitLink, transform);
+        //            rectangularDim.HeightLine = Line.CreateBound(tupleValues[1].Item1, tupleValues[1].Item2);
+        //            DrawPointLineArc.CreateModelLine(doc, tupleValues[1].Item1, tupleValues[1].Item2,0, isRevitLink, transform);
+        //        }
 
-                rectangularDim.LengthLine = Line.CreateBound(point1, point2);
-                DrawPointLineArc.CreateModelLine(doc, point1, point2, isRevitLink, transform, 0);
-            }
-            ListRectangularDimension.Add(rectangularDim);
-        }
+        //        rectangularDim.LengthLine = Line.CreateBound(point1, point2);
+        //        DrawPointLineArc.CreateModelLine(doc, point1, point2,0, isRevitLink, transform);
+        //    }
+        //    ListRectangularDimension.Add(rectangularDim);
+        //}
 
         /// <summary>
         /// Lấy ra các cặp điểm đối nhau, trong đó mỗi điểm là trung điểm của các cạnh trong 1 face
@@ -1134,6 +1143,8 @@ namespace FirstCommand
             Plane plane = Plane.CreateByNormalAndOrigin(reversed, p);
             return plane;
         }
+
+        #endregion Methods
     }
 
     public class RectangularDimensions

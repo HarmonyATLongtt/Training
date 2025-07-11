@@ -115,8 +115,9 @@
     <Compile Include="Support\DebugTest\TestForDebug.cs" />
     <Compile Include="Support\DrawOnRevit\DrawPointLineArc.cs" />
     <Compile Include="Support\FaceHandle\FaceUtility.cs" />
-    <Compile Include="Support\GenericClass\ComparerClass\LineEqualityComparer.cs" />
-    <Compile Include="Support\GenericClass\ComparerClass\XYZComparer.cs" />
+    <Compile Include="Support\GenericClass\ComparerUtils\Comparers.cs" />
+    <Compile Include="Support\GenericClass\ComparerUtils\LineEqualityComparer.cs" />
+    <Compile Include="Support\GenericClass\ComparerUtils\XYZComparer.cs" />
     <Compile Include="Support\GeometryHandle\GeometryUtility.cs" />
     <Compile Include="Support\GenericClass\WarningSuppressor.cs" />
     <Compile Include="Support\LineHandle\LineUtility.cs" />
@@ -124,7 +125,10 @@
     <Compile Include="Support\PointHandle\PointUtility.cs" />
     <Compile Include="Support\SolidHandle\SolidUtility.cs" />
     <Compile Include="Support\TransactionHandle\HandleForTransaction.cs" />
+    <Compile Include="Support\TrianglesHandle\TriangleInfos.cs" />
     <Compile Include="Support\TrianglesHandle\TrianglesUtility.cs" />
+    <Compile Include="Support\TrianglesHandle\TriangleVertexMap.cs" />
+    <Compile Include="Support\VectorHandle\VectorUtility.cs" />
     <Compile Include="View\AddElevationView.xaml.cs">
       <DependentUpon>AddElevationView.xaml</DependentUpon>
     </Compile>

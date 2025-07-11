@@ -5,13 +5,14 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 
 using FirstCommand.Support.Constants;
+using FirstCommand.Support.PointHandle;
 
 namespace FirstCommand.Support.GeometryHandle
 {
     public static class GeometryUtility
     {
-        //___Hàm kiểm tra xem hình vuông và hình tam giác có giao nhau không
-        //___Start ___
+        #region Hàm kiểm tra xem hình vuông và hình tam giác có giao nhau không
+
         public static bool AreTriangleAndSquareIntersecting(List<XYZ> triangle, List<XYZ> square)
         {
             // 1. Đỉnh tam giác nằm trong hình vuông
@@ -69,7 +70,7 @@ namespace FirstCommand.Support.GeometryHandle
             return inside;
         }
 
-        //___End ___
+        #endregion Hàm kiểm tra xem hình vuông và hình tam giác có giao nhau không
 
         /// <summary>
         /// Hàm dùng đề chia mặt phẳng XY thành các grid, sau đó lấy ra danh sách các đỉnh của hình chữ nhật tạo bởi các grid
@@ -80,20 +81,59 @@ namespace FirstCommand.Support.GeometryHandle
         /// <param name="maxY"></param>
         /// <param name="gridSize"></param>
         /// <returns></returns>
+        //public static List<List<XYZ>> GenerateGridSquares(double minX, double maxX, double minY, double maxY, double gridSize)
+        //{
+        //    List<List<XYZ>> squares = new List<List<XYZ>>();
+
+        //    for (double x = minX; x < maxX; x += gridSize)
+        //    {
+        //        for (double y = minY; y < maxY; y += gridSize)
+        //        {
+        //            var p1 = new XYZ(x, y, 0);
+        //            var p2 = new XYZ(x + gridSize, y, 0);
+        //            var p3 = new XYZ(x + gridSize, y + gridSize, 0);
+        //            var p4 = new XYZ(x, y + gridSize, 0);
+
+        //            squares.Add(new List<XYZ> { p1, p2, p3, p4 });
+        //        }
+        //    }
+
+        //    return squares;
+        //}
+
+        /// <summary>
+        ///  Hàm dùng đề chia mặt phẳng XY thành các grid, sau đó lấy ra danh sách các đỉnh của hình chữ nhật tạo bởi các grid
+        /// </summary>
+        /// <param name="minX"></param>
+        /// <param name="maxX"></param>
+        /// <param name="minY"></param>
+        /// <param name="maxY"></param>
+        /// <param name="gridSize"></param>
+        /// <returns></returns>
         public static List<List<XYZ>> GenerateGridSquares(double minX, double maxX, double minY, double maxY, double gridSize)
         {
-            List<List<XYZ>> squares = new List<List<XYZ>>();
+            int cols = (int)Math.Ceiling((maxX - minX) / gridSize);
+            int rows = (int)Math.Ceiling((maxY - minY) / gridSize);
 
-            for (double x = minX; x < maxX; x += gridSize)
+            List<List<XYZ>> squares = new List<List<XYZ>>(cols * rows);
+
+            for (int i = 0; i < cols; i++)
             {
-                for (double y = minY; y < maxY; y += gridSize)
-                {
-                    var p1 = new XYZ(x, y, 0);
-                    var p2 = new XYZ(x + gridSize, y, 0);
-                    var p3 = new XYZ(x + gridSize, y + gridSize, 0);
-                    var p4 = new XYZ(x, y + gridSize, 0);
+                double x = minX + i * gridSize;
+                double xNext = x + gridSize;
 
-                    squares.Add(new List<XYZ> { p1, p2, p3, p4 });
+                for (int j = 0; j < rows; j++)
+                {
+                    double y = minY + j * gridSize;
+                    double yNext = y + gridSize;
+
+                    squares.Add(new List<XYZ>
+                                {
+                                    new XYZ(x, y, 0),
+                                    new XYZ(xNext, y, 0),
+                                    new XYZ(xNext, yNext, 0),
+                                    new XYZ(x, yNext, 0)
+                                });
                 }
             }
 
@@ -164,33 +204,6 @@ namespace FirstCommand.Support.GeometryHandle
         }
 
         /// <summary>
-        /// Hàm kiểm tra 2 vector có vuông góc không
-        /// </summary>
-        /// <param name="v1"></param>
-        /// <param name="v2"></param>
-        /// <returns></returns>
-        public static bool AreVectorsPerpendicular(XYZ v1, XYZ v2, double tolerance)
-        {
-            if (v1.IsZeroLength() || v2.IsZeroLength())
-                return false;  // Vector rỗng không có hướng xác định
-
-            double dot = v1.Normalize().DotProduct(v2.Normalize());
-            //return Math.Abs(dot) < CommonConstants.COSINE_ANGLE_TOLERANCE_1_DEGREE;
-            return Math.Abs(dot) < tolerance;
-        }
-
-        /// <summary>
-        /// Kiểm tra xem 1 vector có song song với 1 trục tọa độ nào không
-        /// </summary>
-        /// <param name="v"></param>
-        /// <returns></returns>
-        public static bool IsPerpendicularToAxis(XYZ v, double axis)
-        {
-            //return Math.Abs(v.X) < TOLERANCE;
-            return Math.Abs(axis) < CommonConstants.TOLERANCE;
-        }
-
-        /// <summary>
         /// So sánh 2 số double
         /// </summary>
         /// <param name="d1"></param>
@@ -199,37 +212,6 @@ namespace FirstCommand.Support.GeometryHandle
         public static bool CompareDouble(double d1, double d2)
         {
             return Math.Abs(d1 - d2) < CommonConstants.TOLERANCE;
-        }
-
-        /// <summary>
-        /// Hàm kiểm tra xem 2 vector có song song với nhau hay không
-        /// </summary>
-        /// <param name="v1"></param>
-        /// <param name="v2"></param>
-        /// <returns></returns>
-        public static bool IsParallel(XYZ v1, XYZ v2, double tolerance)
-        {
-            var cross = v1.CrossProduct(v2);
-            //return cross.GetLength() < COSINE_ANGLE_TOLERANCE_5_DEGREE;
-            return cross.GetLength() < tolerance;
-        }
-
-        /// <summary>
-        /// Hàm dùng để kiểm tra xem 1 vector có song song với bất kỳ trục nào không, nếu có thì gán vector đó bằng trục đó
-        /// </summary>
-        /// <param name="vector"></param>
-        /// <param name="tolerance"></param>
-        public static void IsParallelToAnyAxis(ref XYZ vector, double tolerance)
-        {
-            List<XYZ> axises = new List<XYZ> { XYZ.BasisX, XYZ.BasisY, XYZ.BasisZ };
-            foreach (var axis in axises)
-            {
-                var cross = vector.CrossProduct(axis);
-                if (cross.GetLength() < tolerance)
-                {
-                    vector = axis;
-                }
-            }
         }
     }
 }

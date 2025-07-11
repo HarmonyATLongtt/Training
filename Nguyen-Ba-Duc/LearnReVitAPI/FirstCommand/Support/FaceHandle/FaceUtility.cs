@@ -18,7 +18,7 @@ namespace FirstCommand.Support.FaceHandle
         /// <returns></returns>
         public static bool IsFacePerpendicularToAxis(XYZ normal, XYZ vectorAxis)
         {
-            double dot = normal.Normalize().DotProduct(vectorAxis);
+            double dot = normal.DotProduct(vectorAxis);
             return Math.Abs(Math.Abs(dot) - 1) < CommonConstants.TOLERANCE;
         }
 
@@ -35,16 +35,16 @@ namespace FirstCommand.Support.FaceHandle
         }
 
         /// <summary>
-        ///  Hàm kiểm tra xem face có song song với trục Z hay không
+        ///  Hàm kiểm tra xem face có song song với trục tọa độ hay không
         /// </summary>
         /// <param name="normal"></param>
         /// <param name="tolerance"></param>
         /// <returns></returns>
-        public static bool IsFaceParallelToZ(XYZ normal)
+        public static bool IsFaceParallelToAxis(XYZ normal, XYZ axis)
         {
             //return Math.Abs(normal.DotProduct(XYZ.BasisZ)) < tolerance;
             //return Math.Abs(normal.DotProduct(XYZ.BasisZ)) < 0.01;
-            return Math.Abs(normal.DotProduct(XYZ.BasisZ)) < CommonConstants.COSINE_ANGLE_TOLERANCE_1_DEGREE;
+            return Math.Abs(normal.DotProduct(axis)) < CommonConstants.COSINE_ANGLE_TOLERANCE_1_DEGREE;
         }
 
         /// <summary>

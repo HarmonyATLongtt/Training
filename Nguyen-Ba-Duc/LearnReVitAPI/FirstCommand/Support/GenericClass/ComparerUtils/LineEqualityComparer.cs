@@ -7,7 +7,7 @@ using Autodesk.Revit.DB;
 
 using FirstCommand.Support.Constants;
 
-namespace FirstCommand.Support.GenericClass.ComparerClass
+namespace FirstCommand.Support.GenericClass.ComparerUtils
 {
     public class LineEqualityComparer : IEqualityComparer<Line>
     {

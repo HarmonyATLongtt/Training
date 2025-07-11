@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Autodesk.Revit.DB;
 using FirstCommand.Support.Constants;
 using FirstCommand.Support.GeometryHandle;
+using FirstCommand.Support.VectorHandle;
 
 namespace FirstCommand.Support.PointHandle
 {
@@ -221,7 +222,7 @@ namespace FirstCommand.Support.PointHandle
         {
             XYZ dir1 = (pair1.Point1 - pair1.Point2).Normalize();
             XYZ dir2 = (pair2.Point1 - pair2.Point2).Normalize();
-            return GeometryUtility.IsParallel(dir1, dir2, CommonConstants.TOLERANCE);
+            return VectorUtility.AreParallel(dir1, dir2, CommonConstants.TOLERANCE);
         }
 
         /// <summary>
@@ -355,6 +356,20 @@ namespace FirstCommand.Support.PointHandle
 
             // Từ U và W => tìm V
             V = W.CrossProduct(U); // đảm bảo V vuông góc cả W và U
+        }
+
+        /// <summary>
+        /// Mặt phẳng XY được chia thành các grid, mỗi grid có tọa độ x,y riêng
+        /// Hàm sẽ kiểm tra xem point được truyên vào thuộc grid nào
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="gridSize"></param>
+        /// <returns></returns>
+        public static (int, int) GetGridIndex(XYZ point, double gridSize)
+        {
+            int ix = (int)Math.Floor(point.X / gridSize);
+            int iy = (int)Math.Floor(point.Y / gridSize);
+            return (ix, iy);
         }
     }
 

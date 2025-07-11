@@ -19,7 +19,7 @@ namespace FirstCommand.Support.DrawOnRevit
         /// <param name="doc"></param>
         /// <param name="point1"></param>
         /// <param name="point2"></param>
-        public static void CreateModelLine(Document doc, XYZ p1, XYZ p2, bool isRevitLink, Transform transform, double multiply)
+        public static void CreateModelLine(Document doc, XYZ p1, XYZ p2, double multiply = 0, Transform transform = null)
         {
             try
             {
@@ -27,18 +27,11 @@ namespace FirstCommand.Support.DrawOnRevit
                 {
                     ModelCurve modelCurve = null;
 
-                    if (isRevitLink)
+                    if (transform != null)
                     {
                         p1 = transform.OfPoint(p1);
                         p2 = transform.OfPoint(p2);
                     }
-
-                    //XYZ pt1 = transform.OfPoint(point1);
-                    //XYZ pt2 = transform.OfPoint(point2);
-
-                    //XYZ newVector = XYZ.BasisZ.Multiply(1);
-                    //XYZ p1 = pt1.Add(newVector);
-                    //XYZ p2 = pt2.Add(newVector);
 
                     if (multiply > 0)
                     {
@@ -118,14 +111,14 @@ namespace FirstCommand.Support.DrawOnRevit
         /// <param name="p2"></param>
         /// <param name="p3"></param>
         /// <exception cref="InvalidOperationException"></exception>
-        public static void CreateModelArcFrom3Points(UIDocument uiDoc, Document doc, XYZ p1, XYZ p2, XYZ p3, bool isRevitLink, Transform transform, double multiply)
+        public static void CreateModelArcFrom3Points(UIDocument uiDoc, Document doc, XYZ p1, XYZ p2, XYZ p3, double multiply, Transform transform = null)
         {
             ModelCurve modelCurve = null;
             using (Transaction trans = new Transaction(doc, "Create Model Arc From 3 Points"))
             {
                 trans.Start();
 
-                if (isRevitLink)
+                if (transform != null)
                 {
                     p1 = transform.OfPoint(p1);
                     p2 = transform.OfPoint(p2);
@@ -178,13 +171,13 @@ namespace FirstCommand.Support.DrawOnRevit
             uiDoc.ShowElements(modelCurve.Id);
         }
 
-        public static void DrawLines(Document doc, List<Line> lines, bool isRevitLink, Transform transform, double multiply)
+        public static void DrawLines(Document doc, List<Line> lines, double multiply, Transform transform = null)
         {
             foreach (Line line in lines)
             {
                 XYZ p1 = line.GetEndPoint(0);
                 XYZ p2 = line.GetEndPoint(1);
-                CreateModelLine(doc, p1, p2, isRevitLink, transform, multiply);
+                CreateModelLine(doc, p1, p2, multiply, transform);
             }
         }
     }

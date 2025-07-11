@@ -7,7 +7,7 @@ using System.Windows.Media.Media3D;
 using Autodesk.Revit.DB;
 
 using FirstCommand.Support.GenericClass;
-using FirstCommand.Support.GenericClass.ComparerClass;
+using FirstCommand.Support.GenericClass.ComparerUtils;
 using FirstCommand.Support.DebugTest;
 using FirstCommand.Support.PointHandle;
 
@@ -68,7 +68,7 @@ namespace FirstCommand.Support.SolidHandle
         /// <param name="solid"></param>
         public static List<XYZ> GetPointOnSolid(Solid solid)
         {
-            HashSet<XYZ> points = new HashSet<XYZ>(new XYZComparer());
+            HashSet<XYZ> points = new HashSet<XYZ>(Comparers.XYZ);
 
             foreach (Face face in solid.Faces)
             {

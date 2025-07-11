@@ -7,6 +7,7 @@ using Autodesk.Revit.DB;
 using FirstCommand.Support.Constants;
 using FirstCommand.Support.PlaneHandle;
 using FirstCommand.Support.GeometryHandle;
+using FirstCommand.Support.VectorHandle;
 
 namespace FirstCommand.Support.LineHandle
 {
@@ -83,13 +84,13 @@ namespace FirstCommand.Support.LineHandle
                 // Tạo mặt phẳng đi qua 1 line và thẳng đứng song song với trục Z
                 Plane plane = PlaneUtility.CreatePlaneParallelToZFromLine(lines[i]);
                 // Nếu line[i + 1] song song với plane
-                if (GeometryUtility.AreVectorsPerpendicular(plane.Normal.Normalize(), dir2, CommonConstants.COSINE_ANGLE_TOLERANCE_1_DEGREE))
+                if (VectorUtility.ArePerpendicular(plane.Normal.Normalize(), dir2, CommonConstants.COSINE_ANGLE_TOLERANCE_1_DEGREE))
                 {
                     lines[i + 1] = CreateLineOnPlane(plane, lines[i + 1]);
                     // Sau đó sẽ xét giao điểm
                 }
                 // Nếu line[i + 1] vuông góc với plane
-                else if (GeometryUtility.IsParallel(plane.Normal.Normalize(), dir2, CommonConstants.COSINE_ANGLE_TOLERANCE_1_DEGREE))
+                else if (VectorUtility.AreParallel(plane.Normal.Normalize(), dir2, CommonConstants.COSINE_ANGLE_TOLERANCE_1_DEGREE))
                 {
                     // tạo mặt phẳng mới đi qua line1 và song song với line 2
                     XYZ cross = dir1.CrossProduct(dir2);
@@ -174,8 +175,8 @@ namespace FirstCommand.Support.LineHandle
             // Nên giới han chiều dài của Line tránh trường hợp 2 line vuông góc với nhau, và do quá dài nên cắt nhau, gây ra sai điểm giao
             //double length = 10;
             //XYZ midPoint = SetOriginPoint(origin, (origin.Z + topZ) / 2);
-            XYZ p1 = origin + direction.Multiply(-length);
-            XYZ p2 = origin + direction.Multiply(length);
+            XYZ p1 = origin + direction.Normalize().Multiply(-length);
+            XYZ p2 = origin + direction.Normalize().Multiply(length);
 
             return Line.CreateBound(p1, p2);
         }
@@ -241,7 +242,7 @@ namespace FirstCommand.Support.LineHandle
             XYZ dir1 = line1.Direction.Normalize();
             XYZ dir2 = line2.Direction.Normalize();
             XYZ origin = line1.GetEndPoint(0);
-            if (!GeometryUtility.IsParallel(dir1, dir2, tolerance))
+            if (!VectorUtility.AreParallel(dir1, dir2, tolerance))
             {
                 var cross = dir1.CrossProduct(dir2);
                 plane = Plane.CreateByNormalAndOrigin(cross, origin);

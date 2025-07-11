@@ -5,6 +5,8 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using FirstCommand.Support.TransactionHandle;
 using FirstCommand.Support.LineHandle;
+using System.Linq;
+using FirstCommand.Support.PointHandle;
 
 namespace FirstCommand.Support.DebugTest
 {
@@ -132,7 +134,7 @@ namespace FirstCommand.Support.DebugTest
         /// </summary>
         /// <param name="doc"></param>
         /// <param name="points"></param>
-        public static void DrawPoints(Document doc, List<XYZ> points, XYZ point)
+        public static void DrawPoints(Document doc, List<XYZ> points = null, XYZ point = null)
         {
             if (points != null && points.Count > 0)
             {

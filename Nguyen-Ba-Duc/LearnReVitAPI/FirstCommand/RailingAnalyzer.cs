@@ -13,42 +13,46 @@ using Autodesk.Revit.UI.Selection;
 using FirstCommand.Support.Constants;
 using FirstCommand.Support.DrawOnRevit;
 using FirstCommand.Support.FaceHandle;
-using FirstCommand.Support.GenericClass;
-using FirstCommand.Support.GenericClass.ComparerClass;
+
+using FirstCommand.Support.GenericClass.ComparerUtils;
 using FirstCommand.Support.GeometryHandle;
 using FirstCommand.Support.LineHandle;
 using FirstCommand.Support.PlaneHandle;
 using FirstCommand.Support.PointHandle;
 using FirstCommand.Support.SolidHandle;
 using FirstCommand.Support.TrianglesHandle;
+using FirstCommand.Support.VectorHandle;
 
 namespace FirstCommand
 {
     [TransactionAttribute(TransactionMode.Manual)]
     public class RailingAnalyzer : IExternalCommand
     {
-        //private const double TOLERANCE = 1e-6;
-        //private const double COSINE_ANGLE_TOLERANCE_1_DEGREE = 0.01745; // 1 độ
-        //private const double COSINE_ANGLE_TOLERANCE_5_DEGREE = 0.0872; // 5 độ (góc lệch cho phép để vector normal và trục Z được coi là vuông góc)
-        private Transform transform = null;
+        private Transform _transform = null;
+        private double _multiplyZ = 1;
+        private double _maxLengthOfElement = 0;
+        private double _minX = 0;
+        private double _minY = 0;
+        private double _maxX = 0;
+        private double _maxY = 0;
+        private List<MeshTriangle> _allTrianglesOfElement = new List<MeshTriangle>();
+        private bool hasMeshes = false;
+        private Document _doc = null;
+        //private Dictionary<MeshTriangle, List<XYZ>> triangleVertexDict = new Dictionary<MeshTriangle, List<XYZ>>();
 
-        private double lengthOfLine = 10;
-        private double minX = 0;
-        private double minY = 0;
-        private double maxX = 0;
-        private double maxY = 0;
-        private bool isRevitLink = false;
+        //private bool isRevitLink = false;
+        private TriangleVertexMap _data = null;
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
-            Document doc = uidoc.Document;
+            _doc = uidoc.Document;
 
             try
             {
                 //IList<Reference> selectedRefs = uidoc.Selection.PickObjects(ObjectType.Element, "Chọn các đối tượng");
-                //IList<Reference> selectedRefs = uidoc.Selection.PickObjects(ObjectType.PointOnElement, "Chọn các đối tượng");
+
                 IList<Reference> selectedRefs = uidoc.Selection.PickObjects(ObjectType.LinkedElement, "Chọn các đối tượng");
 
                 if (selectedRefs.Count == 0)
@@ -77,8 +81,8 @@ namespace FirstCommand
 
                         //Element linkedElem = linkDoc.GetElement(linkedElemId);
                         targetElement = linkDoc.GetElement(linkedElemId);
-                        transform = rli.GetTransform();
-                        isRevitLink = true;
+                        _transform = rli.GetTransform();
+                        //isRevitLink = true;
                     }
                     else
                     {
@@ -89,7 +93,7 @@ namespace FirstCommand
                     if (targetElement is Railing railing)
                     {
                         // xử lý với railing...
-                        HandleRailingCase(doc, railing);
+                        HandleRailingCase(_doc, railing);
                     }
                     else if (targetElement is Duct || targetElement is Pipe
                         || CheckElementIsPipeFittingOrDuctFitting(targetElement))
@@ -131,10 +135,12 @@ namespace FirstCommand
                             var (minPoint, maxPoint) = PointUtility.GetBoundingBoxExtents(targetElement);
                             if (minPoint != null && maxPoint != null)
                             {
-                                minX = minPoint.X;
-                                maxX = maxPoint.X;
-                                minY = minPoint.Y;
-                                maxY = maxPoint.Y;
+                                _minX = minPoint.X;
+                                _maxX = maxPoint.X;
+                                _minY = minPoint.Y;
+                                _maxY = maxPoint.Y;
+
+                                _maxLengthOfElement = minPoint.DistanceTo(maxPoint);
                             }
                         }
 
@@ -143,13 +149,16 @@ namespace FirstCommand
                         //meshes.AddRange(tupleValues.Meshs);
                         //List<Solid> solids = tupleValues.Solids;
 
-                        var (meshes, cylinderInfos, solids) = GetCylinderInfosFromElements(targetElement, doc);
-
+                        var (meshes, cylinderInfos, solids) = GetCylinderInfosFromElements(targetElement, _doc);
+                        if (meshes.Count > 0)
+                        {
+                            hasMeshes = true;
+                        }
                         // Trường hợp model là 1 khối thống nhất
 
                         if (cylinderInfos.Count > 2)
                         {
-                            PrepareDataForExecution(cylinderInfos, doc, uidoc, meshes, solids);
+                            PrepareDataForExecution(cylinderInfos, uidoc, solids);
                         }
                         //else if (cylinderInfos.Count == 1)
                         //{
@@ -160,7 +169,7 @@ namespace FirstCommand
                         // trường hợp chỉ có 2 trụ
                         else if (cylinderInfos.Count == 2)
                         {
-                            HandleInCaseHaveTwoCylinderInfos(doc, cylinderInfos);
+                            HandleInCaseHaveTwoCylinderInfos(cylinderInfos);
                         }
                     }
                 }
@@ -178,7 +187,7 @@ namespace FirstCommand
                 // Xử lý cho  trường hợp model gồm nhiều element nhỏ ghép lại
                 if (collectedElements.Count > 0)
                 {
-                    HandleCollectedElements(uidoc, doc, collectedElements);
+                    HandleCollectedElements(uidoc, _doc, collectedElements);
                 }
             }
             catch (Autodesk.Revit.Exceptions.OperationCanceledException)
@@ -234,17 +243,17 @@ namespace FirstCommand
 
             if (minPoint != null && maxPoint != null)
             {
-                minX = minPoint.X;
-                maxX = maxPoint.X;
-                minY = minPoint.Y;
-                maxY = maxPoint.Y;
+                _minX = minPoint.X;
+                _maxX = maxPoint.X;
+                _minY = minPoint.Y;
+                _maxY = maxPoint.Y;
             }
             if (radius > 0)
             {
                 solidsOfElement.RemoveAll(x => elementsAreCylinder.Contains(x.Item1));
 
                 double gridSize = radius * 1.5;
-                var squares = GeometryUtility.GenerateGridSquares(minX, maxX, minY, maxY, gridSize);
+                var squares = GeometryUtility.GenerateGridSquares(_minX, _maxX, _minY, _maxY, gridSize);
 
                 var topElementIds = GetElementIdHighestOnEachSquare(doc, solidsOfElement, squares, maxPoint.Z, minPoint.Z);
 
@@ -344,7 +353,7 @@ namespace FirstCommand
         private void HandleRailingCase(Document doc, Railing railing)
         {
             double length = 0;
-            List<Curve> curves = GetTopRailLines(doc, railing);
+            List<Curve> curves = GetTopRailLines(railing);
             foreach (Curve c in curves)
             {
                 if (c is CylindricalHelix helix)
@@ -357,7 +366,7 @@ namespace FirstCommand
                 }
                 if (c is Line line)
                 {
-                    if (!GeometryUtility.IsParallel(line.Direction, XYZ.BasisZ, CommonConstants.COSINE_ANGLE_TOLERANCE_1_DEGREE))
+                    if (!VectorUtility.AreParallel(line.Direction, XYZ.BasisZ, CommonConstants.COSINE_ANGLE_TOLERANCE_1_DEGREE))
                     {
                         length += line.Length;
                     }
@@ -372,14 +381,14 @@ namespace FirstCommand
         /// <param name="doc"></param>
         /// <param name="railing"></param>
         /// <returns></returns>
-        public List<Curve> GetTopRailLines(Document doc, Railing railing)
+        public List<Curve> GetTopRailLines(Railing railing)
         {
             var result = new List<Curve>();
 
             ElementId topRailId = railing.TopRail;
             if (topRailId == ElementId.InvalidElementId) return result;
 
-            TopRail topRail = doc.GetElement(topRailId) as TopRail;
+            TopRail topRail = _doc.GetElement(topRailId) as TopRail;
             if (topRail == null) return result;
 
             IList<Curve> curves = topRail.GetPath();
@@ -392,14 +401,14 @@ namespace FirstCommand
             return result;
         }
 
-        private void HandleInCaseHaveTwoCylinderInfos(Document doc, List<CylinderInfo> cylinderInfos)
+        private void HandleInCaseHaveTwoCylinderInfos(List<CylinderInfo> cylinderInfos)
         {
             if (cylinderInfos.Count == 2)
             {
                 XYZ firstPoint = cylinderInfos[0].TopPoint;
                 XYZ endPoint = cylinderInfos[1].TopPoint;
                 double length = firstPoint.DistanceTo(endPoint);
-                DrawPointLineArc.CreateModelLine(doc, firstPoint, endPoint, isRevitLink, transform, 1);
+                DrawPointLineArc.CreateModelLine(_doc, firstPoint, endPoint, _multiplyZ, _transform);
                 TaskDialog.Show("Nofi", "The length of railing is : " + length.ToString());
             }
         }
@@ -411,44 +420,46 @@ namespace FirstCommand
         /// <param name="cylinderInfos"></param>
         /// <param name="solids"></param>
         /// <returns></returns>
-        private void CheckAreSolidsConnected(ref bool areSolidsConnected, List<CylinderInfo> cylinderInfos, List<Solid> solids)
-        {
-            for (int i = 0; i < cylinderInfos.Count - 1; i++)
-            {
-                List<XYZ> points = new List<XYZ>();
-                XYZ p1 = cylinderInfos[i].TopPoint;
-                XYZ p2 = cylinderInfos[i + 1].TopPoint;
-                points.Add(p1);
-                points.Add(p2);
-                XYZ centerPoint = PointUtility.GetCenterPoint(points);
-                // Tạo 1 line thẳng đứng từ tâm của 2 điểm, sau đó kiểm tra xem có cắt solid không
-                Line line = Line.CreateUnbound(centerPoint, XYZ.BasisZ);
-                foreach (Solid solid in solids)
-                {
-                    if (!SolidUtility.IsLineIntersectSolid(line, solid))
-                    {
-                        areSolidsConnected = false;
-                        break;
-                    }
-                }
-                if (!areSolidsConnected) break;
-            }
-        }
+        //private void CheckAreSolidsConnected(ref bool areSolidsConnected, List<CylinderInfo> cylinderInfos, List<Solid> solids)
+        //{
+        //    for (int i = 0; i < cylinderInfos.Count - 1; i++)
+        //    {
+        //        List<XYZ> points = new List<XYZ>();
+        //        XYZ p1 = cylinderInfos[i].TopPoint;
+        //        XYZ p2 = cylinderInfos[i + 1].TopPoint;
+        //        points.Add(p1);
+        //        points.Add(p2);
+        //        XYZ centerPoint = PointUtility.GetCenterPoint(points);
+        //        // Tạo 1 line thẳng đứng từ tâm của 2 điểm, sau đó kiểm tra xem có cắt solid không
+        //        Line line = Line.CreateUnbound(centerPoint, XYZ.BasisZ);
+        //        foreach (Solid solid in solids)
+        //        {
+        //            if (!SolidUtility.IsLineIntersectSolid(line, solid))
+        //            {
+        //                areSolidsConnected = false;
+        //                break;
+        //            }
+        //        }
+        //        if (!areSolidsConnected) break;
+        //    }
+        //}
 
-        private void PrepareDataForExecution(List<CylinderInfo> cylinderInfos, Document doc, UIDocument uiDoc, List<Mesh> meshes, List<Solid> solids)
+        private void PrepareDataForExecution(List<CylinderInfo> cylinderInfos, UIDocument uiDoc, List<Solid> solids)
         {
-            if (meshes.Count == 0)
+            //if (meshes.Count == 0)
+            if (!hasMeshes)
             {
                 cylinderInfos = MergeCylinderInfos(cylinderInfos);
                 if (cylinderInfos.Count == 2)
                 {
-                    HandleInCaseHaveTwoCylinderInfos(doc, cylinderInfos);
+                    HandleInCaseHaveTwoCylinderInfos(cylinderInfos);
                 }
             }
             //var mergedList = MergeCylinderInfos(cylinderInfos);
             //SortInstancesAlongLine(mergedList);
 
-            if (meshes.Count > 0 || cylinderInfos.Count > 2)
+            //if (meshes.Count > 0 || cylinderInfos.Count > 2)
+            if (hasMeshes || cylinderInfos.Count > 2)
             {
                 //if (GroupPointsOnSamePlane(mergedList).Count == 0)
                 //{
@@ -458,7 +469,7 @@ namespace FirstCommand
                 //else
                 //{
                 SortInstancesAlongLine(cylinderInfos);
-                GroupPointsForDistanceCalculation(cylinderInfos, meshes, doc);
+                GroupPointsForDistanceCalculation(cylinderInfos);
                 //GetLengthOfRailing(doc, result);
                 //if (result.Count > 0)
                 //{
@@ -476,7 +487,7 @@ namespace FirstCommand
             }
         }
 
-        private void GetLengthOfRailing(Document doc, List<List<CylinderInfo>> result)
+        private void GetLengthOfRailing(List<List<CylinderInfo>> result)
         {
             if (result.Count > 0)
             {
@@ -486,7 +497,7 @@ namespace FirstCommand
                     XYZ firstPoint = group.FirstOrDefault().TopPoint;
                     XYZ endPoint = group.LastOrDefault().TopPoint;
                     length += firstPoint.DistanceTo(endPoint);
-                    DrawPointLineArc.CreateModelLine(doc, firstPoint, endPoint, isRevitLink, transform, 1);
+                    DrawPointLineArc.CreateModelLine(_doc, firstPoint, endPoint, _multiplyZ, _transform);
                 }
                 //TaskDialog.Show("Nofi", "The length of railing is : " + length.ToString());
             }
@@ -496,23 +507,23 @@ namespace FirstCommand
         /// Trường hợp tất cả các trụ được coi là bằng nhau thì để tránh sai số, set lại Z cho tất cả bằng nhau
         /// </summary>
         /// <param name="cylinderInfos"> Danh sách các trụ</param>
-        private void SetSameZForAllCylinderInfos(List<CylinderInfo> cylinderInfos)
-        {
-            double minZ = double.MaxValue;
-            foreach (var c in cylinderInfos)
-            {
-                if (minZ > c.TopPoint.Z)
-                {
-                    minZ = c.TopPoint.Z;
-                }
-            }
-            foreach (var c in cylinderInfos)
-            {
-                c.TopPoint = PointUtility.SetPointWithNewZValue(c.TopPoint, minZ);
-            }
-        }
+        //private void SetSameZForAllCylinderInfos(List<CylinderInfo> cylinderInfos)
+        //{
+        //    double minZ = double.MaxValue;
+        //    foreach (var c in cylinderInfos)
+        //    {
+        //        if (minZ > c.TopPoint.Z)
+        //        {
+        //            minZ = c.TopPoint.Z;
+        //        }
+        //    }
+        //    foreach (var c in cylinderInfos)
+        //    {
+        //        c.TopPoint = PointUtility.SetPointWithNewZValue(c.TopPoint, minZ);
+        //    }
+        //}
 
-        private void GetTopViewShape(List<Mesh> meshes, List<CylinderInfo> cylinderInfos, Document doc)
+        private void GetTopViewShape(List<CylinderInfo> cylinderInfos)
         {
             List<XYZ> topPoints = new List<XYZ>();
 
@@ -526,41 +537,49 @@ namespace FirstCommand
             double radius = firstCylinderInfo.Radius;
 
             // Lấy ra tất cả các triangles của các meshes
-            List<MeshTriangle> trianglesOfElement = new List<MeshTriangle>();
-            HashSet<MeshTriangle> trianglesParallelToZ = new HashSet<MeshTriangle>();
-            HashSet<MeshTriangle> trianglesPerpendicularToZ = new HashSet<MeshTriangle>();
+            //List<MeshTriangle> allTrianglesOfElement = new List<MeshTriangle>();
+            HashSet<MeshTriangle> trianglesParallelToAxisZ = new HashSet<MeshTriangle>();
+            HashSet<MeshTriangle> trianglesPerpendicularToAxisZ = new HashSet<MeshTriangle>();
 
-            if (meshes.Count > 0)
+            //if (meshes.Count > 0)
+            //{
+            //    foreach (var mesh in meshes)
+            //    {
+            //        for (int i = 0; i < mesh.NumTriangles; i++)
+            //        {
+            //            allTrianglesOfElement.Add(mesh.get_Triangle(i));
+            //        }
+            //    }
+            //}
+
+            foreach (var tri in _allTrianglesOfElement)
             {
-                foreach (var mesh in meshes)
+                //XYZ normal = TrianglesUtility.GetNormalFromTriangle(tri);
+                XYZ normal = _data.GetTriangleInfos(tri).Normal;
+                if (normal != null)
                 {
-                    for (int i = 0; i < mesh.NumTriangles; i++)
+                    //if (FaceUtility.IsFacePerpendicularToAxis(normal, XYZ.BasisZ))
+                    if (VectorUtility.AreParallel(normal, XYZ.BasisZ))
                     {
-                        trianglesOfElement.Add(mesh.get_Triangle(i));
+                        trianglesPerpendicularToAxisZ.Add(tri);
+                    }
+                    //else if (FaceUtility.IsFaceParallelToAxis(normal, XYZ.BasisZ))
+                    else if (VectorUtility.ArePerpendicular(normal, XYZ.BasisZ, CommonConstants.COSINE_ANGLE_TOLERANCE_1_DEGREE))
+                    {
+                        trianglesParallelToAxisZ.Add(tri);
                     }
                 }
             }
 
-            foreach (var tri in trianglesOfElement)
-            {
-                XYZ normal = TrianglesUtility.GetNormalFromTriangle(tri);
-                if (FaceUtility.IsFacePerpendicularToAxis(normal, XYZ.BasisZ))
-                {
-                    trianglesPerpendicularToZ.Add(tri);
-                }
-                else if (FaceUtility.IsFaceParallelToZ(normal))
-                {
-                    trianglesParallelToZ.Add(tri);
-                }
-            }
-
             // Xóa những face thuộc trụ và những face thuộc hình tròn ở 2 đầu trụ
-            trianglesOfElement.RemoveAll(t => trianglesParallelToZ.Contains(t));
-            trianglesOfElement.RemoveAll(t => trianglesPerpendicularToZ.Contains(t));
-
-            //TestFunction(trianglesOfElement, doc);
+            _allTrianglesOfElement.RemoveAll(t => trianglesParallelToAxisZ.Contains(t));
+            _allTrianglesOfElement.RemoveAll(t => trianglesPerpendicularToAxisZ.Contains(t));
+            //vertexToTriangles = TrianglesUtility.VertexToTrianglesMapping(allTrianglesOfElement);
+            //triangleVertexDict = TrianglesUtility.GetTriangleVerticesDict(allTrianglesOfElement);
             //Hàm này trả về List<List<MeshTriangle>> phân chia thành các nhóm tam giác
-            var topPointsAndTrianglesHighestOfEachPart = GetTrianglesHaveHigherZ(trianglesOfElement, radius, doc, topPoints);
+            var topPointsAndTrianglesHighestOfEachPart = GetTrianglesHaveHigherZ(_allTrianglesOfElement, radius, topPoints);
+
+            if (topPointsAndTrianglesHighestOfEachPart.Count == 0) return;
 
             foreach (var (topPointsForEachPart, trianglesHighest) in topPointsAndTrianglesHighestOfEachPart)
             {
@@ -583,7 +602,7 @@ namespace FirstCommand
                 bool isComplex = false;
                 if (remainingcylinderInfos.Count == 0)
                 {
-                    isComplex = IsElementComplex(doc, result);
+                    isComplex = IsElementComplex(result);
                 }
 
                 //var pointsAsDiagonalLine = GroupPointsAsDiagonalLine(cylinderInfosForEachPart);
@@ -604,7 +623,7 @@ namespace FirstCommand
                 // Các trường hợp còn lại như thừa trụ lẻ, hoặc các trụ không thẳng
                 if (isComplex == true || remainingcylinderInfos.Count > 0)
                 {
-                    HandleForMeshesComplex(trianglesHighest, topPointsForEachPart, doc, radius, result, remainingcylinderInfos);
+                    HandleForMeshesComplex(trianglesHighest, topPointsForEachPart, radius, result, remainingcylinderInfos);
                 }
             }
         }
@@ -612,18 +631,18 @@ namespace FirstCommand
         /// <summary>
         /// Hàm xử lý những trường hợp element là mesh và có hình dạng phức tạp
         /// </summary>
-        private void HandleForMeshesComplex(List<MeshTriangle> trianglesHighest, List<XYZ> topPointsForEachPart, Document doc, double radius, List<List<CylinderInfo>> result, List<CylinderInfo> remainingcylinderInfos)
+        private void HandleForMeshesComplex(List<MeshTriangle> trianglesHighest, List<XYZ> topPointsForEachPart, double radius, List<List<CylinderInfo>> result, List<CylinderInfo> remainingcylinderInfos)
         {
             List<Line> allLine = new List<Line>();
 
-            HashSet<XYZ> topPointsViewed = new HashSet<XYZ>();
+            List<XYZ> topPointsViewed = new List<XYZ>();
             XYZ firstPoint = null;
             XYZ lastPoint = null;
             List<MeshTriangle> trianglesHighestClone = trianglesHighest.ToList();
             List<XYZ> topPointsClone = topPointsForEachPart.ToList();
             while (topPointsForEachPart.Count > 1 && firstPoint == null)
             {
-                GetLinesFromTriangles(trianglesHighest, topPointsForEachPart.FirstOrDefault(), radius, true, doc, topPointsForEachPart, topPointsViewed, ref firstPoint, null);
+                GetLinesFromTriangles(trianglesHighest, topPointsForEachPart.FirstOrDefault(), radius, true, topPointsForEachPart, topPointsViewed, ref firstPoint);
 
                 topPointsForEachPart.RemoveAll(x => topPointsViewed.Any(y => x.IsAlmostEqualTo(y, CommonConstants.TOLERANCE)));
             }
@@ -650,7 +669,7 @@ namespace FirstCommand
                 {
                     while (topPointsClone.Count > 1 && firstPoint != null)
                     {
-                        var lines = GetLinesFromTriangles(trianglesHighestClone, topPointsClone.First(), radius, true, doc, topPointsClone, topPointsViewed, ref lastPoint, null);
+                        var lines = GetLinesFromTriangles(trianglesHighestClone, topPointsClone.First(), radius, true, topPointsClone, topPointsViewed, ref lastPoint);
 
                         if (lines != null && lines.Count > 0)
                         {
@@ -665,121 +684,204 @@ namespace FirstCommand
             {
                 if (allLine.Count == 1 && result.Count == 1 && remainingcylinderInfos.Count == 0)
                 {
-                    DrawPointLineArc.CreateModelLine(doc, firstPoint, lastPoint, isRevitLink, transform, 1);
+                    DrawPointLineArc.CreateModelLine(_doc, firstPoint, lastPoint, _multiplyZ, _transform);
                 }
                 else if (allLine.Count >= 2)
                 {
-                    GetAllIntersecPoints(firstPoint, lastPoint, allLine, doc);
+                    GetAllIntersecPoints(firstPoint, lastPoint, allLine);
                 }
             }
+        }
+
+        /// <summary>
+        /// Nhóm các hình vuông giao với hình chữ nhật
+        /// </summary>
+        /// <param name=""></param>
+        /// <param name=""></param>
+        /// <param name=""></param>
+        private List<(XYZ, List<MeshTriangle>)> GroupTrianglesThatIntersectWithSquare(List<List<XYZ>> gridSquares, List<MeshTriangle> triangles, double gridSize)
+        {
+            var centerPointOfGridAndTrianglesMapping = new List<(XYZ, List<MeshTriangle>)>();
+            var cellToTriangles = TrianglesUtility.SpatialHashMeshTrianglesToGrid(triangles, gridSize);
+            foreach (var square in gridSquares)
+            {
+                var triangleList = new HashSet<MeshTriangle>();
+                XYZ p = PointUtility.GetCenterPoint(square);
+                var (i, j) = PointUtility.GetGridIndex(p, gridSize);
+
+                if (cellToTriangles.TryGetValue((i, j), out var triList))
+                {
+                    foreach (var tri in triList)
+                    {
+                        var vertices = TrianglesUtility.GetVerticesOfTriangles(triangle: tri);
+                        // Nếu grid và tam giác giao nhau
+                        if (GeometryUtility.AreTriangleAndSquareIntersecting(vertices, square))
+                        {
+                            triangleList.Add(tri);
+                        }
+                    }
+                }
+                if (triangleList.Count > 0)
+                {
+                    centerPointOfGridAndTrianglesMapping.Add((p, triangleList.ToList()));
+                }
+            }
+            return centerPointOfGridAndTrianglesMapping;
         }
 
         /// <summary>
         /// Loại bỏ những triangles cùng vị trí (x,y) nhưng thấp hơn
         /// </summary>
         /// <param name="triangles"></param>
-        private List<(List<XYZ> TopPoints, List<MeshTriangle> TrianglesHigher)> GetTrianglesHaveHigherZ(List<MeshTriangle> triangles, double r, Document doc, List<XYZ> topPoints)
+        private List<(List<XYZ> TopPoints, List<MeshTriangle> TrianglesHigher)> GetTrianglesHaveHigherZ(List<MeshTriangle> triangles, double r, List<XYZ> topPoints)
         {
             // Đoạn này dùng để gom nhóm các tam giác thuộc 1 grid
             //double gridSize = r * 1.75;
             //double gridSize = r * 4; //nhanh cho gần tất cả
             //double gridSize = r / 2;
             double gridSize = r * 2.25;
-            var squares = GeometryUtility.GenerateGridSquares(minX, maxX, minY, maxY, gridSize);
+            var gridSquares = GeometryUtility.GenerateGridSquares(_minX, _maxX, _minY, _maxY, gridSize);
 
-            List<(XYZ, List<MeshTriangle>)> tupleValues = new List<(XYZ, List<MeshTriangle>)>();
-            foreach (var square in squares)
-            {
-                List<MeshTriangle> triangleList = new List<MeshTriangle>();
-                foreach (var tri in triangles)
-                {
-                    var vertices = TrianglesUtility.GetVerticesOfTriangle(tri);
-                    // Nếu grid và tam giác giao nhau
-                    if (GeometryUtility.AreTriangleAndSquareIntersecting(vertices, square))
-                    {
-                        triangleList.Add(tri);
-                    }
-                }
-                if (triangleList.Count > 0)
-                {
-                    tupleValues.Add((PointUtility.GetCenterPoint(square), triangleList));
-                }
-            }
-            // Gom nhóm các square nối với nhau thành 1 nhóm
-            List<XYZ> centerPoints = new List<XYZ>();
-            foreach (var tuple in tupleValues)
-            {
-                centerPoints.Add(tuple.Item1);
-            }
-            double gapOfNearPoints = gridSize * 1.5; // gần bằng căn bậc 2 của 2
-            var groupPoints = PointUtility.GroupClosePoints(centerPoints, gapOfNearPoints);
+            var centerPointOfGridAndTrianglesMapping = GroupTrianglesThatIntersectWithSquare(gridSquares, triangles, gridSize);
+            //foreach (var square in gridSquares)
+            //{
+            //    var triangleList = new HashSet<MeshTriangle>();
+            //    //
+            //    var vertexToTrianglesMapping = TrianglesUtility.VertexToTrianglesMapping(triangles);
 
-            List<(List<XYZ> TopPoints, List<List<MeshTriangle>> GroupTriangles)> topPointsAndGroupTrianglesForEachPart =
-                new List<(List<XYZ> TopPoints, List<List<MeshTriangle>> GroupTriangles)>();
-            foreach (var group in groupPoints)
+            //    //
+            //    foreach (var tri in triangles)
+            //    {
+            //        var vertices = TrianglesUtility.GetVerticesOfTriangle(tri);
+            //        // Nếu grid và tam giác giao nhau
+            //        if (GeometryUtility.AreTriangleAndSquareIntersecting(vertices, square))
+            //        {
+            //            triangleList.Add(tri);
+            //        }
+            //    }
+            //    if (triangleList.Count > 0)
+            //    {
+            //        CenterPointOfGridAndTrianglesMapping.Add((PointUtility.GetCenterPoint(square), triangleList.ToList()));
+            //    }
+            //}
+
+            if (centerPointOfGridAndTrianglesMapping.Count > 0)
             {
-                List<List<MeshTriangle>> groupTriangles = new List<List<MeshTriangle>>();
-                foreach (XYZ p in group)
+                //List<XYZ> centerPoints = new List<XYZ>();
+                //foreach (var tuple in centerPointOfGridAndTrianglesMapping)
+                //{
+                //    centerPoints.Add(tuple.Item1);
+                //}
+                // Gom nhóm các square nối với nhau thành 1 nhóm
+                List<XYZ> centerPoints = centerPointOfGridAndTrianglesMapping
+                    .Select(t => t.Item1)
+                    .ToList();
+
+                double gapOfNearPoints = gridSize * 1.5; // gần bằng căn bậc 2 của 2
+                var groupPoints = PointUtility.GroupClosePoints(centerPoints, gapOfNearPoints);
+
+                var topPointsAndGroupTrianglesForEachPart = new List<(List<XYZ> TopPoints, List<List<MeshTriangle>> GroupTriangles)>();
+
+                foreach (var group in groupPoints)
                 {
-                    foreach (var tuple in tupleValues)
+                    var groupTriangles = new List<List<MeshTriangle>>();
+                    foreach (XYZ p in group)
                     {
-                        if (p.IsAlmostEqualTo(tuple.Item1, CommonConstants.TOLERANCE))
+                        foreach (var (centerPoint, listTriangles) in centerPointOfGridAndTrianglesMapping)
                         {
-                            groupTriangles.Add(tuple.Item2);
-                            break;
-                        }
-                    }
-                }
-
-                //Chia topPoint theo từng phần của element
-                List<XYZ> topPointsForEachPart = new List<XYZ>();
-                foreach (XYZ p in topPoints)
-                {
-                    XYZ newPointOnXY = PointUtility.SetPointWithNewZValue(p, 0);
-                    if (PointUtility.IsPointNearListPoint(newPointOnXY, group, gridSize))
-                    {
-                        topPointsForEachPart.Add(p);
-                    }
-                }
-
-                topPointsAndGroupTrianglesForEachPart.Add((topPointsForEachPart, groupTriangles));
-            }
-
-            List<(List<XYZ> TopPoints, List<MeshTriangle> TrianglesHigher)> topPointsAndTrianglesHigherOfEachPart = new List<(List<XYZ> TopPoints, List<MeshTriangle> TrianglesHigher)>();
-            foreach (var newTuple in topPointsAndGroupTrianglesForEachPart)
-            {
-                HashSet<MeshTriangle> meshTrianglesHigher = new HashSet<MeshTriangle>();
-
-                foreach (var trianglesOnGrid in newTuple.GroupTriangles)
-                {
-                    double maxZ = double.MinValue;
-                    XYZ maxPoint;
-
-                    foreach (var tri in trianglesOnGrid)
-                    {
-                        double highest = TrianglesUtility.GetHighestAndLowestZPoint(tri).Max.Z;
-
-                        if (highest > maxZ)
-                        {
-                            maxZ = highest;
-                            maxPoint = TrianglesUtility.GetHighestAndLowestZPoint(tri).Max;
+                            if (p.IsAlmostEqualTo(centerPoint, CommonConstants.TOLERANCE))
+                            {
+                                groupTriangles.Add(listTriangles);
+                                break;
+                            }
                         }
                     }
 
-                    foreach (var tri1 in trianglesOnGrid)
+                    //Chia topPoint theo từng phần của element
+                    List<XYZ> topPointsForEachPart = new List<XYZ>();
+                    foreach (XYZ p in topPoints)
                     {
-                        if (meshTrianglesHigher.Contains(tri1)) continue;
-                        double highest = TrianglesUtility.GetHighestAndLowestZPoint(tri1).Max.Z;
-                        if (maxZ - highest < r)
+                        XYZ newPointOnXY = PointUtility.SetPointWithNewZValue(p, 0);
+                        if (PointUtility.IsPointNearListPoint(newPointOnXY, group, gridSize))
                         {
-                            meshTrianglesHigher.Add(tri1);
+                            topPointsForEachPart.Add(p);
                         }
                     }
-                }
-                topPointsAndTrianglesHigherOfEachPart.Add((newTuple.TopPoints, meshTrianglesHigher.ToList()));
-            }
 
-            return topPointsAndTrianglesHigherOfEachPart;
+                    topPointsAndGroupTrianglesForEachPart.Add((topPointsForEachPart, groupTriangles));
+                }
+
+                // tìm ra những triangles cao nhất
+                var topPointsAndTrianglesHigherOfEachPart = new List<(List<XYZ> TopPoints, List<MeshTriangle> TrianglesHigher)>();
+                foreach (var listTuple in topPointsAndGroupTrianglesForEachPart)
+                {
+                    var meshTrianglesHigher = new HashSet<MeshTriangle>();
+
+                    foreach (var trianglesOnGrid in listTuple.GroupTriangles)
+                    {
+                        double maxZ = double.MinValue;
+
+                        // Tạm lưu danh sách tam giác cùng với điểm cao nhất để tránh gọi lại nhiều lần
+                        var triangleWithZ = new List<(MeshTriangle tri, double highestZ)>();
+
+                        foreach (var tri in trianglesOnGrid)
+                        {
+                            double highestZ = TrianglesUtility.GetHighestAndLowestZPoint(tri).Max.Z;
+
+                            // Cập nhật maxZ
+                            if (highestZ > maxZ)
+                            {
+                                maxZ = highestZ;
+                            }
+
+                            // Lưu để dùng sau
+                            triangleWithZ.Add((tri, highestZ));
+                        }
+
+                        foreach (var (tri, highestZ) in triangleWithZ)
+                        {
+                            if (meshTrianglesHigher.Contains(tri)) continue;
+
+                            if (maxZ - highestZ < r)
+                            {
+                                meshTrianglesHigher.Add(tri);
+                            }
+                        }
+                    }
+
+                    //foreach (var trianglesOnGrid in listTuple.GroupTriangles)
+                    //{
+                    //    double maxZ = double.MinValue;
+                    //    XYZ maxPoint;
+
+                    //    foreach (var tri in trianglesOnGrid)
+                    //    {
+                    //        XYZ maxZPoint = TrianglesUtility.GetHighestAndLowestZPoint(tri).Max;
+                    //        double highest = maxZPoint.Z;
+
+                    //        if (highest > maxZ)
+                    //        {
+                    //            maxZ = highest;
+                    //            maxPoint = maxZPoint;
+                    //        }
+                    //    }
+
+                    //    foreach (var tri1 in trianglesOnGrid)
+                    //    {
+                    //        if (meshTrianglesHigher.Contains(tri1)) continue;
+                    //        double highest = TrianglesUtility.GetHighestAndLowestZPoint(tri1).Max.Z;
+                    //        if (maxZ - highest < r)
+                    //        {
+                    //            meshTrianglesHigher.Add(tri1);
+                    //        }
+                    //    }
+                    //}
+                    topPointsAndTrianglesHigherOfEachPart.Add((listTuple.TopPoints, meshTrianglesHigher.ToList()));
+                }
+
+                return topPointsAndTrianglesHigherOfEachPart;
+            }
+            return null;
         }
 
         /// <summary>
@@ -791,7 +893,7 @@ namespace FirstCommand
         /// <param name="lastLine"></param>
         /// <param name="lines"></param>
         /// <returns></returns>
-        private List<(XYZ, XYZ)> GetAllIntersecPoints(XYZ firstPoint, XYZ lastPoint, List<Line> lines, Document doc)
+        private List<(XYZ, XYZ)> GetAllIntersecPoints(XYZ firstPoint, XYZ lastPoint, List<Line> lines)
         {
             List<(XYZ, XYZ)> pairs = new List<(XYZ, XYZ)>();
             List<XYZ> points = new List<XYZ>();
@@ -841,14 +943,15 @@ namespace FirstCommand
             //TaskDialog.Show("adfd", str);
             foreach (var pair in pairs)
             {
-                DrawPointLineArc.CreateModelLine(doc, pair.Item1, pair.Item2, isRevitLink, transform, 1);
+                DrawPointLineArc.CreateModelLine(_doc, pair.Item1, pair.Item2, _multiplyZ, _transform);
             }
 
             return pairs;
         }
 
         private List<Line> GetLinesFromTriangles(List<MeshTriangle> triangles,
-            XYZ point, double radius, bool isTopPointOfCylinder, Document doc, List<XYZ> topPoints, HashSet<XYZ> topPointsViewed, ref XYZ firstPoint, XYZ originPointToCreateLine)
+            XYZ point, double radius, bool isTopPointOfCylinder,
+            List<XYZ> topPoints, List<XYZ> topPointsViewed, ref XYZ firstPoint, XYZ originPointToCreateLine = null)
         {
             List<Line> lines = new List<Line>();
             (XYZ, Line) pointAndLine;
@@ -857,7 +960,7 @@ namespace FirstCommand
 
             if (pointAndAxis.Axis == null)
             {
-                XYZ p = GetTopPoint(topPoints, point, radius, originPointToCreateLine, false);
+                XYZ p = GetTopPoint(topPoints, point, radius, originPointToCreateLine);
                 if (p != null)
                 {
                     topPointsViewed.Add(p);
@@ -870,9 +973,9 @@ namespace FirstCommand
                 }
                 return null;
             }
-            Line line = LineUtility.CreateLine(pointAndAxis.OriginPoint, pointAndAxis.Axis, lengthOfLine);
-            lines.Add(line);
 
+            Line line = LineUtility.CreateLine(pointAndAxis.OriginPoint, pointAndAxis.Axis, _maxLengthOfElement);
+            lines.Add(line);
             pointAndLine = (pointAndAxis.OriginPoint, line);
 
             //Thêm đoạn này xem có lỗi gì không
@@ -882,7 +985,7 @@ namespace FirstCommand
                 topPointsViewed.Add(point);
             }
 
-            XYZ referencePoint = GetRemainTriangles(pointAndLine, triangles, radius, doc);
+            XYZ referencePoint = GetRemainTriangles(pointAndLine, triangles, radius);
 
             if (referencePoint != null)
             {
@@ -891,7 +994,7 @@ namespace FirstCommand
                 {
                     topPointsViewed.Add(p);
                 }
-                var subLines = GetLinesFromTriangles(triangles, referencePoint, radius, false, doc, topPoints, topPointsViewed, ref firstPoint, pointAndLine.Item1);
+                var subLines = GetLinesFromTriangles(triangles, referencePoint, radius, false, topPoints, topPointsViewed, ref firstPoint, pointAndLine.Item1);
                 if (subLines != null && subLines.Count > 0)
                 {
                     lines.AddRange(subLines);
@@ -908,7 +1011,7 @@ namespace FirstCommand
         /// <param name="point"></param>
         /// <param name="radius"></param>
         /// <returns></returns>
-        private XYZ GetTopPoint(List<XYZ> topPoints, XYZ point, double radius, XYZ originPointToCreateLine, bool hasAxis)
+        private XYZ GetTopPoint(List<XYZ> topPoints, XYZ point, double radius, XYZ originPointToCreateLine = null, bool hasAxis = false)
         {
             List<XYZ> list = new List<XYZ>();
             List<double> checkDistances = new List<double> { radius * 6, radius * 12 };
@@ -952,7 +1055,7 @@ namespace FirstCommand
         /// <param name="topZ"></param>
         /// <param name="r"></param>
         /// <returns></returns>
-        private XYZ GetRemainTriangles((XYZ, Line) tuple, List<MeshTriangle> triangles, double r, Document doc)
+        private XYZ GetRemainTriangles((XYZ, Line) tuple, List<MeshTriangle> triangles, double r)
         {
             double distance = r * 4;
             List<MeshTriangle> trianglesNearLine = new List<MeshTriangle>();
@@ -989,7 +1092,8 @@ namespace FirstCommand
         /// <returns></returns>
         private XYZ GetFarthestPoint(XYZ targetPoint, List<MeshTriangle> triangles)
         {
-            List<XYZ> vertexs = GetVerticesOfAllTriangles(triangles).Vertexs;
+            //List<XYZ> vertexs = GetVerticesOfAllTriangles(triangles).Vertexs;
+            List<XYZ> vertexs = TrianglesUtility.GetVerticesOfTriangles(triangles);
             double maxDistance = double.MinValue;
             XYZ farthestPoint = null;
             foreach (var p in vertexs)
@@ -1003,20 +1107,20 @@ namespace FirstCommand
             return farthestPoint;
         }
 
-        private List<MeshTriangle> GetElementsInANotInB(List<MeshTriangle> A, List<MeshTriangle> B)
-        {
-            var result = new List<MeshTriangle>();
+        //private List<MeshTriangle> GetElementsInANotInB(List<MeshTriangle> A, List<MeshTriangle> B)
+        //{
+        //    var result = new List<MeshTriangle>();
 
-            foreach (var item in A)
-            {
-                if (!B.Contains(item))
-                {
-                    result.Add(item);
-                }
-            }
+        //    foreach (var item in A)
+        //    {
+        //        if (!B.Contains(item))
+        //        {
+        //            result.Add(item);
+        //        }
+        //    }
 
-            return result;
-        }
+        //    return result;
+        //}
 
         /// <summary>
         /// Lấy ra danh sách các tam giác cách 1 điêm cho trước 1 khoảng và thỏa mãn có 1 cạnh
@@ -1037,7 +1141,7 @@ namespace FirstCommand
             {
                 foreach (var tr in triangles)
                 {
-                    var vertices = TrianglesUtility.GetVerticesOfTriangle(tr);
+                    var vertices = TrianglesUtility.GetVerticesOfTriangles(triangle: tr);
                     if (vertices.Any(pt => pt.DistanceTo(point) < length + radius * 2))
                     {
                         var edges = TrianglesUtility.GetTriangleEdges(tr);
@@ -1046,30 +1150,6 @@ namespace FirstCommand
                             sublist.Add(tr);
                         }
                     }
-
-                    //
-                    //foreach (var pt in vertices)
-                    //{
-                    //    double dist = pt.DistanceTo(point);
-                    //    if (dist < length + radius * 2)
-                    //    {
-                    //        int count = 0;
-                    //        List<Line> edges = GetTriangleEdges(tr);
-                    //        foreach (Line line in edges)
-                    //        {
-                    //            if (line.Length > radius * 3)
-                    //            {
-                    //                count++;
-                    //                break;
-                    //            }
-                    //        }
-                    //        if (count > 0)
-                    //        {
-                    //            sublist.Add(tr);
-                    //            break;
-                    //        }
-                    //    }
-                    //}
                 }
                 if (sublist.Count > 1)
                     break;
@@ -1084,14 +1164,14 @@ namespace FirstCommand
         /// <returns></returns>
         private (List<XYZ> Vertexs, Dictionary<XYZ, List<MeshTriangle>> VertexToTriangles) GetVerticesOfAllTriangles(List<MeshTriangle> triangles)
         {
-            HashSet<XYZ> vertexs = new HashSet<XYZ>();
+            HashSet<XYZ> vertexs = new HashSet<XYZ>(Comparers.XYZ);
 
             /// Vertex thuộc những tam giác nào
-            Dictionary<XYZ, List<MeshTriangle>> vertexToTriangles = new Dictionary<XYZ, List<MeshTriangle>>(new XYZComparer(CommonConstants.TOLERANCE));
+            Dictionary<XYZ, List<MeshTriangle>> vertexToTriangles = new Dictionary<XYZ, List<MeshTriangle>>(Comparers.XYZ);
 
             foreach (var tri in triangles)
             {
-                List<XYZ> vertexsOfEachTriangle = TrianglesUtility.GetVerticesOfTriangle(tri);
+                List<XYZ> vertexsOfEachTriangle = TrianglesUtility.GetVerticesOfTriangles(triangle: tri);
                 foreach (XYZ vertex in vertexsOfEachTriangle)
                 {
                     if (!vertexToTriangles.TryGetValue(vertex, out var list))
@@ -1118,9 +1198,10 @@ namespace FirstCommand
         /// <returns></returns>
         private (XYZ OriginPoint, XYZ Axis) GetPointAndAxisOfTriangles(XYZ A, List<MeshTriangle> triangles, double r, bool IsOrigin, List<XYZ> topPoints)
         {
-            var tupleValues = GetVerticesOfAllTriangles(triangles);
-            List<XYZ> vertexs = tupleValues.Vertexs;
-            var vertexToTriangles = tupleValues.VertexToTriangles;
+            //var (vertexs, vertexToTriangles) = GetVerticesOfAllTriangles(triangles);
+            //List<XYZ> vertexs = TrianglesUtility.GetVerticesOfTriangles(triangles);
+            List<XYZ> vertexs = _data.GetVerticesOfGroupTriangles(triangles);
+            //var vertexToTriangles = tupleValues.VertexToTriangles;
             // Tìm điểm xa nhất với điểm A trong bán kính cho trước
             // B nên thuộc tam giác có cạnh dài hơn 3r
             XYZ B = null;
@@ -1144,7 +1225,7 @@ namespace FirstCommand
                         if (distToA > lengthToGetB)
                             continue;
 
-                        if (vertexToTriangles.TryGetValue(v, out var triList))
+                        if (_data.VertexToTriangles.TryGetValue(v, out var triList))
                         {
                             foreach (var tri in triList)
                             {
@@ -1183,14 +1264,6 @@ namespace FirstCommand
             {
                 XYZ axis = GetAxisFromTriangles(subListTriangleNearB);
                 return (B, axis);
-                //if (IsOrigin)
-                //{
-                //    return (A, axis);
-                //}
-                //else
-                //{
-                //    return (B, axis);
-                //}
             }
             else
             {
@@ -1214,7 +1287,7 @@ namespace FirstCommand
             {
                 XYZ normal = TrianglesUtility.GetNormalFromTriangle(triangles[i]);
                 // Nếu 2 vector không song song với nhau
-                if (!GeometryUtility.IsParallel(firstNormal, normal, CommonConstants.COSINE_ANGLE_TOLERANCE_5_DEGREE))
+                if (!VectorUtility.AreParallel(firstNormal, normal, CommonConstants.COSINE_ANGLE_TOLERANCE_5_DEGREE))
                 {
                     secondTriangle = triangles[i];
                     secondNormal = normal;
@@ -1226,10 +1299,12 @@ namespace FirstCommand
             {
                 axisVector = firstNormal.CrossProduct(secondNormal).Normalize();
             }
-            if (GeometryUtility.IsParallel(axisVector, XYZ.BasisZ, CommonConstants.COSINE_ANGLE_TOLERANCE_5_DEGREE))
-            {
-                return PointUtility.SetPointWithNewZValue(axisVector, 0);
-            }
+            //if (VectorUtility.AreParallel(axisVector, XYZ.BasisZ, CommonConstants.COSINE_ANGLE_TOLERANCE_5_DEGREE))
+            //{
+            //    return PointUtility.SetPointWithNewZValue(axisVector, 0);
+            //}
+
+            VectorUtility.IsParallelToAnyAxis(ref axisVector, CommonConstants.COSINE_ANGLE_TOLERANCE_5_DEGREE);
 
             return axisVector;
         }
@@ -1376,22 +1451,36 @@ namespace FirstCommand
 
                 if (planarFacesOfElement.Count > 0)
                 {
-                    GeometryUtility.AddMesh(meshes, planarFacesOfElement);
+                    //GeometryUtility.AddMesh(meshes, planarFacesOfElement);
                     foreach (PlanarFace p in planarFacesOfElement)
                     {
-                        //Mesh mesh = p.Triangulate();
-                        //meshes.Add(mesh);
-                        // Kiểm tra xem facenormal của planarface có gần vuông góc với Z không
-                        if (FaceUtility.IsFaceParallelToZ(p.FaceNormal))
-                        {
-                            Mesh mesh = p.Triangulate();
-                            AddMeshTriangles(triangles, mesh);
-                        }
+                        Mesh mesh = p.Triangulate();
+                        AddMeshTriangles(triangles, mesh);
+                        meshes.Add(mesh);
+                        //    // Kiểm tra xem facenormal của planarface có gần vuông góc với Z không
+                        //    if (FaceUtility.IsFaceParallelToAxis(p.FaceNormal, XYZ.BasisZ))
+                        //    {
+                        //        Mesh mesh = p.Triangulate();
+                        //        AddMeshTriangles(triangles, mesh);
+                        //    }
                     }
                 }
             }
-            //var result = GroupFacesBySharedVertices(planarFacesParallelToZ);
-            var result = TrianglesUtility.GroupMeshTrianglesBySharedVertices(triangles);
+            _allTrianglesOfElement = triangles.ToList();
+            _data = new TriangleVertexMap(triangles);
+            var trianglesParallelToZ = new List<MeshTriangle>();
+            foreach (var tri in triangles)
+            {
+                var triInfos = _data.GetTriangleInfos(tri);
+                var normalTri = triInfos.Normal;
+                if (VectorUtility.ArePerpendicular(normalTri, XYZ.BasisZ, CommonConstants.COSINE_ANGLE_TOLERANCE_1_DEGREE))
+                {
+                    trianglesParallelToZ.Add(tri);
+                }
+            }
+
+            //var result = TrianglesUtility.GroupMeshTrianglesBySharedVertices(triangles);
+            var result = TrianglesUtility.GroupMeshTrianglesBySharedVertices(_data, trianglesParallelToZ);
             result = result.OrderByDescending(x => x.Count).ToList();
             double firstRadius = 0;
             foreach (var group in result)
@@ -1434,11 +1523,12 @@ namespace FirstCommand
             for (int i = 0; i < mesh.NumTriangles; i++)
             {
                 MeshTriangle triangle = mesh.get_Triangle(i);
-                XYZ normal = TrianglesUtility.GetNormalFromTriangle(triangle);
-                if (FaceUtility.IsFaceParallelToZ(normal))
-                {
-                    triangles.Add(triangle);
-                }
+                //XYZ normal = TrianglesUtility.GetNormalFromTriangle(triangle);
+                //if (FaceUtility.IsFaceParallelToAxis(normal, XYZ.BasisZ))
+                //{
+                //    triangles.Add(triangle);
+                //}
+                triangles.Add(triangle);
             }
         }
 
@@ -1446,7 +1536,7 @@ namespace FirstCommand
         {
             CylinderInfo cylinderInfo = new CylinderInfo();
 
-            var points = new HashSet<XYZ>(new XYZComparer());
+            var points = new List<XYZ>();
             XYZ highestPoint = null;
             XYZ lowestPoint = null;
 
@@ -1455,29 +1545,38 @@ namespace FirstCommand
 
             foreach (var triangle in group)
             {
-                var tuple = TrianglesUtility.GetHighestAndLowestZPoint(triangle);
-                if (tuple.Max.Z > maxZ)
+                var triInfo = _data.GetTriangleInfos(triangle);
+                if (triInfo.MaxZPoint.Z > maxZ)
                 {
-                    maxZ = tuple.Max.Z;
-                    highestPoint = tuple.Max;
+                    maxZ = triInfo.MaxZPoint.Z;
+                    highestPoint = triInfo.MaxZPoint;
                 }
-                if (tuple.Min.Z < minZ)
+                if (triInfo.MinZPoint.Z < minZ)
                 {
-                    minZ = tuple.Min.Z;
-                    lowestPoint = tuple.Min;
+                    minZ = triInfo.MinZPoint.Z;
+                    lowestPoint = triInfo.MinZPoint;
                 }
 
-                points.UnionWith(TrianglesUtility.GetVerticesOfTriangle(triangle));
+                //var tuple = TrianglesUtility.GetHighestAndLowestZPoint(triangle);
+                //if (tuple.Max.Z > maxZ)
+                //{
+                //    maxZ = tuple.Max.Z;
+                //    highestPoint = tuple.Max;
+                //}
+                //if (tuple.Min.Z < minZ)
+                //{
+                //    minZ = tuple.Min.Z;
+                //    lowestPoint = tuple.Min;
+                //}
+
+                //points.UnionWith(TrianglesUtility.GetVerticesOfTriangles(triangle: triangle));
             }
-            XYZ centerPoint = PointUtility.GetCenterPoint(points.ToList());
+            points = _data.GetVerticesOfGroupTriangles(group);
+            XYZ centerPoint = PointUtility.GetCenterPoint(points);
 
             cylinderInfo.TopPoint = PointUtility.SetPointWithNewZValue(centerPoint, highestPoint.Z);
             cylinderInfo.BottomPoint = PointUtility.SetPointWithNewZValue(centerPoint, lowestPoint.Z);
             cylinderInfo.Radius = highestPoint.DistanceTo(cylinderInfo.TopPoint);
-            //if (defaultRadius < cylinderInfo.Radius)
-            //{
-            //    defaultRadius = cylinderInfo.Radius;
-            //}
 
             return cylinderInfo;
         }
@@ -1544,26 +1643,26 @@ namespace FirstCommand
         /// </summary>
         /// <param name="result"></param>
         /// <returns></returns>
-        private double CalculateSpiralRailingLength(List<List<CylinderInfo>> result, Document doc, UIDocument uiDoc)
-        {
-            double length = 0;
-            var group = result.FirstOrDefault();
+        //private double CalculateSpiralRailingLength(List<List<CylinderInfo>> result, Document doc, UIDocument uiDoc)
+        //{
+        //    double length = 0;
+        //    var group = result.FirstOrDefault();
 
-            int num = group.Count;
-            for (int i = 2; i < num; i += 2)
-            {
-                Arc arc = Arc.Create(group[i - 2].TopPoint, group[i].TopPoint, group[i - 1].TopPoint);
-                length += arc.Length;
-                DrawPointLineArc.CreateModelArcFrom3Points(uiDoc, doc, group[i - 2].TopPoint, group[i].TopPoint, group[i - 1].TopPoint, isRevitLink, transform, 1);
-            }
-            if (num % 2 == 0)
-            {
-                length += group[num - 1].TopPoint.DistanceTo(group[num - 2].TopPoint);
-                DrawPointLineArc.CreateModelArcFrom3Points(uiDoc, doc, group[num - 3].TopPoint, group[num - 1].TopPoint, group[num - 2].TopPoint, isRevitLink, transform, 1);
-            }
-            TaskDialog.Show("Nofi", "The length of railing is : " + length.ToString());
-            return length;
-        }
+        //    int num = group.Count;
+        //    for (int i = 2; i < num; i += 2)
+        //    {
+        //        Arc arc = Arc.Create(group[i - 2].TopPoint, group[i].TopPoint, group[i - 1].TopPoint);
+        //        length += arc.Length;
+        //        DrawPointLineArc.CreateModelArcFrom3Points(uiDoc, doc, group[i - 2].TopPoint, group[i].TopPoint, group[i - 1].TopPoint,1, isRevitLink, transform);
+        //    }
+        //    if (num % 2 == 0)
+        //    {
+        //        length += group[num - 1].TopPoint.DistanceTo(group[num - 2].TopPoint);
+        //        DrawPointLineArc.CreateModelArcFrom3Points(uiDoc, doc, group[num - 3].TopPoint, group[num - 1].TopPoint, group[num - 2].TopPoint,1, isRevitLink, transform);
+        //    }
+        //    TaskDialog.Show("Nofi", "The length of railing is : " + length.ToString());
+        //    return length;
+        //}
 
         /// <summary>
         /// Nhóm các điểm thuộc cùng 1 mặt phẳng lại với nhau
@@ -1630,22 +1729,22 @@ namespace FirstCommand
             return result;
         }
 
-        private bool ValidateInstanceSpacing(List<CylinderInfo> pointsAsDiagonalLine, CylinderInfo remainCylinderInfo)
-        {
-            XYZ remainPoint = PointUtility.SetPointWithNewZValue(remainCylinderInfo.TopPoint, 0);
+        //private bool ValidateInstanceSpacing(List<CylinderInfo> pointsAsDiagonalLine, CylinderInfo remainCylinderInfo)
+        //{
+        //    XYZ remainPoint = PointUtility.SetPointWithNewZValue(remainCylinderInfo.TopPoint, 0);
 
-            XYZ firstPoint = PointUtility.SetPointWithNewZValue(pointsAsDiagonalLine[0].TopPoint, 0);
-            XYZ nextPoint = PointUtility.SetPointWithNewZValue(pointsAsDiagonalLine[1].TopPoint, 0);
-            double distance = firstPoint.DistanceTo(nextPoint);
+        //    XYZ firstPoint = PointUtility.SetPointWithNewZValue(pointsAsDiagonalLine[0].TopPoint, 0);
+        //    XYZ nextPoint = PointUtility.SetPointWithNewZValue(pointsAsDiagonalLine[1].TopPoint, 0);
+        //    double distance = firstPoint.DistanceTo(nextPoint);
 
-            // Khoảng cách từ điểm thừa đến điểm gần nhất trong danh sách
-            double minDistance = pointsAsDiagonalLine.Min(p => PointUtility.SetPointWithNewZValue(p.TopPoint, 0).DistanceTo(remainPoint));
-            if (Math.Abs(distance - minDistance) < remainCylinderInfo.Radius * 2)
-            {
-                return true;
-            }
-            return false;
-        }
+        //    // Khoảng cách từ điểm thừa đến điểm gần nhất trong danh sách
+        //    double minDistance = pointsAsDiagonalLine.Min(p => PointUtility.SetPointWithNewZValue(p.TopPoint, 0).DistanceTo(remainPoint));
+        //    if (Math.Abs(distance - minDistance) < remainCylinderInfo.Radius * 2)
+        //    {
+        //        return true;
+        //    }
+        //    return false;
+        //}
 
         /// <summary>
         /// Xử lý trường hợp có 1 danh sách trụ thẳng hàng và có 1 trụ thừa
@@ -1680,99 +1779,99 @@ namespace FirstCommand
         /// <param name="newResult"></param>
         /// <param name="remainCylinderInfo"></param>
         /// <param name="pointsAsDiagonalLine"></param>
-        private void HandleSinglePointOutOfDiagonalLine(List<List<CylinderInfo>> newResult, List<CylinderInfo> remainCylinderInfos, List<CylinderInfo> pointsAsDiagonalLine)
-        {
-            // Trường hợp group thừa 1 trụ nằm ngoài khoảng của group chéo
-            // kéo dài tia tạo bởi 2 trụ trong group chéo, nếu đi qua trụ thừa mà cao hơn thì lấy tại điểm cao hơn
-            // nếu kéo dài tia mà cắt trụ thì lấy tại điểm thuộc tia và có chiều cao bằng trụ thừa
-            var e = remainCylinderInfos.FirstOrDefault();
+        //private void HandleSinglePointOutOfDiagonalLine(List<List<CylinderInfo>> newResult, List<CylinderInfo> remainCylinderInfos, List<CylinderInfo> pointsAsDiagonalLine)
+        //{
+        //    // Trường hợp group thừa 1 trụ nằm ngoài khoảng của group chéo
+        //    // kéo dài tia tạo bởi 2 trụ trong group chéo, nếu đi qua trụ thừa mà cao hơn thì lấy tại điểm cao hơn
+        //    // nếu kéo dài tia mà cắt trụ thì lấy tại điểm thuộc tia và có chiều cao bằng trụ thừa
+        //    var e = remainCylinderInfos.FirstOrDefault();
 
-            double ze = e.TopPoint.Z;
-            double maxZC = pointsAsDiagonalLine.Max(x => x.TopPoint.Z);
-            double minZC = pointsAsDiagonalLine.Min(x => x.TopPoint.Z);
+        //    double ze = e.TopPoint.Z;
+        //    double maxZC = pointsAsDiagonalLine.Max(x => x.TopPoint.Z);
+        //    double minZC = pointsAsDiagonalLine.Min(x => x.TopPoint.Z);
 
-            double zOnline = GetZOnLine(pointsAsDiagonalLine[0].TopPoint, pointsAsDiagonalLine[1].TopPoint, e.TopPoint);
-            XYZ C = new XYZ();
-            if (ze > minZC && ze < maxZC) // C cùng đường thẳng với E
-            {
-                C = new XYZ(e.TopPoint.X, e.TopPoint.Y, zOnline);
-            }
-            else if (ze == minZC || ze == maxZC)
-            {
-                double targetZ = ze == minZC ? minZC : maxZC;
+        //    double zOnline = GetZOnLine(pointsAsDiagonalLine[0].TopPoint, pointsAsDiagonalLine[1].TopPoint, e.TopPoint);
+        //    XYZ C = new XYZ();
+        //    if (ze > minZC && ze < maxZC) // C cùng đường thẳng với E
+        //    {
+        //        C = new XYZ(e.TopPoint.X, e.TopPoint.Y, zOnline);
+        //    }
+        //    else if (ze == minZC || ze == maxZC)
+        //    {
+        //        double targetZ = ze == minZC ? minZC : maxZC;
 
-                var otherPointsAsStraightLine = new List<CylinderInfo>
-                {
-                    e,
-                    pointsAsDiagonalLine.FirstOrDefault(c => c.TopPoint.Z.Equals(targetZ))
-                };
+        //        var otherPointsAsStraightLine = new List<CylinderInfo>
+        //        {
+        //            e,
+        //            pointsAsDiagonalLine.FirstOrDefault(c => c.TopPoint.Z.Equals(targetZ))
+        //        };
 
-                if (otherPointsAsStraightLine.Count > 0)
-                {
-                    newResult.Add(otherPointsAsStraightLine);
-                }
-            }
-            else
-            {
-                if (zOnline < ze)
-                {
-                    // dùng phương trình đường thẳng để tìm ra điểm C thuộc đường thẳng AB và có cao độ là E
-                    C = GetPointOnLine(pointsAsDiagonalLine[0].TopPoint, pointsAsDiagonalLine[1].TopPoint, e.TopPoint);
-                }
-                else if (zOnline > maxZC)
-                {
-                    if (ValidateInstanceSpacing(pointsAsDiagonalLine, e))
-                    {
-                        C = new XYZ(e.TopPoint.X, e.TopPoint.Y, zOnline);
-                    }
-                    else
-                    {
-                        C = GetPointOnLine(pointsAsDiagonalLine[0].TopPoint, pointsAsDiagonalLine[1].TopPoint, e.TopPoint);
-                    }
-                }
-                else if (zOnline > ze && zOnline < minZC)
-                {
-                    // Tạo ra điểm C với tọa độ của E nhưng chỉnh cao độ lên bằng với giao điểm
-                    C = new XYZ(e.TopPoint.X, e.TopPoint.Y, zOnline);
-                }
-            }
-            if (!C.IsAlmostEqualTo(XYZ.Zero))
-            {
-                CylinderInfo cylinderInfo = new CylinderInfo();
-                cylinderInfo.TopPoint = C;
-                List<CylinderInfo> newPointsOnStraightLine = new List<CylinderInfo>();
-                // Nếu C cùng chiều cao nhưng khác x hoặc y với E (C không thuộc trụ chứa E)
-                if (GeometryUtility.CompareDouble(C.Z, e.TopPoint.Z) && (!GeometryUtility.CompareDouble(C.X, e.TopPoint.X) || !GeometryUtility.CompareDouble(C.Y, e.TopPoint.Y)))
-                {
-                    newPointsOnStraightLine.Add(e);
-                    newPointsOnStraightLine.Add(cylinderInfo);
-                    if (C.Z < minZC)
-                    {
-                        pointsAsDiagonalLine.Insert(0, cylinderInfo);
-                    }
-                    else if (C.Z > maxZC)
-                    {
-                        pointsAsDiagonalLine.Add(cylinderInfo);
-                    }
-                }
-                else
-                {
-                    if (C.Z < minZC)
-                    {
-                        pointsAsDiagonalLine.Insert(0, cylinderInfo);
-                    }
-                    else if (C.Z > maxZC)
-                    {
-                        pointsAsDiagonalLine.Add(cylinderInfo);
-                    }
-                }
-                if (newPointsOnStraightLine.Count > 0)
-                {
-                    newResult.Add(newPointsOnStraightLine);
-                }
-            }
-            newResult.Add(pointsAsDiagonalLine);
-        }
+        //        if (otherPointsAsStraightLine.Count > 0)
+        //        {
+        //            newResult.Add(otherPointsAsStraightLine);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        if (zOnline < ze)
+        //        {
+        //            // dùng phương trình đường thẳng để tìm ra điểm C thuộc đường thẳng AB và có cao độ là E
+        //            C = GetPointOnLine(pointsAsDiagonalLine[0].TopPoint, pointsAsDiagonalLine[1].TopPoint, e.TopPoint);
+        //        }
+        //        else if (zOnline > maxZC)
+        //        {
+        //            if (ValidateInstanceSpacing(pointsAsDiagonalLine, e))
+        //            {
+        //                C = new XYZ(e.TopPoint.X, e.TopPoint.Y, zOnline);
+        //            }
+        //            else
+        //            {
+        //                C = GetPointOnLine(pointsAsDiagonalLine[0].TopPoint, pointsAsDiagonalLine[1].TopPoint, e.TopPoint);
+        //            }
+        //        }
+        //        else if (zOnline > ze && zOnline < minZC)
+        //        {
+        //            // Tạo ra điểm C với tọa độ của E nhưng chỉnh cao độ lên bằng với giao điểm
+        //            C = new XYZ(e.TopPoint.X, e.TopPoint.Y, zOnline);
+        //        }
+        //    }
+        //    if (!C.IsAlmostEqualTo(XYZ.Zero))
+        //    {
+        //        CylinderInfo cylinderInfo = new CylinderInfo();
+        //        cylinderInfo.TopPoint = C;
+        //        List<CylinderInfo> newPointsOnStraightLine = new List<CylinderInfo>();
+        //        // Nếu C cùng chiều cao nhưng khác x hoặc y với E (C không thuộc trụ chứa E)
+        //        if (GeometryUtility.CompareDouble(C.Z, e.TopPoint.Z) && (!GeometryUtility.CompareDouble(C.X, e.TopPoint.X) || !GeometryUtility.CompareDouble(C.Y, e.TopPoint.Y)))
+        //        {
+        //            newPointsOnStraightLine.Add(e);
+        //            newPointsOnStraightLine.Add(cylinderInfo);
+        //            if (C.Z < minZC)
+        //            {
+        //                pointsAsDiagonalLine.Insert(0, cylinderInfo);
+        //            }
+        //            else if (C.Z > maxZC)
+        //            {
+        //                pointsAsDiagonalLine.Add(cylinderInfo);
+        //            }
+        //        }
+        //        else
+        //        {
+        //            if (C.Z < minZC)
+        //            {
+        //                pointsAsDiagonalLine.Insert(0, cylinderInfo);
+        //            }
+        //            else if (C.Z > maxZC)
+        //            {
+        //                pointsAsDiagonalLine.Add(cylinderInfo);
+        //            }
+        //        }
+        //        if (newPointsOnStraightLine.Count > 0)
+        //        {
+        //            newResult.Add(newPointsOnStraightLine);
+        //        }
+        //    }
+        //    newResult.Add(pointsAsDiagonalLine);
+        //}
 
         /// <summary>
         /// Xử lý trường hợp trong group tồn tại hả danh sách hàng chéo và danh sách các trụ thẳng hàng
@@ -1831,83 +1930,83 @@ namespace FirstCommand
         /// <param name="newResult"></param>
         /// <param name="remainingcylinderInfos"></param>
         /// <param name="usedCylinderInfo"></param>
-        private void HandleRedundantPoint(List<List<CylinderInfo>> newResult, List<CylinderInfo> remainingcylinderInfos, List<CylinderInfo> usedCylinderInfo)
-        {
-            foreach (var cylinderInfoA in remainingcylinderInfos)
-            {
-                XYZ A = cylinderInfoA.TopPoint;
-                if (!usedCylinderInfo.Contains(cylinderInfoA))
-                {
-                    usedCylinderInfo.Add(cylinderInfoA);
-                    XYZ B = null;
-                    XYZ newA = null;
-                    double minDist = double.MaxValue;
+        //private void HandleRedundantPoint(List<List<CylinderInfo>> newResult, List<CylinderInfo> remainingcylinderInfos, List<CylinderInfo> usedCylinderInfo)
+        //{
+        //    foreach (var cylinderInfoA in remainingcylinderInfos)
+        //    {
+        //        XYZ A = cylinderInfoA.TopPoint;
+        //        if (!usedCylinderInfo.Contains(cylinderInfoA))
+        //        {
+        //            usedCylinderInfo.Add(cylinderInfoA);
+        //            XYZ B = null;
+        //            XYZ newA = null;
+        //            double minDist = double.MaxValue;
 
-                    List<CylinderInfo> closestGroup = null;
-                    Plane groupPlane = null;
+        //            List<CylinderInfo> closestGroup = null;
+        //            Plane groupPlane = null;
 
-                    foreach (var group in newResult)
-                    {
-                        for (int i = 0; i < group.Count - 2; i++)
-                        {
-                            XYZ thirdPoint = new XYZ(group[i + 2].TopPoint.X, group[i + 2].TopPoint.Y, 0);
-                            Plane plane = Plane.CreateByThreePoints(group[i].TopPoint, group[i + 1].TopPoint, thirdPoint);
-                            foreach (var pt in group)
-                            {
-                                double dist = A.DistanceTo(pt.TopPoint);
-                                if (dist < minDist)
-                                {
-                                    minDist = dist;
-                                    B = pt.TopPoint;
-                                    closestGroup = group;
-                                    groupPlane = plane;
+        //            foreach (var group in newResult)
+        //            {
+        //                for (int i = 0; i < group.Count - 2; i++)
+        //                {
+        //                    XYZ thirdPoint = new XYZ(group[i + 2].TopPoint.X, group[i + 2].TopPoint.Y, 0);
+        //                    Plane plane = Plane.CreateByThreePoints(group[i].TopPoint, group[i + 1].TopPoint, thirdPoint);
+        //                    foreach (var pt in group)
+        //                    {
+        //                        double dist = A.DistanceTo(pt.TopPoint);
+        //                        if (dist < minDist)
+        //                        {
+        //                            minDist = dist;
+        //                            B = pt.TopPoint;
+        //                            closestGroup = group;
+        //                            groupPlane = plane;
 
-                                    newA = new XYZ(A.X, A.Y, B.Z);
-                                }
-                            }
-                        }
-                    }
-                    if (B == null || groupPlane == null)
-                        continue;
+        //                            newA = new XYZ(A.X, A.Y, B.Z);
+        //                        }
+        //                    }
+        //                }
+        //            }
+        //            if (B == null || groupPlane == null)
+        //                continue;
 
-                    XYZ E = PlaneUtility.GetProjectedPoint(groupPlane, newA);
-                    CylinderInfo newCylinderInfo = new CylinderInfo();
-                    newCylinderInfo.TopPoint = E;
+        //            XYZ E = PlaneUtility.GetProjectedPoint(groupPlane, newA);
+        //            CylinderInfo newCylinderInfo = new CylinderInfo();
+        //            newCylinderInfo.TopPoint = E;
 
-                    cylinderInfoA.TopPoint = newA;
+        //            cylinderInfoA.TopPoint = newA;
 
-                    if (!closestGroup.Any(p => p.Equals(newCylinderInfo)))
-                    {
-                        closestGroup.Add(newCylinderInfo);
-                        // Sắp xếp theo thứ tự gần new A nhất
-                        closestGroup.Sort((a, b) => newA.DistanceTo(a.TopPoint).CompareTo(newA.DistanceTo(b.TopPoint)));
-                    }
+        //            if (!closestGroup.Any(p => p.Equals(newCylinderInfo)))
+        //            {
+        //                closestGroup.Add(newCylinderInfo);
+        //                // Sắp xếp theo thứ tự gần new A nhất
+        //                closestGroup.Sort((a, b) => newA.DistanceTo(a.TopPoint).CompareTo(newA.DistanceTo(b.TopPoint)));
+        //            }
 
-                    List<CylinderInfo> newGroup = new List<CylinderInfo> { cylinderInfoA, newCylinderInfo };
-                    // Xây mặt phẳng từ A, E và pháp tuyến mới
+        //            List<CylinderInfo> newGroup = new List<CylinderInfo> { cylinderInfoA, newCylinderInfo };
+        //            // Xây mặt phẳng từ A, E và pháp tuyến mới
 
-                    XYZ newNormal = (B - E).Normalize();
-                    Plane aePlane = Plane.CreateByNormalAndOrigin(newNormal, newA);
+        //            XYZ newNormal = (B - E).Normalize();
+        //            Plane aePlane = Plane.CreateByNormalAndOrigin(newNormal, newA);
 
-                    // Tìm kiếm những điểm lẻ khác mà thuộc mặt phẳng AE
-                    foreach (var info in remainingcylinderInfos.Where(p => !usedCylinderInfo.Contains(p)).ToList())
-                    {
-                        if (info.Equals(cylinderInfoA))
-                            continue;
+        //            // Tìm kiếm những điểm lẻ khác mà thuộc mặt phẳng AE
+        //            foreach (var info in remainingcylinderInfos.Where(p => !usedCylinderInfo.Contains(p)).ToList())
+        //            {
+        //                if (info.Equals(cylinderInfoA))
+        //                    continue;
 
-                        // Trường hợp nếu có thêm điểm thừa khác thuộc mặt phẳng thì kiểm trả xem 3 điểm đó thẳng hàng không
-                        // thẳng hàng thì thêm vào, còn không chỉ đó là 3 điểm lệch nhau(trường hợp này chưa có model nào giống vậy để xử lý)
-                        if (PlaneUtility.IsPointOnPlane(aePlane, info.TopPoint))
-                        {
-                            newGroup.Add(info);
-                            usedCylinderInfo.Add(info);
-                        }
-                    }
-                    SortInstancesAlongLine(newGroup);
-                    newResult.Add(newGroup);
-                }
-            }
-        }
+        //                // Trường hợp nếu có thêm điểm thừa khác thuộc mặt phẳng thì kiểm trả xem 3 điểm đó thẳng hàng không
+        //                // thẳng hàng thì thêm vào, còn không chỉ đó là 3 điểm lệch nhau(trường hợp này chưa có model nào giống vậy để xử lý)
+        //                if (PlaneUtility.IsPointOnPlane(aePlane, info.TopPoint))
+        //                {
+        //                    newGroup.Add(info);
+        //                    usedCylinderInfo.Add(info);
+        //                }
+        //            }
+        //            SortInstancesAlongLine(newGroup);
+        //            newResult.Add(newGroup);
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// Hàm lấy ra những cylinderInfo thừa không tạo thành 1 mặt phẳng với các cylinderInfo khác
@@ -1922,7 +2021,7 @@ namespace FirstCommand
             return remainingcylinderInfos;
         }
 
-        private bool IsElementComplex(Document doc, List<List<CylinderInfo>> result)
+        private bool IsElementComplex(List<List<CylinderInfo>> result)
         {
             List<List<CylinderInfo>> newResult = new List<List<CylinderInfo>>();
             foreach (var group in result)
@@ -1976,16 +2075,16 @@ namespace FirstCommand
                     newResult.Add(pointsAsDiagonalLine);
                 }
             }
-            GetLengthOfRailing(doc, newResult);
+            GetLengthOfRailing(newResult);
             return false;
         }
 
         /// <summary>
-        /// Nhóm các hình trụ có thành các nhóm nhỏ để tính khoảng cách, các nhóm nhỏ bao gồm các nhóm chéo, nhóm thẳng
+        /// Nhóm các hình trụ thành các nhóm nhỏ để tính khoảng cách, các nhóm nhỏ bao gồm các nhóm chéo, nhóm thẳng
         /// </summary>
         /// <param name="cylinderInfos"></param>
         /// <returns></returns>
-        private void GroupPointsForDistanceCalculation(List<CylinderInfo> cylinderInfos, List<Mesh> meshes, Document doc)
+        private void GroupPointsForDistanceCalculation(List<CylinderInfo> cylinderInfos)
         {
             var result = GroupPointsOnSamePlane(cylinderInfos);
 
@@ -1993,21 +2092,20 @@ namespace FirstCommand
 
             //List<List<CylinderInfo>> newResult = new List<List<CylinderInfo>>();
 
-            bool hasMeshes = meshes.Count > 0;
             bool hasRemaining = remainingcylinderInfos.Count > 0;
             bool isMultipleResults = result.Count > 1;
 
             // Trường hợp mesh có thừa 1 điểm hoặc có nhiều mặt phẳng
             if (hasMeshes && (hasRemaining || isMultipleResults))
             {
-                GetTopViewShape(meshes, cylinderInfos, doc);
+                GetTopViewShape(cylinderInfos);
             }
             // Trường hợp solid hoặc mesh chỉ có 1 mặt phẳng (không có điểm thừa)
             else
             {
                 bool IsMeshComplex = false;
                 bool IsSolidComplex = false;
-                if (IsElementComplex(doc, result))
+                if (IsElementComplex(result))
                 {
                     if (hasMeshes)
                     {
@@ -2015,6 +2113,7 @@ namespace FirstCommand
                     }
                     else
                     {
+                        // Chưa xử lý trường hợp này
                         IsSolidComplex = true;
                     }
                 }
@@ -2081,7 +2180,7 @@ namespace FirstCommand
                 // Trường hợp mesh chỉ có 1 mặt phẳng nhưng thứ tự các trụ phức tạp, không thẳng hết hoặc chéo hết
                 if (IsMeshComplex)
                 {
-                    GetTopViewShape(meshes, cylinderInfos, doc);
+                    GetTopViewShape(cylinderInfos);
                 }
 
                 // Trường hợp solid phức tạp, có những điểm thừa không thuộc nhóm các trụ thẳng hoặc chéo
@@ -2134,43 +2233,43 @@ namespace FirstCommand
         /// <param name="B"></param>
         /// <param name="E"></param>
         /// <returns></returns>
-        private double GetZOnLine(XYZ A, XYZ B, XYZ E)
-        {
-            // Trường hợp E hơi lệch tý, không thuộc mặt phẳng đi qua AB và song song với trục Z thì phải tạo 1 điểm E mới nằm trên mặt phẳng
+        //private double GetZOnLine(XYZ A, XYZ B, XYZ E)
+        //{
+        //    // Trường hợp E hơi lệch tý, không thuộc mặt phẳng đi qua AB và song song với trục Z thì phải tạo 1 điểm E mới nằm trên mặt phẳng
 
-            // C là điểm giống A nhưng có Z = 0, để tạo với A và B thành 1 mặt phẳng song song với Z
-            XYZ C = PointUtility.SetPointWithNewZValue(A, 0);
-            Plane plane = Plane.CreateByThreePoints(A, B, C);
-            XYZ newEOnPlane = PlaneUtility.GetProjectedPoint(plane, E);
+        //    // C là điểm giống A nhưng có Z = 0, để tạo với A và B thành 1 mặt phẳng song song với Z
+        //    XYZ C = PointUtility.SetPointWithNewZValue(A, 0);
+        //    Plane plane = Plane.CreateByThreePoints(A, B, C);
+        //    XYZ newEOnPlane = PlaneUtility.GetProjectedPoint(plane, E);
 
-            double t;
+        //    double t;
 
-            if (Math.Abs(B.X - A.X) > CommonConstants.TOLERANCE)
-            {
-                t = (newEOnPlane.X - A.X) / (B.X - A.X);
-            }
-            else if (Math.Abs(B.Y - A.Y) > CommonConstants.TOLERANCE)
-            {
-                t = (newEOnPlane.Y - A.Y) / (B.Y - A.Y);
-            }
-            else
-            {
-                // Đường AB thẳng đứng (X và Y không đổi)
-                // Kiểm tra xem E có cùng X, Y không
-                if (Math.Abs(newEOnPlane.X - A.X) < CommonConstants.TOLERANCE && Math.Abs(newEOnPlane.Y - A.Y) < CommonConstants.TOLERANCE)
-                {
-                    return newEOnPlane.Z;
-                }
-                else
-                {
-                    // Không nằm trên đường thẳng
-                    return 0;
-                }
-            }
+        //    if (Math.Abs(B.X - A.X) > CommonConstants.TOLERANCE)
+        //    {
+        //        t = (newEOnPlane.X - A.X) / (B.X - A.X);
+        //    }
+        //    else if (Math.Abs(B.Y - A.Y) > CommonConstants.TOLERANCE)
+        //    {
+        //        t = (newEOnPlane.Y - A.Y) / (B.Y - A.Y);
+        //    }
+        //    else
+        //    {
+        //        // Đường AB thẳng đứng (X và Y không đổi)
+        //        // Kiểm tra xem E có cùng X, Y không
+        //        if (Math.Abs(newEOnPlane.X - A.X) < CommonConstants.TOLERANCE && Math.Abs(newEOnPlane.Y - A.Y) < CommonConstants.TOLERANCE)
+        //        {
+        //            return newEOnPlane.Z;
+        //        }
+        //        else
+        //        {
+        //            // Không nằm trên đường thẳng
+        //            return 0;
+        //        }
+        //    }
 
-            // Tính Z trên đường thẳng tại vị trí t
-            return A.Z + (B.Z - A.Z) * t;
-        }
+        //    // Tính Z trên đường thẳng tại vị trí t
+        //    return A.Z + (B.Z - A.Z) * t;
+        //}
 
         /// <summary>
         /// Nhóm các trụ có toppoint bằng nhau hoặc bottom point bằng nhau
@@ -2413,7 +2512,7 @@ namespace FirstCommand
                 //XYZ AD = (D - A).Normalize();
 
                 // Nếu vector AB và AC không cùng phương -> không thẳng hàng
-                if (!GeometryUtility.IsParallel(AB, AC, CommonConstants.COSINE_ANGLE_TOLERANCE_5_DEGREE))
+                if (!VectorUtility.AreParallel(AB, AC, CommonConstants.COSINE_ANGLE_TOLERANCE_5_DEGREE))
                     return false;
 
                 // Nếu vector AB và AD không cùng phương -> không thẳng hàng
