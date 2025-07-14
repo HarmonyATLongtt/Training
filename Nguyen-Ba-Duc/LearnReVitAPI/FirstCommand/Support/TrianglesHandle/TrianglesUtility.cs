@@ -213,19 +213,21 @@ namespace FirstCommand.Support.TrianglesHandle
         /// <param name="triangle"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public static bool HasEdgeLongerThan(MeshTriangle triangle, double length)
+        public static bool HasEdgeLongerThan(TriangleVertexMap data, MeshTriangle triangle, double length)
         {
-            XYZ v0 = triangle.get_Vertex(0);
-            XYZ v1 = triangle.get_Vertex(1);
-            XYZ v2 = triangle.get_Vertex(2);
+            //XYZ v0 = triangle.get_Vertex(0);
+            //XYZ v1 = triangle.get_Vertex(1);
+            //XYZ v2 = triangle.get_Vertex(2);
+
+            XYZ v0 = data.GetTriangleInfos(triangle).P1;
+            XYZ v1 = data.GetTriangleInfos(triangle).P2;
+            XYZ v2 = data.GetTriangleInfos(triangle).P3;
 
             if ((v0 - v1).GetLength() > length) return true;
             if ((v1 - v2).GetLength() > length) return true;
             if ((v2 - v0).GetLength() > length) return true;
 
             return false;
-            //List<Line> edges = GetTriangleEdges(triangle);
-            //return edges.Any(e => e.Length > length);
         }
 
         /// <summary>
@@ -267,7 +269,8 @@ namespace FirstCommand.Support.TrianglesHandle
 
             XYZ normal = edge1.CrossProduct(edge2);
 
-            return VectorUtility.NormalizeSafe(normal);
+            //return VectorUtility.NormalizeSafe(normal);
+            return normal.Normalize();
 
             //XYZ normal = edge1.CrossProduct(edge2).Normalize();
             //if (normal.IsZeroLength())
@@ -283,7 +286,7 @@ namespace FirstCommand.Support.TrianglesHandle
         /// </summary>
         /// <param name="triangles"></param>
         /// <returns></returns>
-        public static List<List<MeshTriangle>> GroupMeshTrianglesBySharedVertices(TriangleVertexMap data, List<MeshTriangle> triangles)
+        public static List<List<MeshTriangle>> GroupMeshTrianglesBySharedVertices(TriangleVertexMap data, HashSet<MeshTriangle> triangles)
         {
             var result = new List<List<MeshTriangle>>();
             var visited = new HashSet<MeshTriangle>();
@@ -331,9 +334,12 @@ namespace FirstCommand.Support.TrianglesHandle
 
                         if (!data.VertexToTriangles.TryGetValue(vertex, out var neighbors))
                             continue;
+                        //if (!vertexToTriangles.TryGetValue(vertex, out var neighbors))
 
                         foreach (var neighbor in neighbors)
                         {
+                            if (!triangles.Contains(neighbor)) // đảm bảo chỉ xét trong B
+                                continue;
                             if (!visited.Contains(neighbor) && !toCheck.Contains(neighbor))
                             {
                                 toCheck.Add(neighbor);
@@ -833,14 +839,19 @@ namespace FirstCommand.Support.TrianglesHandle
         /// <param name="meshTriangles"></param>
         /// <param name="gridSize"></param>
         /// <returns></returns>
-        public static Dictionary<(int, int), List<MeshTriangle>> SpatialHashMeshTrianglesToGrid(List<MeshTriangle> meshTriangles, double gridSize)
+        public static Dictionary<(int, int), List<MeshTriangle>> SpatialHashMeshTrianglesToGrid(TriangleVertexMap data, List<MeshTriangle> meshTriangles, double gridSize)
 
         {
             var cellToTriangles = new Dictionary<(int, int), List<MeshTriangle>>();
 
             foreach (var tri in meshTriangles)
             {
-                GetMinMaxXYOfTriangle(tri, out double minX, out double minY, out double maxX, out double maxY);
+                //GetMinMaxXYOfTriangle(tri, out double minX, out double minY, out double maxX, out double maxY);
+                var triInfo = data.GetTriangleInfos(tri);
+                double minX = triInfo.MinX;
+                double minY = triInfo.MinY;
+                double maxX = triInfo.MaxX;
+                double maxY = triInfo.MaxY;
 
                 var (minI, minJ) = PointUtility.GetGridIndex(new XYZ(minX, minY, 0), gridSize);
                 var (maxI, maxJ) = PointUtility.GetGridIndex(new XYZ(maxX, maxY, 0), gridSize);

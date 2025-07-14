@@ -22,6 +22,7 @@ using FirstCommand.Support.PointHandle;
 using FirstCommand.Support.SolidHandle;
 using FirstCommand.Support.TrianglesHandle;
 using FirstCommand.Support.VectorHandle;
+using Microsoft.SqlServer.Server;
 
 namespace FirstCommand
 {
@@ -31,6 +32,7 @@ namespace FirstCommand
         private Transform _transform = null;
         private double _multiplyZ = 1;
         private double _maxLengthOfElement = 0;
+        private List<double> checkDistances = null;
         private double _minX = 0;
         private double _minY = 0;
         private double _maxX = 0;
@@ -628,70 +630,189 @@ namespace FirstCommand
             }
         }
 
-        /// <summary>
-        /// Hàm xử lý những trường hợp element là mesh và có hình dạng phức tạp
-        /// </summary>
         private void HandleForMeshesComplex(List<MeshTriangle> trianglesHighest, List<XYZ> topPointsForEachPart, double radius, List<List<CylinderInfo>> result, List<CylinderInfo> remainingcylinderInfos)
         {
-            List<Line> allLine = new List<Line>();
-
-            List<XYZ> topPointsViewed = new List<XYZ>();
-            XYZ firstPoint = null;
-            XYZ lastPoint = null;
-            List<MeshTriangle> trianglesHighestClone = trianglesHighest.ToList();
-            List<XYZ> topPointsClone = topPointsForEachPart.ToList();
-            while (topPointsForEachPart.Count > 1 && firstPoint == null)
+            var trianglesHaveLongEdge = new HashSet<MeshTriangle>();
+            foreach (var tri in trianglesHighest)
             {
-                GetLinesFromTriangles(trianglesHighest, topPointsForEachPart.FirstOrDefault(), radius, true, topPointsForEachPart, topPointsViewed, ref firstPoint);
-
-                topPointsForEachPart.RemoveAll(x => topPointsViewed.Any(y => x.IsAlmostEqualTo(y, CommonConstants.TOLERANCE)));
+                if (TrianglesUtility.HasEdgeLongerThan(_data, tri, radius * 3))
+                {
+                    trianglesHaveLongEdge.Add(tri);
+                }
             }
-            topPointsViewed.Clear();
 
-            if (firstPoint != null)
+            var groupTrianglesHaveCommonVertex = TrianglesUtility.GroupMeshTrianglesBySharedVertices(_data, trianglesHaveLongEdge);
+            List<(XYZ, XYZ, Line)> allLineInfo = new List<(XYZ, XYZ, Line)>();
+
+            foreach (var triangles in groupTrianglesHaveCommonVertex)
             {
-                int num = topPointsClone.Count;
-                int indexToRemove = num;
-                for (int i = 0; i < num; i++)
-                {
-                    if (topPointsClone[i].IsAlmostEqualTo(firstPoint, CommonConstants.TOLERANCE))
-                    {
-                        indexToRemove = i;
-                        break;
-                    }
-                }
-                if (indexToRemove != num)
-                {
-                    topPointsClone.RemoveAt(indexToRemove);
-                }
-                topPointsClone.Insert(0, firstPoint);
-                if (topPointsClone.Count == num)
-                {
-                    while (topPointsClone.Count > 1 && firstPoint != null)
-                    {
-                        var lines = GetLinesFromTriangles(trianglesHighestClone, topPointsClone.First(), radius, true, topPointsClone, topPointsViewed, ref lastPoint);
+                XYZ axis = GetAxisFromTriangles(_data, triangles);
+                List<XYZ> vertices = _data.GetVerticesOfGroupTriangles(triangles);
+                var (p1, p2) = PointUtility.FindFurthestPair(vertices);
+                Line line = Line.CreateUnbound(p1, axis);
+                XYZ pointOnLine = LineUtility.GetPerpendicularProjectionPointOnLine(line, p2);
+                Line newLine = Line.CreateBound(p1, pointOnLine);
+                allLineInfo.Add((p1, pointOnLine, newLine));
+            }
 
-                        if (lines != null && lines.Count > 0)
+            if (allLineInfo.Count == 1 && result.Count == 1 && remainingcylinderInfos.Count == 0)
+            {
+                SortInstancesAlongLine(result.First());
+                DrawPointLineArc.CreateModelLine(_doc, result.First().First().TopPoint, result.First().Last().TopPoint, _multiplyZ, _transform);
+                return;
+            }
+
+            checkDistances = new List<double> { radius * 6, radius * 14 };
+            Dictionary<Line, List<Line>> linesIntersect = new Dictionary<Line, List<Line>>(Comparers.Line);
+            for (int i = 0; i < allLineInfo.Count; i++)
+            {
+                XYZ p1 = allLineInfo[i].Item1;
+                XYZ p2 = allLineInfo[i].Item2;
+                var intersecting = new List<Line>();
+
+                for (int j = 0; j < allLineInfo.Count; j++)
+                {
+                    XYZ q1 = allLineInfo[j].Item1;
+                    XYZ q2 = allLineInfo[j].Item2;
+
+                    foreach (var dis in checkDistances)
+                    {
+                        if (p1.DistanceTo(q1) < dis || p1.DistanceTo(q2) < dis
+                            || p2.DistanceTo(q1) < dis || p2.DistanceTo(q2) < dis)
                         {
-                            allLine.AddRange(lines);
+                            intersecting.Add(allLineInfo[j].Item3);
+                            break;
                         }
-                        topPointsClone.RemoveAll(x => topPointsViewed.Any(y => x.IsAlmostEqualTo(y, CommonConstants.TOLERANCE)));
                     }
+                }
+                if (intersecting.Count > 0)
+                {
+                    linesIntersect[allLineInfo[i].Item3] = intersecting;
+                }
+            }
+            List<Line> allLines = new List<Line>();
+            Line fistLine = null;
+            foreach (var keyValue in linesIntersect)
+            {
+                if (keyValue.Value.Count == 1)
+                {
+                    fistLine = keyValue.Key;
+                    break;
                 }
             }
 
-            if (firstPoint != null && lastPoint != null)
+            if (fistLine == null) return;
+
+            allLines.Add(fistLine);
+            AddSortedLinesToList(linesIntersect, allLines);
+
+            if (allLines.Count >= 2)
             {
-                if (allLine.Count == 1 && result.Count == 1 && remainingcylinderInfos.Count == 0)
+                GetAllIntersecPoints(allLines, listTopPoint: topPointsForEachPart);
+            }
+
+            //if (firstPoint != null && lastPoint != null)
+            //{
+            //    if (allLine.Count == 1 && result.Count == 1 && remainingcylinderInfos.Count == 0)
+            //    {
+            //        DrawPointLineArc.CreateModelLine(_doc, firstPoint, lastPoint, _multiplyZ, _transform);
+            //    }
+            //    else if (allLine.Count >= 2)
+            //    {
+            //        GetAllIntersecPoints(firstPoint, lastPoint, allLine);
+            //    }
+            //}
+        }
+
+        private void AddSortedLinesToList(Dictionary<Line, List<Line>> linesIntersect, List<Line> allLines)
+        {
+            if (linesIntersect.TryGetValue(allLines.Last(), out var lines))
+            {
+                if (lines.Count == 1)
                 {
-                    DrawPointLineArc.CreateModelLine(_doc, firstPoint, lastPoint, _multiplyZ, _transform);
+                    if (!allLines.Contains(lines.First(), Comparers.Line))
+                    {
+                        allLines.Add(lines.First());
+                        AddSortedLinesToList(linesIntersect, allLines);
+                    }
+                    else return;
                 }
-                else if (allLine.Count >= 2)
+                else if (lines.Count == 2)
                 {
-                    GetAllIntersecPoints(firstPoint, lastPoint, allLine);
+                    var nextLine = lines.FirstOrDefault(l => !allLines.Contains(l, Comparers.Line));
+                    if (nextLine != null)
+                    {
+                        allLines.Add(nextLine);
+                        AddSortedLinesToList(linesIntersect, allLines);
+                    }
                 }
             }
         }
+
+        /// <summary>
+        /// Hàm xử lý những trường hợp element là mesh và có hình dạng phức tạp
+        /// </summary>
+        //private void HandleForMeshesComplex(List<MeshTriangle> trianglesHighest, List<XYZ> topPointsForEachPart, double radius, List<List<CylinderInfo>> result, List<CylinderInfo> remainingcylinderInfos)
+        //{
+        //    List<Line> allLine = new List<Line>();
+
+        //    List<XYZ> topPointsViewed = new List<XYZ>();
+        //    XYZ firstPoint = null;
+        //    XYZ lastPoint = null;
+        //    List<MeshTriangle> trianglesHighestClone = trianglesHighest.ToList();
+        //    List<XYZ> topPointsClone = topPointsForEachPart.ToList();
+        //    while (topPointsForEachPart.Count > 1 && firstPoint == null)
+        //    {
+        //        GetLinesFromTriangles(trianglesHighest, topPointsForEachPart.FirstOrDefault(), radius, true, topPointsForEachPart, topPointsViewed, ref firstPoint);
+
+        //        topPointsForEachPart.RemoveAll(x => topPointsViewed.Any(y => x.IsAlmostEqualTo(y, CommonConstants.TOLERANCE)));
+        //    }
+        //    topPointsViewed.Clear();
+
+        //    if (firstPoint != null)
+        //    {
+        //        int num = topPointsClone.Count;
+        //        int indexToRemove = num;
+        //        for (int i = 0; i < num; i++)
+        //        {
+        //            if (topPointsClone[i].IsAlmostEqualTo(firstPoint, CommonConstants.TOLERANCE))
+        //            {
+        //                indexToRemove = i;
+        //                break;
+        //            }
+        //        }
+        //        if (indexToRemove != num)
+        //        {
+        //            topPointsClone.RemoveAt(indexToRemove);
+        //        }
+        //        topPointsClone.Insert(0, firstPoint);
+        //        if (topPointsClone.Count == num)
+        //        {
+        //            while (topPointsClone.Count > 1 && firstPoint != null)
+        //            {
+        //                var lines = GetLinesFromTriangles(trianglesHighestClone, topPointsClone.First(), radius, true, topPointsClone, topPointsViewed, ref lastPoint);
+
+        //                if (lines != null && lines.Count > 0)
+        //                {
+        //                    allLine.AddRange(lines);
+        //                }
+        //                topPointsClone.RemoveAll(x => topPointsViewed.Any(y => x.IsAlmostEqualTo(y, CommonConstants.TOLERANCE)));
+        //            }
+        //        }
+        //    }
+
+        //    if (firstPoint != null && lastPoint != null)
+        //    {
+        //        if (allLine.Count == 1 && result.Count == 1 && remainingcylinderInfos.Count == 0)
+        //        {
+        //            DrawPointLineArc.CreateModelLine(_doc, firstPoint, lastPoint, _multiplyZ, _transform);
+        //        }
+        //        else if (allLine.Count >= 2)
+        //        {
+        //            GetAllIntersecPoints(firstPoint, lastPoint, allLine);
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// Nhóm các hình vuông giao với hình chữ nhật
@@ -702,7 +823,7 @@ namespace FirstCommand
         private List<(XYZ, List<MeshTriangle>)> GroupTrianglesThatIntersectWithSquare(List<List<XYZ>> gridSquares, List<MeshTriangle> triangles, double gridSize)
         {
             var centerPointOfGridAndTrianglesMapping = new List<(XYZ, List<MeshTriangle>)>();
-            var cellToTriangles = TrianglesUtility.SpatialHashMeshTrianglesToGrid(triangles, gridSize);
+            var cellToTriangles = TrianglesUtility.SpatialHashMeshTrianglesToGrid(_data, triangles, gridSize);
             foreach (var square in gridSquares)
             {
                 var triangleList = new HashSet<MeshTriangle>();
@@ -713,7 +834,8 @@ namespace FirstCommand
                 {
                     foreach (var tri in triList)
                     {
-                        var vertices = TrianglesUtility.GetVerticesOfTriangles(triangle: tri);
+                        //var vertices = TrianglesUtility.GetVerticesOfTriangles(triangle: tri);
+                        var vertices = _data.GetVerticesOfTriangle(tri);
                         // Nếu grid và tam giác giao nhau
                         if (GeometryUtility.AreTriangleAndSquareIntersecting(vertices, square))
                         {
@@ -826,8 +948,8 @@ namespace FirstCommand
 
                         foreach (var tri in trianglesOnGrid)
                         {
-                            double highestZ = TrianglesUtility.GetHighestAndLowestZPoint(tri).Max.Z;
-
+                            //double highestZ = TrianglesUtility.GetHighestAndLowestZPoint(tri).Max.Z;
+                            double highestZ = _data.GetTriangleInfos(tri).MaxZ;
                             // Cập nhật maxZ
                             if (highestZ > maxZ)
                             {
@@ -893,30 +1015,64 @@ namespace FirstCommand
         /// <param name="lastLine"></param>
         /// <param name="lines"></param>
         /// <returns></returns>
-        private List<(XYZ, XYZ)> GetAllIntersecPoints(XYZ firstPoint, XYZ lastPoint, List<Line> lines)
+        private List<(XYZ, XYZ)> GetAllIntersecPoints(List<Line> lines, XYZ firstPoint = null, XYZ lastPoint = null, List<XYZ> listTopPoint = null)
         {
+            Line firstLine = lines.First();
+            Line lastLine = lines.Last();
+
+            List<Line> stretchLines = new List<Line>();
+
+            foreach (var l in lines)
+            {
+                stretchLines.Add(LineUtility.CreateLine(l.GetEndPoint(0), l.Direction, _maxLengthOfElement));
+            }
+
             List<(XYZ, XYZ)> pairs = new List<(XYZ, XYZ)>();
             List<XYZ> points = new List<XYZ>();
             //points.Add(firstPoint);
 
-            LineUtility.MakeLinesCoplanar(lines);
+            LineUtility.MakeLinesCoplanar(stretchLines);
 
-            for (int i = 0; i < lines.Count - 1; i++)
+            for (int i = 0; i < stretchLines.Count - 1; i++)
             {
-                XYZ intersectPoint = LineUtility.GetIntersectionPoint(lines[i], lines[i + 1]);
+                XYZ intersectPoint = LineUtility.GetIntersectionPoint(stretchLines[i], stretchLines[i + 1]);
                 if (intersectPoint != null)
                 {
                     points.Add(intersectPoint);
                 }
             }
+
+            XYZ p1 = GetEndPointIsNotNearIntersectPoint(points, firstLine);
+            XYZ q1 = GetEndPointIsNotNearIntersectPoint(points, lastLine);
+
+            if (p1 != null && q1 != null)
+            {
+                XYZ firstTopPoint = null;
+                XYZ lastTopPoint = null;
+                foreach (double l in checkDistances)
+                {
+                    firstTopPoint = listTopPoint.FirstOrDefault(p => p1.DistanceTo(p) < l);
+                    lastTopPoint = listTopPoint.FirstOrDefault(p => q1.DistanceTo(p) < l);
+                }
+                if (firstTopPoint != null && lastTopPoint != null)
+                {
+                    points.Insert(0, LineUtility.GetPerpendicularProjectionPointOnLine(stretchLines.First(), firstTopPoint));
+                    points.Add(LineUtility.GetPerpendicularProjectionPointOnLine(stretchLines.Last(), lastTopPoint));
+                    for (int i = 0; i < points.Count - 1; i++)
+                    {
+                        pairs.Add((points[i], points[i + 1]));
+                    }
+                }
+            }
+
             //Plane lastPlane = CreatePlaneParallelToZFromLine(lines.Last());
             //points.Add(GetProjectedPoint(lastPlane, lastPoint));
-            points.Insert(0, LineUtility.GetPerpendicularProjectionPointOnLine(lines.First(), firstPoint));
-            points.Add(LineUtility.GetPerpendicularProjectionPointOnLine(lines.Last(), lastPoint));
-            for (int i = 0; i < points.Count - 1; i++)
-            {
-                pairs.Add((points[i], points[i + 1]));
-            }
+            //points.Insert(0, LineUtility.GetPerpendicularProjectionPointOnLine(lines.First(), firstPoint));
+            //points.Add(LineUtility.GetPerpendicularProjectionPointOnLine(lines.Last(), lastPoint));
+            //for (int i = 0; i < points.Count - 1; i++)
+            //{
+            //    pairs.Add((points[i], points[i + 1]));
+            //}
 
             // Chỉ có 2 đường
             //else
@@ -947,6 +1103,24 @@ namespace FirstCommand
             }
 
             return pairs;
+        }
+
+        private XYZ GetEndPointIsNotNearIntersectPoint(List<XYZ> points, Line line)
+        {
+            XYZ p1 = line.GetEndPoint(0);
+            XYZ p2 = line.GetEndPoint(1);
+            foreach (double l in checkDistances)
+            {
+                if (points.Any(p => p1.DistanceTo(p) < l))
+                {
+                    return p2;
+                }
+                else if (points.Any(p => p2.DistanceTo(p) < l))
+                {
+                    return p1;
+                }
+            }
+            return null;
         }
 
         private List<Line> GetLinesFromTriangles(List<MeshTriangle> triangles,
@@ -1123,7 +1297,7 @@ namespace FirstCommand
         //}
 
         /// <summary>
-        /// Lấy ra danh sách các tam giác cách 1 điêm cho trước 1 khoảng và thỏa mãn có 1 cạnh
+        /// Lấy ra danh sách các tam giác cách 1 điểm cho trước 1 khoảng và thỏa mãn có 1 cạnh
         /// có chiều dài lớn hơn 3 r
         /// </summary>
         /// <param name="triangles"></param>
@@ -1131,7 +1305,7 @@ namespace FirstCommand
         /// <param name="length"></param>
         /// <param name="radius"></param>
         /// <returns></returns>
-        private List<MeshTriangle> GetSublistTriangles(List<MeshTriangle> triangles, XYZ point, double length, double radius)
+        private List<MeshTriangle> GetSublistTriangles(TriangleVertexMap data, List<MeshTriangle> triangles, XYZ point, double length, double radius)
         {
             List<MeshTriangle> sublist = new List<MeshTriangle>();
             //List<double> checkDistances = new List<double> { radius * 3, radius * 2.5, radius * 2, radius * 1.5, radius };
@@ -1141,11 +1315,16 @@ namespace FirstCommand
             {
                 foreach (var tr in triangles)
                 {
-                    var vertices = TrianglesUtility.GetVerticesOfTriangles(triangle: tr);
+                    //var vertices = TrianglesUtility.GetVerticesOfTriangles(triangle: tr);
+                    var vertices = data.GetVerticesOfTriangle(tr);
                     if (vertices.Any(pt => pt.DistanceTo(point) < length + radius * 2))
                     {
-                        var edges = TrianglesUtility.GetTriangleEdges(tr);
-                        if (edges.Any(edge => edge.Length > lengthOfEdge))
+                        //var edges = TrianglesUtility.GetTriangleEdges(tr);
+                        //if (edges.Any(edge => edge.Length > lengthOfEdge))
+                        //{
+                        //    sublist.Add(tr);
+                        //}
+                        if (TrianglesUtility.HasEdgeLongerThan(data, tr, lengthOfEdge))
                         {
                             sublist.Add(tr);
                         }
@@ -1212,12 +1391,12 @@ namespace FirstCommand
             //double maxLengthToGetB = r * 12;
             //List<double> checkDistances = new List<double> { minLengthToGetB, maxLengthToGetB };
             List<double> checkDistances = new List<double> { r * 6, r * 14 };
-            List<double> lengthOfEdge = new List<double> { r * 3 };
-            //double minLengthOfEdge = r * 3;
+            List<double> lengthOfEdges = new List<double> { r * 3 };
+            double minLengthOfEdge = 0;
 
             foreach (var lengthToGetB in checkDistances)
             {
-                foreach (var l in lengthOfEdge)
+                foreach (var l in lengthOfEdges)
                 {
                     foreach (var v in vertexs)
                     {
@@ -1229,7 +1408,7 @@ namespace FirstCommand
                         {
                             foreach (var tri in triList)
                             {
-                                if (TrianglesUtility.HasEdgeLongerThan(tri, l))
+                                if (TrianglesUtility.HasEdgeLongerThan(_data, tri, l))
                                 {
                                     if (distToA > maxDisToA)
                                     {
@@ -1243,7 +1422,10 @@ namespace FirstCommand
                         }
                     }
                     if (B != null)
+                    {
+                        minLengthOfEdge = l;
                         break;
+                    }
                 }
                 // Nếu đã tìm được B ở khoảng cách hiện tại thì dừng luôn
                 if (B != null)
@@ -1258,11 +1440,19 @@ namespace FirstCommand
             // Khoảng cách từ A đến B cộng thêm 1 khoảng 2r
 
             double length = A.DistanceTo(B);
+            //List<MeshTriangle> subListTriangleNearB = new List<MeshTriangle>();
+            //foreach (var tri in _data.GetTriangles(B))
+            //{
+            //    if (TrianglesUtility.HasEdgeLongerThan(_data, tri, minLengthOfEdge))
+            //    {
+            //        subListTriangleNearB.Add(tri);
+            //    }
+            //}
 
-            List<MeshTriangle> subListTriangleNearB = GetSublistTriangles(triangles, A, length, r);
+            List<MeshTriangle> subListTriangleNearB = GetSublistTriangles(_data, triangles, A, length, r);
             if (subListTriangleNearB.Count > 1)
             {
-                XYZ axis = GetAxisFromTriangles(subListTriangleNearB);
+                XYZ axis = GetAxisFromTriangles(_data, subListTriangleNearB);
                 return (B, axis);
             }
             else
@@ -1277,15 +1467,17 @@ namespace FirstCommand
         /// </summary>
         /// <param name="triangles"></param>
         /// <returns></returns>
-        private XYZ GetAxisFromTriangles(List<MeshTriangle> triangles)
+        private XYZ GetAxisFromTriangles(TriangleVertexMap data, List<MeshTriangle> triangles)
         {
             MeshTriangle firstTriangle = triangles.FirstOrDefault();
-            XYZ firstNormal = TrianglesUtility.GetNormalFromTriangle(firstTriangle);
+            //XYZ firstNormal = TrianglesUtility.GetNormalFromTriangle(firstTriangle);
+            XYZ firstNormal = data.GetTriangleInfos(firstTriangle).Normal;
             XYZ secondNormal = null;
             MeshTriangle secondTriangle = null;
             for (int i = 1; i < triangles.Count; i++)
             {
-                XYZ normal = TrianglesUtility.GetNormalFromTriangle(triangles[i]);
+                //XYZ normal = TrianglesUtility.GetNormalFromTriangle(triangles[i]);
+                XYZ normal = data.GetTriangleInfos(triangles[i]).Normal;
                 // Nếu 2 vector không song song với nhau
                 if (!VectorUtility.AreParallel(firstNormal, normal, CommonConstants.COSINE_ANGLE_TOLERANCE_5_DEGREE))
                 {
@@ -1457,18 +1649,19 @@ namespace FirstCommand
                         Mesh mesh = p.Triangulate();
                         AddMeshTriangles(triangles, mesh);
                         meshes.Add(mesh);
-                        //    // Kiểm tra xem facenormal của planarface có gần vuông góc với Z không
-                        //    if (FaceUtility.IsFaceParallelToAxis(p.FaceNormal, XYZ.BasisZ))
-                        //    {
-                        //        Mesh mesh = p.Triangulate();
-                        //        AddMeshTriangles(triangles, mesh);
-                        //    }
+                        // Kiểm tra xem facenormal của planarface có gần vuông góc với Z không
+                        //if (FaceUtility.IsFaceParallelToAxis(p.FaceNormal, XYZ.BasisZ))
+                        //{
+                        //    Mesh mesh = p.Triangulate();
+                        //    AddMeshTriangles(triangles, mesh);
+                        //}
                     }
                 }
             }
             _allTrianglesOfElement = triangles.ToList();
             _data = new TriangleVertexMap(triangles);
-            var trianglesParallelToZ = new List<MeshTriangle>();
+
+            var trianglesParallelToZ = new HashSet<MeshTriangle>();
             foreach (var tri in triangles)
             {
                 var triInfos = _data.GetTriangleInfos(tri);
@@ -1479,8 +1672,9 @@ namespace FirstCommand
                 }
             }
 
-            //var result = TrianglesUtility.GroupMeshTrianglesBySharedVertices(triangles);
+            //var result = TrianglesUtility.GroupMeshTrianglesBySharedVertices(_data, triangles);
             var result = TrianglesUtility.GroupMeshTrianglesBySharedVertices(_data, trianglesParallelToZ);
+
             result = result.OrderByDescending(x => x.Count).ToList();
             double firstRadius = 0;
             foreach (var group in result)
@@ -1523,11 +1717,13 @@ namespace FirstCommand
             for (int i = 0; i < mesh.NumTriangles; i++)
             {
                 MeshTriangle triangle = mesh.get_Triangle(i);
+
                 //XYZ normal = TrianglesUtility.GetNormalFromTriangle(triangle);
                 //if (FaceUtility.IsFaceParallelToAxis(normal, XYZ.BasisZ))
                 //{
                 //    triangles.Add(triangle);
                 //}
+
                 triangles.Add(triangle);
             }
         }

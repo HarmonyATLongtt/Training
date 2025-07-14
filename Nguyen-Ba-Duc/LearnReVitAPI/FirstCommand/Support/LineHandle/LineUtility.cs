@@ -188,26 +188,59 @@ namespace FirstCommand.Support.LineHandle
         /// <param name="point"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
+        //public static XYZ GetPerpendicularProjectionPointOnLine(Line line, XYZ point)
+        //{
+        //    if (line == null || point == null || !line.IsBound)
+        //        throw new ArgumentException("Invalid input");
+
+        //    // Điểm đầu và cuối của line
+        //    XYZ p0 = line.GetEndPoint(0);
+        //    XYZ p1 = line.GetEndPoint(1);
+
+        //    // Vector chỉ phương của đường thẳng
+        //    XYZ lineDirection = (p1 - p0).Normalize();
+
+        //    // Vector từ điểm gốc của line đến điểm cần chiếu
+        //    XYZ vectorToPoint = point - p0;
+
+        //    // Chiều dài chiếu của vector lên đường thẳng (tức là khoảng cách theo hướng line)
+        //    double projectionLength = vectorToPoint.DotProduct(lineDirection);
+
+        //    // Tọa độ điểm chiếu vuông góc trên line
+        //    XYZ projectedPoint = p0 + projectionLength * lineDirection;
+
+        //    return projectedPoint;
+        //}
+
         public static XYZ GetPerpendicularProjectionPointOnLine(Line line, XYZ point)
         {
-            if (line == null || point == null || !line.IsBound)
-                throw new ArgumentException("Invalid input");
+            if (line == null || point == null)
+                throw new ArgumentNullException("Line or point is null");
 
-            // Điểm đầu và cuối của line
-            XYZ p0 = line.GetEndPoint(0);
-            XYZ p1 = line.GetEndPoint(1);
+            XYZ origin;
+            XYZ direction;
 
-            // Vector chỉ phương của đường thẳng
-            XYZ lineDirection = (p1 - p0).Normalize();
+            if (line.IsBound)
+            {
+                // Nếu là bound line → lấy điểm đầu làm gốc
+                origin = line.GetEndPoint(0);
+                direction = (line.GetEndPoint(1) - line.GetEndPoint(0)).Normalize();
+            }
+            else
+            {
+                // Nếu là unbound line → lấy origin và direction trực tiếp
+                origin = line.Origin;
+                direction = line.Direction;
+            }
 
-            // Vector từ điểm gốc của line đến điểm cần chiếu
-            XYZ vectorToPoint = point - p0;
+            // Vector từ origin đến điểm cần chiếu
+            XYZ vectorToPoint = point - origin;
 
-            // Chiều dài chiếu của vector lên đường thẳng (tức là khoảng cách theo hướng line)
-            double projectionLength = vectorToPoint.DotProduct(lineDirection);
+            // Độ dài chiếu của vector lên đường thẳng
+            double projectionLength = vectorToPoint.DotProduct(direction);
 
-            // Tọa độ điểm chiếu vuông góc trên line
-            XYZ projectedPoint = p0 + projectionLength * lineDirection;
+            // Tọa độ điểm chiếu vuông góc
+            XYZ projectedPoint = origin + projectionLength * direction;
 
             return projectedPoint;
         }

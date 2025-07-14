@@ -371,6 +371,33 @@ namespace FirstCommand.Support.PointHandle
             int iy = (int)Math.Floor(point.Y / gridSize);
             return (ix, iy);
         }
+
+        /// <summary>
+        /// Hàm tìm ra cặp điểm có khoảng cách xa nhất
+        /// </summary>
+        /// <param name="points"></param>
+        /// <returns></returns>
+        public static (XYZ, XYZ) FindFurthestPair(List<XYZ> points)
+        {
+            double maxDistance = double.MinValue;
+            XYZ pointA = null, pointB = null;
+
+            for (int i = 0; i < points.Count - 1; i++)
+            {
+                for (int j = i + 1; j < points.Count; j++)
+                {
+                    double distance = points[i].DistanceTo(points[j]);
+                    if (distance > maxDistance)
+                    {
+                        maxDistance = distance;
+                        pointA = points[i];
+                        pointB = points[j];
+                    }
+                }
+            }
+
+            return (pointA, pointB);
+        }
     }
 
     /// <summary>

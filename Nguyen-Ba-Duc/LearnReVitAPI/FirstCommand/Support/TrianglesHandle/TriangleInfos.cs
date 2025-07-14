@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autodesk.Revit.DB;
+using FirstCommand.Support.Constants;
 using FirstCommand.Support.VectorHandle;
 
 namespace FirstCommand.Support.TrianglesHandle
@@ -34,7 +35,11 @@ namespace FirstCommand.Support.TrianglesHandle
             P1 = meshTriangle.get_Vertex(0);
             P2 = meshTriangle.get_Vertex(1);
             P3 = meshTriangle.get_Vertex(2);
-            Normal = ComputeNormal(P1, P2, P3);
+            XYZ vectorNomal = ComputeNormal(P1, P2, P3);
+            if (vectorNomal != null)
+            {
+                Normal = vectorNomal;
+            }
             GetMinMaxXYZOfTriangle();
             GetHighestAndLowestZPoint();
         }
@@ -66,13 +71,24 @@ namespace FirstCommand.Support.TrianglesHandle
         /// <param name="b"></param>
         /// <param name="c"></param>
         /// <returns></returns>
-        private XYZ ComputeNormal(XYZ a, XYZ b, XYZ c)
+        private XYZ ComputeNormal(XYZ a, XYZ b, XYZ c, double tolerance = CommonConstants.TOLERANCE)
         {
+            if ((b - a).GetLength() < tolerance ||
+                (c - a).GetLength() < tolerance ||
+                (c - b).GetLength() < tolerance)
+            {
+                // Tam giác suy biến hoặc cạnh quá ngắn
+                return null; // hoặc XYZ.Zero, hoặc throw exception
+            }
+
             var v1 = b - a;
             var v2 = c - a;
             var cross = v1.CrossProduct(v2);
+            if (cross.GetLength() < tolerance)
+                return null;
 
-            return VectorUtility.NormalizeSafe(cross);
+            return cross.Normalize();
+            //return VectorUtility.NormalizeSafe(cross);
         }
 
         /// <summary>
