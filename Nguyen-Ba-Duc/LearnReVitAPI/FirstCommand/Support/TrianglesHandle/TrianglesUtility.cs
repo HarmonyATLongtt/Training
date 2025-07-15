@@ -80,11 +80,12 @@ namespace FirstCommand.Support.TrianglesHandle
         /// <param name="doc"></param>
         /// <param name="isRevitLink"></param>
         /// <param name="transform"></param>
-        public static void DrawTriangles(List<MeshTriangle> meshTriangles, Document doc, Transform trans)
+        public static void DrawTriangles(TriangleVertexMap data, IEnumerable<MeshTriangle> meshTriangles, Document doc, Transform trans)
         {
             foreach (var tri in meshTriangles)
             {
-                var points = GetVerticesOfTriangles(triangle: tri);
+                //var points = GetVerticesOfTriangles(triangle: tri);
+                var points = data.GetVerticesOfTriangle(tri);
                 if (points.Count == 3)
                 {
                     XYZ p1 = points[0];

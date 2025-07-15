@@ -36,17 +36,35 @@ namespace FirstCommand.Support.VectorHandle
         /// <returns></returns>
         public static bool ArePerpendicular(XYZ v1, XYZ v2, double tolerance = CommonConstants.TOLERANCE)
         {
+            if (v1 == null || v2 == null)
+                throw new ArgumentNullException();
+
             double dot = v1.DotProduct(v2);
-            if (Math.Abs(dot) < 1e-12) // shortcut cho vector zero
+
+            // Nếu dot gần 0 mà không phải do vector zero thì coi là vuông góc
+            if (Math.Abs(dot) < tolerance)
+            {
+                double len1 = v1.GetLength();
+                double len2 = v2.GetLength();
+
+                if (len1 < 1e-12 || len2 < 1e-12)
+                    return false;
+
                 return true;
+            }
 
-            double len1 = v1.GetLength();
-            double len2 = v2.GetLength();
+            return false;
+            //double dot = v1.DotProduct(v2);
+            //if (Math.Abs(dot) < 1e-12) // shortcut cho vector zero
+            //    return true;
 
-            if (len1 < 1e-12 || len2 < 1e-12)
-                return false;  // vector gần như zero
+            //double len1 = v1.GetLength();
+            //double len2 = v2.GetLength();
 
-            return Math.Abs(dot) < tolerance;
+            //if (len1 < 1e-12 || len2 < 1e-12)
+            //    return false;  // vector gần như zero
+
+            //return Math.Abs(dot) < tolerance;
 
             //if (v1.IsZeroLength() || v2.IsZeroLength())
             //    return false;  // Vector rỗng không có hướng xác định

@@ -640,7 +640,8 @@ namespace FirstCommand
                     trianglesHaveLongEdge.Add(tri);
                 }
             }
-
+            TrianglesUtility.DrawTriangles(_data, trianglesHaveLongEdge, _doc, _transform);
+            return;
             var groupTrianglesHaveCommonVertex = TrianglesUtility.GroupMeshTrianglesBySharedVertices(_data, trianglesHaveLongEdge);
             List<(XYZ, XYZ, Line)> allLineInfo = new List<(XYZ, XYZ, Line)>();
 
@@ -1666,9 +1667,12 @@ namespace FirstCommand
             {
                 var triInfos = _data.GetTriangleInfos(tri);
                 var normalTri = triInfos.Normal;
-                if (VectorUtility.ArePerpendicular(normalTri, XYZ.BasisZ, CommonConstants.COSINE_ANGLE_TOLERANCE_1_DEGREE))
+                if (normalTri != null)
                 {
-                    trianglesParallelToZ.Add(tri);
+                    if (VectorUtility.ArePerpendicular(normalTri, XYZ.BasisZ, CommonConstants.COSINE_ANGLE_TOLERANCE_1_DEGREE))
+                    {
+                        trianglesParallelToZ.Add(tri);
+                    }
                 }
             }
 
