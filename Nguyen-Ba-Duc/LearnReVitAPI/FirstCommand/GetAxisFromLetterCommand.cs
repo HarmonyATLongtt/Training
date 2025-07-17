@@ -34,6 +34,7 @@ namespace FirstCommand
 
         private List<CylinderDimensions> ListCylinderDimension = new List<CylinderDimensions>();
         private Document doc;
+        private TriangleVertexMap _data = null;
 
         #endregion Propeties
 
@@ -196,7 +197,7 @@ namespace FirstCommand
         private void DrawLinesAndRadiusOfCylinders(List<MeshTriangle> meshTriangles)
         {
             var groupAxisAndTriangles = new List<(XYZ, List<MeshTriangle>)>();
-            double numOfTriangleMakePlanarFace = 3;
+            int numOfTriangleMakePlanarFace = 3;
 
             // Xóa hết những nhóm tam giác tạo thành 1 mặt phẳng
             var meshTrianglesMakePlarnarFace = TrianglesUtility.GroupTrianglesByVertexAndNormal(meshTriangles, numOfTriangleMakePlanarFace).SelectMany(tri => tri).ToList();
@@ -447,7 +448,7 @@ namespace FirstCommand
         {
             Solid solid = null;
             //Gom nhóm các triangle theo mặt phẳng
-            double numOfTriangleMakePlanarFace = 2;
+            int numOfTriangleMakePlanarFace = 2;
             var groupMeshTrianglesHasCommonVertexAndNormal = TrianglesUtility.GroupTrianglesByVertexAndNormal(meshTriangles, numOfTriangleMakePlanarFace);
 
             var pointsOfTrianglesFromGroupComplex = new List<List<(XYZ, XYZ)>>();
@@ -569,7 +570,7 @@ namespace FirstCommand
             {
                 VectorUtility.IsParallelToAnyAxis(ref axis, CommonConstants.COSINE_ANGLE_TOLERANCE_5_DEGREE);
 
-                var trianglesParallelToVector = TrianglesUtility.GetTrianglesParallelToVector(axis, meshTriangles, CommonConstants.COSINE_ANGLE_TOLERANCE_5_DEGREE).ToHashSet();
+                var trianglesParallelToVector = TrianglesUtility.GetTrianglesParallelToVector(_data, axis, meshTriangles, CommonConstants.COSINE_ANGLE_TOLERANCE_5_DEGREE).ToHashSet();
                 var list = TrianglesUtility.FindConnectedTrianglesBySharedTwoVertex(trianglesParallelToVector.ToList(), originTriangle).ToHashSet();
 
                 groupTrianglesAndAxis.Add((axis, list.ToList()));

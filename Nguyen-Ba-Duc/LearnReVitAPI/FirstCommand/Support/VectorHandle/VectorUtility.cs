@@ -104,5 +104,39 @@ namespace FirstCommand.Support.VectorHandle
                 }
             }
         }
+
+        /// <summary>
+        /// Hàm kiểm tra xem góc tạo bởi 2 vector có nhỏ hơn 1 góc cố định
+        /// </summary>
+        /// <param name="v1"></param>
+        /// <param name="v2"></param>
+        /// <param name="angleInDegrees"></param>
+        /// <param name="minVectorLength"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public static bool IsAngleLessThan(XYZ v1, XYZ v2, double angleInDegrees, double minVectorLength = CommonConstants.TOLERANCE)
+        {
+            if (v1 == null || v2 == null)
+                throw new ArgumentNullException("Vector không được null.");
+
+            if (angleInDegrees <= 0 || angleInDegrees >= 180)
+                throw new ArgumentOutOfRangeException("Góc phải nằm trong khoảng (0, 180) độ.");
+
+            // Kiểm tra độ dài vector đủ lớn
+            if (v1.GetLength() < minVectorLength || v2.GetLength() < minVectorLength)
+                return false; // Hoặc throw nếu bạn muốn bắt lỗi
+
+            // Chuẩn hóa vector
+            XYZ n1 = v1.Normalize();
+            XYZ n2 = v2.Normalize();
+
+            // Tính cos(góc)
+            double dot = n1.DotProduct(n2);
+            double cosThreshold = Math.Cos(angleInDegrees * Math.PI / 180.0);
+
+            // So sánh
+            return dot > cosThreshold;
+        }
     }
 }

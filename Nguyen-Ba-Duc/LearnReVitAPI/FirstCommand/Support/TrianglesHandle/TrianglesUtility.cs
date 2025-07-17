@@ -166,13 +166,15 @@ namespace FirstCommand.Support.TrianglesHandle
         /// <param name="vector"></param>
         /// <param name="triangles"></param>
         /// <returns></returns>
-        public static List<MeshTriangle> GetTrianglesParallelToVector(XYZ vector, List<MeshTriangle> triangles, double tolerance)
+        public static List<MeshTriangle> GetTrianglesParallelToVector(TriangleVertexMap data, XYZ vector, List<MeshTriangle> triangles, double tolerance = CommonConstants.TOLERANCE)
         {
             List<MeshTriangle> result = new List<MeshTriangle>();
             //XYZ normalizedDirection = line.Direction.Normalize();
             foreach (var triangle in triangles)
             {
-                XYZ normal = GetNormalFromTriangle(triangle);
+                //XYZ normal = GetNormalFromTriangle(triangle);
+                XYZ normal = data.GetTriangleInfos(triangle).Normal;
+                if (normal == null) continue;
 
                 // Nếu normal vuông góc với direction thì dot product gần 0
                 double dot = normal.Normalize().DotProduct(vector);
@@ -287,7 +289,7 @@ namespace FirstCommand.Support.TrianglesHandle
         /// </summary>
         /// <param name="triangles"></param>
         /// <returns></returns>
-        public static List<List<MeshTriangle>> GroupMeshTrianglesBySharedVertices(TriangleVertexMap data, HashSet<MeshTriangle> triangles)
+        public static List<List<MeshTriangle>> GroupMeshTrianglesBySharedVertices(TriangleVertexMap data, HashSet<MeshTriangle> triangles, int numOfTriangleValid = 2)
         {
             var result = new List<List<MeshTriangle>>();
             var visited = new HashSet<MeshTriangle>();
@@ -348,8 +350,10 @@ namespace FirstCommand.Support.TrianglesHandle
                         }
                     }
                 }
-
-                result.Add(group);
+                if (group.Count >= numOfTriangleValid)
+                {
+                    result.Add(group);
+                }
             }
 
             return result;
@@ -472,7 +476,7 @@ namespace FirstCommand.Support.TrianglesHandle
         /// </summary>
         /// <param name="triangles"></param>
         /// <returns></returns>
-        public static List<List<MeshTriangle>> GroupTrianglesByVertexAndNormal(List<MeshTriangle> triangles, double numOfTriangleMakePlanarFace)
+        public static List<List<MeshTriangle>> GroupTrianglesByVertexAndNormal(List<MeshTriangle> triangles, int numOfTriangleMakePlanarFace = 2)
         {
             // B1: Tạo dictionary: mỗi điểm XYZ ánh xạ đến các tam giác chứa nó
             var vertexToTriangles = new Dictionary<XYZ, List<MeshTriangle>>(Comparers.XYZ);
@@ -894,6 +898,74 @@ namespace FirstCommand.Support.TrianglesHandle
                 }
             }
             return triangleVertexDict;
+        }
+
+        /// <summary>
+        /// Hàm dùng để nhóm các tam giác theo 1 nhóm cùng song song với 1 vector (vector là trục đại diện cho nhóm đó)
+        /// </summary>
+        /// <param name="triangles"></param>
+        /// <param name="tolerance"></param>
+        /// <returns></returns>
+        public static List<List<MeshTriangle>> GroupTrianglesByNormalPerpendicularToAxis(TriangleVertexMap data, IEnumerable<MeshTriangle> triangles)
+        {
+            List<List<MeshTriangle>> resultGroups = new List<List<MeshTriangle>>();
+            HashSet<MeshTriangle> unprocessed = new HashSet<MeshTriangle>(triangles);
+
+            while (unprocessed.Count >= 2)
+            {
+                // Tìm 2 triangle có normal không song song
+
+                XYZ normalA = null, normalB = null;
+
+                var triList = unprocessed.ToList();
+                bool found = false;
+
+                for (int i = 0; i < triList.Count - 1; i++)
+                {
+                    normalA = data.GetTriangleInfos(triList[i]).Normal;
+
+                    for (int j = i + 1; j < triList.Count; j++)
+                    {
+                        normalB = data.GetTriangleInfos(triList[j]).Normal;
+                        if (!VectorUtility.AreParallel(normalA, normalB, CommonConstants.TOLERANCE))
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (found) break;
+                }
+
+                if (!found)
+                {
+                    // Không còn cặp nào đủ khác biệt → gom tất cả còn lại vào 1 nhóm
+                    resultGroups.Add(unprocessed.ToList());
+                    break;
+                }
+
+                // Vector vuông góc với cả 2 normal
+                XYZ axis = normalA.CrossProduct(normalB);
+
+                var group = unprocessed
+                    .Where(tri =>
+                    {
+                        XYZ n = data.GetTriangleInfos(tri).Normal;
+                        return VectorUtility.ArePerpendicular(n, axis, CommonConstants.TOLERANCE);
+                    })
+                    .ToList();
+
+                // Thêm vào nhóm kết quả
+                if (group.Count > 3)
+                {
+                    resultGroups.Add(group);
+                }
+
+                // Loại bỏ khỏi tập chưa xử lý
+                foreach (var tri in group)
+                    unprocessed.Remove(tri);
+            }
+
+            return resultGroups;
         }
     }
 }
