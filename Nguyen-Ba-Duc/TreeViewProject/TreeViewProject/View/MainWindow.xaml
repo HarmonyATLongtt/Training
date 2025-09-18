@@ -79,11 +79,14 @@
         <!-- TreeView panel-->
         <Border Grid.Column="0" Background="White" CornerRadius="8" Padding="10"
                 BorderBrush="#DDD" BorderThickness="1" Margin="0,0,10,0">
-            <TreeView FontSize="14"
+            <TreeView x:Name="MyTree" FontSize="14"
                   FontFamily="Segoe UI"
                   BorderThickness="0"
-                  ItemsSource="{Binding RootNodes}"
-                  SelectedItemChanged="TreeView_SelectedItemChanged">
+                  ItemsSource="{Binding TreeVM.RootNodes}"
+                  SelectedItemChanged="TreeView_SelectedItemChanged"
+                  GotFocus="TreeView_GotFocus"
+                  LostFocus="TreeView_LostFocus">
+
                 <TreeView.ItemContainerStyle>
                     <Style TargetType="TreeViewItem">
                         <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
@@ -227,21 +230,22 @@
                 <RowDefinition></RowDefinition>
             </Grid.RowDefinitions>
             <Grid Margin="0,5" Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center">
+
                 <!-- Image -->
-                <Image Source="{Binding SelectedNodeImagePath}"
-                       Visibility="{Binding IsImageVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <Image Source="{Binding TreeVM.SelectedNodeImagePath}"
+                       Visibility="{Binding TreeVM.IsImageVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
                 <!--GIF -->
-                <Image gif:ImageBehavior.AnimatedSource="{Binding SelectedNodeGifPath, Converter={StaticResource StringToUriConverter}}"
+                <Image gif:ImageBehavior.AnimatedSource="{Binding TreeVM.SelectedNodeGifPath, Converter={StaticResource StringToUriConverter}}"
                     gif:ImageBehavior.RepeatBehavior="Forever"
-                    Visibility="{Binding IsGifVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
+                    Visibility="{Binding TreeVM.IsGifVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
 
                 <!-- Video -->
-                <MediaElement Source="{Binding SelectedNodeVideoPath}"
+                <MediaElement Source="{Binding TreeVM.SelectedNodeVideoPath}"
                             LoadedBehavior="Manual"
                             UnloadedBehavior="Stop"
                             Stretch="Uniform"
                             Name="VideoPlayer"
-                            Visibility="{Binding IsVideoVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+                            Visibility="{Binding TreeVM.IsVideoVisible, Converter={StaticResource BoolToVisibilityConverter}}">
                     <i:Interaction.Behaviors>
                         <behaviors:MediaElementLoopBehavior />
                     </i:Interaction.Behaviors>
@@ -250,14 +254,14 @@
 
             <!-- Buttons -->
             <StackPanel Grid.Row="1" Margin="10" VerticalAlignment="Top" Orientation="Vertical" Width="150">
-                <Button Content="Expand All" Command="{Binding ExpandAllCommand}" Style="{StaticResource ButtonStyle}" />
-                <Button Content="Collapse All" Command="{Binding CollapseAllCommand}" Style="{StaticResource ButtonStyle}" />
-                <Button Content="Invert" Command="{Binding InvertCommand}" Style="{StaticResource ButtonStyle}" />
+                <Button Content="Expand All" Command="{Binding TreeVM.ExpandAllCommand}" Style="{StaticResource ButtonStyle}" />
+                <Button Content="Collapse All" Command="{Binding TreeVM.CollapseAllCommand}" Style="{StaticResource ButtonStyle}" />
+                <Button Content="Invert" Command="{Binding TreeVM.InvertCommand}" Style="{StaticResource ButtonStyle}" />
                 <Separator Margin="0,5" />
-                <Button Content="Copy" Command="{Binding CopyCommand}" Style="{StaticResource ButtonStyle}" />
-                <Button Content="Cut" Command="{Binding CutCommand}" Style="{StaticResource ButtonStyle}" />
-                <Button Content="Paste" Command="{Binding PasteCommand}" Style="{StaticResource ButtonStyle}" />
-                <Button Content="Delete" Command="{Binding DeleteCommand}" Style="{StaticResource ButtonStyle}" />
+                <Button x:Name="CopyButton" Content="Copy" Command="{Binding CopyCommand}" Style="{StaticResource ButtonStyle}" />
+                <Button x:Name="CutButton" Content="Cut" Command="{Binding CutCommand}" Style="{StaticResource ButtonStyle}" />
+                <Button x:Name="PasteButton" Content="Paste" Command="{Binding PasteCommand}" Style="{StaticResource ButtonStyle}" />
+                <Button x:Name="DeleteButton" Content="Delete" Command="{Binding DeleteCommand}" Style="{StaticResource ButtonStyle}" />
             </StackPanel>
         </Grid>
     </Grid>

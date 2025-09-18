@@ -16,379 +16,55 @@ namespace TreeViewProject.ViewModel
 {
     public class MainViewModel : BaseViewModel
     {
-        public ObservableCollection<NodeViewModel> RootNodes { get; set; }
+        public TreeViewModel TreeVM { get; }
 
-        private NodeViewModel? _currentHoveredNode;
+        private IClipboardHandler? _activeHandler;
 
-        public NodeViewModel? CurrentHoveredNode
+        public IClipboardHandler? ActiveHandler
         {
-            get => _currentHoveredNode;
-            set { _currentHoveredNode = value; OnPropertyChanged(nameof(CurrentHoveredNode)); }
+            get => _activeHandler;
+            set { _activeHandler = value; OnPropertyChanged(); }
         }
 
         private NodeViewModel? _selectedNode;
 
         public NodeViewModel? SelectedNode
         {
-            get { return _selectedNode; }
-            set
-            {
-                _selectedNode = value; OnPropertyChanged(nameof(SelectedNode));
-
-                SelectedNodeImagePath = SelectedNode?.ImagePath;
-                SelectedNodeGifPath = null;
-                SelectedNodeVideoPath = null;
-            }
+            get => _selectedNode;
+            set { _selectedNode = value; OnPropertyChanged(); }
         }
 
-        private bool _isImageVisible;
-
-        public bool IsImageVisible
-        {
-            get => _isImageVisible;
-            set { _isImageVisible = value; OnPropertyChanged(); }
-        }
-
-        private bool _isGifVisible;
-
-        public bool IsGifVisible
-        {
-            get => _isGifVisible;
-            set { _isGifVisible = value; OnPropertyChanged(); }
-        }
-
-        private bool _isVideoVisible;
-
-        public bool IsVideoVisible
-        {
-            get => _isVideoVisible;
-            set { _isVideoVisible = value; OnPropertyChanged(); }
-        }
-
-        private string? _selectedNodeImagePath;
-
-        public string? SelectedNodeImagePath
-        {
-            get { return _selectedNodeImagePath; }
-            set
-            {
-                _selectedNodeImagePath = value; OnPropertyChanged(nameof(SelectedNodeImagePath));
-
-                if (SelectedNodeImagePath != null)
-                {
-                    IsImageVisible = true;
-                }
-                else { IsImageVisible = false; }
-            }
-        }
-
-        private string? _selectedNodeVideoPath;
-
-        public string? SelectedNodeVideoPath
-        {
-            get { return _selectedNodeVideoPath; }
-            set
-            {
-                _selectedNodeVideoPath = value; OnPropertyChanged(nameof(SelectedNodeVideoPath));
-                if (SelectedNodeVideoPath != null)
-                {
-                    IsVideoVisible = true;
-                }
-                else { IsVideoVisible = false; }
-            }
-        }
-
-        private string? _selectedNodeGifPath;
-
-        public string? SelectedNodeGifPath
-        {
-            get => _selectedNodeGifPath;
-            set
-            {
-                _selectedNodeGifPath = value; OnPropertyChanged(nameof(SelectedNodeGifPath));
-                if (SelectedNodeGifPath != null)
-                {
-                    IsGifVisible = true;
-                }
-                else { IsGifVisible = false; }
-            }
-        }
-
-        private NodeViewModel? _selectedCopyNode;
-
-        public NodeViewModel? SelectedCopyNode
-        {
-            get { return _selectedCopyNode; }
-            set
-            {
-                _selectedCopyNode = value; OnPropertyChanged(nameof(SelectedNode));
-            }
-        }
-
-        private NodeViewModel? _clipboardNode;
-
-        private bool _isCut = false;
-
-        public ICommand ExpandAllCommand { get; set; }
-        public ICommand CollapseAllCommand { get; set; }
-        public ICommand InvertCommand { get; set; }
         public ICommand CopyCommand { get; set; }
         public ICommand CutCommand { get; set; }
         public ICommand PasteCommand { get; set; }
         public ICommand DeleteCommand { get; set; }
+
         public ICommand HelpCommand { get; set; }
 
         public MainViewModel()
         {
-            InitializeData();
+            TreeVM = new TreeViewModel();
+            ActiveHandler = TreeVM;
+
             InvokeCommand();
         }
 
         private void InvokeCommand()
         {
-            ExpandAllCommand = new RelayCommand(_ => ExpandCollapseAll(true));
-            CollapseAllCommand = new RelayCommand(_ => ExpandCollapseAll(false));
-            InvertCommand = new RelayCommand(_ => InvertAll());
-            CopyCommand = new RelayCommand(_ => Copy(), _ => SelectedNode != null);
-            CutCommand = new RelayCommand(_ => Cut(), _ => SelectedNode != null);
-            PasteCommand = new RelayCommand(_ => Paste(), _ => _clipboardNode != null && SelectedNode != null);
-            DeleteCommand = new RelayCommand(_ => Delete(), _ => SelectedNode != null);
-            HelpCommand = new RelayCommand(_ => ShowHelp(), _ => CurrentHoveredNode != null || SelectedNode != null);
+            CopyCommand = new RelayCommand(_ => ActiveHandler?.CopyCommand.Execute(null));
+            CutCommand = new RelayCommand(_ => ActiveHandler?.CutCommand.Execute(null));
+            PasteCommand = new RelayCommand(_ => ActiveHandler?.PasteCommand.Execute(null));
+            DeleteCommand = new RelayCommand(_ => ActiveHandler?.DeleteCommand.Execute(null));
+            HelpCommand = new RelayCommand(_ => ActiveHandler?.HelpCommand.Execute(null));
         }
+    }
 
-        private void InitializeData()
-        {
-            // dữ liệu mẫu
-            var rootA = new NodeModel
-            {
-                Name = "Root A",
-                Description = "Mô tả Root A",
-                DetailDescription = "Chi tiết Root A",
-                ImagePath = "/Images/tooltip.png",
-                GifPath = "/Images/pikachu.gif"
-                //GifPath = "test.gif"
-            };
-            var childA_1 = new NodeModel { Name = "Child A1", Description = "Mô tả Child A1", DetailDescription = "Chi tiết Child A1", Parent = rootA, GifPath = "Images/pikachu.gif" };
-            var childA_2 = new NodeModel { Name = "Child A2", Description = "Mô tả Child A2", DetailDescription = "Chi tiết Child A2", Parent = rootA, GifPath = "Images/test.gif" };
-            var grandChildA_1_1 = new NodeModel { Name = "GrandChild A1.1", Description = "Mô tả GrandChild A1.1", DetailDescription = "Chi tiết GrandChild A1.1", Parent = childA_1 };
-            childA_1.Children.Add(grandChildA_1_1);
-            rootA.Children.Add(childA_1);
-            rootA.Children.Add(childA_2);
-
-            var rootB = new NodeModel { Name = "Root B", Description = "Mô tả Root B", DetailDescription = "Chi tiết Root B", ImagePath = "/Images/images.png", VideoPath = "Images/lebong.mp4" };
-            var childB_1 = new NodeModel { Name = "Child B1", Description = "Mô tả Child B1", DetailDescription = "Chi tiết Child B1", Parent = rootB };
-            var childB_2 = new NodeModel { Name = "Child B2", Description = "Mô tả Child B2", DetailDescription = "Chi tiết Child B2", Parent = rootB };
-            var grandChildB_2_1 = new NodeModel { Name = "GrandChild B1.1", Description = "Mô tả GrandChild B1.1", DetailDescription = "Chi tiết GrandChild B1.1", Parent = childB_1 };
-            childB_1.Children.Add(grandChildB_2_1);
-            rootB.Children.Add(childB_1);
-            rootB.Children.Add(childB_2);
-
-            var rootC = new NodeModel
-            {
-                Name = "Root C",
-                Description = "Mô tả Root C",
-                DetailDescription = "Chi tiết Root C",
-                ImagePath = "/Images/tooltip.png",
-                GifPath = "/Images/test.gif"
-            };
-
-            var rootVM1 = new NodeViewModel(rootA, this);
-            var rootVM2 = new NodeViewModel(rootB, this);
-            var rootVM3 = new NodeViewModel(rootC, this);
-
-            RootNodes = new ObservableCollection<NodeViewModel> { rootVM1, rootVM2, rootVM3 };
-        }
-
-        private void ShowHelp()
-        {
-            SelectedNodeImagePath = null;
-            SelectedNodeVideoPath = null;
-            SelectedNodeGifPath = null;
-
-            if (CurrentHoveredNode != null)
-            {
-                if (!string.IsNullOrEmpty(CurrentHoveredNode?.VideoPath))
-                {
-                    SelectedNodeVideoPath = CurrentHoveredNode.VideoPath;
-                }
-                else if (!string.IsNullOrEmpty(CurrentHoveredNode?.GifPath))
-                {
-                    SelectedNodeGifPath = CurrentHoveredNode.GifPath;
-                }
-            }
-            else if (SelectedNode != null)
-            {
-                if (!string.IsNullOrEmpty(SelectedNode?.VideoPath))
-                {
-                    SelectedNodeVideoPath = SelectedNode.VideoPath;
-                }
-                else if (!string.IsNullOrEmpty(SelectedNode?.GifPath))
-                {
-                    SelectedNodeGifPath = SelectedNode.GifPath;
-                }
-            }
-        }
-
-        private int GetLevel(NodeViewModel node)
-        {
-            int level = 1;
-            NodeViewModel? current = node;
-            while (current.Parent != null)
-            {
-                level++;
-                current = current.Parent;
-            }
-            return level;
-        }
-
-        private void InvertAll()
-        {
-            foreach (var node in RootNodes)
-                InvertRecursive(node);
-        }
-
-        private void InvertRecursive(NodeViewModel node)
-        {
-            node.IsExpanded = !node.IsExpanded;
-            foreach (var child in node.Children)
-            {
-                InvertRecursive(child);
-            }
-        }
-
-        private void ExpandCollapseAll(bool expand)
-        {
-            foreach (var node in RootNodes)
-                SetExpandRecursive(node, expand);
-        }
-
-        private void SetExpandRecursive(NodeViewModel node, bool expand)
-        {
-            node.IsExpanded = expand;
-            foreach (var child in node.Children)
-                SetExpandRecursive(child, expand);
-        }
-
-        private void Copy()
-        {
-            if (SelectedNode == null) return;
-
-            _clipboardNode = SelectedNode;
-            SelectedNode.IsMarked = true;
-            SelectedCopyNode = SelectedNode;
-        }
-
-        private void Cut()
-        {
-            if (SelectedNode == null) return;
-
-            _clipboardNode = SelectedNode;
-            _isCut = true;
-
-            SelectedNode.IsMarked = true;
-        }
-
-        private void Paste()
-        {
-            if (_clipboardNode == null || SelectedNode == null) return;
-
-            // Nếu cut chính node đang chọn thì bỏ qua (copy thì vẫn cho phép)
-            if (_isCut && _clipboardNode.Equals(SelectedNode))
-            {
-                ClearClipboard();
-                return;
-            }
-
-            int sourceLevel = GetLevel(_clipboardNode);
-            int targetLevel = GetLevel(SelectedNode);
-
-            // Chỉ cho phép paste cùng cấp
-            if (sourceLevel != targetLevel)
-            {
-                ClearClipboard();
-                return;
-            }
-
-            var targetCollection = SelectedNode.Parent?.Children ?? RootNodes;
-            var sourceCollection = _clipboardNode.Parent?.Children ?? RootNodes;
-
-            bool isSameColection = false;
-            if (ReferenceEquals(sourceCollection, targetCollection))
-            {
-                isSameColection = true;
-            }
-
-            int index = targetCollection.IndexOf(SelectedNode);
-            bool isLast = (index == targetCollection.Count - 1);
-
-            if (_isCut)
-            {
-                int indexToRemove = -1;
-                if (!isSameColection)
-                {
-                    sourceCollection.Remove(_clipboardNode);
-                    _clipboardNode.Parent = SelectedNode.Parent;
-                }
-                else
-                {
-                    indexToRemove = sourceCollection.IndexOf(_clipboardNode);
-                }
-                if (isLast)
-                    targetCollection.Add(_clipboardNode);
-                else
-                    targetCollection.Insert(index + 1, _clipboardNode);
-                if (indexToRemove >= 0)
-                {
-                    if (indexToRemove < index)
-                    {
-                        sourceCollection.RemoveAt(indexToRemove);
-                    }
-                    else
-                    {
-                        sourceCollection.RemoveAt(indexToRemove + 1);
-                    }
-                }
-            }
-            else
-            {
-                var clone = _clipboardNode.Clone(this, SelectedNode.Parent);
-
-                if (isLast)
-                    targetCollection.Add(clone);
-                else
-                    targetCollection.Insert(index + 1, clone);
-            }
-            ClearClipboard();
-        }
-
-        private void ClearClipboard()
-        {
-            if (SelectedCopyNode != null)
-            {
-                SelectedCopyNode.IsMarked = false;
-            }
-            if (_clipboardNode != null)
-            {
-                _clipboardNode.IsMarked = false;
-            }
-            _clipboardNode = null;
-            _isCut = false;
-        }
-
-        private void Delete()
-        {
-            if (SelectedNode == null) return;
-            if (SelectedNode.Parent != null)
-            {
-                var tempNode = SelectedNode.Parent;
-                SelectedNode.Parent.Children.Remove(SelectedNode);
-                SelectedNode = tempNode;
-            }
-            else
-            {
-                RootNodes.Remove(SelectedNode);
-                SelectedNode = RootNodes.FirstOrDefault();
-            }
-        }
+    public interface IClipboardHandler
+    {
+        ICommand CopyCommand { get; }
+        ICommand CutCommand { get; }
+        ICommand PasteCommand { get; }
+        ICommand DeleteCommand { get; }
+        ICommand HelpCommand { get; set; }
     }
 }

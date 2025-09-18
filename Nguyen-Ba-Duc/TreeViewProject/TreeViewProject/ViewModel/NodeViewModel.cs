@@ -15,7 +15,9 @@ namespace TreeViewProject.ViewModel
 {
     public class NodeViewModel : BaseViewModel
     {
-        private readonly MainViewModel _mainVM;
+        //private readonly MainViewModel _mainVM;
+        private readonly TreeViewModel _treeVM;
+
         private readonly NodeModel _node;
         public string? Name => _node.Name;
 
@@ -110,18 +112,18 @@ namespace TreeViewProject.ViewModel
         public ICommand TooltipOpenedCommand { get; set; }
         public ICommand TooltipClosedCommand { get; set; }
 
-        public NodeViewModel(NodeModel node, MainViewModel mainVM, NodeViewModel? parent = null, bool buildChildren = true)
+        public NodeViewModel(NodeModel node, TreeViewModel treeVM, NodeViewModel? parent = null, bool buildChildren = true)
         {
             _node = node;
             Parent = parent;
-            _mainVM = mainVM;
+            _treeVM = treeVM;
             Children = new ObservableCollection<NodeViewModel>();
 
             if (buildChildren)
             {
                 foreach (var child in _node.Children)
                 {
-                    Children.Add(new NodeViewModel(child, mainVM, this));
+                    Children.Add(new NodeViewModel(child, treeVM, this));
                 }
             }
             InvokeCommand();
@@ -143,7 +145,7 @@ namespace TreeViewProject.ViewModel
             {
                 _tooltipTimer.Stop();
                 IsDetailVisible = Visibility.Visible;
-                _mainVM.CurrentHoveredNode = this;
+                _treeVM.CurrentHoveredNode = this;
             };
             _tooltipTimer.Start();
         }
@@ -151,15 +153,15 @@ namespace TreeViewProject.ViewModel
         private void TooltipClosedCommandInvoke()
         {
             _tooltipTimer?.Stop();
-            if (_mainVM.CurrentHoveredNode == this)
-                _mainVM.CurrentHoveredNode = null;
+            if (_treeVM.CurrentHoveredNode == this)
+                _treeVM.CurrentHoveredNode = null;
             IsDetailVisible = Visibility.Collapsed;
             CommandManager.InvalidateRequerySuggested();
         }
 
-        public NodeViewModel Clone(MainViewModel mainVM, NodeViewModel? parent = null)
+        public NodeViewModel Clone(TreeViewModel treeVM, NodeViewModel? parent = null)
         {
-            var clone = new NodeViewModel(_node, mainVM, parent, buildChildren: false)
+            var clone = new NodeViewModel(_node, treeVM, parent, buildChildren: false)
             {
                 Description = this.Description,
                 DetailDescription = this.DetailDescription,
@@ -170,7 +172,7 @@ namespace TreeViewProject.ViewModel
 
             foreach (var child in Children)
             {
-                var clonedChild = child.Clone(mainVM, clone);
+                var clonedChild = child.Clone(treeVM, clone);
                 clone.Children.Add(clonedChild);
             }
 

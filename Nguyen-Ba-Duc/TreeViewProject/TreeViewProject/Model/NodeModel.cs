@@ -9,7 +9,7 @@ namespace TreeViewProject.Model
     public class NodeModel
     {
         public string? Name { get; set; }
-        public bool IsExpanded { get; set; }
+        public bool IsExpanded { get; set; } = false;
         public bool IsMarked { get; set; }
         public string? ImagePath { get; set; }
         public string? GifPath { get; set; }
