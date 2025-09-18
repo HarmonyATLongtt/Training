@@ -365,10 +365,13 @@ namespace FirstCommand.Support.TrianglesHandle
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns></returns>
-        public static bool HasCommonVertex(MeshTriangle a, MeshTriangle b)
+        public static bool HasCommonVertex(TriangleVertexMap data, MeshTriangle a, MeshTriangle b)
         {
-            var vertsA = TrianglesUtility.GetVerticesOfTriangles(triangle: a);
-            var vertsB = TrianglesUtility.GetVerticesOfTriangles(triangle: b);
+            //var vertsA = TrianglesUtility.GetVerticesOfTriangles(triangle: a);
+            //var vertsB = TrianglesUtility.GetVerticesOfTriangles(triangle: b);
+            var vertsA = data.GetVerticesOfTriangle(a);
+            var vertsB = data.GetVerticesOfTriangle(b);
+
             return vertsA.Any(va => vertsB.Any(vb => va.IsAlmostEqualTo(vb, CommonConstants.TOLERANCE)));
         }
 
@@ -408,14 +411,20 @@ namespace FirstCommand.Support.TrianglesHandle
         /// </summary>
         /// <param name="triangle"></param>
         /// <returns></returns>
-        public static List<(XYZ, XYZ)> GetXYZPairsOfTriangle(MeshTriangle triangle)
+        public static List<(XYZ, XYZ)> GetXYZPairsOfTriangle(TriangleVertexMap data, MeshTriangle triangle)
         {
             return new List<(XYZ, XYZ)>
             {
-                (triangle.get_Vertex(0), triangle.get_Vertex(1)),
-                (triangle.get_Vertex(1), triangle.get_Vertex(2)),
-                (triangle.get_Vertex(2), triangle.get_Vertex(0))
+                (data.GetTriangleInfos(triangle).P1, data.GetTriangleInfos(triangle).P2),
+                (data.GetTriangleInfos(triangle).P2, data.GetTriangleInfos(triangle).P3),
+                (data.GetTriangleInfos(triangle).P3, data.GetTriangleInfos(triangle).P1)
             };
+            //return new List<(XYZ, XYZ)>
+            //{
+            //    (triangle.get_Vertex(0), triangle.get_Vertex(1)),
+            //    (triangle.get_Vertex(1), triangle.get_Vertex(2)),
+            //    (triangle.get_Vertex(2), triangle.get_Vertex(0))
+            //};
         }
 
         /// <summary>
@@ -432,17 +441,7 @@ namespace FirstCommand.Support.TrianglesHandle
                 faces.Add(face);
             }
             triangles.AddRange(ExtractTrianglesFromFaces(faces));
-            //foreach (Face face in solid.Faces)
-            //{
-            //    Mesh mesh = face.Triangulate();
-            //    //int triCount = mesh.NumTriangles;
 
-            //    //for (int i = 0; i < triCount; i++)
-            //    //{
-            //    //    MeshTriangle tri = mesh.get_Triangle(i);
-            //    //    triangles.Add(tri);
-            //    //}
-            //}
             return triangles;
         }
 
@@ -476,24 +475,24 @@ namespace FirstCommand.Support.TrianglesHandle
         /// </summary>
         /// <param name="triangles"></param>
         /// <returns></returns>
-        public static List<List<MeshTriangle>> GroupTrianglesByVertexAndNormal(List<MeshTriangle> triangles, int numOfTriangleMakePlanarFace = 2)
+        public static List<List<MeshTriangle>> GroupTrianglesByVertexAndNormal(TriangleVertexMap data, List<MeshTriangle> triangles, int numOfTriangleMakePlanarFace = 2)
         {
-            // B1: Tạo dictionary: mỗi điểm XYZ ánh xạ đến các tam giác chứa nó
-            var vertexToTriangles = new Dictionary<XYZ, List<MeshTriangle>>(Comparers.XYZ);
+            //// B1: Tạo dictionary: mỗi điểm XYZ ánh xạ đến các tam giác chứa nó
+            //var vertexToTriangles = new Dictionary<XYZ, List<MeshTriangle>>(Comparers.XYZ);
 
-            foreach (var tri in triangles)
-            {
-                for (int i = 0; i < 3; i++)
-                {
-                    XYZ v = tri.get_Vertex(i);
-                    if (!vertexToTriangles.TryGetValue(v, out var list))
-                    {
-                        list = new List<MeshTriangle>();
-                        vertexToTriangles[v] = list;
-                    }
-                    list.Add(tri);
-                }
-            }
+            //foreach (var tri in triangles)
+            //{
+            //    for (int i = 0; i < 3; i++)
+            //    {
+            //        XYZ v = tri.get_Vertex(i);
+            //        if (!vertexToTriangles.TryGetValue(v, out var list))
+            //        {
+            //            list = new List<MeshTriangle>();
+            //            vertexToTriangles[v] = list;
+            //        }
+            //        list.Add(tri);
+            //    }
+            //}
 
             // B2: Gom nhóm các tam giác
             var result = new List<List<MeshTriangle>>();
@@ -508,7 +507,8 @@ namespace FirstCommand.Support.TrianglesHandle
                 queue.Enqueue(tri);
                 visited.Add(tri);
 
-                var normal = GetNormalFromTriangle(tri);
+                //var normal = GetNormalFromTriangle(tri);
+                var normal = data.GetTriangleInfos(tri).Normal;
 
                 while (queue.Count > 0)
                 {
@@ -518,13 +518,17 @@ namespace FirstCommand.Support.TrianglesHandle
                     for (int i = 0; i < 3; i++)
                     {
                         XYZ v = current.get_Vertex(i);
-                        if (!vertexToTriangles.TryGetValue(v, out var candidates)) continue;
-
+                        //if (!vertexToTriangles.TryGetValue(v, out var candidates)) continue;
+                        if (!data.VertexToTriangles.TryGetValue(v, out var candidates)) continue;
                         foreach (var neighbor in candidates)
                         {
+                            if (!triangles.Contains(neighbor))
+                                continue;
+
                             if (visited.Contains(neighbor)) continue;
 
-                            var neighborNormal = GetNormalFromTriangle(neighbor);
+                            //var neighborNormal = GetNormalFromTriangle(neighbor);
+                            var neighborNormal = data.GetTriangleInfos(neighbor).Normal;
                             if (VectorUtility.AreParallel(normal, neighborNormal, CommonConstants.TOLERANCE))
                             {
                                 queue.Enqueue(neighbor);
@@ -630,7 +634,7 @@ namespace FirstCommand.Support.TrianglesHandle
         /// </summary>
         /// <param name="triangles"></param>
         /// <returns></returns>
-        public static (XYZ Min, XYZ Max) GetMinMaxXYZFromMeshTriangles(List<MeshTriangle> triangles)
+        public static (XYZ Min, XYZ Max) GetMinMaxXYZFromMeshTriangles(TriangleVertexMap data, List<MeshTriangle> triangles)
         {
             if (triangles == null || triangles.Count == 0)
                 return (null, null);
@@ -640,17 +644,31 @@ namespace FirstCommand.Support.TrianglesHandle
 
             foreach (var tri in triangles)
             {
-                for (int i = 0; i < 3; i++)
+                List<XYZ> points = data.GetVerticesOfTriangle(tri);
+                if (points.Count == 3)
                 {
-                    var pt = tri.get_Vertex(i);
-                    minX = Math.Min(minX, pt.X);
-                    minY = Math.Min(minY, pt.Y);
-                    minZ = Math.Min(minZ, pt.Z);
+                    foreach (var pt in points)
+                    {
+                        minX = Math.Min(minX, pt.X);
+                        minY = Math.Min(minY, pt.Y);
+                        minZ = Math.Min(minZ, pt.Z);
 
-                    maxX = Math.Max(maxX, pt.X);
-                    maxY = Math.Max(maxY, pt.Y);
-                    maxZ = Math.Max(maxZ, pt.Z);
+                        maxX = Math.Max(maxX, pt.X);
+                        maxY = Math.Max(maxY, pt.Y);
+                        maxZ = Math.Max(maxZ, pt.Z);
+                    }
                 }
+                //for (int i = 0; i < 3; i++)
+                //{
+                //    var pt = tri.get_Vertex(i);
+                //    minX = Math.Min(minX, pt.X);
+                //    minY = Math.Min(minY, pt.Y);
+                //    minZ = Math.Min(minZ, pt.Z);
+
+                //    maxX = Math.Max(maxX, pt.X);
+                //    maxY = Math.Max(maxY, pt.Y);
+                //    maxZ = Math.Max(maxZ, pt.Z);
+                //}
             }
 
             XYZ minPoint = new XYZ(minX, minY, minZ);
@@ -663,9 +681,9 @@ namespace FirstCommand.Support.TrianglesHandle
         /// </summary>
         /// <param name="triangles"></param>
         /// <returns></returns>
-        public static double GetMaxLengthOfGroupMeshTriangles(List<MeshTriangle> triangles)
+        public static double GetMaxLengthOfGroupMeshTriangles(TriangleVertexMap data, List<MeshTriangle> triangles)
         {
-            var (minPoint, maxPoint) = GetMinMaxXYZFromMeshTriangles(triangles);
+            var (minPoint, maxPoint) = GetMinMaxXYZFromMeshTriangles(data, triangles);
             return minPoint.DistanceTo(maxPoint);
         }
 
@@ -674,7 +692,7 @@ namespace FirstCommand.Support.TrianglesHandle
         /// </summary>
         /// <param name="triangles"></param>
         /// <returns></returns>
-        public static List<List<MeshTriangle>> GroupMeshTrianglesBySharedTwoVertices(HashSet<MeshTriangle> triangles)
+        public static List<List<MeshTriangle>> GroupMeshTrianglesBySharedTwoVertices(TriangleVertexMap data, HashSet<MeshTriangle> triangles)
         {
             var result = new List<List<MeshTriangle>>();
             var visited = new HashSet<MeshTriangle>();
@@ -684,7 +702,7 @@ namespace FirstCommand.Support.TrianglesHandle
             var vertexToTriangles = new Dictionary<UnorderedXYZPair, List<MeshTriangle>>();
             foreach (var tri in triangles)
             {
-                var XYZPairs = GetXYZPairsOfTriangle(tri);
+                var XYZPairs = GetXYZPairsOfTriangle(data, tri);
                 foreach (var pair in XYZPairs)
                 {
                     var newPair = new UnorderedXYZPair(pair.Item1, pair.Item2);
@@ -717,7 +735,7 @@ namespace FirstCommand.Support.TrianglesHandle
                     group.Add(current);
 
                     // Tìm các tam giác khác có đỉnh trùng (gần) với current
-                    var XYZPairs = GetXYZPairsOfTriangle(current);
+                    var XYZPairs = GetXYZPairsOfTriangle(data, current);
                     foreach (var pair in XYZPairs)
                     {
                         var newPair = new UnorderedXYZPair(pair.Item1, pair.Item2);
@@ -745,7 +763,7 @@ namespace FirstCommand.Support.TrianglesHandle
         /// <param name="inputTriangles"></param>
         /// <param name="startTriangle"></param>
         /// <returns></returns>
-        public static List<MeshTriangle> FindConnectedTrianglesBySharedTwoVertex(List<MeshTriangle> inputTriangles, MeshTriangle startTriangle)
+        public static List<MeshTriangle> FindConnectedTrianglesBySharedTwoVertex(TriangleVertexMap data, List<MeshTriangle> inputTriangles, MeshTriangle startTriangle)
         {
             var visited = new HashSet<MeshTriangle>();
             var result = new List<MeshTriangle>();
@@ -755,7 +773,7 @@ namespace FirstCommand.Support.TrianglesHandle
             var vertexToTriangles = new Dictionary<UnorderedXYZPair, List<MeshTriangle>>();
             foreach (var tri in inputTriangles)
             {
-                var XYZPairs = GetXYZPairsOfTriangle(tri);
+                var XYZPairs = GetXYZPairsOfTriangle(data, tri);
                 foreach (var pair in XYZPairs)
                 {
                     var newPair = new UnorderedXYZPair(pair.Item1, pair.Item2);
@@ -778,7 +796,7 @@ namespace FirstCommand.Support.TrianglesHandle
                 var current = queue.Dequeue();
                 result.Add(current);
 
-                var XYZPairs = GetXYZPairsOfTriangle(current);
+                var XYZPairs = GetXYZPairsOfTriangle(data, current);
                 foreach (var pair in XYZPairs)
                 {
                     var newPair = new UnorderedXYZPair(pair.Item1, pair.Item2);

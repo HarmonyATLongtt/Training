@@ -22,17 +22,43 @@ namespace FirstCommand.Support.SolidHandle
         /// <param name="solid"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static bool IsLineIntersectSolid(Line line, Solid solid)
+        public static bool IsLineIntersectSolid(Line line, Solid solid, out List<XYZ> intersectionPoints)
         {
+            intersectionPoints = new List<XYZ>();
+
             if (line == null || solid == null)
                 throw new ArgumentNullException("Line or solid is null");
 
-            // Dùng phương thức Intersect với Line (Curve) và Solid
             SolidCurveIntersection intersection = solid.IntersectWithCurve(line, new SolidCurveIntersectionOptions());
 
-            // Kết quả có ít nhất một điểm giao là giao cắt
-            return intersection.SegmentCount > 0;
+            if (intersection == null || intersection.SegmentCount == 0)
+                return false;
+
+            for (int i = 0; i < intersection.SegmentCount; i++)
+            {
+                Curve seg = intersection.GetCurveSegment(i);
+
+                if (seg != null)
+                {
+                    intersectionPoints.Add(seg.GetEndPoint(0));
+                    intersectionPoints.Add(seg.GetEndPoint(1));
+                }
+            }
+
+            return intersectionPoints.Count > 0;
         }
+
+        //public static bool IsLineIntersectSolid(Line line, Solid solid)
+        //{
+        //    if (line == null || solid == null)
+        //        throw new ArgumentNullException("Line or solid is null");
+
+        //    // Dùng phương thức Intersect với Line (Curve) và Solid
+        //    SolidCurveIntersection intersection = solid.IntersectWithCurve(line, new SolidCurveIntersectionOptions());
+
+        //    // Kết quả có ít nhất một điểm giao là giao cắt
+        //    return intersection.SegmentCount > 0;
+        //}
 
         /// <summary>
         /// Hàm này dùng để lấy ra danh sách các planarface và cylindricalface từ 1 solid

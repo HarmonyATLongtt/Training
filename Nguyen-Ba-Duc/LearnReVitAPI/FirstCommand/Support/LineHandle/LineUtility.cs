@@ -327,5 +327,56 @@ namespace FirstCommand.Support.LineHandle
             }
             return true;
         }
+
+        /// <summary>
+        /// Hàm kiểm tra xem 2 line có chung đầu mút hay không
+        /// </summary>
+        /// <param name="line1"></param>
+        /// <param name="line2"></param>
+        /// <param name="tolerance"></param>
+        /// <returns></returns>
+        public static bool HaveCommonEndpoint(Line line1, Line line2, double tolerance = CommonConstants.TOLERANCE)
+        {
+            XYZ l1Start = line1.GetEndPoint(0);
+            XYZ l1End = line1.GetEndPoint(1);
+            XYZ l2Start = line2.GetEndPoint(0);
+            XYZ l2End = line2.GetEndPoint(1);
+
+            return l1Start.IsAlmostEqualTo(l2Start, tolerance) ||
+                   l1Start.IsAlmostEqualTo(l2End, tolerance) ||
+                   l1End.IsAlmostEqualTo(l2Start, tolerance) ||
+                   l1End.IsAlmostEqualTo(l2End, tolerance);
+        }
+
+        /// <summary>
+        /// Hàm tạo ra 2 line song song và ở 2 bên với 1 line cũ cách 1 khoảng r cho trước
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="r"></param>
+        /// <returns></returns>
+        public static (Line l1, Line l2) CreateParallelLinesAtDistance(Line line, double r)
+        {
+            // Vector chỉ phương
+            XYZ dir = line.Direction;
+
+            if (VectorUtility.AreParallel(dir, XYZ.BasisZ, CommonConstants.COSINE_ANGLE_TOLERANCE_1_DEGREE)) return (null, null);
+
+            XYZ start = line.GetEndPoint(0);
+            XYZ end = line.GetEndPoint(1);
+
+            // Vector vuông góc nằm trên mặt phẳng XY
+            XYZ perp = dir.CrossProduct(XYZ.BasisZ).Normalize();
+
+            // Tạo 4 điểm cách start, end khoảng r theo 2 hướng vuông góc
+            XYZ p1 = start + perp.Multiply(r);
+            XYZ p2 = end + perp.Multiply(r);
+            Line line1 = Line.CreateBound(p1, p2);
+
+            XYZ pt1 = start - perp.Multiply(r);
+            XYZ pt2 = end - perp.Multiply(r);
+            Line line2 = Line.CreateBound(pt1, pt2);
+
+            return (line1, line2);
+        }
     }
 }

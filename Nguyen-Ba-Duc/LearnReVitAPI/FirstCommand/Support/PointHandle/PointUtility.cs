@@ -398,6 +398,50 @@ namespace FirstCommand.Support.PointHandle
 
             return (pointA, pointB);
         }
+
+        /// <summary>
+        /// Hàm dùng để tạo 1 điểm mới từ 1 điểm gốc bằng cách multiply nó theo 1 vector
+        /// </summary>
+        /// <param name="originPoint"></param>
+        /// <param name="direction"></param>
+        /// <param name="multiply"></param>
+        /// <returns></returns>
+        public static XYZ CreatePointFromVector(XYZ originPoint, XYZ direction, double multiply)
+        {
+            if (originPoint == null || direction == null)
+                throw new ArgumentNullException("origin or direction can not be null");
+
+            XYZ offset = direction.Normalize().Multiply(multiply);
+            return originPoint + offset;
+        }
+
+        /// <summary>
+        ///  Hàm kiểm tra xem 1 điểm có nằm trong boungdingbox của 1 element
+        /// </summary>
+        /// <param name="element"></param>
+        /// <param name="point"></param>
+        /// <returns></returns>
+        public static bool IsPointInsideBoundingBox(Element element, XYZ point)
+        {
+            if (element == null || point == null)
+                return false;
+
+            BoundingBoxXYZ bbox = element.get_BoundingBox(null);
+            if (bbox == null)
+                return false;
+
+            // Lấy điểm min và max trong hệ tọa độ của bounding box
+            XYZ min = bbox.Min;
+            XYZ max = bbox.Max;
+
+            // Nếu bounding box có transform (thường gặp với link), cần chuyển point về local
+            Transform transform = bbox.Transform;
+            XYZ localPoint = transform.Inverse.OfPoint(point);
+
+            return localPoint.X >= min.X && localPoint.X <= max.X &&
+                   localPoint.Y >= min.Y && localPoint.Y <= max.Y &&
+                   localPoint.Z >= min.Z && localPoint.Z <= max.Z;
+        }
     }
 
     /// <summary>

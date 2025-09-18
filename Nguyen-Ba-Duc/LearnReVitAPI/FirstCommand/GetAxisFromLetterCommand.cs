@@ -27,13 +27,15 @@ namespace FirstCommand
     {
         #region Propeties
 
-        private Transform transform = null;
+        private Transform _transform = null;
 
         //private bool isRevitLink = false;
         private List<RectangularDimensions> ListRectangularDimension = new List<RectangularDimensions>();
 
         private List<CylinderDimensions> ListCylinderDimension = new List<CylinderDimensions>();
-        private Document doc;
+        public List<Solid> ListSolidForEachRectangularShape = new List<Solid>();
+        public List<Solid> ListSolidForEachCylinderShape = new List<Solid>();
+        private Document _doc;
         private TriangleVertexMap _data = null;
 
         #endregion Propeties
@@ -45,7 +47,7 @@ namespace FirstCommand
             UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
             //Document doc = uidoc.Document;
-            doc = uidoc.Document;
+            _doc = uidoc.Document;
 
             try
             {
@@ -60,17 +62,17 @@ namespace FirstCommand
                     ElementId linkedElemId = r.LinkedElementId;
 
                     Element linkedElem = linkDoc.GetElement(linkedElemId);
-                    transform = rli.GetTransform();
+                    _transform = rli.GetTransform();
 
                     List<PlanarFace> planarFaces = new List<PlanarFace>();
                     List<CylindricalFace> cylindricalFaces = new List<CylindricalFace>();
                     Dictionary<Solid, List<PlanarFace>> solidPlanarFaces = new Dictionary<Solid, List<PlanarFace>>();
                     List<MeshTriangle> meshTriangles = new List<MeshTriangle>();
 
-                    var (solids, meshes) = GeometryUtility.GetSolids(linkedElem, doc);
+                    var (solids, meshes) = GeometryUtility.GetSolids(linkedElem, _doc);
 
-                    bool isSolid = false;
-                    bool isMesh = true;
+                    bool isSolid = true;
+                    bool isMesh = false;
 
                     //Thử trường hợp chuyển solid sang mesh
                     if (isMesh)
@@ -89,7 +91,7 @@ namespace FirstCommand
                         {
                             foreach (Solid s in solids)
                             {
-                                var tupleValues = GetGroupedFacesFromSolid(doc, s);
+                                var tupleValues = GetGroupedFacesFromSolid(_doc, s);
                                 planarFaces.AddRange(tupleValues.Item1);
                                 cylindricalFaces.AddRange(tupleValues.Item2);
                                 tupleValues.Item3.ToList().ForEach(kvp => solidPlanarFaces.Add(kvp.Key, kvp.Value));
@@ -116,9 +118,9 @@ namespace FirstCommand
                             // với mesh thì không cần
                             var listCylindricalFaces = GetCylindricalFaces(cylindricalFaces, planarFaces);
 
-                            var lineAndIntersectPointOnFaces = FindLinesAndIntersectionsOnFace(doc, planarFaces, listCylindricalFaces);
+                            var lineAndIntersectPointOnFaces = FindLinesAndIntersectionsOnFace(_doc, planarFaces, listCylindricalFaces);
 
-                            ListCylinderDimension = PreparePointsForDrawingModelLine(doc, lineAndIntersectPointOnFaces);
+                            ListCylinderDimension = PreparePointsForDrawingModelLine(_doc, lineAndIntersectPointOnFaces);
                         }
                         else
                         {
@@ -148,7 +150,7 @@ namespace FirstCommand
                             }
                             else
                             {
-                                PrepareSolidCuttingData(doc, solidPlanarFaces);
+                                PrepareSolidCuttingData(_doc, solidPlanarFaces);
                             }
                         }
                     }
@@ -157,6 +159,7 @@ namespace FirstCommand
                     {
                         bool isCylinder = false;
                         bool isRectangle = false;
+                        _data = new TriangleVertexMap(meshTriangles);
                         IsElementCylinderOrRectangle(meshTriangles, ref isCylinder, ref isRectangle);
 
                         if (isRectangle)
@@ -164,16 +167,25 @@ namespace FirstCommand
                             var solid = CreateSolidFromMeshTriangles(meshTriangles);
                             if (solid != null)
                             {
-                                var tupleValue = GetGroupedFacesFromSolid(doc, solid);
+                                var tupleValue = GetGroupedFacesFromSolid(_doc, solid);
 
                                 var newSolidAndPlanarFaces = tupleValue.Item3;
-                                PrepareSolidCuttingData(doc, newSolidAndPlanarFaces);
+                                PrepareSolidCuttingData(_doc, newSolidAndPlanarFaces);
                             }
                         }
                         else if (isCylinder)
                         {
                             DrawLinesAndRadiusOfCylinders(meshTriangles);
                         }
+                    }
+
+                    foreach (var s1 in ListSolidForEachCylinderShape)
+                    {
+                        TestForDebug.CreateDirectShapeFromSolid(_doc, s1);
+                    }
+                    foreach (var s2 in ListSolidForEachRectangularShape)
+                    {
+                        TestForDebug.CreateDirectShapeFromSolid(_doc, s2);
                     }
 
                     var x = ListRectangularDimension;
@@ -200,7 +212,7 @@ namespace FirstCommand
             int numOfTriangleMakePlanarFace = 3;
 
             // Xóa hết những nhóm tam giác tạo thành 1 mặt phẳng
-            var meshTrianglesMakePlarnarFace = TrianglesUtility.GroupTrianglesByVertexAndNormal(meshTriangles, numOfTriangleMakePlanarFace).SelectMany(tri => tri).ToList();
+            var meshTrianglesMakePlarnarFace = TrianglesUtility.GroupTrianglesByVertexAndNormal(_data, meshTriangles, numOfTriangleMakePlanarFace).SelectMany(tri => tri).ToList();
             var setmeshTrianglesMakePlarnarFace = meshTrianglesMakePlarnarFace.ToHashSet();
             meshTriangles.RemoveAll(tr => setmeshTrianglesMakePlarnarFace.Contains(tr));
 
@@ -242,7 +254,7 @@ namespace FirstCommand
                         {
                             var pairLines = new List<Line> { keyValue.Key, keyValue.Value };
                             GetSolidFromCoupleLines(pairLines);
-                            //DrawPointLineArc.DrawLines(doc, pairLines, isRevitLink, transform, 0);
+                            //DrawPointLineArc.DrawLines(_doc, pairLines, 0, _transform);
                         }
                     }
                 }
@@ -252,6 +264,7 @@ namespace FirstCommand
 
                     var pairLines = new List<Line> { firstPair.Key, firstPair.Value };
                     GetSolidFromCoupleLines(pairLines);
+                    //DrawPointLineArc.DrawLines(_doc, pairLines, 0, _transform);
                     //DrawPointLineArc.DrawLines(doc, pairLines, isRevitLink, transform, 0);
                 }
             }
@@ -267,8 +280,9 @@ namespace FirstCommand
             {
                 Line linePresentForRadius = lines[0];
                 Line linePresentForAxis = lines[1];
-                Solid solid = SolidUtility.CreateCylindricalSolid(doc, linePresentForAxis.GetEndPoint(0), linePresentForRadius.Length, linePresentForAxis.Length, linePresentForAxis.Direction);
-                TestForDebug.CreateDirectShapeFromSolid(doc, solid);
+                Solid solid = SolidUtility.CreateCylindricalSolid(_doc, linePresentForAxis.GetEndPoint(0), linePresentForRadius.Length, linePresentForAxis.Length, linePresentForAxis.Direction);
+                ListSolidForEachCylinderShape.Add(solid);
+                //TestForDebug.CreateDirectShapeFromSolid(_doc, solid);
             }
         }
 
@@ -401,9 +415,10 @@ namespace FirstCommand
         {
             foreach (var (axis, triangles) in groupAxisAndTriangles)
             {
-                var points = TrianglesUtility.GetVerticesOfTriangles(triangles);
+                //var points = TrianglesUtility.GetVerticesOfTriangles(triangles);
+                var points = _data.GetVerticesOfGroupTriangles(triangles);
 
-                var (min, max) = TrianglesUtility.GetMinMaxXYZFromMeshTriangles(triangles);
+                var (min, max) = TrianglesUtility.GetMinMaxXYZFromMeshTriangles(_data, triangles);
                 if (min != null && max != null)
                 {
                     XYZ minPointOfTriangles = PointUtility.FindNearestPoint(points, min);
@@ -449,7 +464,7 @@ namespace FirstCommand
             Solid solid = null;
             //Gom nhóm các triangle theo mặt phẳng
             int numOfTriangleMakePlanarFace = 2;
-            var groupMeshTrianglesHasCommonVertexAndNormal = TrianglesUtility.GroupTrianglesByVertexAndNormal(meshTriangles, numOfTriangleMakePlanarFace);
+            var groupMeshTrianglesHasCommonVertexAndNormal = TrianglesUtility.GroupTrianglesByVertexAndNormal(_data, meshTriangles, numOfTriangleMakePlanarFace);
 
             var pointsOfTrianglesFromGroupComplex = new List<List<(XYZ, XYZ)>>();
             var pointsOfTrianglesFromGroupSimple = new List<List<(XYZ, XYZ)>>();
@@ -459,7 +474,7 @@ namespace FirstCommand
                 var xyzPairsMeshTrianglesMap = new Dictionary<UnorderedXYZPair, List<MeshTriangle>>();
                 foreach (var tri in triangles)
                 {
-                    var XYZPairs = TrianglesUtility.GetXYZPairsOfTriangle(tri);
+                    var XYZPairs = TrianglesUtility.GetXYZPairsOfTriangle(_data, tri);
                     foreach (var pair in XYZPairs)
                     {
                         var newPair = new UnorderedXYZPair(pair.Item1, pair.Item2);
@@ -493,6 +508,8 @@ namespace FirstCommand
 
                     // dùng startPoint và endPoint làm đầu – cuối đoạn thẳng đại diện
                 }
+                // Có thể có lỗi trong trường hợp các cặp đầu cuối không theo thứ tự, ví dụ cuối điểm này
+                // không là đầu điểm khác
                 if (startEndPairs.Count == 4)
                 {
                     pointsOfTrianglesFromGroupSimple.Add(startEndPairs.ToList());
@@ -549,11 +566,14 @@ namespace FirstCommand
 
             for (int i = 0; i < meshTriangles.Count - 1; i++)
             {
-                XYZ normal1 = TrianglesUtility.GetNormalFromTriangle(meshTriangles[i]);
+                //XYZ normal1 = TrianglesUtility.GetNormalFromTriangle(meshTriangles[i]);
+                XYZ normal1 = _data.GetTriangleInfos(meshTriangles[i]).Normal;
                 for (int j = i + 1; j < meshTriangles.Count; j++)
                 {
-                    XYZ normal2 = TrianglesUtility.GetNormalFromTriangle(meshTriangles[j]);
-                    if (TrianglesUtility.HasCommonVertex(meshTriangles[i], meshTriangles[j])
+                    //XYZ normal2 = TrianglesUtility.GetNormalFromTriangle(meshTriangles[j]);
+                    XYZ normal2 = _data.GetTriangleInfos(meshTriangles[j]).Normal;
+
+                    if (TrianglesUtility.HasCommonVertex(_data, meshTriangles[i], meshTriangles[j])
                         && !VectorUtility.AreParallel(normal1, normal2, CommonConstants.TOLERANCE)
                         && !VectorUtility.ArePerpendicular(normal1, normal2, CommonConstants.COSINE_ANGLE_TOLERANCE_1_DEGREE))
                     {
@@ -571,7 +591,7 @@ namespace FirstCommand
                 VectorUtility.IsParallelToAnyAxis(ref axis, CommonConstants.COSINE_ANGLE_TOLERANCE_5_DEGREE);
 
                 var trianglesParallelToVector = TrianglesUtility.GetTrianglesParallelToVector(_data, axis, meshTriangles, CommonConstants.COSINE_ANGLE_TOLERANCE_5_DEGREE).ToHashSet();
-                var list = TrianglesUtility.FindConnectedTrianglesBySharedTwoVertex(trianglesParallelToVector.ToList(), originTriangle).ToHashSet();
+                var list = TrianglesUtility.FindConnectedTrianglesBySharedTwoVertex(_data, trianglesParallelToVector.ToList(), originTriangle).ToHashSet();
 
                 groupTrianglesAndAxis.Add((axis, list.ToList()));
                 meshTriangles.RemoveAll(a => list.Contains(a));
@@ -592,8 +612,12 @@ namespace FirstCommand
         {
             for (int i = 0; i < meshTriangles.Count - 1; i++)
             {
-                XYZ normal1 = TrianglesUtility.GetNormalFromTriangle(meshTriangles[i]);
-                XYZ normal2 = TrianglesUtility.GetNormalFromTriangle(meshTriangles[i + 1]);
+                //XYZ normal1 = TrianglesUtility.GetNormalFromTriangle(meshTriangles[i]);
+                //XYZ normal2 = TrianglesUtility.GetNormalFromTriangle(meshTriangles[i + 1]);
+
+                XYZ normal1 = _data.GetTriangleInfos(meshTriangles[i]).Normal;
+                XYZ normal2 = _data.GetTriangleInfos(meshTriangles[i + 1]).Normal;
+
                 if (!VectorUtility.AreParallel(normal1, normal2, CommonConstants.TOLERANCE)
                     && !VectorUtility.ArePerpendicular(normal1, normal2, CommonConstants.TOLERANCE))
                 {
@@ -696,7 +720,8 @@ namespace FirstCommand
                     Line newLine = Line.CreateBound(p1, p2);
 
                     Solid solid = SolidUtility.CreateCylindricalSolid(doc, p1, radius, newLine.Length, newLine.Direction);
-                    TestForDebug.CreateDirectShapeFromSolid(doc, solid);
+                    ListSolidForEachCylinderShape.Add(solid);
+                    //TestForDebug.CreateDirectShapeFromSolid(doc, solid);
                     //DrawPointLineArc.CreateModelLine(doc, p1,p2, isRevitLink, transform, 0);
 
                     cylinderDimensions.LengthLine = newLine;
@@ -714,7 +739,8 @@ namespace FirstCommand
                             Line newLine = Line.CreateBound(point, projectedPoint);
                             //DrawPointLineArc.CreateModelLine(doc, point, projectedPoint, isRevitLink, transform, 0);
                             Solid solid = SolidUtility.CreateCylindricalSolid(doc, point, radius, newLine.Length, newLine.Direction);
-                            TestForDebug.CreateDirectShapeFromSolid(doc, solid);
+                            ListSolidForEachCylinderShape.Add(solid);
+                            //TestForDebug.CreateDirectShapeFromSolid(doc, solid);
 
                             cylinderDimensions.LengthLine = newLine;
                             cylinderDimensions.Radius = radius;
@@ -739,8 +765,9 @@ namespace FirstCommand
                     {
                         Line newLine = Line.CreateBound(listProjectedPoints[0], listProjectedPoints[1]);
                         Solid solid = SolidUtility.CreateCylindricalSolid(doc, listProjectedPoints[0], radius, newLine.Length, newLine.Direction);
-                        TestForDebug.CreateDirectShapeFromSolid(doc, solid);
+                        //TestForDebug.CreateDirectShapeFromSolid(doc, solid);
                         //DrawPointLineArc.CreateModelLine(doc, listProjectedPoints[0], listProjectedPoints[1], isRevitLink, transform, 0);
+                        ListSolidForEachCylinderShape.Add(solid);
                         cylinderDimensions.LengthLine = newLine;
                         cylinderDimensions.Radius = radius;
                     }
@@ -838,6 +865,7 @@ namespace FirstCommand
 
             if (IsRectangularBox(solid))
             {
+                ListSolidForEachRectangularShape.Add(solid);
                 //GetRectangularDimensions(doc, solid);
             }
             else if (solid.Faces.Size > 0 && solid.Volume > 0)
@@ -893,8 +921,9 @@ namespace FirstCommand
                     }
                 }
 
-                var tupleValue = GetLongestEdgeAndParallelEdge(faceOverFourEdges);
-                Plane plane = GetPlaneToCutSolid(doc, tupleValue.LongestEdge, tupleValue.ParallelEdge, facesWithFourEdges);
+                var edgeForCuttingFace = FindEdgeForCuttingFace(faceOverFourEdges);
+
+                Plane plane = GetPlaneToCutSolid(doc, edgeForCuttingFace, facesWithFourEdges);
                 if (plane != null)
                 {
                     CutSolid(doc, keyValue.Key, plane);
@@ -903,59 +932,69 @@ namespace FirstCommand
         }
 
         /// <summary>
-        /// Tìm ra cặp cạnh dài nhất và cạnh song song và gần nhất với cạnh dài nhất
-        /// </summary>
-        /// <param name="face">Là face có số cạnh lớn hơn 4</param>
-        /// <returns>Trả về cặp cạnh dài nhất và cạnh gần với cạnh dài</returns>
-        private (Edge LongestEdge, Edge ParallelEdge) GetLongestEdgeAndParallelEdge(PlanarFace face)
-        {
-            List<Edge> edges = FaceUtility.GetEgdesAndNumOfFace(face).Edges;
-            Edge longestEdge = edges.OrderByDescending(e => e.ApproximateLength).First();
-
-            return (longestEdge, FindClosestParallelEdge(longestEdge, edges));
-        }
-
-        /// <summary>
         /// Tìm cạnh song song và gần nhất với 1 cạnh cho trước
         /// </summary>
         /// <param name="targetEdge">Cạnh gần so</param>
         /// <param name="candidateEdges">Danh sách các cạnh của face có số cạnh lớn hơn 4</param>
         /// <returns>Trả về cạnh song song và gần nhất</returns>
-        private Edge FindClosestParallelEdge(Edge targetEdge, List<Edge> candidateEdges)
+        private Edge FindEdgeForCuttingFace(PlanarFace face)
         {
-            if (targetEdge == null || candidateEdges == null || candidateEdges.Count == 0)
-                return null;
+            List<Edge> edges = FaceUtility.GetEgdesAndNumOfFace(face).Edges;
+            Edge longestEdge = edges.OrderByDescending(e => e.ApproximateLength).First();
 
-            Curve targetCurve = targetEdge.AsCurve();
-            XYZ targetDirection = (targetCurve.GetEndPoint(1) - targetCurve.GetEndPoint(0)).Normalize();
+            Line longestLine = longestEdge.AsCurve() as Line;
+
+            XYZ dirOfLongestLine = longestLine.Direction;
 
             Edge closestEdge = null;
             double minDistance = double.MaxValue;
-
-            foreach (Edge candidate in candidateEdges)
+            var edgesPerpendicularToLongestEdge = new List<Edge>();
+            foreach (Edge edge in edges)
             {
-                if (candidate == targetEdge)
+                if (edge == longestEdge)
                     continue;
 
-                Curve candidateCurve = candidate.AsCurve();
-                XYZ candidateDirection = (candidateCurve.GetEndPoint(1) - candidateCurve.GetEndPoint(0)).Normalize();
+                Line line = edge.AsCurve() as Line;
 
-                double dot = targetDirection.DotProduct(candidateDirection);
-                if (Math.Abs(Math.Abs(dot) - 1.0) > CommonConstants.TOLERANCE)
+                XYZ dir = line.Direction;
+
+                if (!VectorUtility.AreParallel(dirOfLongestLine, dir, CommonConstants.TOLERANCE))
+                {
+                    edgesPerpendicularToLongestEdge.Add(edge);
                     continue;
+                }
 
-                XYZ midTarget = (targetCurve.GetEndPoint(0) + targetCurve.GetEndPoint(1)) * 0.5;
-                XYZ midCandidate = (candidateCurve.GetEndPoint(0) + candidateCurve.GetEndPoint(1)) * 0.5;
-                double distance = midTarget.DistanceTo(midCandidate);
+                XYZ pointOnLine = line.GetEndPoint(0);
+                double distance = LineUtility.DistancePointToLine(pointOnLine, longestLine);
 
                 if (distance < minDistance)
                 {
                     minDistance = distance;
-                    closestEdge = candidate;
+                    closestEdge = edge;
                 }
             }
+            if (closestEdge != null)
+            {
+                if (!GeometryUtility.CompareDouble(closestEdge.ApproximateLength, longestEdge.ApproximateLength))
+                {
+                    return closestEdge;
+                }
+                else
+                {
+                    Line closestLine = closestEdge.AsCurve() as Line;
+                    foreach (Edge edge in edgesPerpendicularToLongestEdge)
+                    {
+                        Line line = edge.AsCurve() as Line;
+                        XYZ dir = line.Direction;
 
-            return closestEdge;
+                        if (LineUtility.HaveCommonEndpoint(longestLine, line) && !LineUtility.HaveCommonEndpoint(closestLine, line))
+                        {
+                            return edge;
+                        }
+                    }
+                }
+            }
+            return null;
         }
 
         /// <summary>
@@ -971,6 +1010,7 @@ namespace FirstCommand
 
             Plane flippedPlane = Plane.CreateByNormalAndOrigin(-plane.Normal, plane.Origin);
             Solid remaining = BooleanOperationsUtils.CutWithHalfSpace(solid, flippedPlane);
+            ListSolidForEachRectangularShape.Add(part);
             //GetRectangularDimensions(doc, part);
             Dictionary<Solid, List<PlanarFace>> solidPlanarFaces = new Dictionary<Solid, List<PlanarFace>>();
 
@@ -979,6 +1019,7 @@ namespace FirstCommand
             {
                 if (IsRectangularBox(s))
                 {
+                    ListSolidForEachRectangularShape.Add(s);
                     //GetRectangularDimensions(doc, s);
                 }
                 else
@@ -1009,45 +1050,45 @@ namespace FirstCommand
         /// </summary>
         /// <param name="doc"></param>
         /// <param name="solid"></param>
-        //private void GetRectangularDimensions(Document doc, Solid solid)
-        //{
-        //    RectangularDimensions rectangularDim = new RectangularDimensions();
+        private void GetRectangularDimensions(Document doc, Solid solid)
+        {
+            RectangularDimensions rectangularDim = new RectangularDimensions();
 
-        //    PlanarFace face1 = FaceUtility.GetSmallestFace(solid);
-        //    PlanarFace face2 = null;
-        //    foreach (Face face in solid.Faces)
-        //    {
-        //        if (!face.Equals(face1))
-        //        {
-        //            if (face is PlanarFace planarFace)
-        //            {
-        //                if (FaceUtility.AreFacesParallel(face1, planarFace))
-        //                {
-        //                    face2 = planarFace;
-        //                    break;
-        //                }
-        //            }
-        //        }
-        //    }
+            PlanarFace face1 = FaceUtility.GetSmallestFace(solid);
+            PlanarFace face2 = null;
+            foreach (Face face in solid.Faces)
+            {
+                if (!face.Equals(face1))
+                {
+                    if (face is PlanarFace planarFace)
+                    {
+                        if (FaceUtility.AreFacesParallel(face1, planarFace))
+                        {
+                            face2 = planarFace;
+                            break;
+                        }
+                    }
+                }
+            }
 
-        //    if (face1 != null && face2 != null)
-        //    {
-        //        XYZ point1 = FaceUtility.GetCenterOfFace(face1);
-        //        XYZ point2 = FaceUtility.GetCenterOfFace(face2);
-        //        var tupleValues = GetMidPointPairsOfRectangleFace(face1);
-        //        if (tupleValues != null && tupleValues.Count == 2)
-        //        {
-        //            rectangularDim.WidthLine = Line.CreateBound(tupleValues[0].Item1, tupleValues[0].Item2);
-        //            DrawPointLineArc.CreateModelLine(doc, tupleValues[0].Item1, tupleValues[0].Item2,0, isRevitLink, transform);
-        //            rectangularDim.HeightLine = Line.CreateBound(tupleValues[1].Item1, tupleValues[1].Item2);
-        //            DrawPointLineArc.CreateModelLine(doc, tupleValues[1].Item1, tupleValues[1].Item2,0, isRevitLink, transform);
-        //        }
+            if (face1 != null && face2 != null)
+            {
+                XYZ point1 = FaceUtility.GetCenterOfFace(face1);
+                XYZ point2 = FaceUtility.GetCenterOfFace(face2);
+                var tupleValues = GetMidPointPairsOfRectangleFace(face1);
+                if (tupleValues != null && tupleValues.Count == 2)
+                {
+                    rectangularDim.WidthLine = Line.CreateBound(tupleValues[0].Item1, tupleValues[0].Item2);
+                    DrawPointLineArc.CreateModelLine(doc, tupleValues[0].Item1, tupleValues[0].Item2, 0, isRevitLink, transform);
+                    rectangularDim.HeightLine = Line.CreateBound(tupleValues[1].Item1, tupleValues[1].Item2);
+                    DrawPointLineArc.CreateModelLine(doc, tupleValues[1].Item1, tupleValues[1].Item2, 0, isRevitLink, transform);
+                }
 
-        //        rectangularDim.LengthLine = Line.CreateBound(point1, point2);
-        //        DrawPointLineArc.CreateModelLine(doc, point1, point2,0, isRevitLink, transform);
-        //    }
-        //    ListRectangularDimension.Add(rectangularDim);
-        //}
+                rectangularDim.LengthLine = Line.CreateBound(point1, point2);
+                DrawPointLineArc.CreateModelLine(doc, point1, point2, 0, isRevitLink, transform);
+            }
+            ListRectangularDimension.Add(rectangularDim);
+        }
 
         /// <summary>
         /// Lấy ra các cặp điểm đối nhau, trong đó mỗi điểm là trung điểm của các cạnh trong 1 face
@@ -1123,7 +1164,7 @@ namespace FirstCommand
         /// <param name="closestEdge">Cạnh song song và gần nhất với cạnh dài nhất</param>
         /// <param name="faces">Danh sách các face có 4 cạnh </param>
         /// <returns>Trả về 1 mặt phẳng được tạo từ face dùng để cắt solid</returns>
-        private Plane GetPlaneToCutSolid(Document doc, Edge longestEdge, Edge closestEdge, List<PlanarFace> faces)
+        private Plane GetPlaneToCutSolid(Document doc, Edge closestEdge, List<PlanarFace> faces)
         {
             PlanarFace cutFace = null;
             foreach (var face in faces)

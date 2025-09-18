@@ -213,5 +213,102 @@ namespace FirstCommand.Support.GeometryHandle
         {
             return Math.Abs(d1 - d2) < CommonConstants.TOLERANCE;
         }
+
+        #region Hàm dùng để nhóm các element sát nhau lại với nhau
+
+        /// <summary>
+        /// Hàm dùng để nhóm các element sát nhau lại với nhau
+        /// </summary>
+        /// <param name="doc"></param>
+        /// <param name="elements"></param>
+        /// <param name="tolerance"></param>
+        /// <returns></returns>
+        public static List<List<Element>> GroupElementsByBoundingBoxProximity(Document doc, List<Element> elements, double tolerance = 0.01)
+        {
+            var ungrouped = new HashSet<Element>(elements);
+            var groups = new List<List<Element>>();
+
+            while (ungrouped.Count > 0)
+            {
+                var startElement = ungrouped.First();
+                ungrouped.Remove(startElement);
+
+                var group = new List<Element> { startElement };
+                var queue = new Queue<Element>();
+                queue.Enqueue(startElement);
+
+                while (queue.Count > 0)
+                {
+                    var current = queue.Dequeue();
+                    var currentBox = current.get_BoundingBox(null);
+
+                    if (currentBox == null)
+                        continue;
+
+                    var nearby = ungrouped
+                        .Where(e => AreBoundingBoxesTouchingOrClose(currentBox, e.get_BoundingBox(null), tolerance))
+                        .ToList();
+
+                    foreach (var e in nearby)
+                    {
+                        group.Add(e);
+                        queue.Enqueue(e);
+                        ungrouped.Remove(e);
+                    }
+                }
+
+                groups.Add(group);
+            }
+
+            return groups;
+        }
+
+        private static bool AreBoundingBoxesTouchingOrClose(BoundingBoxXYZ box1, BoundingBoxXYZ box2, double tolerance = CommonConstants.TOLERANCE * 10)
+        {
+            if (box1 == null || box2 == null)
+                return false;
+
+            XYZ min1 = box1.Min;
+            XYZ max1 = box1.Max;
+            XYZ min2 = box2.Min;
+            XYZ max2 = box2.Max;
+
+            // Nếu có giao nhau: return true
+            bool overlapX = max1.X >= min2.X && min1.X <= max2.X;
+            bool overlapY = max1.Y >= min2.Y && min1.Y <= max2.Y;
+            bool overlapZ = max1.Z >= min2.Z && min1.Z <= max2.Z;
+
+            if (overlapX && overlapY && overlapZ)
+                return true;
+
+            // Nếu không giao nhau, tính khoảng cách gần nhất
+            double dx = Math.Max(0, Math.Max(min1.X - max2.X, min2.X - max1.X));
+            double dy = Math.Max(0, Math.Max(min1.Y - max2.Y, min2.Y - max1.Y));
+            double dz = Math.Max(0, Math.Max(min1.Z - max2.Z, min2.Z - max1.Z));
+
+            double distance = Math.Sqrt(dx * dx + dy * dy + dz * dz);
+
+            return distance <= tolerance;
+        }
+
+        #endregion Hàm dùng để nhóm các element sát nhau lại với nhau
+
+        /// <summary>
+        /// Hàm dùng để tìm ra 2 điểm min và max của 1 element
+        /// </summary>
+        /// <param name="element"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static (XYZ min, XYZ max) GetElementBoundingBoxMinMax(Element element)
+        {
+            if (element == null)
+                throw new ArgumentNullException(nameof(element));
+
+            BoundingBoxXYZ bbox = element.get_BoundingBox(null);
+            if (bbox == null)
+                return (null, null);
+
+            return (bbox.Min, bbox.Max);
+        }
     }
 }
