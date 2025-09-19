@@ -21,6 +21,8 @@ namespace TreeViewProject.ViewModel
         private readonly NodeModel _node;
         public string? Name => _node.Name;
 
+        public object? ItemInfo => _node.ItemInfo;
+
         public ObservableCollection<NodeViewModel> Children { get; }
 
         public bool IsExpanded

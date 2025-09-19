@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows.Input;
 using TreeViewProject.ViewModel;
 
@@ -18,5 +19,7 @@ namespace TreeViewProject.Model
         public string? DetailDescription { get; set; }
         public List<NodeModel> Children { get; set; } = new List<NodeModel>();
         public NodeModel? Parent { get; set; }
+
+        public object? ItemInfo { get; set; }
     }
 }

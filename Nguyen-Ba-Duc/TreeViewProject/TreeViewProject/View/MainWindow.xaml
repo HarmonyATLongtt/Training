@@ -8,32 +8,35 @@
         xmlns:converters="clr-namespace:TreeViewProject.Converter"
         xmlns:behaviors="clr-namespace:TreeViewProject.Behaviors"
         xmlns:gif="clr-namespace:WpfAnimatedGif;assembly=WpfAnimatedGif"
+        xmlns:views="clr-namespace:TreeViewProject.View"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         Title="TreeView with A"
-        Height="500" Width="700"
+        Height="1000" Width="700"
         Background="#F4F6F8">
     <!--KeyDown="Window_KeyDown"-->
     <Window.InputBindings>
         <KeyBinding Key="C"
                     Modifiers="Control"
                     Command="{Binding CopyCommand}" />
-
         <KeyBinding Key="X"
                     Modifiers="Control"
                     Command="{Binding CutCommand}" />
         <KeyBinding Key="V"
                     Modifiers="Control"
                     Command="{Binding PasteCommand}" />
-
         <KeyBinding Key="Delete"
                     Command="{Binding DeleteCommand}" />
         <KeyBinding Key="F1"
                     Command="{Binding HelpCommand}" />
     </Window.InputBindings>
     <Window.Resources>
-        <converters:StringToUriConverter x:Key="StringToUriConverter" />
-        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <DataTemplate DataType="{x:Type vm:HumanViewModel}">
+            <views:HumanInfoWindow />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ProductViewModel}">
+            <views:ProductInfoWindow />
+        </DataTemplate>
         <Style x:Key="ButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="#FFF" />
             <Setter Property="Foreground" Value="#333" />
@@ -226,30 +229,12 @@
         </Border>
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
-                <RowDefinition></RowDefinition>
-                <RowDefinition></RowDefinition>
+                <RowDefinition Height="5*"></RowDefinition>
+                <RowDefinition Height="3*"></RowDefinition>
             </Grid.RowDefinitions>
             <Grid Margin="0,5" Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center">
-
-                <!-- Image -->
-                <Image Source="{Binding TreeVM.SelectedNodeImagePath}"
-                       Visibility="{Binding TreeVM.IsImageVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
-                <!--GIF -->
-                <Image gif:ImageBehavior.AnimatedSource="{Binding TreeVM.SelectedNodeGifPath, Converter={StaticResource StringToUriConverter}}"
-                    gif:ImageBehavior.RepeatBehavior="Forever"
-                    Visibility="{Binding TreeVM.IsGifVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
-
-                <!-- Video -->
-                <MediaElement Source="{Binding TreeVM.SelectedNodeVideoPath}"
-                            LoadedBehavior="Manual"
-                            UnloadedBehavior="Stop"
-                            Stretch="Uniform"
-                            Name="VideoPlayer"
-                            Visibility="{Binding TreeVM.IsVideoVisible, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <i:Interaction.Behaviors>
-                        <behaviors:MediaElementLoopBehavior />
-                    </i:Interaction.Behaviors>
-                </MediaElement>
+                <!--<views:HumanInfoWindow DataContext="{Binding TreeVM.CurrentViewModel}" />-->
+                <ContentControl Content="{Binding TreeVM.CurrentViewModel}" />
             </Grid>
 
             <!-- Buttons -->

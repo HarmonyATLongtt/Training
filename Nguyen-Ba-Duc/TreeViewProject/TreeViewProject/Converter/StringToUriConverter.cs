@@ -8,7 +8,7 @@ using System.Windows.Data;
 
 namespace TreeViewProject.Converter
 {
-    internal class StringToUriConverter : IValueConverter
+    public class StringToUriConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

@@ -9,15 +9,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Images\Avatar.PNG" />
     <None Remove="Images\Download.mp4" />
     <None Remove="Images\images.png" />
     <None Remove="Images\lebong.mp4" />
+    <None Remove="Images\MyAddress.PNG" />
     <None Remove="Images\pikachu.gif" />
     <None Remove="Images\test.gif" />
     <None Remove="Images\tooltip.png" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Images\Avatar.PNG">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Images\Download.mp4">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -26,6 +31,9 @@
     </Content>
     <Content Include="Images\lebong.mp4">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\MyAddress.PNG">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Images\pikachu.gif">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

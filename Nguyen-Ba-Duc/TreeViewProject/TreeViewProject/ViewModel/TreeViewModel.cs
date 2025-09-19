@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using TreeViewProject.Model;
 
@@ -21,6 +22,14 @@ namespace TreeViewProject.ViewModel
             set { _currentHoveredNode = value; OnPropertyChanged(nameof(CurrentHoveredNode)); }
         }
 
+        private object? _currentViewModel;
+
+        public object? CurrentViewModel
+        {
+            get => _currentViewModel;
+            set { _currentViewModel = value; OnPropertyChanged(nameof(CurrentViewModel)); }
+        }
+
         private NodeViewModel? _selectedNode;
 
         public NodeViewModel? SelectedNode
@@ -29,6 +38,15 @@ namespace TreeViewProject.ViewModel
             set
             {
                 _selectedNode = value; OnPropertyChanged(nameof(SelectedNode));
+
+                if (SelectedNode?.ItemInfo is HumanViewModel)
+                {
+                    CurrentViewModel = (HumanViewModel)SelectedNode.ItemInfo;
+                }
+                else if (SelectedNode?.ItemInfo is ProductViewModel)
+                {
+                    CurrentViewModel = (ProductViewModel)SelectedNode.ItemInfo;
+                }
 
                 SelectedNodeImagePath = SelectedNode?.ImagePath;
                 SelectedNodeGifPath = null;
@@ -130,7 +148,6 @@ namespace TreeViewProject.ViewModel
         public ICommand CopyCommand { get; set; }
         public ICommand CutCommand { get; set; }
         public ICommand PasteCommand { get; set; }
-
         public ICommand DeleteCommand { get; set; }
         public ICommand HelpCommand { get; set; }
 
@@ -142,14 +159,40 @@ namespace TreeViewProject.ViewModel
 
         private void InitializeData()
         {
+            var human1 = new HumanModel
+            {
+                Name = "Nguyen Ba Duc",
+                Birthday = new DateTime(1994, 2, 5),
+                Address = "Bac Ninh",
+                Description = "Anh duc dep trai",
+                ImagePath = "/Images/Avatar.PNG"
+            };
+
+            var humanVM1 = new HumanViewModel(human1);
+
+            var product1 = new ProductModel
+            {
+                ProductName = "Oppo",
+                Price = 100000,
+                Factory = "Aliexpress",
+                Provider = "China",
+                ExpireDate = new DateTime(2026, 9, 6),
+                Address = "Từ Hy Cung, Tử Cấm Thành, Bắc Kinh, Trung Quốc",
+                ImagePath = "/Images/MyAddress.PNG",
+                Description = "Made in china"
+            };
+
+            var productVM1 = new ProductViewModel(product1);
+
             // dữ liệu mẫu
             var rootA = new NodeModel
             {
-                Name = "Root A",
+                Name = "Điện thoại Oppo",
                 Description = "Mô tả Root A",
                 DetailDescription = "Chi tiết Root A",
                 ImagePath = "/Images/tooltip.png",
-                GifPath = "/Images/pikachu.gif"
+                GifPath = "/Images/pikachu.gif",
+                ItemInfo = productVM1
             };
             var childA_1 = new NodeModel { Name = "Child A1", Description = "Mô tả Child A1", DetailDescription = "Chi tiết Child A1", Parent = rootA, GifPath = "Images/pikachu.gif" };
             var childA_2 = new NodeModel { Name = "Child A2", Description = "Mô tả Child A2", DetailDescription = "Chi tiết Child A2", Parent = rootA, GifPath = "Images/test.gif" };
@@ -158,7 +201,7 @@ namespace TreeViewProject.ViewModel
             rootA.Children.Add(childA_1);
             rootA.Children.Add(childA_2);
 
-            var rootB = new NodeModel { Name = "Root B", Description = "Mô tả Root B", DetailDescription = "Chi tiết Root B", ImagePath = "/Images/images.png", VideoPath = "Images/lebong.mp4" };
+            var rootB = new NodeModel { Name = "Anh Đức", Description = "Mô tả Root B", DetailDescription = "Chi tiết Root B", ImagePath = "/Images/images.png", VideoPath = "Images/lebong.mp4", ItemInfo = humanVM1 };
             var childB_1 = new NodeModel { Name = "Child B1", Description = "Mô tả Child B1", DetailDescription = "Chi tiết Child B1", Parent = rootB };
             var childB_2 = new NodeModel { Name = "Child B2", Description = "Mô tả Child B2", DetailDescription = "Chi tiết Child B2", Parent = rootB };
             var grandChildB_2_1 = new NodeModel { Name = "GrandChild B1.1", Description = "Mô tả GrandChild B1.1", DetailDescription = "Chi tiết GrandChild B1.1", Parent = childB_1 };
@@ -196,6 +239,8 @@ namespace TreeViewProject.ViewModel
 
         private void ShowHelp()
         {
+            //MessageBox.Show("dfsd");
+
             SelectedNodeImagePath = null;
             SelectedNodeVideoPath = null;
             SelectedNodeGifPath = null;
