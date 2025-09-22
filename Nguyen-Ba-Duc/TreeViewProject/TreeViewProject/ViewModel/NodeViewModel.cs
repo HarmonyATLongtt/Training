@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 using System.Xml.Linq;
 using TreeViewProject.Model;
@@ -15,7 +16,6 @@ namespace TreeViewProject.ViewModel
 {
     public class NodeViewModel : BaseViewModel
     {
-        //private readonly MainViewModel _mainVM;
         private readonly TreeViewModel _treeVM;
 
         private readonly NodeModel _node;
@@ -108,6 +108,16 @@ namespace TreeViewProject.ViewModel
             set
             {
                 _isDetailVisible = value; OnPropertyChanged(nameof(IsDetailVisible));
+            }
+        }
+
+        public Brush CheckColor
+        {
+            get => _node.CheckColor;
+            set
+            {
+                _node.CheckColor = value;
+                OnPropertyChanged(nameof(CheckColor));
             }
         }
 

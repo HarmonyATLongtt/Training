@@ -6,6 +6,7 @@
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:behaviors="clr-namespace:TreeViewProject.Behaviors"
              xmlns:gif="clr-namespace:WpfAnimatedGif;assembly=WpfAnimatedGif"
+             xmlns:controls="clr-namespace:TreeViewProject.CustomControls"
              mc:Ignorable="d" Width="400" Height="500">
 
     <Border Padding="10" CornerRadius="10" Background="White"
@@ -35,8 +36,9 @@
                 <TextBlock Text="Address:" FontWeight="Bold" FontSize="14" Foreground="#333" />
                 <TextBlock Text="{Binding Address, Mode=OneWay}" Margin="0,0,0,10" />
             </StackPanel>
+
             <!-- TextBox multiline -->
-            <TextBox Grid.Column="0" Grid.Row="1" Text="{Binding Description, Mode=OneWay}" Grid.ColumnSpan="2"
+            <TextBox Grid.Column="0" Grid.Row="1" Text="{Binding Description, Mode=OneWay}" Grid.ColumnSpan="3"
                      Margin="0,10,0,0"
                      Width="350"
                      TextWrapping="Wrap"

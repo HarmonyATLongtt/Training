@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using TreeViewProject.Model;
 
 namespace TreeViewProject.ViewModel
@@ -27,7 +28,19 @@ namespace TreeViewProject.ViewModel
         public object? CurrentViewModel
         {
             get => _currentViewModel;
-            set { _currentViewModel = value; OnPropertyChanged(nameof(CurrentViewModel)); }
+            set
+            {
+                _currentViewModel = value;
+                OnPropertyChanged(nameof(CurrentViewModel));
+                if (CurrentViewModel != null)
+                {
+                    IsButtonCheckVisible = true;
+                }
+                else
+                {
+                    IsButtonCheckVisible = false;
+                }
+            }
         }
 
         private NodeViewModel? _selectedNode;
@@ -47,11 +60,41 @@ namespace TreeViewProject.ViewModel
                 {
                     CurrentViewModel = (ProductViewModel)SelectedNode.ItemInfo;
                 }
+                else if (SelectedNode?.ItemInfo == null)
+                {
+                    CurrentViewModel = null;
+                }
+
+                CheckStatusOfItemInfo();
 
                 SelectedNodeImagePath = SelectedNode?.ImagePath;
                 SelectedNodeGifPath = null;
                 SelectedNodeVideoPath = null;
             }
+        }
+
+        private string _checkContent;
+
+        public string CheckContent
+        {
+            get => _checkContent;
+            set { _checkContent = value; OnPropertyChanged(nameof(CheckContent)); }
+        }
+
+        private bool _isButtonCheckVisible = false;
+
+        public bool IsButtonCheckVisible
+        {
+            get => _isButtonCheckVisible;
+            set { _isButtonCheckVisible = value; OnPropertyChanged(); }
+        }
+
+        private bool _isCheckControlVisible = false;
+
+        public bool IsCheckControlVisible
+        {
+            get => _isCheckControlVisible;
+            set { _isCheckControlVisible = value; OnPropertyChanged(nameof(IsCheckControlVisible)); }
         }
 
         private bool _isImageVisible;
@@ -142,6 +185,9 @@ namespace TreeViewProject.ViewModel
 
         private bool _isCut = false;
 
+        public ICommand CheckCommand { get; set; }
+        public ICommand HoverCommand { get; set; }
+        public ICommand LeaveCommand { get; set; }
         public ICommand ExpandAllCommand { get; set; }
         public ICommand CollapseAllCommand { get; set; }
         public ICommand InvertCommand { get; set; }
@@ -227,6 +273,9 @@ namespace TreeViewProject.ViewModel
 
         private void InvokeCommand()
         {
+            CheckCommand = new RelayCommand(_ => CheckingProcess());
+            HoverCommand = new RelayCommand(param => OnHover(param));
+            LeaveCommand = new RelayCommand(param => OnLeave(param));
             ExpandAllCommand = new RelayCommand(_ => ExpandCollapseAll(true));
             CollapseAllCommand = new RelayCommand(_ => ExpandCollapseAll(false));
             InvertCommand = new RelayCommand(_ => InvertAll());
@@ -235,6 +284,82 @@ namespace TreeViewProject.ViewModel
             PasteCommand = new RelayCommand(_ => Paste(), _ => _clipboardNode != null && SelectedNode != null);
             DeleteCommand = new RelayCommand(_ => Delete(), _ => SelectedNode != null);
             HelpCommand = new RelayCommand(_ => ShowHelp(), _ => CurrentHoveredNode != null || SelectedNode != null);
+        }
+
+        private void CheckStatusOfItemInfo()
+        {
+            if (SelectedNode != null)
+            {
+                if (SelectedNode.ItemInfo is HumanViewModel humanVM)
+                {
+                    IsCheckControlVisible = humanVM.IsChecked;
+                    if (IsCheckControlVisible)
+                    {
+                        CheckContent = "Đã duyệt";
+                    }
+                    else
+                    {
+                        CheckContent = "Duyệt";
+                    }
+                }
+                else if (SelectedNode.ItemInfo is ProductViewModel productVM)
+                {
+                    IsCheckControlVisible = productVM.IsChecked;
+                    if (IsCheckControlVisible)
+                    {
+                        CheckContent = "Đã duyệt";
+                    }
+                    else
+                    {
+                        CheckContent = "Duyệt";
+                    }
+                }
+            }
+        }
+
+        private void CheckingProcess()
+        {
+            if (SelectedNode != null)
+            {
+                IsCheckControlVisible = !IsCheckControlVisible;
+                SetIsCheckedPropFromItemInfo(SelectedNode, IsCheckControlVisible);
+                if (IsCheckControlVisible)
+                {
+                    CheckContent = "Đã duyệt";
+                }
+                else
+                {
+                    CheckContent = "Duyệt";
+                }
+            }
+        }
+
+        private void SetIsCheckedPropFromItemInfo(NodeViewModel selectedNode, bool isChecked)
+        {
+            if (selectedNode.ItemInfo is HumanViewModel humanVM)
+            {
+                humanVM.IsChecked = isChecked;
+            }
+            else if (selectedNode.ItemInfo is ProductViewModel productVM)
+            {
+                productVM.IsChecked = isChecked;
+            }
+        }
+
+        private void OnHover(object? param)
+        {
+            if (param is NodeViewModel node)
+            {
+                node.CheckColor = Brushes.Cyan;
+            }
+        }
+
+        private void OnLeave(object? param)
+        {
+            if (param is NodeViewModel node)
+            {
+                node.CheckColor = Brushes.Green;
+            }
         }
 
         private void ShowHelp()

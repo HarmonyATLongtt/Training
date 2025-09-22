@@ -9,10 +9,11 @@
         xmlns:behaviors="clr-namespace:TreeViewProject.Behaviors"
         xmlns:gif="clr-namespace:WpfAnimatedGif;assembly=WpfAnimatedGif"
         xmlns:views="clr-namespace:TreeViewProject.View"
+        xmlns:controls="clr-namespace:TreeViewProject.CustomControls"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         Title="TreeView with A"
-        Height="1000" Width="700"
+        Height="1000" Width="900"
         Background="#F4F6F8">
     <!--KeyDown="Window_KeyDown"-->
     <Window.InputBindings>
@@ -93,6 +94,7 @@
                 <TreeView.ItemContainerStyle>
                     <Style TargetType="TreeViewItem">
                         <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="TreeViewItem">
@@ -137,6 +139,11 @@
                                                     ContentSource="Header"
                                                     RecognizesAccessKey="True" />
                                             </Border>
+                                            <Grid Margin="5,0,0,0" HorizontalAlignment="Left" Visibility="{Binding ItemInfo.IsChecked,
+                                                Converter={StaticResource BoolToVisibilityConverter},
+                                                FallbackValue=Collapsed}">
+                                                <controls:GreenCheckControl Width="15" Height="15" Stroke ="{Binding CheckColor}" />
+                                            </Grid>
                                         </DockPanel>
                                         <!-- Children -->
                                         <ItemsPresenter x:Name="ItemsHost"
@@ -222,6 +229,20 @@
                                     </Style>
                                 </TextBlock.Style>
                             </TextBlock>
+                            <!-- Trigger hover -->
+                            <i:Interaction.Triggers>
+                                <!-- Hover vào -->
+                                <i:EventTrigger EventName="MouseEnter">
+                                    <i:InvokeCommandAction Command="{Binding DataContext.TreeVM.HoverCommand, RelativeSource={RelativeSource AncestorType=TreeView}}"
+                                   CommandParameter="{Binding}" />
+                                </i:EventTrigger>
+
+                                <!-- Rời chuột -->
+                                <i:EventTrigger EventName="MouseLeave">
+                                    <i:InvokeCommandAction Command="{Binding DataContext.TreeVM.LeaveCommand, RelativeSource={RelativeSource AncestorType=TreeView}}"
+                                   CommandParameter="{Binding}" />
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
                         </StackPanel>
                     </HierarchicalDataTemplate>
                 </TreeView.Resources>
@@ -235,6 +256,20 @@
             <Grid Margin="0,5" Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center">
                 <!--<views:HumanInfoWindow DataContext="{Binding TreeVM.CurrentViewModel}" />-->
                 <ContentControl Content="{Binding TreeVM.CurrentViewModel}" />
+                <Button DataContext="{Binding TreeVM}"
+                        Visibility="{Binding IsButtonCheckVisible, Converter = {StaticResource BoolToVisibilityConverter} }"
+                        VerticalAlignment="Top" HorizontalAlignment="Right"
+                        Width="80" Height="30" Padding="5" Margin="10"
+                        Command="{Binding CheckCommand}">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
+                        <!-- Custom Control -->
+                        <controls:GreenCheckControl Visibility="{Binding IsCheckControlVisible, Converter={StaticResource BoolToVisibilityConverter}}" Width="16" Height="16" Stroke="Green"
+                         VerticalAlignment="Center" Margin="0,0,5,0" />
+
+                        <!-- Text -->
+                        <TextBlock Text="{Binding CheckContent}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
             </Grid>
 
             <!-- Buttons -->

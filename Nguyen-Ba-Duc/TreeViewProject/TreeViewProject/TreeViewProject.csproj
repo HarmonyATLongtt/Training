@@ -54,8 +54,4 @@
     </Content>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="CustomControls\" />
-  </ItemGroup>
-
 </Project>

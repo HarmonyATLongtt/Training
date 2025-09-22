@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Input;
+using System.Windows.Media;
 using TreeViewProject.ViewModel;
 
 namespace TreeViewProject.Model
@@ -19,6 +20,8 @@ namespace TreeViewProject.Model
         public string? DetailDescription { get; set; }
         public List<NodeModel> Children { get; set; } = new List<NodeModel>();
         public NodeModel? Parent { get; set; }
+
+        public Brush CheckColor { get; set; } = Brushes.Green;
 
         public object? ItemInfo { get; set; }
     }

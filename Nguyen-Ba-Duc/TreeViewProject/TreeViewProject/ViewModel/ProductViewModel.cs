@@ -7,7 +7,7 @@ using TreeViewProject.Model;
 
 namespace TreeViewProject.ViewModel
 {
-    public class ProductViewModel
+    public class ProductViewModel : BaseViewModel
     {
         private readonly ProductModel _productModel;
         public string? ProductName => _productModel.ProductName;
@@ -22,6 +22,16 @@ namespace TreeViewProject.ViewModel
         public string? Factory => _productModel.Factory;
 
         public string? Provider => _productModel.Provider;
+
+        public bool IsChecked
+        {
+            get => _productModel.IsChecked;
+            set
+            {
+                _productModel.IsChecked = value;
+                OnPropertyChanged(nameof(IsChecked));
+            }
+        }
 
         public ProductViewModel(ProductModel productModel)
         {
