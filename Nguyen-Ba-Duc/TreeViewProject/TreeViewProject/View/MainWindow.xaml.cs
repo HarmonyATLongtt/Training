@@ -1,16 +1,7 @@
-﻿using System.Diagnostics;
-using System.Text;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Windows.Threading;
-using TreeViewProject.Model;
+
 using TreeViewProject.ViewModel;
 
 namespace TreeViewProject.View
@@ -21,15 +12,102 @@ namespace TreeViewProject.View
     public partial class MainWindow : Window
     {
         private MainViewModel _mainVM;
-        //private TextEditorViewModel _textEditorVM;
 
         public MainWindow()
         {
             InitializeComponent();
             _mainVM = new MainViewModel();
             this.DataContext = _mainVM;
+        }
 
-            //_textEditorVM = new TextEditorViewModel(TextEditor);
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (_mainVM == null) return;
+
+            // Ctrl + C
+            if (e.Key == Key.C && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                if (_mainVM.CopyCommand?.CanExecute(null) == true)
+                    _mainVM.CopyCommand.Execute(null);
+                e.Handled = true; // Nếu muốn chặn TextBox copy mặc định
+            }
+
+            // Ctrl + V
+            if (e.Key == Key.V && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                if (_mainVM.PasteCommand?.CanExecute(null) == true)
+                    _mainVM.PasteCommand.Execute(null);
+                e.Handled = true; // Nếu muốn chặn TextBox paste mặc định
+            }
+
+            // Ctrl + X
+            if (e.Key == Key.X && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                if (_mainVM.CutCommand?.CanExecute(null) == true)
+                    _mainVM.CutCommand.Execute(null);
+                e.Handled = true; // Nếu muốn chặn TextBox cut mặc định
+            }
+
+            // Delete
+            if (e.Key == Key.Delete && Keyboard.Modifiers == ModifierKeys.None)
+            {
+                if (_mainVM.DeleteCommand?.CanExecute(null) == true)
+                    _mainVM.DeleteCommand.Execute(null);
+                e.Handled = true; // thường Delete bạn muốn override hoàn toàn
+            }
+
+            // F1
+            if (e.Key == Key.F1 && Keyboard.Modifiers == ModifierKeys.None)
+            {
+                if (_mainVM.HelpCommand?.CanExecute(null) == true)
+                    _mainVM.HelpCommand.Execute(null);
+                e.Handled = true; // chặn F1 mặc định của Windows
+            }
+        }
+
+        private void TextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            _mainVM.ActiveTextBox = sender as TextBox;
+        }
+
+        private void TextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            var focusedElement = Keyboard.FocusedElement as FrameworkElement;
+
+            if (focusedElement != null)
+            {
+                string name = focusedElement.Name;
+
+                if (name == "PasteButton")
+                {
+                    return;
+                }
+            }
+            _mainVM.ActiveTextBox = null;
+        }
+
+        private void UserControl_GotFocus(object sender, RoutedEventArgs e)
+        {
+            _mainVM.ActiveHandler = _mainVM.TreeVM.CurrentViewModel;
+        }
+
+        private void UserControl_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (MyUserControl.IsKeyboardFocusWithin)
+                return;
+
+            var focusedElement = Keyboard.FocusedElement as FrameworkElement;
+
+            if (focusedElement != null)
+            {
+                string name = focusedElement.Name;
+
+                if (name == "CopyButton")
+                {
+                    return;
+                }
+            }
+            _mainVM.ActiveHandler = null;
         }
 
         private void TreeView_GotFocus(object sender, RoutedEventArgs e)
@@ -59,11 +137,6 @@ namespace TreeViewProject.View
             // Thật sự mất focus ra ngoài
             _mainVM.ActiveHandler = null;
         }
-
-        //private void TextBox_GotFocus(object sender, RoutedEventArgs e)
-        //{
-        //    _mainVM.ActiveHandler = _textEditorVM;
-        //}
 
         private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {

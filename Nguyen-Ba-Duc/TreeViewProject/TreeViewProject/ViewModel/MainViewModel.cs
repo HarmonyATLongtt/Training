@@ -1,29 +1,47 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Threading;
-using System.Xml.Linq;
-using TreeViewProject.Model;
 
 namespace TreeViewProject.ViewModel
 {
     public class MainViewModel : BaseViewModel
     {
-        public TreeViewModel TreeVM { get; }
+        public TreeViewModel TreeVM { get; set; }
 
-        private IClipboardHandler? _activeHandler;
+        private object? _activeHandler;
 
-        public IClipboardHandler? ActiveHandler
+        public object? ActiveHandler
         {
             get => _activeHandler;
             set { _activeHandler = value; OnPropertyChanged(); }
+        }
+
+        private object? _clipBoardObj;
+
+        public object? ClipBoardObj
+        {
+            get => _clipBoardObj;
+            set
+            {
+                _clipBoardObj = value; OnPropertyChanged(nameof(ClipBoardObj));
+
+                if (ClipBoardObj != null)
+                {
+                    if (ClipBoardObj is string name) { ClipBoardName = name; }
+                    if (ClipBoardObj is NodeViewModel node) { ClipBoardName = node.Name; }
+                }
+            }
+        }
+
+        //test
+
+        private string _clipBoardName;
+
+        public string ClipBoardName
+        {
+            get => _clipBoardName;
+            set { _clipBoardName = value; OnPropertyChanged(nameof(ClipBoardName)); }
         }
 
         private NodeViewModel? _selectedNode;
@@ -34,11 +52,12 @@ namespace TreeViewProject.ViewModel
             set { _selectedNode = value; OnPropertyChanged(); }
         }
 
+        public TextBox? ActiveTextBox { get; set; }
+
         public ICommand CopyCommand { get; set; }
         public ICommand CutCommand { get; set; }
         public ICommand PasteCommand { get; set; }
         public ICommand DeleteCommand { get; set; }
-
         public ICommand HelpCommand { get; set; }
 
         public MainViewModel()
@@ -51,20 +70,73 @@ namespace TreeViewProject.ViewModel
 
         private void InvokeCommand()
         {
-            CopyCommand = new RelayCommand(_ => ActiveHandler?.CopyCommand.Execute(null));
-            CutCommand = new RelayCommand(_ => ActiveHandler?.CutCommand.Execute(null));
-            PasteCommand = new RelayCommand(_ => ActiveHandler?.PasteCommand.Execute(null));
-            DeleteCommand = new RelayCommand(_ => ActiveHandler?.DeleteCommand.Execute(null));
-            HelpCommand = new RelayCommand(_ => ActiveHandler?.HelpCommand.Execute(null));
+            CopyCommand = new RelayCommand(_ => OnCopy());
+            PasteCommand = new RelayCommand(_ => OnPaste());
+            CutCommand = new RelayCommand(_ => OnCut());
+            DeleteCommand = new RelayCommand(_ => OnDelete());
+            HelpCommand = new RelayCommand(_ => OnHelp());
+
+            //CopyCommand = new RelayCommand(_ => ActiveHandler?.CopyCommand.Execute(null));
+            //CutCommand = new RelayCommand(_ => ActiveHandler?.CutCommand.Execute(null));
+            //PasteCommand = new RelayCommand(_ => ActiveHandler?.PasteCommand.Execute(null));
+            //DeleteCommand = new RelayCommand(_ => ActiveHandler?.DeleteCommand.Execute(null));
+            //HelpCommand = new RelayCommand(_ => ActiveHandler?.HelpCommand.Execute(null));
+        }
+
+        private void OnCopy()
+        {
+            (ActiveHandler as ICopyPasteHandler)?.Copy(this);
+        }
+
+        private void OnPaste()
+        {
+            if (ClipBoardObj is NodeViewModel)
+            {
+                (ActiveHandler as ICopyPasteHandler)?.Paste(this);
+            }
+            else if (ClipBoardObj is string text && ActiveTextBox != null)
+            {
+                ActiveTextBox.SelectedText = text; // paste vào TextBox đang focus
+            }
+        }
+
+        private void OnCut()
+        {
+            (ActiveHandler as INodeEditHandler)?.Cut(this);
+        }
+
+        private void OnDelete()
+        {
+            (ActiveHandler as INodeEditHandler)?.Delete();
+        }
+
+        private void OnHelp()
+        {
+            (ActiveHandler as INodeEditHandler)?.ShowHelp();
         }
     }
 
-    public interface IClipboardHandler
+    //public interface IClipboardHandler
+    //{
+    //    ICommand CopyCommand { get; }
+    //    ICommand CutCommand { get; }
+    //    ICommand PasteCommand { get; }
+    //    ICommand DeleteCommand { get; }
+    //    ICommand HelpCommand { get; set; }
+    //}
+    public interface ICopyPasteHandler
     {
-        ICommand CopyCommand { get; }
-        ICommand CutCommand { get; }
-        ICommand PasteCommand { get; }
-        ICommand DeleteCommand { get; }
-        ICommand HelpCommand { get; set; }
+        void Copy(MainViewModel mainVM);
+
+        void Paste(MainViewModel mainVM);
+    }
+
+    public interface INodeEditHandler : ICopyPasteHandler
+    {
+        void Cut(MainViewModel mainVM);
+
+        void Delete();
+
+        void ShowHelp();
     }
 }

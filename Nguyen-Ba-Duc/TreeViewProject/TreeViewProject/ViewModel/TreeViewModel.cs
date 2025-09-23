@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Collections.ObjectModel;
+
 using System.Windows.Input;
 using System.Windows.Media;
 using TreeViewProject.Model;
 
 namespace TreeViewProject.ViewModel
 {
-    public class TreeViewModel : BaseViewModel, IClipboardHandler
+    public class TreeViewModel : BaseViewModel, INodeEditHandler
     {
         public ObservableCollection<NodeViewModel> RootNodes { get; set; }
 
@@ -181,7 +176,22 @@ namespace TreeViewProject.ViewModel
             }
         }
 
-        private NodeViewModel? _clipboardNode;
+        //private NodeViewModel? _clipboardNode;
+
+        private NodeViewModel? _clipBoardNode;
+
+        public NodeViewModel? ClipBoardNode
+        {
+            get => _clipBoardNode;
+            set
+            {
+                if (_clipBoardNode != value)
+                {
+                    _clipBoardNode = value;
+                    OnPropertyChanged(nameof(ClipBoardNode));
+                }
+            }
+        }
 
         private bool _isCut = false;
 
@@ -279,11 +289,11 @@ namespace TreeViewProject.ViewModel
             ExpandAllCommand = new RelayCommand(_ => ExpandCollapseAll(true));
             CollapseAllCommand = new RelayCommand(_ => ExpandCollapseAll(false));
             InvertCommand = new RelayCommand(_ => InvertAll());
-            CopyCommand = new RelayCommand(_ => Copy(), _ => SelectedNode != null);
-            CutCommand = new RelayCommand(_ => Cut(), _ => SelectedNode != null);
-            PasteCommand = new RelayCommand(_ => Paste(), _ => _clipboardNode != null && SelectedNode != null);
-            DeleteCommand = new RelayCommand(_ => Delete(), _ => SelectedNode != null);
-            HelpCommand = new RelayCommand(_ => ShowHelp(), _ => CurrentHoveredNode != null || SelectedNode != null);
+            //CopyCommand = new RelayCommand(_ => Copy(), _ => SelectedNode != null);
+            //CutCommand = new RelayCommand(_ => Cut(), _ => SelectedNode != null);
+            //PasteCommand = new RelayCommand(_ => Paste(), _ => ClipBoardNode != null && SelectedNode != null);
+            //DeleteCommand = new RelayCommand(_ => Delete(), _ => SelectedNode != null);
+            //HelpCommand = new RelayCommand(_ => ShowHelp(), _ => CurrentHoveredNode != null || SelectedNode != null);
         }
 
         private void CheckStatusOfItemInfo()
@@ -362,10 +372,8 @@ namespace TreeViewProject.ViewModel
             }
         }
 
-        private void ShowHelp()
+        public void ShowHelp()
         {
-            //MessageBox.Show("dfsd");
-
             SelectedNodeImagePath = null;
             SelectedNodeVideoPath = null;
             SelectedNodeGifPath = null;
@@ -446,48 +454,56 @@ namespace TreeViewProject.ViewModel
             }
         }
 
-        private void Copy()
+        public void Copy(MainViewModel mainVM)
         {
             if (SelectedNode == null) return;
             UnMarkedAll();
-            _clipboardNode = SelectedNode;
+            ClipBoardNode = SelectedNode;
+
+            mainVM.ClipBoardObj = ClipBoardNode;
+
             SelectedNode.IsMarked = true;
             SelectedCopyNode = SelectedNode;
         }
 
-        private void Cut()
+        public void Cut(MainViewModel mainVM)
         {
             if (SelectedNode == null) return;
             UnMarkedAll();
-            _clipboardNode = SelectedNode;
+            ClipBoardNode = SelectedNode;
+            mainVM.ClipBoardObj = ClipBoardNode;
             _isCut = true;
 
             SelectedNode.IsMarked = true;
         }
 
-        private void Paste()
+        public void Paste(MainViewModel mainVM)
         {
-            if (_clipboardNode == null || SelectedNode == null) return;
-
-            // Nếu cut chính node đang chọn thì bỏ qua (copy thì vẫn cho phép)
-            if (_isCut && _clipboardNode.Equals(SelectedNode))
+            if (ClipBoardNode == null || SelectedNode == null || mainVM.ClipBoardObj is not NodeViewModel)
             {
-                ClearClipboard();
+                ClearClipboard(mainVM);
                 return;
             }
 
-            int sourceLevel = GetLevel(_clipboardNode);
+            // Nếu cut chính node đang chọn thì bỏ qua (copy thì vẫn cho phép)
+            if (_isCut && ClipBoardNode.Equals(SelectedNode))
+            {
+                ClearClipboard(mainVM);
+                return;
+            }
+
+            int sourceLevel = GetLevel(ClipBoardNode);
             int targetLevel = GetLevel(SelectedNode);
 
             // Chỉ cho phép paste cùng cấp
             if (sourceLevel != targetLevel)
             {
-                ClearClipboard();
+                ClearClipboard(mainVM);
                 return;
             }
 
             var targetCollection = SelectedNode.Parent?.Children ?? RootNodes;
-            var sourceCollection = _clipboardNode.Parent?.Children ?? RootNodes;
+            var sourceCollection = ClipBoardNode.Parent?.Children ?? RootNodes;
 
             bool isSameColection = false;
             if (ReferenceEquals(sourceCollection, targetCollection))
@@ -503,17 +519,17 @@ namespace TreeViewProject.ViewModel
                 int indexToRemove = -1;
                 if (!isSameColection)
                 {
-                    sourceCollection.Remove(_clipboardNode);
-                    _clipboardNode.Parent = SelectedNode.Parent;
+                    sourceCollection.Remove(ClipBoardNode);
+                    ClipBoardNode.Parent = SelectedNode.Parent;
                 }
                 else
                 {
-                    indexToRemove = sourceCollection.IndexOf(_clipboardNode);
+                    indexToRemove = sourceCollection.IndexOf(ClipBoardNode);
                 }
                 if (isLast)
-                    targetCollection.Add(_clipboardNode);
+                    targetCollection.Add(ClipBoardNode);
                 else
-                    targetCollection.Insert(index + 1, _clipboardNode);
+                    targetCollection.Insert(index + 1, ClipBoardNode);
                 if (indexToRemove >= 0)
                 {
                     if (indexToRemove < index)
@@ -528,31 +544,32 @@ namespace TreeViewProject.ViewModel
             }
             else
             {
-                var clone = _clipboardNode.Clone(this, SelectedNode.Parent);
+                var clone = ClipBoardNode.Clone(this, SelectedNode.Parent);
 
                 if (isLast)
                     targetCollection.Add(clone);
                 else
                     targetCollection.Insert(index + 1, clone);
             }
-            ClearClipboard();
+            ClearClipboard(mainVM);
         }
 
-        private void ClearClipboard()
+        private void ClearClipboard(MainViewModel mainVM)
         {
             if (SelectedCopyNode != null)
             {
                 SelectedCopyNode.IsMarked = false;
             }
-            if (_clipboardNode != null)
+            if (ClipBoardNode != null)
             {
-                _clipboardNode.IsMarked = false;
+                ClipBoardNode.IsMarked = false;
             }
-            _clipboardNode = null;
+            //mainVM.ClipBoardObj = null;
+            //ClipBoardNode = null;
             _isCut = false;
         }
 
-        private void Delete()
+        public void Delete()
         {
             if (SelectedNode == null) return;
             if (SelectedNode.Parent != null)

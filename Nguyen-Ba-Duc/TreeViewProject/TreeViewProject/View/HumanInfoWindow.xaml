@@ -48,7 +48,14 @@
                      FontSize="14"
                      Padding="8"
                      BorderBrush="#999"
-                     BorderThickness="1" />
+                     BorderThickness="1">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="PreviewMouseUp">
+                        <i:InvokeCommandAction
+                        Command="{Binding HighLightCommand}" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </TextBox>
             <!--<Grid>
                  Image
                 <Image Source="{Binding TreeVM.SelectedNodeImagePath}"

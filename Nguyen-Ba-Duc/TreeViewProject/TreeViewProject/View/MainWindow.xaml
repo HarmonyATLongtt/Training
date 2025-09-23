@@ -13,10 +13,11 @@
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         Title="TreeView with A"
+        PreviewKeyDown="Window_PreviewKeyDown"
         Height="1000" Width="900"
         Background="#F4F6F8">
     <!--KeyDown="Window_KeyDown"-->
-    <Window.InputBindings>
+    <!--<Window.InputBindings>
         <KeyBinding Key="C"
                     Modifiers="Control"
                     Command="{Binding CopyCommand}" />
@@ -30,7 +31,7 @@
                     Command="{Binding DeleteCommand}" />
         <KeyBinding Key="F1"
                     Command="{Binding HelpCommand}" />
-    </Window.InputBindings>
+    </Window.InputBindings>-->
     <Window.Resources>
         <DataTemplate DataType="{x:Type vm:HumanViewModel}">
             <views:HumanInfoWindow />
@@ -253,7 +254,11 @@
                 <RowDefinition Height="5*"></RowDefinition>
                 <RowDefinition Height="3*"></RowDefinition>
             </Grid.RowDefinitions>
-            <Grid Margin="0,5" Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Grid x:Name="MyUserControl"
+                  GotFocus="UserControl_GotFocus"
+                  LostFocus="UserControl_LostFocus"
+
+                  Margin="0,5" Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center">
                 <!--<views:HumanInfoWindow DataContext="{Binding TreeVM.CurrentViewModel}" />-->
                 <ContentControl Content="{Binding TreeVM.CurrentViewModel}" />
                 <Button DataContext="{Binding TreeVM}"
@@ -274,6 +279,10 @@
 
             <!-- Buttons -->
             <StackPanel Grid.Row="1" Margin="10" VerticalAlignment="Top" Orientation="Vertical" Width="150">
+                <TextBlock Text="{Binding ClipBoardName}" />
+                <TextBox GotFocus="TextBox_GotFocus"
+                        LostFocus="TextBox_LostFocus"
+                        PreviewKeyDown="Window_PreviewKeyDown" />
                 <Button Content="Expand All" Command="{Binding TreeVM.ExpandAllCommand}" Style="{StaticResource ButtonStyle}" />
                 <Button Content="Collapse All" Command="{Binding TreeVM.CollapseAllCommand}" Style="{StaticResource ButtonStyle}" />
                 <Button Content="Invert" Command="{Binding TreeVM.InvertCommand}" Style="{StaticResource ButtonStyle}" />

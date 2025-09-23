@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
+using System.Windows.Input;
 using TreeViewProject.Model;
 
 namespace TreeViewProject.ViewModel
 {
-    public class ProductViewModel : BaseViewModel
+    public class ProductViewModel : BaseViewModel, ICopyPasteHandler
     {
         private readonly ProductModel _productModel;
         public string? ProductName => _productModel.ProductName;
@@ -33,9 +35,34 @@ namespace TreeViewProject.ViewModel
             }
         }
 
+        public string SelectedText { get; set; }
+        public ICommand HighLightCommand { get; }
+
         public ProductViewModel(ProductModel productModel)
         {
             _productModel = productModel;
+            HighLightCommand = new RelayCommand(_ => HighLightCommandInvoke());
+        }
+
+        public void Copy(MainViewModel mainVM)
+        {
+            mainVM.ClipBoardObj = SelectedText;
+        }
+
+        public void Paste(MainViewModel mainVM)
+        {
+            if (mainVM.ClipBoardObj is not string) return;
+        }
+
+        private void HighLightCommandInvoke()
+        {
+            if (Keyboard.FocusedElement is TextBox tb)
+            {
+                if (!string.IsNullOrEmpty(tb.SelectedText))
+                {
+                    SelectedText = tb.SelectedText;
+                }
+            }
         }
     }
 }
