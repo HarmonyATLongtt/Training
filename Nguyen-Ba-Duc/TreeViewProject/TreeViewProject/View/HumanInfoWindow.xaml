@@ -49,12 +49,15 @@
                      Padding="8"
                      BorderBrush="#999"
                      BorderThickness="1">
-                <i:Interaction.Triggers>
+                <!--<i:Interaction.Triggers>
                     <i:EventTrigger EventName="PreviewMouseUp">
                         <i:InvokeCommandAction
                         Command="{Binding HighLightCommand}" />
                     </i:EventTrigger>
-                </i:Interaction.Triggers>
+                </i:Interaction.Triggers>-->
+                <i:Interaction.Behaviors>
+                    <behaviors:CopyPasteBehavior  MainVM= "{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}" />
+                </i:Interaction.Behaviors>
             </TextBox>
             <!--<Grid>
                  Image

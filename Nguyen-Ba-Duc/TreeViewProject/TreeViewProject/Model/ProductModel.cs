@@ -23,5 +23,21 @@ namespace TreeViewProject.Model
         public string? Description { get; set; }
 
         public bool IsChecked { get; set; } = false;
+
+        public ProductModel Clone()
+        {
+            var clone = new ProductModel()
+            {
+                ProductName = ProductName,
+                Price = Price,
+                Factory = Factory,
+                Provider = Provider,
+                ExpireDate = ExpireDate,
+                Address = Address,
+                Description = Description,
+                IsChecked = IsChecked
+            };
+            return clone;
+        }
     }
 }

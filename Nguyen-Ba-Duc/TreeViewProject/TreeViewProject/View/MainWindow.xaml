@@ -232,13 +232,13 @@
                             </TextBlock>
                             <!-- Trigger hover -->
                             <i:Interaction.Triggers>
-                                <!-- Hover vào -->
+                                <!--Hover vào-->
                                 <i:EventTrigger EventName="MouseEnter">
                                     <i:InvokeCommandAction Command="{Binding DataContext.TreeVM.HoverCommand, RelativeSource={RelativeSource AncestorType=TreeView}}"
                                    CommandParameter="{Binding}" />
                                 </i:EventTrigger>
 
-                                <!-- Rời chuột -->
+                                <!--Rời chuột-->
                                 <i:EventTrigger EventName="MouseLeave">
                                     <i:InvokeCommandAction Command="{Binding DataContext.TreeVM.LeaveCommand, RelativeSource={RelativeSource AncestorType=TreeView}}"
                                    CommandParameter="{Binding}" />
@@ -255,8 +255,6 @@
                 <RowDefinition Height="3*"></RowDefinition>
             </Grid.RowDefinitions>
             <Grid x:Name="MyUserControl"
-                  GotFocus="UserControl_GotFocus"
-                  LostFocus="UserControl_LostFocus"
 
                   Margin="0,5" Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center">
                 <!--<views:HumanInfoWindow DataContext="{Binding TreeVM.CurrentViewModel}" />-->
@@ -279,10 +277,14 @@
 
             <!-- Buttons -->
             <StackPanel Grid.Row="1" Margin="10" VerticalAlignment="Top" Orientation="Vertical" Width="150">
+                <Label  Content="Clipboard Value" />
                 <TextBlock Text="{Binding ClipBoardName}" />
-                <TextBox GotFocus="TextBox_GotFocus"
-                        LostFocus="TextBox_LostFocus"
-                        PreviewKeyDown="Window_PreviewKeyDown" />
+
+                <TextBox>
+                    <i:Interaction.Behaviors>
+                        <behaviors:CopyPasteBehavior MainVM="{Binding}" />
+                    </i:Interaction.Behaviors>
+                </TextBox>
                 <Button Content="Expand All" Command="{Binding TreeVM.ExpandAllCommand}" Style="{StaticResource ButtonStyle}" />
                 <Button Content="Collapse All" Command="{Binding TreeVM.CollapseAllCommand}" Style="{StaticResource ButtonStyle}" />
                 <Button Content="Invert" Command="{Binding TreeVM.InvertCommand}" Style="{StaticResource ButtonStyle}" />

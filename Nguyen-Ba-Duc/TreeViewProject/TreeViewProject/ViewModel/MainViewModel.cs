@@ -24,6 +24,10 @@ namespace TreeViewProject.ViewModel
             get => _clipBoardObj;
             set
             {
+                if (_clipBoardObj is NodeViewModel && value is string)
+                {
+                    TreeVM.UnMarkedAll();
+                }
                 _clipBoardObj = value; OnPropertyChanged(nameof(ClipBoardObj));
 
                 if (ClipBoardObj != null)
@@ -44,15 +48,15 @@ namespace TreeViewProject.ViewModel
             set { _clipBoardName = value; OnPropertyChanged(nameof(ClipBoardName)); }
         }
 
-        private NodeViewModel? _selectedNode;
+        //private NodeViewModel? _selectedNode;
 
-        public NodeViewModel? SelectedNode
-        {
-            get => _selectedNode;
-            set { _selectedNode = value; OnPropertyChanged(); }
-        }
+        //public NodeViewModel? SelectedNode
+        //{
+        //    get => _selectedNode;
+        //    set { _selectedNode = value; OnPropertyChanged(); }
+        //}
 
-        public TextBox? ActiveTextBox { get; set; }
+        //public TextBox? ActiveTextBox { get; set; }
 
         public ICommand CopyCommand { get; set; }
         public ICommand CutCommand { get; set; }
@@ -92,12 +96,17 @@ namespace TreeViewProject.ViewModel
         {
             if (ClipBoardObj is NodeViewModel)
             {
+                (ActiveHandler as INodeEditHandler)?.Paste(this);
+            }
+            else if (ClipBoardObj is string)
+            {
                 (ActiveHandler as ICopyPasteHandler)?.Paste(this);
             }
-            else if (ClipBoardObj is string text && ActiveTextBox != null)
-            {
-                ActiveTextBox.SelectedText = text; // paste vào TextBox đang focus
-            }
+
+            //else if (ClipBoardObj is string text && ActiveTextBox != null)
+            //{
+            //    ActiveTextBox.SelectedText = text; // paste vào TextBox đang focus
+            //}
         }
 
         private void OnCut()

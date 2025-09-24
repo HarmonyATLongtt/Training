@@ -20,6 +20,7 @@ namespace TreeViewProject.View
             this.DataContext = _mainVM;
         }
 
+        //
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (_mainVM == null) return;
@@ -39,7 +40,6 @@ namespace TreeViewProject.View
                     _mainVM.PasteCommand.Execute(null);
                 e.Handled = true; // Nếu muốn chặn TextBox paste mặc định
             }
-
             // Ctrl + X
             if (e.Key == Key.X && Keyboard.Modifiers == ModifierKeys.Control)
             {
@@ -63,51 +63,6 @@ namespace TreeViewProject.View
                     _mainVM.HelpCommand.Execute(null);
                 e.Handled = true; // chặn F1 mặc định của Windows
             }
-        }
-
-        private void TextBox_GotFocus(object sender, RoutedEventArgs e)
-        {
-            _mainVM.ActiveTextBox = sender as TextBox;
-        }
-
-        private void TextBox_LostFocus(object sender, RoutedEventArgs e)
-        {
-            var focusedElement = Keyboard.FocusedElement as FrameworkElement;
-
-            if (focusedElement != null)
-            {
-                string name = focusedElement.Name;
-
-                if (name == "PasteButton")
-                {
-                    return;
-                }
-            }
-            _mainVM.ActiveTextBox = null;
-        }
-
-        private void UserControl_GotFocus(object sender, RoutedEventArgs e)
-        {
-            _mainVM.ActiveHandler = _mainVM.TreeVM.CurrentViewModel;
-        }
-
-        private void UserControl_LostFocus(object sender, RoutedEventArgs e)
-        {
-            if (MyUserControl.IsKeyboardFocusWithin)
-                return;
-
-            var focusedElement = Keyboard.FocusedElement as FrameworkElement;
-
-            if (focusedElement != null)
-            {
-                string name = focusedElement.Name;
-
-                if (name == "CopyButton")
-                {
-                    return;
-                }
-            }
-            _mainVM.ActiveHandler = null;
         }
 
         private void TreeView_GotFocus(object sender, RoutedEventArgs e)
@@ -143,7 +98,7 @@ namespace TreeViewProject.View
             if (e.NewValue is NodeViewModel node)
             {
                 _mainVM.TreeVM.SelectedNode = node;
-                _mainVM.SelectedNode = node;
+                //_mainVM.SelectedNode = node;
             }
         }
     }

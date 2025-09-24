@@ -11,7 +11,7 @@ using TreeViewProject.Model;
 
 namespace TreeViewProject.ViewModel
 {
-    public class HumanViewModel : BaseViewModel, ICopyPasteHandler
+    public class HumanViewModel : BaseViewModel
     {
         private readonly HumanModel _humanModel;
         public string? Name => _humanModel.Name;
@@ -32,34 +32,39 @@ namespace TreeViewProject.ViewModel
             }
         }
 
-        public string SelectedText { get; set; }
-        public ICommand HighLightCommand { get; }
+        //public string SelectedText { get; set; }
+        //public ICommand HighLightCommand { get; }
 
         public HumanViewModel(HumanModel humanModel)
         {
             _humanModel = humanModel;
-            HighLightCommand = new RelayCommand(_ => HighLightCommandInvoke());
+            //HighLightCommand = new RelayCommand(_ => HighLightCommandInvoke());
         }
 
-        public void Copy(MainViewModel mainVM)
+        public HumanViewModel Clone()
         {
-            mainVM.ClipBoardObj = SelectedText;
+            return new HumanViewModel(_humanModel.Clone());
         }
 
-        public void Paste(MainViewModel mainVM)
-        {
-            if (mainVM.ClipBoardObj is not string) return;
-        }
+        //public void Copy(MainViewModel mainVM)
+        //{
+        //    mainVM.ClipBoardObj = SelectedText;
+        //}
 
-        private void HighLightCommandInvoke()
-        {
-            if (Keyboard.FocusedElement is TextBox tb)
-            {
-                if (!string.IsNullOrEmpty(tb.SelectedText))
-                {
-                    SelectedText = tb.SelectedText;
-                }
-            }
-        }
+        //public void Paste(MainViewModel mainVM)
+        //{
+        //    if (mainVM.ClipBoardObj is not string) return;
+        //}
+
+        //private void HighLightCommandInvoke()
+        //{
+        //    if (Keyboard.FocusedElement is TextBox tb)
+        //    {
+        //        if (!string.IsNullOrEmpty(tb.SelectedText))
+        //        {
+        //            SelectedText = tb.SelectedText;
+        //        }
+        //    }
+        //}
     }
 }

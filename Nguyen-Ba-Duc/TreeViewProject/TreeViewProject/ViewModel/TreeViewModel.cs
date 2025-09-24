@@ -178,20 +178,20 @@ namespace TreeViewProject.ViewModel
 
         //private NodeViewModel? _clipboardNode;
 
-        private NodeViewModel? _clipBoardNode;
+        //private NodeViewModel? _clipBoardNode;
 
-        public NodeViewModel? ClipBoardNode
-        {
-            get => _clipBoardNode;
-            set
-            {
-                if (_clipBoardNode != value)
-                {
-                    _clipBoardNode = value;
-                    OnPropertyChanged(nameof(ClipBoardNode));
-                }
-            }
-        }
+        //public NodeViewModel? ClipBoardNode
+        //{
+        //    get => _clipBoardNode;
+        //    set
+        //    {
+        //        if (_clipBoardNode != value)
+        //        {
+        //            _clipBoardNode = value;
+        //            OnPropertyChanged(nameof(ClipBoardNode));
+        //        }
+        //    }
+        //}
 
         private bool _isCut = false;
 
@@ -442,7 +442,7 @@ namespace TreeViewProject.ViewModel
                 SetExpandRecursive(child, expand);
         }
 
-        private void UnMarkedAll()
+        public void UnMarkedAll()
         {
             foreach (var node in RootNodes)
             {
@@ -458,9 +458,10 @@ namespace TreeViewProject.ViewModel
         {
             if (SelectedNode == null) return;
             UnMarkedAll();
-            ClipBoardNode = SelectedNode;
+            //ClipBoardNode = SelectedNode;
 
-            mainVM.ClipBoardObj = ClipBoardNode;
+            //mainVM.ClipBoardObj = ClipBoardNode;
+            mainVM.ClipBoardObj = SelectedNode;
 
             SelectedNode.IsMarked = true;
             SelectedCopyNode = SelectedNode;
@@ -470,8 +471,9 @@ namespace TreeViewProject.ViewModel
         {
             if (SelectedNode == null) return;
             UnMarkedAll();
-            ClipBoardNode = SelectedNode;
-            mainVM.ClipBoardObj = ClipBoardNode;
+            //ClipBoardNode = SelectedNode;
+            //mainVM.ClipBoardObj = ClipBoardNode;
+            mainVM.ClipBoardObj = SelectedNode;
             _isCut = true;
 
             SelectedNode.IsMarked = true;
@@ -479,7 +481,8 @@ namespace TreeViewProject.ViewModel
 
         public void Paste(MainViewModel mainVM)
         {
-            if (ClipBoardNode == null || SelectedNode == null || mainVM.ClipBoardObj is not NodeViewModel)
+            //if (ClipBoardNode == null || SelectedNode == null || mainVM.ClipBoardObj is not NodeViewModel)
+            if (SelectedNode == null || mainVM.ClipBoardObj == null || mainVM.ClipBoardObj is not NodeViewModel ClipBoardNode)
             {
                 ClearClipboard(mainVM);
                 return;
@@ -560,10 +563,18 @@ namespace TreeViewProject.ViewModel
             {
                 SelectedCopyNode.IsMarked = false;
             }
-            if (ClipBoardNode != null)
+            if (mainVM.ClipBoardObj is NodeViewModel node)
             {
-                ClipBoardNode.IsMarked = false;
+                if (node != null)
+                {
+                    node.IsMarked = false;
+                }
             }
+
+            //if (ClipBoardNode != null)
+            //{
+            //    ClipBoardNode.IsMarked = false;
+            //}
             //mainVM.ClipBoardObj = null;
             //ClipBoardNode = null;
             _isCut = false;

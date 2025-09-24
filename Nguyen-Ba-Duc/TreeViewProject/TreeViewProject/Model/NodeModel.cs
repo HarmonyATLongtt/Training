@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Net;
 using System.Windows.Input;
 using System.Windows.Media;
 using TreeViewProject.ViewModel;
@@ -24,5 +25,23 @@ namespace TreeViewProject.Model
         public Brush CheckColor { get; set; } = Brushes.Green;
 
         public object? ItemInfo { get; set; }
+
+        public NodeModel Clone()
+        {
+            var clone = new NodeModel()
+            {
+                Name = Name,
+                IsExpanded = IsExpanded,
+                IsMarked = IsMarked,
+                ImagePath = ImagePath,
+                GifPath = GifPath,
+                VideoPath = VideoPath,
+                Description = Description,
+                DetailDescription = DetailDescription,
+                CheckColor = CheckColor,
+                ItemInfo = ItemInfo
+            };
+            return clone;
+        }
     }
 }
