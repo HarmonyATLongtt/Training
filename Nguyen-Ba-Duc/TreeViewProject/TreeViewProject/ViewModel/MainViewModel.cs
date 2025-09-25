@@ -121,7 +121,14 @@ namespace TreeViewProject.ViewModel
 
         private void OnHelp()
         {
-            (ActiveHandler as INodeEditHandler)?.ShowHelp();
+            if (ActiveHandler is INodeEditHandler handler)
+            {
+                handler.ShowHelp();
+            }
+            else if (TreeVM.CurrentHoveredNode != null)
+            {
+                TreeVM.ShowHelp();
+            }
         }
     }
 

@@ -205,7 +205,7 @@ namespace TreeViewProject.ViewModel
         public ICommand CutCommand { get; set; }
         public ICommand PasteCommand { get; set; }
         public ICommand DeleteCommand { get; set; }
-        public ICommand HelpCommand { get; set; }
+        //public ICommand HelpCommand { get; set; }
 
         public TreeViewModel()
         {
@@ -217,19 +217,56 @@ namespace TreeViewProject.ViewModel
         {
             var human1 = new HumanModel
             {
-                Name = "Nguyen Ba Duc",
+                Name = "Nguyễn Bá Đức",
                 Birthday = new DateTime(1994, 2, 5),
-                Address = "Bac Ninh",
-                Description = "Anh duc dep trai",
+                Address = "Bắc Ninh",
+                Description = "Đẹp trai nhưng nghèo",
+                ImagePath = "/Images/Avatar.PNG"
+            };
+            var human2 = new HumanModel
+            {
+                Name = "Nguyễn Văn A",
+                Birthday = new DateTime(1994, 2, 5),
+                Address = "Hà Nội",
+                Description = "Con nhà giàu",
+                ImagePath = "/Images/Avatar.PNG"
+            };
+            var human3 = new HumanModel
+            {
+                Name = "Nguyễn Đức B",
+                Birthday = new DateTime(1994, 2, 5),
+                Address = "Nghệ An",
+                Description = "Nghèo bẩm sinh",
+                ImagePath = "/Images/Avatar.PNG"
+            };
+            var human4 = new HumanModel
+            {
+                Name = "Trần Văn C",
+                Birthday = new DateTime(1994, 2, 5),
+                Address = "Đà Nẵng",
+                Description = "Không ai yêu",
+                ImagePath = "/Images/Avatar.PNG"
+            };
+
+            var human5 = new HumanModel
+            {
+                Name = "Nguyễn Vũ D",
+                Birthday = new DateTime(1994, 2, 5),
+                Address = "Vũng Tàu",
+                Description = "Không biết bơi",
                 ImagePath = "/Images/Avatar.PNG"
             };
 
             var humanVM1 = new HumanViewModel(human1);
+            var humanVM2 = new HumanViewModel(human2);
+            var humanVM3 = new HumanViewModel(human3);
+            var humanVM4 = new HumanViewModel(human4);
+            var humanVM5 = new HumanViewModel(human5);
 
             var product1 = new ProductModel
             {
-                ProductName = "Oppo",
-                Price = 100000,
+                Name = "Oppo A 83",
+                Price = 300,
                 Factory = "Aliexpress",
                 Provider = "China",
                 ExpireDate = new DateTime(2026, 9, 6),
@@ -237,41 +274,76 @@ namespace TreeViewProject.ViewModel
                 ImagePath = "/Images/MyAddress.PNG",
                 Description = "Made in china"
             };
+            var product2 = new ProductModel
+            {
+                Name = "Samsung S26",
+                Price = 1200,
+                Factory = "Samsung SDV",
+                Provider = "Korea",
+                ExpireDate = new DateTime(2026, 9, 6),
+                Address = "Seoul, Hàn Quốc",
+                ImagePath = "/Images/MyAddress.PNG",
+                Description = "Dùng tạm"
+            };
+            var product3 = new ProductModel
+            {
+                Name = "Iphone 17 ProMax",
+                Price = 2000,
+                Factory = "Apple Factory",
+                Provider = "Apple",
+                ExpireDate = new DateTime(2026, 9, 6),
+                Address = "Silicon Valley, California",
+                ImagePath = "/Images/MyAddress.PNG",
+                Description = "Tốn tiền"
+            };
+            var product4 = new ProductModel
+            {
+                Name = "Bphone",
+                Price = 400,
+                Factory = "Bkav Lab",
+                Provider = "Bkav",
+                ExpireDate = new DateTime(2026, 9, 6),
+                Address = "Hà Nội, Việt Nam",
+                ImagePath = "/Images/MyAddress.PNG",
+                Description = "Bom nguyên tử"
+            };
 
             var productVM1 = new ProductViewModel(product1);
+            var productVM2 = new ProductViewModel(product2);
+            var productVM3 = new ProductViewModel(product3);
+            var productVM4 = new ProductViewModel(product4);
 
             // dữ liệu mẫu
             var rootA = new NodeModel
             {
-                Name = "Điện thoại Oppo",
                 Description = "Mô tả Root A",
                 DetailDescription = "Chi tiết Root A",
                 ImagePath = "/Images/tooltip.png",
                 GifPath = "/Images/pikachu.gif",
                 ItemInfo = productVM1
             };
-            var childA_1 = new NodeModel { Name = "Child A1", Description = "Mô tả Child A1", DetailDescription = "Chi tiết Child A1", Parent = rootA, GifPath = "Images/pikachu.gif" };
-            var childA_2 = new NodeModel { Name = "Child A2", Description = "Mô tả Child A2", DetailDescription = "Chi tiết Child A2", Parent = rootA, GifPath = "Images/test.gif" };
-            var grandChildA_1_1 = new NodeModel { Name = "GrandChild A1.1", Description = "Mô tả GrandChild A1.1", DetailDescription = "Chi tiết GrandChild A1.1", Parent = childA_1 };
+            var childA_1 = new NodeModel { ItemInfo = productVM2, Description = "Mô tả Child A1", DetailDescription = "Chi tiết Child A1", Parent = rootA, GifPath = "Images/pikachu.gif" };
+            var childA_2 = new NodeModel { ItemInfo = productVM3, Description = "Mô tả Child A2", DetailDescription = "Chi tiết Child A2", Parent = rootA, GifPath = "Images/test.gif" };
+            var grandChildA_1_1 = new NodeModel { ItemInfo = productVM4, Description = "Mô tả GrandChild A1.1", DetailDescription = "Chi tiết GrandChild A1.1", Parent = childA_1 };
             childA_1.Children.Add(grandChildA_1_1);
             rootA.Children.Add(childA_1);
             rootA.Children.Add(childA_2);
 
-            var rootB = new NodeModel { Name = "Anh Đức", Description = "Mô tả Root B", DetailDescription = "Chi tiết Root B", ImagePath = "/Images/images.png", VideoPath = "Images/lebong.mp4", ItemInfo = humanVM1 };
-            var childB_1 = new NodeModel { Name = "Child B1", Description = "Mô tả Child B1", DetailDescription = "Chi tiết Child B1", Parent = rootB };
-            var childB_2 = new NodeModel { Name = "Child B2", Description = "Mô tả Child B2", DetailDescription = "Chi tiết Child B2", Parent = rootB };
-            var grandChildB_2_1 = new NodeModel { Name = "GrandChild B1.1", Description = "Mô tả GrandChild B1.1", DetailDescription = "Chi tiết GrandChild B1.1", Parent = childB_1 };
+            var rootB = new NodeModel { Description = "Mô tả Root B", DetailDescription = "Chi tiết Root B", ImagePath = "/Images/images.png", VideoPath = "Images/lebong.mp4", ItemInfo = humanVM1 };
+            var childB_1 = new NodeModel { Description = "Mô tả Child B1", DetailDescription = "Chi tiết Child B1", Parent = rootB, ItemInfo = humanVM2 };
+            var childB_2 = new NodeModel { Description = "Mô tả Child B2", DetailDescription = "Chi tiết Child B2", Parent = rootB, ItemInfo = humanVM3 };
+            var grandChildB_2_1 = new NodeModel { Description = "Mô tả GrandChild B1.1", DetailDescription = "Chi tiết GrandChild B1.1", Parent = childB_1, ItemInfo = humanVM4 };
             childB_1.Children.Add(grandChildB_2_1);
             rootB.Children.Add(childB_1);
             rootB.Children.Add(childB_2);
 
             var rootC = new NodeModel
             {
-                Name = "Root C",
                 Description = "Mô tả Root C",
                 DetailDescription = "Chi tiết Root C",
                 ImagePath = "/Images/tooltip.png",
-                GifPath = "/Images/test.gif"
+                GifPath = "/Images/test.gif",
+                ItemInfo = humanVM5
             };
 
             var rootVM1 = new NodeViewModel(rootA, this);

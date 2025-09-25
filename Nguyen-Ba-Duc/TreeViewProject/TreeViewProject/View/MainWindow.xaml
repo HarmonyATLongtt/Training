@@ -14,7 +14,7 @@
         ResizeMode="NoResize"
         Title="TreeView with A"
         PreviewKeyDown="Window_PreviewKeyDown"
-        Height="1000" Width="900"
+        Height="1000" Width="1100"
         Background="#F4F6F8">
     <!--KeyDown="Window_KeyDown"-->
     <!--<Window.InputBindings>
@@ -77,8 +77,8 @@
 
     <Grid Margin="10">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*" />
-            <ColumnDefinition Width="3*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="4*" />
         </Grid.ColumnDefinitions>
 
         <!-- TreeView panel-->
@@ -94,12 +94,17 @@
 
                 <TreeView.ItemContainerStyle>
                     <Style TargetType="TreeViewItem">
+
+                        <!--<EventSetter Event="MouseEnter" Handler="TreeViewItem_MouseEnter" />
+                        <EventSetter Event="MouseLeave" Handler="TreeViewItem_MouseLeave" />-->
+
                         <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
 
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="TreeViewItem">
                                     <StackPanel>
+
                                         <!-- Header -->
 
                                         <DockPanel>
@@ -132,19 +137,35 @@
                                             </ToggleButton>
 
                                             <!-- Header -->
-                                            <Border x:Name="Bd"
+                                            <StackPanel Orientation="Horizontal">
+                                                <i:Interaction.Triggers>
+                                                    <i:EventTrigger EventName="MouseEnter">
+                                                        <i:InvokeCommandAction Command="{Binding DataContext.TreeVM.HoverCommand, RelativeSource={RelativeSource AncestorType=TreeView}}"
+                                                                                CommandParameter="{Binding}" />
+                                                    </i:EventTrigger>
+                                                    <i:EventTrigger EventName="MouseLeave">
+                                                        <i:InvokeCommandAction Command="{Binding DataContext.TreeVM.LeaveCommand, RelativeSource={RelativeSource AncestorType=TreeView}}"
+                                                                    CommandParameter="{Binding}" />
+                                                    </i:EventTrigger>
+                                                </i:Interaction.Triggers>
+
+                                                <Border x:Name="Bd"
                                                     Padding="2"
                                                     Background="Transparent"
                                                     HorizontalAlignment="Left">
-                                                <ContentPresenter x:Name="PART_Header"
+
+                                                    <ContentPresenter x:Name="PART_Header"
                                                     ContentSource="Header"
                                                     RecognizesAccessKey="True" />
-                                            </Border>
-                                            <Grid Margin="5,0,0,0" HorizontalAlignment="Left" Visibility="{Binding ItemInfo.IsChecked,
+                                                </Border>
+
+                                                <Grid Margin="5,0,0,0" HorizontalAlignment="Left" Visibility="{Binding ItemInfo.IsChecked,
                                                 Converter={StaticResource BoolToVisibilityConverter},
                                                 FallbackValue=Collapsed}">
-                                                <controls:GreenCheckControl Width="15" Height="15" Stroke ="{Binding CheckColor}" />
-                                            </Grid>
+                                                    <controls:GreenCheckControl Width="15" Height="15" StrokeColor ="{Binding CheckColor}" />
+                                                    <!--<controls:GreenCheckControl Width="15" Height="15" Stroke ="{Binding CheckColor}" />-->
+                                                </Grid>
+                                            </StackPanel>
                                         </DockPanel>
                                         <!-- Children -->
                                         <ItemsPresenter x:Name="ItemsHost"
@@ -230,20 +251,6 @@
                                     </Style>
                                 </TextBlock.Style>
                             </TextBlock>
-                            <!-- Trigger hover -->
-                            <i:Interaction.Triggers>
-                                <!--Hover vào-->
-                                <i:EventTrigger EventName="MouseEnter">
-                                    <i:InvokeCommandAction Command="{Binding DataContext.TreeVM.HoverCommand, RelativeSource={RelativeSource AncestorType=TreeView}}"
-                                   CommandParameter="{Binding}" />
-                                </i:EventTrigger>
-
-                                <!--Rời chuột-->
-                                <i:EventTrigger EventName="MouseLeave">
-                                    <i:InvokeCommandAction Command="{Binding DataContext.TreeVM.LeaveCommand, RelativeSource={RelativeSource AncestorType=TreeView}}"
-                                   CommandParameter="{Binding}" />
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
                         </StackPanel>
                     </HierarchicalDataTemplate>
                 </TreeView.Resources>
@@ -254,9 +261,14 @@
                 <RowDefinition Height="5*"></RowDefinition>
                 <RowDefinition Height="3*"></RowDefinition>
             </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
             <Grid x:Name="MyUserControl"
 
-                  Margin="0,5" Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center">
+                  Margin="0,5" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center">
                 <!--<views:HumanInfoWindow DataContext="{Binding TreeVM.CurrentViewModel}" />-->
                 <ContentControl Content="{Binding TreeVM.CurrentViewModel}" />
                 <Button DataContext="{Binding TreeVM}"
@@ -266,7 +278,7 @@
                         Command="{Binding CheckCommand}">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
                         <!-- Custom Control -->
-                        <controls:GreenCheckControl Visibility="{Binding IsCheckControlVisible, Converter={StaticResource BoolToVisibilityConverter}}" Width="16" Height="16" Stroke="Green"
+                        <controls:GreenCheckControl Visibility="{Binding IsCheckControlVisible, Converter={StaticResource BoolToVisibilityConverter}}" Width="16" Height="16" StrokeColor="Green"
                          VerticalAlignment="Center" Margin="0,0,5,0" />
 
                         <!-- Text -->
@@ -274,17 +286,38 @@
                     </StackPanel>
                 </Button>
             </Grid>
+            <!--Help-->
+            <Grid Grid.Row="0" Grid.Column="1" Width="200" Height="200">
+                <!--Image-->
+                <Image Source="{Binding TreeVM.SelectedNodeImagePath}"
+                    Visibility="{Binding TreeVM.IsImageVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <!--GIF-->
+                <Image gif:ImageBehavior.AnimatedSource="{Binding TreeVM.SelectedNodeGifPath, Converter={StaticResource StringToUriConverter}}"
+                    gif:ImageBehavior.RepeatBehavior="Forever"
+                    Visibility="{Binding TreeVM.IsGifVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
 
+                <!--Video-->
+                <MediaElement Source="{Binding TreeVM.SelectedNodeVideoPath}"
+                    LoadedBehavior="Manual"
+                    UnloadedBehavior="Stop"
+                    Stretch="Uniform"
+                    Name="VideoPlayer"
+                    Visibility="{Binding TreeVM.IsVideoVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <i:Interaction.Behaviors>
+                        <behaviors:MediaElementLoopBehavior />
+                    </i:Interaction.Behaviors>
+                </MediaElement>
+            </Grid>
             <!-- Buttons -->
-            <StackPanel Grid.Row="1" Margin="10" VerticalAlignment="Top" Orientation="Vertical" Width="150">
-                <Label  Content="Clipboard Value" />
-                <TextBlock Text="{Binding ClipBoardName}" />
+            <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="10" VerticalAlignment="Top" Orientation="Vertical" Width="150">
+                <!--<Label  Content="Clipboard Value" />
+                <TextBlock Text="{Binding ClipBoardName}" />-->
 
-                <TextBox>
+                <!--<TextBox>
                     <i:Interaction.Behaviors>
                         <behaviors:CopyPasteBehavior MainVM="{Binding}" />
                     </i:Interaction.Behaviors>
-                </TextBox>
+                </TextBox>-->
                 <Button Content="Expand All" Command="{Binding TreeVM.ExpandAllCommand}" Style="{StaticResource ButtonStyle}" />
                 <Button Content="Collapse All" Command="{Binding TreeVM.CollapseAllCommand}" Style="{StaticResource ButtonStyle}" />
                 <Button Content="Invert" Command="{Binding TreeVM.InvertCommand}" Style="{StaticResource ButtonStyle}" />

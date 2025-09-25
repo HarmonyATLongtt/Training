@@ -52,17 +52,50 @@ namespace TreeViewProject.CustomControls
         }
 
         // DependencyProperty cho Stroke (màu đường viền + dấu tích)
-        public Brush Stroke
+
+        public Brush StrokeColor
         {
-            get => (Brush)GetValue(StrokeProperty);
-            set => SetValue(StrokeProperty, value);
+            get => (Brush)GetValue(StrokeColorProperty);
+            set => SetValue(StrokeColorProperty, value);
         }
 
-        public static readonly DependencyProperty StrokeProperty =
-            DependencyProperty.Register(
-                nameof(Stroke),
-                typeof(Brush),
-                typeof(GreenCheckControl),
-                new PropertyMetadata(Brushes.Gray));
+        public static readonly DependencyProperty StrokeColorProperty =
+            DependencyProperty.Register(nameof(StrokeColor), typeof(Brush), typeof(GreenCheckControl),
+                new PropertyMetadata(Brushes.Green, OnVisualPropertyChanged));
+
+        private static void OnVisualPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is GreenCheckControl control)
+                control.InvalidateVisual(); // redraw khi đổi màu
+        }
+
+        protected override void OnRender(DrawingContext dc)
+        {
+            base.OnRender(dc);
+
+            double w = ActualWidth;
+            double h = ActualHeight;
+            double size = Math.Min(w, h);
+
+            // Vẽ vòng tròn
+            Pen circlePen = new Pen(StrokeColor, 2);
+            dc.DrawEllipse(null, circlePen, new Point(w / 2, h / 2), size / 2 - 2, size / 2 - 2);
+
+            // Vẽ dấu tích bằng PathFigure
+            Pen checkPen = new Pen(StrokeColor, 2)
+            {
+                StartLineCap = PenLineCap.Round,
+                EndLineCap = PenLineCap.Round
+            };
+
+            PathFigure figure = new PathFigure { StartPoint = new Point(w * 0.3, h * 0.55) };
+            figure.Segments.Add(new LineSegment(new Point(w * 0.45, h * 0.7), true));
+            figure.Segments.Add(new LineSegment(new Point(w * 0.75, h * 0.35), true));
+
+            PathGeometry geometry = new PathGeometry();
+            geometry.Figures.Add(figure);
+
+            dc.DrawGeometry(null, checkPen, geometry);
+        }
     }
 }

@@ -8,7 +8,7 @@ namespace TreeViewProject.Model
 {
     public class ProductModel
     {
-        public string? ProductName { get; set; }
+        public string? Name { get; set; }
         public double? Price { get; set; }
 
         public string? Factory { get; set; }
@@ -28,14 +28,15 @@ namespace TreeViewProject.Model
         {
             var clone = new ProductModel()
             {
-                ProductName = ProductName,
+                Name = Name,
                 Price = Price,
                 Factory = Factory,
                 Provider = Provider,
                 ExpireDate = ExpireDate,
                 Address = Address,
                 Description = Description,
-                IsChecked = IsChecked
+                IsChecked = IsChecked,
+                ImagePath = ImagePath
             };
             return clone;
         }

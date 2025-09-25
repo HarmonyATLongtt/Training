@@ -12,7 +12,7 @@ namespace TreeViewProject.ViewModel
     public class ProductViewModel : BaseViewModel
     {
         private readonly ProductModel _productModel;
-        public string? ProductName => _productModel.ProductName;
+        public string? Name => _productModel.Name;
         public string? ImagePath => _productModel.ImagePath;
         public DateTime? ExpireDate => _productModel.ExpireDate;
 

@@ -173,13 +173,13 @@ namespace TreeViewProject.ViewModel
 
         public NodeViewModel Clone(TreeViewModel treeVM, NodeViewModel? parent = null)
         {
-            var clone = new NodeViewModel(_node, treeVM, parent, buildChildren: false)
+            var clone = new NodeViewModel(_node.Clone(), treeVM, parent, buildChildren: false)
             {
-                Description = this.Description,
-                DetailDescription = this.DetailDescription,
-                ImagePath = this.ImagePath,
-                VideoPath = this.VideoPath,
-                GifPath = this.GifPath
+                //Description = this.Description,
+                //DetailDescription = this.DetailDescription,
+                //ImagePath = this.ImagePath,
+                //VideoPath = this.VideoPath,
+                //GifPath = this.GifPath
             };
 
             foreach (var child in Children)
